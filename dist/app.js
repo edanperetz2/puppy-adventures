@@ -1,5 +1,6 @@
 import { MISSIONS, STICKERS, WORDS, READING_LEVELS } from './content.js';
 import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js';
+import { ADVENTURE_PHASES } from './adventure.js';
 import { art, pup, scene, uiIcon } from './art.js';
 import { Narrator } from './audio.js';
 import { GameAnnouncements } from './announcements.js';
@@ -155,7 +156,7 @@ function renderLetterRecognition() {
     <p class="letter-route-description">מסתכלות על האות המוכרת, ומוצאות את אותה אות ${language === 'hebrew' ? 'בכתב יד' : 'קטנה באנגלית'}.</p>
     <p class="letter-route-progress">תרגלת ${practicedLetterCount(progress.letterPractice, language, 'recognition')} מתוך ${letters.length} אותיות</p>
     <div class="letter-recognition-preview" dir="${language === 'hebrew' ? 'rtl' : 'ltr'}">${group.map(letter => `<div><bdi class="letter-familiar">${letter.familiar}</bdi>${letterShape(letter)}</div>`).join('')}</div>
-    <div class="letter-recognition-start"><span class="section-kicker">${recognitionChoice ? 'האותיות שבחרת' : 'ממשיכות עם האותיות הבאות'}</span>${letterGroupPreview(group, language)}<small>6 צעדים קטנים · בכל פעם מגלות עוד אותיות</small><button class="primary-button" data-action="letter-practice">בואי נשחק ${uiIcon('arrow')}</button>${recognitionChoice ? '<button class="text-button" data-action="letter-recognition-auto">ממשיכות במסלול שלי</button>' : ''}</div>
+    <div class="letter-recognition-start"><span class="section-kicker">${recognitionChoice ? 'האותיות שבחרת' : 'ממשיכות עם האותיות הבאות'}</span>${letterGroupPreview(group, language)}<small>${SESSION_LENGTH} צעדים קטנים · מדוגמה מוכרת לאתגר חדש</small><button class="primary-button" data-action="letter-practice">בואי נשחק ${uiIcon('arrow')}</button>${recognitionChoice ? '<button class="text-button" data-action="letter-recognition-auto">ממשיכות במסלול שלי</button>' : ''}</div>
     ${letterLibrary(language, 'recognition')}<p id="audio-notice" class="audio-notice" role="status" hidden></p></section></main>${footer()}`;
 }
 
@@ -283,7 +284,7 @@ function renderHome() {
         <p id="audio-notice" class="audio-notice" role="status" hidden></p>
       </div><div class="hero-world">${scene()}<div class="world-caption"><span class="status-dot"></span> בית החברים · תמיד שמחים לראות אותך</div></div>
     </section>
-    <section class="missions" aria-labelledby="missions-title"><div class="section-heading"><div><span class="section-kicker">כל פעם מגלות משהו חדש</span><h2 id="missions-title">לאן נצא היום?</h2></div><span class="rounds-note">6 צעדים קטנים בכל הרפתקה ${art('paw')}</span></div>
+    <section class="missions" aria-labelledby="missions-title"><div class="section-heading"><div><span class="section-kicker">כל פעם מגלות משהו חדש</span><h2 id="missions-title">לאן נצא היום?</h2></div><span class="rounds-note">${SESSION_LENGTH} צעדים · מתחילות בקל ומתקדמות ${art('paw')}</span></div>
       <div class="mission-grid">${Object.values(MISSIONS).map(m => `<button class="mission-card ${m.color}" data-action="mission" data-mission="${m.id}" aria-label="${m.name} — ${m.description}">
         <div class="mission-art"><span class="art-orbit"></span>${art(m.icon, 'mission-object')}${pup(m.pup, 'mission-pup')}<span class="mini-sparkle">✦</span></div>
         <div class="mission-body"><span class="subject-tag" ${m.id === 'english' ? 'lang="en" dir="ltr"' : ''}>${m.subject}</span><h3>${m.name}</h3><p>${m.subtitle}</p><span class="mission-go">בואי נשחק ${uiIcon('arrow')}</span></div>
@@ -301,7 +302,7 @@ function tallyGroup(n, offset, item) {
 }
 
 function questionVisual(q) {
-  if (q.type === 'letter') return `<div class="letter-question-layout" dir="rtl"><div class="letter-question-card"><small>${q.letter.language === 'hebrew' ? 'איזו אות בכתב יד מתאימה?' : 'איזו אות קטנה מתאימה?'}</small><bdi class="letter-familiar" dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}">${q.letter.familiar}</bdi></div><div id="letter-recognition-model" class="letter-recognition-model" hidden>${letterShape(q.letter)}<span>זו אותה אות · נסתכל על הצורה</span></div></div>`;
+  if (q.type === 'letter') return `<div class="letter-question-layout" dir="rtl"><div class="letter-question-card"><small>${q.letter.language === 'hebrew' ? 'איזו אות בכתב יד מתאימה?' : 'איזו אות קטנה מתאימה?'}</small><bdi class="letter-familiar" dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}">${q.letter.familiar}</bdi></div><div id="letter-recognition-model" class="letter-recognition-model" ${q.showModel ? '' : 'hidden'}>${letterShape(q.letter)}<span>זו אותה אות · נסתכל על הצורה</span></div></div>`;
   if (q.type === 'clock') return `<div class="clock-question-clock">${analogClock(q.time.hour, q.time.minute)}</div><button class="text-button clock-learn-link" data-action="clock-learn">${uiIcon('hint')} נזכרות איך קוראים שעון</button>`;
   if (q.type === 'read') return `<div class="word-card ${q.word.scene ? 'phrase-word' : q.word.he.length >= 6 ? 'long-word' : ''}"><span class="card-label">מה כתוב כאן?</span><div class="target-word" lang="he" dir="rtl">${q.word.scene ? wordText(q.word).split(' ').map(word => `<span class="reading-token">${word}</span>`).join(' ') : wordText(q.word)}</div><span class="word-underline"></span></div>`;
   if (q.type === 'listen') return `<button class="listen-orb" data-action="listen-word" aria-label="שמיעת המילה באנגלית">${uiIcon('sound')}<span class="sound-waves"><i></i><i></i><i></i><i></i><i></i></span><span>לחצי ושמעי את המילה</span></button>`;
@@ -330,13 +331,13 @@ function renderGame() {
   const mission = MISSIONS[round.mission];
   const q = current();
   const title = q.type === 'letter' ? 'איזו אות מתאימה?' : q.type === 'clock' ? 'מה השעה בשעון?' : q.type === 'read' ? q.word.scene ? 'איזו תמונה מתאימה למה שכתוב?' : 'איזו תמונה מתאימה למילה?' : q.type === 'listen' ? 'מה שמעת באנגלית?' : q.type === 'add' ? 'כמה יש ביחד?' : 'כמה יש בסל?';
-  const stage = q.type === 'read' ? READING_LEVELS[round.reading] : null;
+  const stage = q.type === 'read' ? round.reading === 'all' ? Object.values(READING_LEVELS).find(level => level.level === q.word.level) : READING_LEVELS[round.reading] : null;
   app.innerHTML = `${header()}<main id="main" class="game-page ${mission.color} ${q.type === 'clock' ? 'clock-game' : q.type === 'letter' ? 'letter-game' : q.type === 'read' ? 'reading-game' : ''}">
     <div class="game-topline"><button class="text-button back-button" data-action="${q.type === 'read' ? 'reading-levels' : q.type === 'letter' ? 'letters-menu' : 'home'}">${uiIcon('home')} ${q.type === 'read' ? 'לבחירת שלב' : q.type === 'letter' ? 'למסלולי האותיות' : 'למפת ההרפתקאות'}</button><span class="mission-label">${mission.name}${q.type === 'letter' ? ' · משחק זיהוי' : ''}${stage ? ` · ${stage.number ? `שלב ${stage.number}` : stage.name}` : ''}</span><span class="step-label">צעד ${round.index + 1} מתוך ${SESSION_LENGTH}</span></div>
     <div class="step-track" aria-label="התקדמות: ${round.index} מתוך ${SESSION_LENGTH}">${Array.from({ length: SESSION_LENGTH }, (_, i) => `<span class="step-dot ${i < round.index ? 'done' : i === round.index ? 'current' : ''}">${i < round.index ? uiIcon('check') : i + 1}</span>`).join('')}</div>
-    <section class="game-board"><div class="question-heading"><div><span class="section-kicker">${q.type === 'letter' ? 'אות מוכרת, צורה חדשה' : q.type === 'clock' ? 'המחוגים מספרים לנו סיפור' : q.type === 'read' ? 'קוראות בעצמך, מגלות ביחד' : q.type === 'listen' ? 'האוזניים מוכנות?' : 'מכינות פיקניק לחברים'}</span><h1 id="question-title" tabindex="-1">${title}</h1></div><button class="circle-button replay-button" data-action="replay" aria-label="שמיעת ההוראות שוב">${uiIcon('sound')}</button></div>
+    <section class="game-board"><div class="question-heading"><div><span class="section-kicker">${ADVENTURE_PHASES[q.phase]}</span><h1 id="question-title" tabindex="-1">${title}</h1></div><button class="circle-button replay-button" data-action="replay" aria-label="שמיעת ההוראות שוב">${uiIcon('sound')}</button></div>
       <div class="question-visual">${questionVisual(q)}</div>
-      <div class="answer-grid ${q.type === 'read' && q.word.scene ? 'scene-options' : ''} ${q.type === 'count' || q.type === 'add' || q.kind === 'number' ? 'numeric-options' : ''}" ${q.type === 'letter' ? `dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}"` : ''} role="group" aria-label="בחירת תשובה">${q.options.map(option => `${q.type === 'clock' ? '<div class="clock-choice">' : ''}<button class="answer-button ${round.attempted.has(option.id) ? 'try-again' : ''}" data-action="answer" data-answer="${option.id}" aria-label="${answerLabel(q, option)}" ${round.attempted.has(option.id) ? 'disabled' : ''}>${answerVisual(q, option)}<span class="answer-check">${uiIcon('check')}</span></button>${q.type === 'clock' ? `<button class="clock-option-sound" data-action="clock-option-audio" data-clip="${option.clip}" aria-label="שמיעת האפשרות ${option.he}">${uiIcon('sound')}</button></div>` : ''}`).join('')}</div>
+      <div class="answer-grid ${q.options.length === 2 ? 'two-options' : ''} ${q.type === 'read' && q.word.scene ? 'scene-options' : ''} ${q.type === 'count' || q.type === 'add' || q.kind === 'number' ? 'numeric-options' : ''}" ${q.type === 'letter' ? `dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}"` : ''} role="group" aria-label="בחירת תשובה">${q.options.map(option => `${q.type === 'clock' ? '<div class="clock-choice">' : ''}<button class="answer-button ${round.attempted.has(option.id) ? 'try-again' : ''}" data-action="answer" data-answer="${option.id}" aria-label="${answerLabel(q, option)}" ${round.attempted.has(option.id) ? 'disabled' : ''}>${answerVisual(q, option)}<span class="answer-check">${uiIcon('check')}</span></button>${q.type === 'clock' ? `<button class="clock-option-sound" data-action="clock-option-audio" data-clip="${option.clip}" aria-label="שמיעת האפשרות ${option.he}">${uiIcon('sound')}</button></div>` : ''}`).join('')}</div>
       <div class="feedback-row"><div class="feedback" id="feedback" role="status" aria-live="polite">קחי את הזמן. החברים כאן איתך ♡</div><button class="hint-button" data-action="hint">${uiIcon('hint')} רמז קטן</button><button class="primary-button next-button" data-action="next" hidden>ממשיכות ${uiIcon('arrow')}</button></div>
       <p id="audio-notice" class="audio-notice" role="status" hidden></p>
     </section><div class="buddy-bar">${pup(mission.pup)}<span id="buddy-message">${{ luli: 'לולי', bobi: 'בובי', tofi: 'טופי' }[mission.pup]} כאן לעזור לך!</span><span class="buddy-hearts">♡ ♡ ♡</span></div>
@@ -436,12 +437,13 @@ function startMission(mission, skipLesson = false) {
   if (mission === 'letters' && !skipLesson) { openLetterMenu(); return; }
   narrator.stop();
   const letterIds = mission === 'letters' ? recognitionGroup().map(letter => letter.id) : null;
-  round = { mission, questions: createSession(mission, { ...settings, readingRecent: readingPractice.recent[settings.reading], letterPractice: progress.letterPractice, letterIds }), letterIds, letterLanguage: settings.letterLanguage, reading: settings.reading, clockLevel: settings.clockLevel, index: 0, resolved: false, attempted: new Set(), counted: new Set(), helped: new Set(), sticker: null, awarded: false };
+  const questions = createSession(mission, { ...settings, readingRecent: readingPractice.recent[settings.reading], letterPractice: progress.letterPractice, letterIds });
+  round = { mission, questions, letterIds, letterLanguage: settings.letterLanguage, reading: settings.reading, clockLevel: settings.clockLevel, index: 0, resolved: false, attempted: new Set(), counted: new Set(), helped: new Set(questions.flatMap((q, i) => q.showModel ? [i] : [])), sticker: null, awarded: false };
   view = 'game';
   render();
   focusTitle();
   const q = current();
-  announcements.say([...(mission === 'hebrew' ? [READING_LEVELS[round.reading].clip, q.prompt] : [mission === 'letters' ? q.prompt : MISSIONS[mission].intro]), ...(q.targetClip ? [q.targetClip] : [])]);
+  announcements.say([...(mission === 'hebrew' ? [READING_LEVELS[round.reading].clip, q.prompt] : [mission === 'letters' ? q.prompt : MISSIONS[mission].intro]), ...(q.showModel ? ['letters-recognition-hint'] : []), ...(q.targetClip ? [q.targetClip] : [])]);
 }
 
 function recommended() {
@@ -554,7 +556,7 @@ function nextQuestion() {
   round.counted = new Set();
   render(); focusTitle();
   const q = current();
-  announcements.say([q.prompt, ...(q.targetClip ? [q.targetClip] : [])]);
+  announcements.say([q.prompt, ...(q.showModel ? ['letters-recognition-hint'] : []), ...(q.targetClip ? [q.targetClip] : [])]);
 }
 
 function celebrate(amount) {
@@ -607,7 +609,7 @@ function renderSettings() {
     <label class="setting-toggle"><span><b>תנועה וחגיגות</b><small>כיבוי מצמצם אנימציות</small></span><input name="motion" type="checkbox" ${settings.motion ? 'checked' : ''}></label>
     <p class="parent-note">ההגדרות ייכנסו לתוקף בהרפתקה הבאה. האנגלית מבוססת על הקשבה ותמונות. מילים כתובות מוצגות באותיות גדולות בלבד.</p>
     <button class="primary-button" type="submit">שמירת ההגדרות ${uiIcon('check')}</button></form>
-    <section class="parent-progress"><h3>מה כבר גילינו?</h3><p id="parent-progress-summary">${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות</p><table><thead><tr><th>תחום</th><th>תשובות ללא עזרה</th><th>עם רמז או ניסיון נוסף</th></tr></thead><tbody>${Object.values(MISSIONS).map(m => `<tr><th>${m.subject}</th><td data-independent="${m.id}">${progress.skills[m.id].correct - progress.skills[m.id].assisted}</td><td data-assisted="${m.id}">${progress.skills[m.id].assisted}</td></tr>`).join('')}</tbody></table><p class="parent-note">מוצגות רק הרפתקאות שהושלמו. זהו תיעוד משחק, ולא מבחן או הערכת יכולת.</p></section>
+    <section class="parent-progress"><h3>מה כבר גילינו?</h3><p id="parent-progress-summary">${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות</p><table><thead><tr><th>תחום</th><th>תשובות ללא עזרה</th><th>עם הדגמה, רמז או ניסיון נוסף</th></tr></thead><tbody>${Object.values(MISSIONS).map(m => `<tr><th>${m.subject}</th><td data-independent="${m.id}">${progress.skills[m.id].correct - progress.skills[m.id].assisted}</td><td data-assisted="${m.id}">${progress.skills[m.id].assisted}</td></tr>`).join('')}</tbody></table><p class="parent-note">מוצגות רק הרפתקאות שהושלמו. זהו תיעוד משחק, ולא מבחן או הערכת יכולת.</p></section>
     <section id="family-panel"></section>
     <p class="privacy-note">אפשר לשחק ללא חיבור לאלבום משפחתי. בחיבור לאלבום, נשמרים מספר ההרפתקאות והעזרה בכל תחום, והאותיות שתורגלו בכל מסלול. ציורי הכתיבה אינם נשמרים. לא צריך אימייל או חשבון לילדה. אין פרסומות, מעקב או בקשת מיקרופון. שמרו את הקוד המשפחתי כדי לחבר מכשיר חדש.</p>
     <p class="parent-note">איורים נוספים: <a href="assets/Twemoji-LICENSE.txt" target="_blank" rel="noopener">Twemoji · רישיון ושמות היוצרים</a>. כל התמונות שמורות בתוך המשחק.</p>

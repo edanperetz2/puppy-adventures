@@ -30,24 +30,24 @@ export function withPending(remote, own, confirmed) {
   for (const mission of MISSION_IDS) {
     const extra = Math.max(0, own.missions[mission] - confirmed.missions[mission]);
     next.missions[mission] += extra;
-    next.skills[mission].correct += extra * 6;
+    next.skills[mission].correct += Math.max(0, own.skills[mission].correct - confirmed.skills[mission].correct);
     next.skills[mission].assisted += Math.max(0, own.skills[mission].assisted - confirmed.skills[mission].assisted);
   }
   next.sessions = Object.values(next.missions).reduce((sum, n) => sum + n, 0);
-  next.stars = next.sessions * 6;
+  next.stars = Object.values(next.skills).reduce((sum, skill) => sum + skill.correct, 0);
   next.stickers = STICKERS.slice(0, Math.min(next.sessions, STICKERS.length));
   next.letterPractice = pendingLetterPractice(next.letterPractice, own.letterPractice, confirmed.letterPractice);
   return next;
 }
 
 function sameContribution(a, b) {
-  return MISSION_IDS.every(m => a.missions[m] === b.missions[m] && a.skills[m].assisted === b.skills[m].assisted) && JSON.stringify(a.letterPractice) === JSON.stringify(b.letterPractice);
+  return MISSION_IDS.every(m => a.missions[m] === b.missions[m] && a.skills[m].correct === b.skills[m].correct && a.skills[m].assisted === b.skills[m].assisted) && JSON.stringify(a.letterPractice) === JSON.stringify(b.letterPractice);
 }
 
 export function compactContribution(progress) {
   const safe = sanitizeProgress(progress);
   // The RPC needs counters only; a 1,000-item sticker list exceeds its size cap.
-  return { missions: safe.missions, skills: Object.fromEntries(MISSION_IDS.map(id => [id, { assisted: safe.skills[id].assisted }])), letterPractice: safe.letterPractice };
+  return { missions: safe.missions, skills: Object.fromEntries(MISSION_IDS.map(id => [id, { correct: Math.max(safe.skills[id].correct, safe.missions[id] * 6), assisted: safe.skills[id].assisted }])), letterPractice: safe.letterPractice };
 }
 
 export class SharedAlbum {

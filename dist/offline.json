@@ -1,5 +1,7 @@
 [
   "./",
+  "./adventure.css",
+  "./adventure.js",
   "./album.css",
   "./announcements.js",
   "./app.js",

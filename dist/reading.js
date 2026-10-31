@@ -1,5 +1,6 @@
 import { ADVANCED_WORDS } from './reading-advanced.js';
 import { VOCABULARY_WORDS } from './vocabulary.js';
+import { MAX_ASSISTED_TO_ADVANCE } from './adventure.js';
 
 // Reading stages are independent choices, never locked behind a score.
 export const READING_LEVELS = Object.freeze({
@@ -64,7 +65,7 @@ export function readingWords(key = 'short') {
 
 export function nextReadingStage(key, assisted) {
   const stage = Object.hasOwn(READING_LEVELS, key) ? READING_LEVELS[key] : null;
-  if (!stage?.number || !Number.isInteger(assisted) || assisted < 0 || assisted > 1) return null;
+  if (!stage?.number || !Number.isInteger(assisted) || assisted < 0 || assisted > MAX_ASSISTED_TO_ADVANCE) return null;
   return Object.keys(READING_LEVELS).find(next => READING_LEVELS[next].number === stage.number + 1) || null;
 }
 

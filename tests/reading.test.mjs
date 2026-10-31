@@ -4,7 +4,7 @@ import { WORDS, READING_LEVELS, readingWords, readingTargets, nextReadingStage, 
 import { CLIPS } from '../dist/content.js';
 import { art, hasArt } from '../dist/art.js';
 import { hebrewSpeech } from '../dist/hebrew-pronunciation.js';
-import { createSession, DEFAULT_SETTINGS, sanitizeSettings } from '../dist/engine.js';
+import { createSession, DEFAULT_SETTINGS, sanitizeSettings, SESSION_LENGTH } from '../dist/engine.js';
 import { VOCABULARY, distinctWordPictures } from '../dist/vocabulary.js';
 
 function seeded(seed) { seed = Math.imul(seed + 1, 0x9e3779b1) >>> 0; return () => { seed = (1664525 * seed + 1013904223) >>> 0; return seed / 4294967296; }; }
@@ -70,13 +70,13 @@ test('Completed rounds rotate through the stage before reviewing its oldest item
   for (const key of Object.keys(READING_LEVELS)) {
     const pool = readingWords(key);
     let practice = sanitizeReadingPractice(null), seen = new Set(), previous = new Set();
-    const rounds = Math.ceil(pool.length / 6);
+    const rounds = Math.ceil(pool.length / SESSION_LENGTH);
     for (let round = 0; round < rounds + 3; round++) {
-      const targets = readingTargets(pool, practice.recent[key], 6, seeded(round));
-      assert.equal(new Set(targets.map(word => word.id)).size, 6);
-      assert.ok(targets.every(word => !previous.has(word.id)), 'A new round should not repeat the previous six');
+      const targets = readingTargets(pool, practice.recent[key], SESSION_LENGTH, seeded(round));
+      assert.equal(new Set(targets.map(word => word.id)).size, SESSION_LENGTH);
+      assert.ok(targets.every(word => !previous.has(word.id)), 'A new round should not repeat the previous ten');
       const unseen = pool.filter(word => !seen.has(word.id));
-      assert.equal(targets.filter(word => !seen.has(word.id)).length, Math.min(6, unseen.length), 'Every remaining unseen target comes before review');
+      assert.equal(targets.filter(word => !seen.has(word.id)).length, Math.min(SESSION_LENGTH, unseen.length), 'Every remaining unseen target comes before review');
       const repeated = targets.filter(word => seen.has(word.id));
       const oldest = practice.recent[key].slice(0, repeated.length);
       assert.deepEqual(new Set(repeated.map(word => word.id)), new Set(oldest), 'Review fills a partial round from the oldest practiced targets');
@@ -96,29 +96,30 @@ test('Completed rounds rotate through the stage before reviewing its oldest item
   assert.equal(sanitizeReadingPractice({}).recent.sentences.length, 0);
 });
 
-test('Advancement offers only the immediately following stage after five independent answers', () => {
+test('Advancement offers only the immediately following stage after eight independent answers', () => {
   for (const [key, stage] of Object.entries(READING_LEVELS)) {
     const expected = stage.number && stage.number < 10 ? Object.keys(READING_LEVELS).find(next => READING_LEVELS[next].number === stage.number + 1) : null;
     assert.equal(nextReadingStage(key, 0), expected);
     assert.equal(nextReadingStage(key, 1), expected);
-    for (const assisted of [2, 3, 6, -1, NaN, undefined, '0']) assert.equal(nextReadingStage(key, assisted), null);
+    assert.equal(nextReadingStage(key, 2), expected);
+    for (const assisted of [3, 6, 10, -1, NaN, undefined, '0']) assert.equal(nextReadingStage(key, assisted), null);
   }
   assert.equal(nextReadingStage('__proto__', 0), null);
 });
 
-test('Chosen stages keep targets and distractors at that stage, with six varied questions', () => {
+test('Chosen stages keep targets and distractors at that stage, with ten varied questions', () => {
   for (const [key, stage] of Object.entries(READING_LEVELS)) {
     const pool = readingWords(key), seen = new Set();
     let practice = sanitizeReadingPractice(null);
     for (let seed = 0; seed < 120; seed++) {
       const questions = createSession('hebrew', { ...DEFAULT_SETTINGS, reading: key, readingRecent: practice.recent[key] }, seeded(seed));
-      assert.equal(questions.length, 6);
-      assert.equal(new Set(questions.map(q => q.answer)).size, Math.min(6, pool.length));
-      for (const q of questions) {
+      assert.equal(questions.length, SESSION_LENGTH);
+      assert.equal(new Set(questions.map(q => q.answer)).size, Math.min(SESSION_LENGTH, pool.length));
+      for (const [index,q] of questions.entries()) {
         seen.add(q.answer);
         assert.ok(pool.some(word => word.id === q.word.id));
-        assert.equal(q.options.length, 3);
-        assert.equal(new Set(q.options.map(word => word.id)).size, 3);
+        assert.equal(q.options.length, index < 3 ? 2 : 3);
+        assert.equal(new Set(q.options.map(word => word.id)).size, q.options.length);
         assert.equal(q.options.filter(word => word.id === q.answer).length, 1);
         if (stage.level !== null) assert.ok(q.options.every(word => word.level === stage.level));
         assert.equal(q.targetClip, undefined, 'The opening instruction must let Ariel read before revealing the spoken answer');

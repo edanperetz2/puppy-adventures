@@ -7,16 +7,16 @@ function seeded(seed) {
   return () => { seed = (1664525 * seed + 1013904223) >>> 0; return seed / 4294967296; };
 }
 
-test('Every activity has six solvable questions with unique choices and audio', () => {
+test('Every activity has ten solvable questions, with two warm-up choices before three', () => {
   for (let seed = 0; seed < 200; seed++) {
     for (const mission of ['hebrew', 'english', 'math']) {
       for (const max of [5, 10, 20]) {
         const settings = { ...DEFAULT_SETTINGS, mathMax: max, englishMax: seed % 2 ? 10 : 20, reading: seed % 2 ? 'short' : 'all' };
         const questions = createSession(mission, settings, seeded(seed));
         assert.equal(questions.length, SESSION_LENGTH);
-        for (const q of questions) {
-          assert.equal(q.options.length, 3);
-          assert.equal(new Set(q.options.map(o => o.id)).size, 3);
+        for (const [index, q] of questions.entries()) {
+          assert.equal(q.options.length, index < 3 ? 2 : 3);
+          assert.equal(new Set(q.options.map(o => o.id)).size, q.options.length);
           assert.equal(q.options.filter(o => o.id === q.answer).length, 1);
           assert.ok(CLIPS[q.prompt]);
           assert.ok(CLIPS[q.hint]);
@@ -30,13 +30,18 @@ test('Every activity has six solvable questions with unique choices and audio', 
   }
 });
 
-test('English always includes two animal, two color, and two spoken-number questions', () => {
+test('English includes four animals, three colors and three increasingly large spoken numbers', () => {
   const questions = createSession('english', DEFAULT_SETTINGS, seeded(42));
-  for (const kind of ['animal', 'color', 'number']) assert.equal(questions.filter(q => q.kind === kind).length, 2);
+  for (const [kind, count] of [['animal', 4], ['color', 3], ['number', 3]]) assert.equal(questions.filter(q => q.kind === kind).length, count);
+  const numbers = questions.filter(q => q.kind === 'number').map(q => q.target.number);
+  assert.ok(numbers[0] <= 3 && numbers[1] >= 4 && numbers[1] <= 6 && numbers[2] >= 7);
 });
 
-test('Math alternates visual counting and addition without subtraction', () => {
-  assert.deepEqual(createSession('math').map(q => q.type), ['count', 'add', 'count', 'add', 'count', 'add']);
+test('Math builds from three small counts to seven additions without subtraction', () => {
+  const questions = createSession('math');
+  assert.deepEqual(questions.map(q => q.type), ['count', 'count', 'count', 'add', 'add', 'add', 'add', 'add', 'add', 'add']);
+  assert.deepEqual(questions.slice(0, 3).map(q => q.total), [2, 3, 4]);
+  assert.equal(questions.at(-1).total, 10);
 });
 
 test('Completing adventures preserves previous progress and unlocks stickers once', () => {
@@ -49,9 +54,9 @@ test('Completing adventures preserves previous progress and unlocks stickers onc
   }
   assert.equal(original.sessions, 0);
   assert.equal(progress.sessions, 15);
-  assert.equal(progress.stars, 90);
+  assert.equal(progress.stars, 150);
   assert.equal(progress.stickers.length, 15);
-  assert.equal(progress.skills.hebrew.correct, 90);
+  assert.equal(progress.skills.hebrew.correct, 150);
   assert.equal(progress.skills.hebrew.assisted, 30);
   assert.equal(progress.missions.english, 0);
 });

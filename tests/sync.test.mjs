@@ -27,8 +27,9 @@ function server() {
     const old = devices.get(request.device_key) || freshProgress();
     const next = request.device_totals;
     for (const mission of MISSION_IDS) {
+      const previousCount = old.missions[mission];
       old.missions[mission] = Math.max(old.missions[mission], next.missions[mission]);
-      old.skills[mission].correct = old.missions[mission] * 6;
+      old.skills[mission].correct = Math.max(old.skills[mission].correct + Math.max(0, next.missions[mission] - previousCount) * 6, next.skills?.[mission]?.correct || 0);
       old.skills[mission].assisted = Math.max(old.skills[mission].assisted, next.skills[mission].assisted);
     }
     const letters = sanitizeLetterPractice(next.letterPractice);
@@ -75,8 +76,14 @@ test('A Safari album with 26 stickers pairs to an empty Home Screen app and surv
   await home.flush(); await safari.flush();
   assert.equal(home.progress.stickers.length, 27);
   assert.equal(safari.progress.stickers.length, 27);
+  assert.equal(safari.progress.stars, 166, 'The existing 26 six-step rounds keep their original 156 answers');
+  assert.equal(safari.progress.skills.hebrew.correct, 156);
+  assert.equal(safari.progress.skills.math.correct, 10);
   await home.flush(); await safari.flush();
   assert.equal(home.progress.sessions, 27);
+  home = new SharedAlbum({ config, storage: homeStore, fetcher: api.fetcher });
+  assert.equal(home.progress.stars, 166);
+  assert.equal(home.progress.stickers.length, 27);
 });
 
 test('Full albums send compact counters within the real RPC payload limit', () => {
@@ -141,6 +148,36 @@ test('Writing done during an in-flight upload is retained and concurrent devices
   assert.equal(second.progress.letterPractice.hebrew.writing[5], 1);
   assert.equal(second.progress.sessions, 0);
   assert.equal(second.progress.stickers.length, 0);
+});
+
+test('Two ten-step completions made during one upload retain all twenty answers and two rewards', async () => {
+  const api = server(), saved = storage();
+  let pause = false, release;
+  const fetcher = async (...args) => {
+    const response = await api.fetcher(...args);
+    if (pause) { pause = false; await new Promise(resolve => { release = resolve; }); }
+    return response;
+  };
+  const first = new SharedAlbum({ config, storage: saved, fetcher });
+  const second = new SharedAlbum({ config, storage: storage(), fetcher: api.fetcher });
+  const code = newCode();
+  await first.link(code, freshProgress(), { create: true });
+  await second.link(code, freshProgress());
+  pause = true;
+  first.complete('math', 1);
+  await Promise.resolve();
+  first.complete('math', 2);
+  assert.equal(first.progress.stars, 20);
+  assert.equal(first.progress.sessions, 2);
+  assert.equal(first.progress.stickers.length, 2);
+  release();
+  await first.flush(); await first.flush(); await second.flush();
+  assert.equal(second.progress.skills.math.correct, 20);
+  assert.equal(second.progress.skills.math.assisted, 3);
+  assert.equal(second.progress.stickers.length, 2);
+  const reopened = new SharedAlbum({ config, storage: saved, fetcher: api.fetcher });
+  assert.equal(reopened.progress.stars, 20);
+  assert.equal(reopened.pending, false);
 });
 
 function legacyProgress(sessions) {
@@ -279,7 +316,7 @@ test('Letter adventures merge with previous subjects and upload once after offli
   await second.flush(); await second.flush(); await first.flush();
   assert.equal(first.progress.sessions, 2);
   assert.equal(first.progress.missions.math, 1);
-  assert.equal(first.progress.skills.letters.correct, 6);
+  assert.equal(first.progress.skills.letters.correct, 10);
   assert.equal(first.progress.skills.letters.assisted, 2);
   assert.equal(first.progress.stickers.length, 2);
 });
@@ -302,7 +339,7 @@ test('Clock practice syncs with the original subjects and survives offline reope
   await second.flush(); await first.flush(); await second.flush();
   assert.equal(first.progress.sessions, 2);
   assert.equal(first.progress.missions.clock, 1);
-  assert.equal(first.progress.skills.clock.correct, 6);
+  assert.equal(first.progress.skills.clock.correct, 10);
   assert.equal(first.progress.skills.clock.assisted, 2);
   assert.equal(first.progress.missions.hebrew, 1);
 });

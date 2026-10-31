@@ -5,9 +5,10 @@ import { READING_LEVELS, readingWords, readingTargets } from './reading.js';
 import { isSticker } from './stickers.js';
 import { sanitizeLetterPractice, recordLetters, suggestedLetters } from './letter-progress.js';
 import { distinctWordPictures } from './vocabulary.js';
+import { SESSION_LENGTH, adventurePhase, choiceCount } from './adventure.js';
+export { SESSION_LENGTH } from './adventure.js';
 
 export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', letterLanguage: 'hebrew', letterWriting: Object.freeze({ hebrew: 0, english: 0 }), sound: true, motion: true });
-export const SESSION_LENGTH = 6;
 
 export function shuffle(values, rng = Math.random) {
   const copy = [...values];
@@ -22,12 +23,17 @@ function optionsFrom(pool, correct, rng, count = 3) {
   return shuffle([correct, ...shuffle(pool.filter(x => x.id !== correct.id), rng).slice(0, count - 1)], rng);
 }
 
-export function numberOptions(answer, max, rng = Math.random) {
+export function numberOptions(answer, max, rng = Math.random, count = 3) {
   const candidates = Array.from({ length: max + 1 }, (_, n) => n).filter(n => n !== answer);
   // Nearby alternatives make the choice useful without following a predictable pattern.
   const neighbors = shuffle(candidates.filter(n => Math.abs(n - answer) <= 3), rng);
   const others = shuffle(candidates.filter(n => Math.abs(n - answer) > 3), rng);
-  return shuffle([answer, ...[...neighbors, ...others].slice(0, 2)], rng).map(n => ({ id: String(n), number: n }));
+  return shuffle([answer, ...[...neighbors, ...others].slice(0, count - 1)], rng).map(n => ({ id: String(n), number: n }));
+}
+
+const readingSize = word => [...word.pointed.matchAll(/[א-ת]/gu)].length;
+function readingOrder(a, b) {
+  return a.level - b.level || (a.scene?.count || 0) - (b.scene?.count || 0) || a.he.split(' ').length - b.he.split(' ').length || readingSize(a) - readingSize(b);
 }
 
 export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Math.random) {
@@ -36,51 +42,66 @@ export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Mat
     const language = Object.hasOwn(LETTERS, settings.letterLanguage) ? settings.letterLanguage : 'hebrew';
     const selected = Array.isArray(settings.letterIds) ? [...new Set(settings.letterIds)].map(id => LETTERS[language].find(letter => letter.id === id)).filter(Boolean) : [];
     const group = selected.length === 3 ? selected : Number.isInteger(settings.letterStart) ? letterGroup(language, settings.letterStart) : suggestedLetters(settings.letterPractice, language);
-    const targets = [group[0], ...shuffle([group[1], group[2], ...group], rng)];
-    return targets.map((letter, i) => ({ id: `letters-${i}`, type: 'letter', letter, answer: letter.id, options: shuffle(group, rng), prompt: `letter-match-${language}`, targetClip: letter.clip, hint: 'letters-recognition-hint' }));
+    const targets = [...shuffle(group, rng), ...shuffle([...group, group[Math.floor(rng() * group.length)]], rng), ...shuffle(group, rng)];
+    return targets.map((letter, i) => ({ id: `letters-${i}`, type: 'letter', letter, answer: letter.id, phase: adventurePhase(i), showModel: i < 3, options: optionsFrom(group, letter, rng, i < 7 ? 2 : 3), prompt: `letter-match-${language}`, targetClip: letter.clip, hint: 'letters-recognition-hint' }));
   }
   if (mission === 'hebrew') {
     const pool = readingWords(settings.reading);
-    const targets = readingTargets(pool, settings.readingRecent, SESSION_LENGTH, rng);
+    const targets = settings.reading === 'all'
+      ? Object.values(READING_LEVELS).filter(stage => stage.number).sort((a, b) => a.number - b.number).flatMap(stage => readingTargets(pool.filter(word => word.level === stage.level), settings.readingRecent, 1, rng))
+      : readingTargets(pool, settings.readingRecent, SESSION_LENGTH, rng).sort(readingOrder);
     // Prefer unseen reading targets before reviewing the oldest practiced ones.
     return Array.from({ length: SESSION_LENGTH }, (_, i) => {
       const word = targets[i % targets.length];
       const choices = word.family ? pool.filter(item => item.family === word.family) : pool.filter(item => !item.family && distinctWordPictures(word, item));
-      return { id: `he-${i}`, type: 'read', word, answer: word.id, options: optionsFrom(choices, word, rng), prompt: word.scene ? 'reading-phrase' : 'read', hint: word.scene ? 'reading-phrase-hint' : 'read-hint' };
+      return { id: `he-${i}`, type: 'read', word, answer: word.id, phase: adventurePhase(i), options: optionsFrom(choices, word, rng, choiceCount(i)), prompt: word.scene ? 'reading-phrase' : 'read', hint: word.scene ? 'reading-phrase-hint' : 'read-hint' };
     });
   }
   if (mission === 'english') {
-    const animals = shuffle(ANIMALS, rng);
-    const colors = shuffle(COLORS, rng);
-    const numbers = shuffle(Array.from({ length: settings.englishMax }, (_, i) => i + 1), rng);
-    return shuffle(Array.from({ length: SESSION_LENGTH }, (_, i) => {
-      const kind = ['animal', 'color', 'number'][i % 3];
-      const target = kind === 'animal' ? animals[Math.floor(i / 3)] : kind === 'color' ? colors[Math.floor(i / 3)] : { id: String(numbers[Math.floor(i / 3)]), number: numbers[Math.floor(i / 3)], en: NUMBERS[numbers[Math.floor(i / 3)]] };
-      const options = kind === 'number' ? numberOptions(target.number, settings.englishMax, rng) : optionsFrom(kind === 'animal' ? ANIMALS : COLORS, target, rng);
-      return { id: `en-${i}`, type: 'listen', kind, target, answer: target.id, options, prompt: 'listen', targetClip: `en-${target.id}`, hint: 'english-hint' };
-    }), rng);
+    const max = [10, 20].includes(settings.englishMax) ? settings.englishMax : 10;
+    const select = (pool, ids) => shuffle(pool.filter(item => ids.includes(item.id)), rng);
+    const animals = [...select(ANIMALS, ['dog', 'cat', 'fish']).slice(0, 1), ...select(ANIMALS, ['bird', 'duck', 'bear']).slice(0, 2), ...select(ANIMALS, ['horse', 'rabbit']).slice(0, 1)];
+    const colors = [select(COLORS, ['red', 'blue', 'yellow'])[0], select(COLORS, ['green', 'pink'])[0], select(COLORS, ['purple', 'orange'])[0]];
+    const numbers = [1 + Math.floor(rng() * 3), 4 + Math.floor(rng() * 3), 7 + Math.floor(rng() * (max - 6))];
+    let animal = 0, color = 0, number = 0;
+    return ['animal', 'color', 'number', 'animal', 'color', 'number', 'animal', 'animal', 'color', 'number'].map((kind, i) => {
+      const n = kind === 'number' ? numbers[number++] : null;
+      const target = kind === 'animal' ? animals[animal++] : kind === 'color' ? colors[color++] : { id: String(n), number: n, en: NUMBERS[n] };
+      const options = kind === 'number' ? numberOptions(n, max, rng, choiceCount(i)) : optionsFrom(kind === 'animal' ? ANIMALS : COLORS, target, rng, choiceCount(i));
+      return { id: `en-${i}`, type: 'listen', kind, target, answer: target.id, options, phase: adventurePhase(i), prompt: 'listen', targetClip: `en-${target.id}`, hint: 'english-hint' };
+    });
   }
   if (mission === 'math') {
     const max = [5, 10, 20].includes(settings.mathMax) ? settings.mathMax : 10;
-    const totals = shuffle(Array.from({ length: max - 1 }, (_, i) => i + 2), rng);
+    const sums = Array.from({ length: SESSION_LENGTH - 3 }, (_, i) => Math.round(4 + (max - 4) * i / (SESSION_LENGTH - 4)));
+    const additions = [];
+    for (const total of [...new Set(sums)]) {
+      const count = sums.filter(n => n === total).length;
+      const pairs = shuffle(Array.from({ length: total - 1 }, (_, i) => [i + 1, total - i - 1]), rng).sort((a, b) => Math.min(...a) - Math.min(...b));
+      for (let i = 0; i < count; i++) {
+        const fraction = count === 1 ? sums.indexOf(total) / (sums.length - 1) : i / (count - 1);
+        const [a, b] = pairs[Math.round(fraction * (pairs.length - 1))];
+        additions.push({ total, a, b });
+      }
+    }
     return Array.from({ length: SESSION_LENGTH }, (_, i) => {
-      const total = totals[i % totals.length];
-      const add = i % 2 === 1;
-      const a = add ? 1 + Math.floor(rng() * (total - 1)) : total;
-      return { id: `math-${i}`, type: add ? 'add' : 'count', a, b: add ? total - a : 0, answer: String(total), total, item: i % 3 === 0 ? 'apple' : i % 3 === 1 ? 'flower' : 'berry', options: numberOptions(total, max, rng), prompt: add ? 'add' : 'count', hint: add ? 'add-hint' : 'count-hint' };
+      const add = i >= 3;
+      const { total, a, b } = add ? additions[i - 3] : { total: i + 2, a: i + 2, b: 0 };
+      return { id: `math-${i}`, type: add ? 'add' : 'count', a, b, answer: String(total), total, phase: adventurePhase(i), item: i % 3 === 0 ? 'apple' : i % 3 === 1 ? 'flower' : 'berry', options: numberOptions(total, max, rng, choiceCount(i)), prompt: add ? 'add' : 'count', hint: add ? 'add-hint' : 'count-hint' };
     });
   }
   if (mission === 'clock') {
     const level = CLOCK_LEVELS[settings.clockLevel] || CLOCK_LEVELS.hours;
-    const hours = shuffle(Array.from({ length: 12 }, (_, i) => i + 1), rng);
-    const minutes = level.minutes.length === 1 ? [0, 0, 0, 0, 0, 0] : level.minutes.length === 2 ? shuffle([0, 30, 0, 30, 0, 30], rng) : shuffle([0, 15, 30, 45, 15, 45], rng);
-    return hours.slice(0, SESSION_LENGTH).map((hour, i) => {
+    const hours = shuffle(Array.from({ length: 12 }, (_, i) => i + 1), rng).slice(0, SESSION_LENGTH).sort((a, b) => a - b);
+    const minutes = level.minutes.length === 1 ? Array(SESSION_LENGTH).fill(0) : level.minutes.length === 2 ? [0, 0, 0, 0, 30, 30, 30, 30, 30, 30] : [0, 0, 30, 30, 15, 15, 15, 45, 45, 45];
+    const minuteOrder = [0, 30, 15, 45];
+    return hours.map((hour, i) => {
       const time = clockTime(hour, minutes[i]);
       const next = hour % 12 + 1;
-      const alternatives = level.minutes.filter(n => n !== time.minute);
+      const alternatives = level.minutes.filter(n => n !== time.minute && minuteOrder.indexOf(n) <= minuteOrder.indexOf(time.minute));
       const otherMinute = alternatives.length ? alternatives[Math.floor(rng() * alternatives.length)] : 0;
       const other = alternatives.length ? clockTime(hour, otherMinute) : clockTime((hour + 10) % 12 + 1, 0);
-      return { id: `clock-${i}`, type: 'clock', time, answer: time.id, options: shuffle([time, other, clockTime(next, time.minute === 45 ? 0 : time.minute)], rng), prompt: 'clock-read', hint: `clock-tip-${time.minute}` };
+      return { id: `clock-${i}`, type: 'clock', time, answer: time.id, phase: adventurePhase(i), options: shuffle([time, other, clockTime(next, time.minute === 45 ? 0 : time.minute)].slice(0, choiceCount(i)), rng), prompt: 'clock-read', hint: `clock-tip-${time.minute}` };
     });
   }
   throw new Error(`Unknown mission: ${mission}`);

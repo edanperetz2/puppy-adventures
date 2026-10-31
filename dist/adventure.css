@@ -1,0 +1,8 @@
+.answer-grid.two-options{grid-template-columns:repeat(2,minmax(0,1fr));max-width:440px;margin-inline:auto}
+.step-track{gap:clamp(4px,1.4vw,12px);max-width:600px;margin-inline:auto}
+@media(max-width:570px){
+  .step-track{gap:4px;max-width:320px}
+  .step-dot{width:22px;height:22px;flex:0 0 22px;font-size:10px}
+  .scene-options.two-options .answer-button:last-child{grid-column:auto;justify-self:stretch;width:auto}
+  .two-options .answer-button{min-width:0}
+}
