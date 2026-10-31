@@ -55,7 +55,7 @@ export class Narrator {
       this.release = finish;
       this.audio.onended = () => finish(true);
       this.audio.onerror = () => finish(false);
-      this.audio.playbackRate = slow ? 0.82 : 1;
+      this.audio.playbackRate = slow ? (CLIPS[key].lang === 'he-IL' ? 0.92 : 0.82) : 1;
       this.audio.src = `./assets/audio/${key}.mp3`;
       watchdog = setTimeout(() => {
         if (sequence === this.sequence) this.audio.pause();
@@ -69,8 +69,11 @@ export class Narrator {
   deviceVoice(key, slow, sequence) {
     if (!('speechSynthesis' in window) || !CLIPS[key]) return Promise.resolve(false);
     const clip = CLIPS[key];
+    // Hebrew uses the reviewed recordings on every device. A device's TTS
+    // would guess pronunciation again and could undo the reviewed readings.
+    if (clip.lang === 'he-IL') return Promise.resolve(false);
     const voice = window.speechSynthesis.getVoices().find(v => v.lang.toLowerCase().startsWith(clip.lang.slice(0, 2)));
-    // Never read Hebrew with a voice for another language.
+    // Never substitute a voice for another language.
     if (!voice) return Promise.resolve(false);
     return new Promise(resolve => {
       let finished = false;

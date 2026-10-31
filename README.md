@@ -45,7 +45,9 @@ The repository is private. A normal Vercel production URL can be visited by anyo
 
 ## Audio and offline use
 
-All 145 Hebrew and English MP3 recordings are bundled. The game does not call a speech service during play, request a microphone, or require an API key. A same-language browser voice is a fallback if a recording cannot play. The sound button and replay control let the child start or re-enable audio, including on devices that require a tap before playback.
+All 145 MP3 recordings are bundled. The 109 Hebrew recordings use the parent-selected Ava sample as a voice reference for the free, local [BlueTTS](https://github.com/maxmelichov/BlueTTS) synthesizer. These are Ava-reference recordings, rather than output from Microsoft's Ava engine. The 36 English recordings use Microsoft's Ava multilingual voice directly. The game does not call a speech service during play, request a microphone, or require an API key. Hebrew always uses the reviewed recordings; an English browser voice can serve as an English-only fallback. The sound button and replay control let the child start or re-enable audio, including on devices that require a tap before playback.
+
+Hebrew narration has a separate, fully pointed source in `dist/speech.js`: instructions address a girl, and counting and clock numbers have explicit feminine readings. `dist/hebrew-pronunciation.js` contains a reviewed dictionary of all 230 Hebrew word forms in the curriculum. It specifies consonants, vowels, stress and feminine endings as IPA phonemes, which BlueTTS uses directly. For example, לִחְצִי is /liχtsˈi/, הַתְּמוּנָה is /hatmunˈa/ and הִצְלַחְתְּ ends in /t/. Silent and audible shva are resolved explicitly across the vocabulary. These phonemes never appear in the child's reading words. A new Hebrew word fails content checks until its pronunciation is reviewed. Device-generated Hebrew speech is disabled so a device cannot reintroduce guessed readings. Slow Hebrew hints make only a small pace change.
 
 A classic service worker caches the game, local fonts and recordings after a successful online visit on HTTPS or localhost. MP3 byte-range responses support Safari's cached-audio requests. The first visit requires a connection. Browser storage policies can remove cached content; revisit online to restore it. The large English speaker button plays the word directly from a tap. Browser layout tests cannot replace a final sound check on the family's physical devices.
 
@@ -53,15 +55,36 @@ A classic service worker caches the game, local fonts and recordings after a suc
 
 Use the same HTTPS address in current Safari on iPhone/iPad, Chrome on Android, or Chrome, Edge and Firefox on a laptop. No installation is needed. The layout supports portrait, landscape, small phones, laptop screens, safe areas around notches and home indicators, touch input and keyboard/mouse input. Apple and Android home-screen icons are bundled for optional installation. Sound starts after a tap, respecting browser audio permissions.
 
-The recordings were generated during development with the open-source [edge-tts](https://github.com/rany2/edge-tts) client and the Hila (Hebrew) and Jenny (English) voices. Existing recordings need no dependency. To regenerate clips optionally:
+Audio generation is a development-only step. Existing recordings need no dependencies. Export the reviewed content first:
+
+```sh
+node --input-type=module -e "import {CLIPS} from './dist/content.js'; import {writeFileSync} from 'node:fs'; writeFileSync('clips.json', JSON.stringify(CLIPS));"
+```
+
+For English, install the open-source [edge-tts](https://github.com/rany2/edge-tts) client and generate the original Ava recordings:
 
 ```sh
 python -m pip install edge-tts
-node --input-type=module -e "import {CLIPS} from './dist/content.js'; import {writeFileSync} from 'node:fs'; writeFileSync('clips.json', JSON.stringify(CLIPS));"
 python scripts/generate-audio.py clips.json dist/assets/audio
 ```
 
-The script keeps existing recordings; remove only the specific clips you intend to regenerate. The generation service may change; runtime playback does not depend on it. Review new recordings for Hebrew pronunciation.
+For Hebrew, use BlueTTS (tested source revision `712f7c9491ad7875fc985e24e166afe43ae649b0`) and PyAV. Download the [matching v2 ONNX model bundle](https://huggingface.co/notmax123/blue-onnx-v2/tree/cd1093eaa920136e7a727dfb92d5f7879039e587) outside this repository. Pass that directory explicitly; the generator never downloads models. The bundled `scripts/ava-style.json` is the extracted profile of the chosen synthetic Ava sample; no child's voice is involved.
+
+```sh
+python scripts/generate-hebrew-audio.py clips.json dist/assets/audio --model-dir /path/to/blue-model --style scripts/ava-style.json
+```
+
+The generation environment used NumPy 2.2.6, ONNX Runtime 1.23.2 and PyAV 17.1.0 on CPU. Heavy model files, development packages and source voice previews are excluded from the game and repository. Playback works on ordinary phones and computers without these dependencies.
+
+`dist/assets/audio/manifest.json` records each clip's actual pronunciation input, voice, pace and audio checksum. Hebrew entries also fingerprint the voice profile and model bundle, and record sentence breaks and deterministic takes. Long instructions are synthesized in short sentences. `scripts/hebrew-takes.json` preserves the selected takes so regeneration does not replace a reviewed result with a random variation. A generator retains a recording only when its inputs and checksum match, so changing a shared pronunciation updates every affected recording. Temporary files are replaced only after a valid MP3 is produced. Both generators accept `--keys` for selected clips. `npm run check` rejects missing, stale or mismatched recordings and verifies the Hebrew profile.
+
+`scripts/audit-hebrew-audio.py` checks actual recordings using the local [Hebrew IPA recognizer](https://huggingface.co/notmax123/whisper-heb-ipa/tree/6f7c493615d163a99ed6ea09b2cb7241760d868b). It requires PyTorch, Transformers, NumPy and PyAV, and a separately downloaded model directory. Reports resume only when the audio, expected phonemes, model fingerprint and precision match. No audio is uploaded. The checked-in `scripts/hebrew-audio-audit.json` covers all 109 Hebrew recordings; `npm run check` verifies that its expected phonemes and audio hashes still match. Regenerated recordings require an updated report.
+
+```sh
+python scripts/audit-hebrew-audio.py clips.json dist/assets/audio --model-dir /path/to/ipa-model --output scripts/hebrew-audio-audit.json
+```
+
+This recognizer is diagnostic: it can confuse sounds, omit glottal stops or misreport stress. Inspect discrepancies and listen to regenerated speech; neither integrity checks nor automated transcription prove perfect pronunciation. The generation services and models may change, but runtime playback uses only the fixed recordings.
 
 ## Development and validation
 
@@ -75,7 +98,7 @@ The curriculum tests exercise 2,400 generated adventures, including 600 clock ad
 
 `supabase/migrations/20261031111908_add_clock_progress.sql` extends the existing sync function's activity list. It preserves albums, prior subject counts and access grants. A transaction-based live test verifies that clock completions merge across devices and remain intact when an older client uploads a three-subject snapshot.
 
-Content and speech text live in `dist/content.js`; question generation and progress rules are in `dist/engine.js`. Illustrations are original SVG in `dist/art.js`, animated by `dist/styles.css`. Narration is in `dist/audio.js`; family sync is in `dist/sync.js` and `dist/family-ui.js`. Increase the cache version in `dist/sw.js` for changed assets and regenerate `dist/offline.json` with `npm run prepare-offline`. Workers activate after their complete asset list downloads. Reload a returning tab to use updated code; an in-progress adventure is not forcibly restarted.
+Content lives in `dist/content.js`; Hebrew speech and pronunciation review live in `dist/speech.js` and `dist/hebrew-pronunciation.js`. Question generation and progress rules are in `dist/engine.js`. Illustrations are original SVG in `dist/art.js`, animated by `dist/styles.css`. Narration is in `dist/audio.js`; family sync is in `dist/sync.js` and `dist/family-ui.js`. Increase the cache version in `dist/sw.js` for changed assets and regenerate `dist/offline.json` with `npm run prepare-offline`. Workers activate after their complete asset list downloads. Reload a returning tab to use updated code; an in-progress adventure is not forcibly restarted.
 
 Rubik is bundled locally under its SIL Open Font License in `dist/assets/FONT-LICENSE.txt`. No third-party analytics, trackers, advertisements, remote fonts or runtime content services are included.
 

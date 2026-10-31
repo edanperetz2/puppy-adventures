@@ -1,4 +1,6 @@
 import { clockTime } from './clock.js';
+import { HEBREW_NARRATION, HEBREW_NUMBERS, clockSpeech } from './speech.js';
+import { hebrewSpeech } from './hebrew-pronunciation.js';
 
 export const WORDS = [
   { id: 'fish', he: 'דג', pointed: 'דָּג', level: 1 },
@@ -65,9 +67,9 @@ export const CLIPS = {
   'clock-tip-45': { lang: 'he-IL', text: 'כשהמחוג הארוך והירוק מצביע על תשע, אומרים: רבע לשעה הבאה. המחוג הקצר עוד לא הגיע למספר הבא, אבל הוא כבר קרוב אליו.' },
   read: { lang: 'he-IL', text: 'קראי את המילה ובחרי את התמונה המתאימה.' },
   listen: { lang: 'he-IL', text: 'הקשיבי למילה באנגלית. מה מתאים?' },
-  count: { lang: 'he-IL', text: 'כמה יש בסל? געי בכל פריט כדי לספור, ואז בחרי את המספר המתאים.' },
+  count: { lang: 'he-IL', text: 'כמה יש בסל? לחצי על כל פריט כדי לספור, ואז בחרי את המספר המתאים.' },
   add: { lang: 'he-IL', text: 'כמה יש ביחד? ספרי את שתי הקבוצות ובחרי את התשובה המתאימה.' },
-  'count-hint': { lang: 'he-IL', text: 'געי בכל פריט פעם אחת. אחר כך בחרי את המספר שהגעת אליו.' },
+  'count-hint': { lang: 'he-IL', text: 'לחצי על כל פריט פעם אחת. אחר כך בחרי את המספר שהגעת אליו.' },
   'add-hint': { lang: 'he-IL', text: 'התחילי לספור בקבוצה הראשונה, והמשיכי לספור בקבוצה השנייה. כמה יש ביחד?' },
   'english-hint': { lang: 'he-IL', text: 'נקשיב שוב, קצת יותר לאט.' },
   'read-hint': { lang: 'he-IL', text: 'בואי נשמע את המילה יחד.' },
@@ -81,15 +83,18 @@ export const CLIPS = {
   break: { lang: 'he-IL', text: 'איזה כיף שיחקנו יחד! אפשר לצאת להפסקה, והחברים יחכו לך כאן.' },
 };
 
-for (const w of WORDS) CLIPS[`he-${w.id}`] = { lang: 'he-IL', text: w.pointed };
+for (const [key, speech] of Object.entries(HEBREW_NARRATION)) CLIPS[key].speech = speech;
+for (const w of WORDS) CLIPS[`he-${w.id}`] = { lang: 'he-IL', text: w.pointed, speech: w.pointed };
 for (const a of ANIMALS) CLIPS[`en-${a.id}`] = { lang: 'en-US', text: a.en.toLowerCase() };
 for (const c of COLORS) CLIPS[`en-${c.id}`] = { lang: 'en-US', text: c.en.toLowerCase() };
 for (let n = 0; n <= 20; n++) {
   CLIPS[`en-${n}`] = { lang: 'en-US', text: NUMBERS[n].toLowerCase() };
-  CLIPS[`number-${n}`] = { lang: 'he-IL', text: String(n) };
+  CLIPS[`number-${n}`] = { lang: 'he-IL', text: String(n), speech: HEBREW_NUMBERS[n] };
 }
 
 for (let hour = 1; hour <= 12; hour++) for (const minute of [0, 15, 30, 45]) {
   const time = clockTime(hour, minute);
-  CLIPS[time.clip] = { lang: 'he-IL', text: `השעה ${time.he}.` };
+  CLIPS[time.clip] = { lang: 'he-IL', text: `השעה ${time.he}.`, speech: clockSpeech(hour, minute) };
 }
+
+for (const clip of Object.values(CLIPS)) if (clip.lang === 'he-IL') clip.speech = hebrewSpeech(clip.speech);

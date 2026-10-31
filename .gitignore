@@ -7,3 +7,5 @@ supabase/.temp/
 *.zip
 __pycache__/
 *.pyc
+clips.json
+*.part
