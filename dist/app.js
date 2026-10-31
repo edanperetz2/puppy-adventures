@@ -2,6 +2,7 @@ import { MISSIONS, STICKERS } from './content.js';
 import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js';
 import { art, pup, scene, uiIcon } from './art.js';
 import { Narrator } from './audio.js';
+import { GameAnnouncements } from './announcements.js';
 import { SharedAlbum, normalizeCode } from './sync.js';
 import { SYNC_CONFIG } from './sync-config.js';
 import { mountFamilyPanel, updateFamilyStatus } from './family-ui.js';
@@ -43,12 +44,24 @@ if (album.linked) progress = album.progress;
 
 const narrator = new Narrator(status => {
   audioStatus = status;
-  const replay = document.querySelector('[data-action="replay"]');
-  if (replay) replay.classList.toggle('is-speaking', status === 'speaking');
+  for (const replay of document.querySelectorAll('[data-action="replay"], [data-action="welcome"]')) replay.classList.toggle('is-speaking', status === 'speaking');
   const notice = document.querySelector('#audio-notice');
   if (notice) { notice.hidden = status !== 'unavailable'; notice.textContent = 'הקול לא נשמע? לחצי שוב על הרמקול. אפשר גם להיעזר בהורה.'; }
 });
 narrator.enabled = settings.sound;
+const announcements = new GameAnnouncements(narrator);
+let welcomeAttempted = false;
+
+function startOpeningWelcome() {
+  if (welcomeAttempted || document.hidden || dialog.open || view !== 'home') return;
+  welcomeAttempted = true;
+  void announcements.start();
+}
+
+function welcome() {
+  if (!settings.sound) { settings.sound = true; narrator.enabled = true; save(); renderSoundButton(); }
+  void announcements.say(['welcome', 'meet-friends']);
+}
 
 function save() {
   try {
@@ -99,7 +112,7 @@ function openClockLesson(returnToGame = false) {
   clockDemo = returnToGame ? { hour: current().time.hour, minute: current().time.minute, highlight: '' } : { hour: 3, minute: 0, highlight: '' };
   if (returnToGame) round.helped.add(round.index);
   else round = null;
-  view = 'clock-lesson'; render(); focusTitle(); narrator.say('intro-clock');
+  view = 'clock-lesson'; render(); focusTitle(); announcements.say('intro-clock');
 }
 
 function updateClockDemo() {
@@ -122,17 +135,18 @@ function updateClockDemo() {
 
 function clockSpeak(keys) {
   if (!settings.sound) { settings.sound = true; narrator.enabled = true; save(); renderSoundButton(); }
-  narrator.say(keys);
+  announcements.say(keys);
 }
 
 function renderHome() {
   app.innerHTML = `${header()}<main id="main" class="home-page">
     <section class="hero" aria-labelledby="hero-title">
-      <div class="hero-copy"><div class="eyebrow"><span class="tiny-sun">✦</span> איזה כיף שבאת!</div>
+      <div class="hero-copy"><div class="eyebrow"><span class="tiny-sun">✦</span> שלום אריאל!</div>
         <h1 id="hero-title" tabindex="-1">הרפתקה קטנה,<br><span>מגלות עולם!</span></h1>
         <p class="hero-description">לולי, בובי וטופי מחכים לך.<br>בואי נשחק, נגלה ונלמד ביחד.</p>
         <button class="primary-button hero-start" data-action="recommended">יוצאות להרפתקה ${uiIcon('arrow')}</button>
         <button class="text-button welcome-listen" data-action="welcome">${uiIcon('sound')} לחצי ונכיר את החברים</button>
+        <p id="audio-notice" class="audio-notice" role="status" hidden></p>
       </div><div class="hero-world">${scene()}<div class="world-caption"><span class="status-dot"></span> בית החברים · תמיד שמחים לראות אותך</div></div>
     </section>
     <section class="missions" aria-labelledby="missions-title"><div class="section-heading"><div><span class="section-kicker">כל פעם מגלות משהו חדש</span><h2 id="missions-title">לאן נצא היום?</h2></div><span class="rounds-note">6 צעדים קטנים בכל הרפתקה ${art('paw')}</span></div>
@@ -226,7 +240,7 @@ function startMission(mission, skipLesson = false) {
   render();
   focusTitle();
   const q = current();
-  narrator.say([MISSIONS[mission].intro, ...(q.targetClip ? [q.targetClip] : [])]);
+  announcements.say([MISSIONS[mission].intro, ...(q.targetClip ? [q.targetClip] : [])]);
 }
 
 function recommended() {
@@ -236,7 +250,7 @@ function recommended() {
 
 function leaveTo(destination) {
   narrator.stop();
-  const leave = () => { round = null; view = destination; render(); focusTitle(); };
+  const leave = () => { round = null; view = destination; render(); focusTitle(); announcements.say(destination === 'home' ? 'choose-activity' : 'stickers'); };
   if (view !== 'game') { leave(); return; }
   openDialog(`<h2 id="parent-title">נחזור לבית החברים?</h2><p>אפשר להתחיל הרפתקה חדשה מתי שתרצי.</p><div class="dialog-actions"><button class="primary-button" data-dialog="stay">ממשיכות לשחק</button><button class="secondary-button" data-dialog="leave">חוזרות הביתה</button></div>`);
   dialog.querySelector('[data-dialog="stay"]').onclick = closeDialog;
@@ -247,8 +261,8 @@ function replay() {
   if (!settings.sound) { settings.sound = true; save(); narrator.enabled = true; renderSoundButton(); }
   if (view === 'game') {
     const q = current();
-    narrator.say([q.prompt, ...(q.targetClip ? [q.targetClip] : [])]);
-  } else narrator.say(view === 'clock-lesson' ? 'intro-clock' : view === 'album' ? 'stickers' : 'welcome');
+    announcements.say([q.prompt, ...(q.targetClip ? [q.targetClip] : [])]);
+  } else announcements.say(view === 'clock-lesson' ? 'intro-clock' : view === 'album' ? 'stickers' : 'welcome');
 }
 
 function renderSoundButton() {
@@ -264,10 +278,10 @@ function hint() {
     document.querySelector('#feedback').textContent = q.time.minute === 0 ? 'נתחיל מהמחוג הקצר והסגול. על איזה מספר הוא מצביע?' : 'נבדוק את המחוג הארוך, ואז נסתכל על המחוג הקצר.';
     const face = document.querySelector('.clock-question-clock .analog-clock');
     face.classList.remove('highlight-hour', 'highlight-minute'); face.classList.add(q.time.minute === 0 ? 'highlight-hour' : 'highlight-minute');
-    narrator.say(q.hint); return;
+    announcements.say(q.hint); return;
   }
   document.querySelector('#feedback').textContent = q.type === 'read' ? 'נשמע את המילה, ואז נחפש את התמונה.' : q.type === 'listen' ? 'נקשיב שוב לאט. איזו תמונה מתאימה?' : 'געי בפריטים אחד־אחד. נמשיך לספור יחד.';
-  narrator.say([q.hint, ...(q.type === 'read' ? [`he-${q.word.id}`] : q.targetClip ? [q.targetClip] : [])], { slow: true });
+  announcements.say([q.hint, ...(q.type === 'read' ? [`he-${q.word.id}`] : q.targetClip ? [q.targetClip] : [])], { slow: true });
 }
 
 function tally(button) {
@@ -277,7 +291,7 @@ function tally(button) {
   button.querySelector('.count-bubble').textContent = round.counted.size;
   button.setAttribute('aria-label', `נספר: ${round.counted.size}`);
   button.setAttribute('aria-disabled', 'true');
-  narrator.say(`number-${round.counted.size}`);
+  announcements.say(`number-${round.counted.size}`);
 }
 
 function answer(button) {
@@ -289,8 +303,8 @@ function answer(button) {
     round.helped.add(round.index);
     button.classList.add('try-again');
     button.disabled = true;
-    feedback.textContent = 'כמעט! ננסה שוב, בקצב שלך ♡';
-    narrator.say('try-again');
+    feedback.textContent = 'נסי שוב, אריאל. אני כאן איתך ♡';
+    announcements.say('try-again');
     return;
   }
   round.resolved = true;
@@ -307,7 +321,7 @@ function answer(button) {
   feedback.classList.add('success');
   document.querySelector('.buddy-bar').classList.add('celebrating');
   document.querySelector('#buddy-message').textContent = 'יש! הצלחת!';
-  narrator.say([`correct-${1 + round.index % 3}`, ...(q.type === 'clock' ? [q.time.clip] : q.type === 'read' ? [`he-${q.word.id}`] : q.targetClip ? [q.targetClip] : [])]);
+  announcements.say([`correct-${1 + round.index % 3}`, ...(q.type === 'clock' ? [q.time.clip] : q.type === 'read' ? [`he-${q.word.id}`] : q.targetClip ? [q.targetClip] : [])]);
   narrator.chime();
   celebrate(16);
   next.focus({ preventScroll: q.type !== 'clock' });
@@ -323,7 +337,7 @@ function nextQuestion() {
       round.awarded = true;
       save();
     }
-    view = 'complete'; render(); focusTitle(); celebrate(40); narrator.say(round.sticker ? 'complete' : 'complete-all'); return;
+    view = 'complete'; render(); focusTitle(); celebrate(40); announcements.say(round.sticker ? 'complete' : 'complete-all'); return;
   }
   round.index++;
   round.resolved = false;
@@ -331,7 +345,7 @@ function nextQuestion() {
   round.counted = new Set();
   render(); focusTitle();
   const q = current();
-  narrator.say([q.prompt, ...(q.targetClip ? [q.targetClip] : [])]);
+  announcements.say([q.prompt, ...(q.targetClip ? [q.targetClip] : [])]);
 }
 
 function celebrate(amount) {
@@ -386,7 +400,7 @@ function renderSettings() {
     <button class="primary-button" type="submit">שמירת ההגדרות ${uiIcon('check')}</button></form>
     <section class="parent-progress"><h3>מה כבר גילינו?</h3><p id="parent-progress-summary">${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות</p><table><thead><tr><th>תחום</th><th>תשובות ללא עזרה</th><th>עם רמז או ניסיון נוסף</th></tr></thead><tbody>${Object.values(MISSIONS).map(m => `<tr><th>${m.subject}</th><td data-independent="${m.id}">${progress.skills[m.id].correct - progress.skills[m.id].assisted}</td><td data-assisted="${m.id}">${progress.skills[m.id].assisted}</td></tr>`).join('')}</tbody></table><p class="parent-note">מוצגות רק הרפתקאות שהושלמו. זהו תיעוד משחק, ולא מבחן או הערכת יכולת.</p></section>
     <section id="family-panel"></section>
-    <p class="privacy-note">אפשר לשחק ללא חיבור לאלבום משפחתי. בחיבור לאלבום, נשמרים בו רק מספר ההרפתקאות והעזרה בכל תחום. אין שם, אימייל או חשבון לילדה, פרסומות, מעקב או בקשת מיקרופון. שמרו את הקוד המשפחתי כדי לחבר מכשיר חדש.</p>
+    <p class="privacy-note">אפשר לשחק ללא חיבור לאלבום משפחתי. בחיבור לאלבום, נשמרים בו רק מספר ההרפתקאות והעזרה בכל תחום. לא צריך אימייל או חשבון לילדה. אין פרסומות, מעקב או בקשת מיקרופון. שמרו את הקוד המשפחתי כדי לחבר מכשיר חדש.</p>
     <p class="save-notice" ${storageAvailable ? 'hidden' : ''}>הדפדפן לא מאפשר שמירה כרגע. אפשר לשחק, אבל ההתקדמות עלולה להיעלם בסגירה.</p>
     <button class="text-button reset-button" data-dialog="reset">${album.linked ? 'ניתוק מהאלבום ואיפוס המכשיר הזה' : 'איפוס ההתקדמות במכשיר הזה'}</button>`);
   mountFamilyPanel(dialog.querySelector('#family-panel'), { album, getLocalProgress: () => progress, pendingCode: pendingJoinCode });
@@ -418,19 +432,23 @@ function updateParentProgress() {
 
 app.addEventListener('click', event => {
   const button = event.target.closest('button[data-action]');
-  if (!button || button.disabled) return;
+  if (!button) {
+    if (view === 'home' && !dialog.open && announcements.welcomePending && audioStatus !== 'speaking') void announcements.say('welcome');
+    return;
+  }
+  if (button.disabled) return;
   switch (button.dataset.action) {
     case 'home': leaveTo('home'); break;
-    case 'album': if (view === 'game') leaveTo('album'); else { narrator.stop(); view = 'album'; render(); focusTitle(); narrator.say('stickers'); } break;
+    case 'album': if (view === 'game') leaveTo('album'); else { narrator.stop(); view = 'album'; render(); focusTitle(); announcements.say('stickers'); } break;
     case 'mission': startMission(button.dataset.mission); break;
     case 'recommended': recommended(); break;
-    case 'welcome': narrator.say('welcome'); break;
+    case 'welcome': welcome(); break;
     case 'replay': replay(); break;
-    case 'listen-word': if (!settings.sound) { settings.sound = true; narrator.enabled = true; save(); renderSoundButton(); } narrator.say(current().targetClip); break;
+    case 'listen-word': if (!settings.sound) { settings.sound = true; narrator.enabled = true; save(); renderSoundButton(); } announcements.say(current().targetClip); break;
     case 'clock-practice': if (clockReturn && round) { view = 'game'; render(); focusTitle(); replay(); } else startMission('clock', true); break;
     case 'clock-learn': if (!round.resolved) openClockLesson(true); break;
-    case 'clock-set-hour': clockDemo.hour = Number(button.dataset.hour); clockDemo.highlight = 'hour'; updateClockDemo(); narrator.say(clockTime(clockDemo.hour, clockDemo.minute).clip); break;
-    case 'clock-set-minute': clockDemo.minute = Number(button.dataset.minute); clockDemo.highlight = 'minute'; updateClockDemo(); narrator.say([`clock-tip-${clockDemo.minute}`, clockTime(clockDemo.hour, clockDemo.minute).clip]); break;
+    case 'clock-set-hour': clockDemo.hour = Number(button.dataset.hour); clockDemo.highlight = 'hour'; updateClockDemo(); announcements.say(clockTime(clockDemo.hour, clockDemo.minute).clip); break;
+    case 'clock-set-minute': clockDemo.minute = Number(button.dataset.minute); clockDemo.highlight = 'minute'; updateClockDemo(); announcements.say([`clock-tip-${clockDemo.minute}`, clockTime(clockDemo.hour, clockDemo.minute).clip]); break;
     case 'clock-hand': clockDemo.highlight = button.dataset.hand; updateClockDemo(); clockSpeak(`clock-${button.dataset.hand}-hand`); break;
     case 'clock-speak-time': clockSpeak(clockTime(clockDemo.hour, clockDemo.minute).clip); break;
     case 'clock-option-audio': clockSpeak(button.dataset.clip); break;
@@ -440,18 +458,19 @@ app.addEventListener('click', event => {
     case 'next': nextQuestion(); break;
     case 'parents': parentGate(); break;
     case 'sound': settings.sound = !settings.sound; narrator.stop(); narrator.enabled = settings.sound; save(); renderSoundButton(); if (settings.sound) replay(); break;
-    case 'break': narrator.stop(); round = null; view = 'home'; render(); focusTitle(); narrator.say('break'); break;
+    case 'break': narrator.stop(); round = null; view = 'home'; render(); focusTitle(); announcements.say('break'); break;
   }
 });
 
 dialog.addEventListener('click', event => { if (event.target === dialog && event.offsetX >= 0 && event.offsetX <= dialog.clientWidth && event.offsetY >= 0 && event.offsetY <= dialog.clientHeight) return; if (event.target === dialog) closeDialog(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden) narrator.stop(); else void album.flush(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) narrator.stop(); else { void album.flush(); startOpeningWelcome(); } });
 window.addEventListener('online', () => { void album.flush(); });
 window.addEventListener('focus', () => { void album.flush(); });
 setInterval(() => { if (!document.hidden && album.linked) void album.flush(); }, 15000);
 window.addEventListener('pagehide', () => narrator.stop());
 render();
 if (pendingJoinCode && !album.linked) parentGate();
+else startOpeningWelcome();
 if (album.linked) void album.flush();
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {

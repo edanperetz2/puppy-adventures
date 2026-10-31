@@ -22,22 +22,25 @@ export class Narrator {
     this.onStatus('idle');
   }
 
-  async say(keys, { slow = false } = {}) {
+  async say(keys, { slow = false, quietFailure = false, onClipEnd = () => {} } = {}) {
     this.stop();
-    if (!this.enabled) return;
+    if (!this.enabled) return false;
     const sequence = this.sequence;
     this.onStatus('speaking');
     for (const key of Array.isArray(keys) ? keys : [keys]) {
-      if (sequence !== this.sequence || !this.enabled) return;
+      if (sequence !== this.sequence || !this.enabled) return false;
       const ok = await this.play(key, slow, sequence);
-      if (sequence !== this.sequence) return;
+      if (sequence !== this.sequence) return false;
       if (!ok) {
         const fallback = await this.deviceVoice(key, slow, sequence);
-        if (sequence !== this.sequence) return;
-        if (!fallback) { this.onStatus('unavailable'); return; }
+        if (sequence !== this.sequence) return false;
+        if (!fallback) { this.onStatus(quietFailure ? 'idle' : 'unavailable'); return false; }
       }
+      onClipEnd(key);
     }
-    if (sequence === this.sequence) this.onStatus('idle');
+    if (sequence !== this.sequence) return false;
+    this.onStatus('idle');
+    return true;
   }
 
   play(key, slow, sequence) {

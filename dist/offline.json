@@ -1,5 +1,6 @@
 [
   "./",
+  "./announcements.js",
   "./app.js",
   "./art.js",
   "./audio.js",
@@ -26,6 +27,8 @@
   "./assets/rubik-600.ttf",
   "./assets/rubik-800.ttf",
   "./assets/audio/welcome.mp3",
+  "./assets/audio/meet-friends.mp3",
+  "./assets/audio/choose-activity.mp3",
   "./assets/audio/intro-hebrew.mp3",
   "./assets/audio/intro-english.mp3",
   "./assets/audio/intro-math.mp3",

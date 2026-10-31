@@ -53,7 +53,9 @@ export const STICKERS = ['flower', 'boat', 'star', 'dog', 'butterfly', 'rocket',
 
 // Explicit clips are bundled at build time: no speech subscription or runtime API.
 export const CLIPS = {
-  welcome: { lang: 'he-IL', text: 'ברוכה הבאה לחבורת ההרפתקאות! החברים שלנו מחכים לך. בחרי הרפתקה, ובואי נשחק יחד!' },
+  welcome: { lang: 'he-IL', text: 'שלום אריאל, ברוכה הבאה למשחק שלך!' },
+  'meet-friends': { lang: 'he-IL', text: 'ברוכה הבאה לחבורת ההרפתקאות! החברים שלנו מחכים לך. בחרי הרפתקה, ובואי נשחק יחד!' },
+  'choose-activity': { lang: 'he-IL', text: 'כל החברים מחכים לך. בחרי הרפתקה חדשה!' },
   'intro-hebrew': { lang: 'he-IL', text: 'לולי מסדרת את גינת המילים. קראי את המילה, ובחרי את התמונה המתאימה. אם תרצי עזרה, לחצי על הנורה.' },
   'intro-english': { lang: 'he-IL', text: 'בובי יוצא למפרץ האנגלית. הקשיבי למילה באנגלית, ואז בחרי את התמונה המתאימה.' },
   'intro-math': { lang: 'he-IL', text: 'טופי מכין פיקניק לחברים! בואי נספור, ונחבר דברים טעימים.' },
@@ -73,9 +75,9 @@ export const CLIPS = {
   'add-hint': { lang: 'he-IL', text: 'התחילי לספור בקבוצה הראשונה, והמשיכי לספור בקבוצה השנייה. כמה יש ביחד?' },
   'english-hint': { lang: 'he-IL', text: 'נקשיב שוב, קצת יותר לאט.' },
   'read-hint': { lang: 'he-IL', text: 'בואי נשמע את המילה יחד.' },
-  'try-again': { lang: 'he-IL', text: 'כמעט! קחי את הזמן, ונסי שוב. אני כאן איתך.' },
+  'try-again': { lang: 'he-IL', text: 'נסי שוב, אריאל. אני כאן איתך.' },
   'correct-1': { lang: 'he-IL', text: 'כל הכבוד! הצלחת!' },
-  'correct-2': { lang: 'he-IL', text: 'איזה יופי! מצאת!' },
+  'correct-2': { lang: 'he-IL', text: 'איזה יופי, אריאל! מצאת!' },
   'correct-3': { lang: 'he-IL', text: 'נהדר! עשית את זה!' },
   complete: { lang: 'he-IL', text: 'יש! סיימת את ההרפתקה! החברים כל כך שמחים שעזרת להם. קיבלת מדבקה חדשה!' },
   'complete-all': { lang: 'he-IL', text: 'איזה יופי! סיימת עוד הרפתקה עם החברים. כל הכבוד על ההתמדה!' },
