@@ -10520,6 +10520,186 @@
       "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
       "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
       "sha256": "404879259e425fcfbc4af9672844b0c37505dbf2b2bf19625efef228e68b7faf"
+    },
+    "characters-menu-paw": {
+      "take": 0,
+      "segments": [
+        "bemifʁˈats hahaʁpatkaʔˈot haχaveʁˈim meχakˈim lˈaχ! nikʁˈa ʃemˈot venimtsˈa tmunˈot. baχaʁˈi ʃalˈav venatχˈil."
+      ],
+      "lang": "he-IL",
+      "speech": "bemifʁˈats hahaʁpatkaʔˈot haχaveʁˈim meχakˈim lˈaχ! nikʁˈa ʃemˈot venimtsˈa tmunˈot. baχaʁˈi ʃalˈav venatχˈil.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "0c9269768fd6c0a79c13855e1c2072ecc3ba636598b71c566ac2b3956534ecd5"
+    },
+    "characters-level-paw-friends": {
+      "lang": "he-IL",
+      "speech": "ʃalˈav ʁiʃˈon. tʃˈejs, mˈaʁʃal uskˈaj.",
+      "segments": [
+        "ʃalˈav ʁiʃˈon. tʃˈejs, mˈaʁʃal uskˈaj."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 1,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "4b9581a5645498ba3371b4c4d4b592ec719c6b92055a663c6cf87c59ff4d757f"
+    },
+    "characters-level-paw-team": {
+      "take": 0,
+      "segments": [
+        "ʃalˈav ʃenˈi. ɡˈam ʁˈabel, ʁˈoki vezˈuma mitstaʁfˈim."
+      ],
+      "lang": "he-IL",
+      "speech": "ʃalˈav ʃenˈi. ɡˈam ʁˈabel, ʁˈoki vezˈuma mitstaʁfˈim.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "0ac51a8c66d8989ef4a57d2c457d2b47d3aa264dd09334f780376cb39360cc93"
+    },
+    "characters-level-paw-all": {
+      "take": 0,
+      "segments": [
+        "ʃalˈav ʃliʃˈi. kˈol haχavuʁˈa! ɡˈam ˈeveʁest, lˈibeʁti veʁˈajdeʁ."
+      ],
+      "lang": "he-IL",
+      "speech": "ʃalˈav ʃliʃˈi. kˈol haχavuʁˈa! ɡˈam ˈeveʁest, lˈibeʁti veʁˈajdeʁ.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "965ea9fe4f8e6a4996c5615f77d2e39e4222be54b036d5b9a57ffc73941418b3"
+    },
+    "character-chase": {
+      "take": 0,
+      "segments": [
+        "haʃˈem hˈu tʃˈejs."
+      ],
+      "lang": "he-IL",
+      "speech": "haʃˈem hˈu tʃˈejs.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "67ac78e3d36aa5150a9341723639bfc08362e68f89c07496a6c068b876581f55"
+    },
+    "character-marshall": {
+      "lang": "he-IL",
+      "speech": "haʃˈem hˈu mˈaʁʃal.",
+      "segments": [
+        "haʃˈem hˈu mˈaʁʃal."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 1,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "f536f1cfad11743f0125111fe730c82de9f7c0d286a453e08ae23264168777ca"
+    },
+    "character-skye": {
+      "take": 0,
+      "segments": [
+        "haʃˈem hˈu skˈaj."
+      ],
+      "lang": "he-IL",
+      "speech": "haʃˈem hˈu skˈaj.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "762eea90842a722ef64a365af44da09eb4a2cf463c35c7cb97026a0b0b7eea43"
+    },
+    "character-rocky": {
+      "take": 0,
+      "segments": [
+        "haʃˈem hˈu ʁˈoki."
+      ],
+      "lang": "he-IL",
+      "speech": "haʃˈem hˈu ʁˈoki.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "f56a2f831022799553bb81237198256fd71951126cade7f9dc02abf7c6643f6a"
+    },
+    "character-zuma": {
+      "take": 0,
+      "segments": [
+        "haʃˈem hˈu zˈuma."
+      ],
+      "lang": "he-IL",
+      "speech": "haʃˈem hˈu zˈuma.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "4be3c1668a17a4cd5378196d98c5a3f4aecc539c8fcdf724d50955ec0061f350"
+    },
+    "character-everest": {
+      "lang": "he-IL",
+      "speech": "haʃˈem hˈu ˈeveʁest.",
+      "segments": [
+        "haʃˈem hˈu ˈeveʁest."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 1,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "6a0f742259eff481a1ba94e0246bf700d79326062b5d9701b0e3cba2b6c18d4a"
+    },
+    "character-liberty": {
+      "take": 0,
+      "segments": [
+        "haʃˈem hˈu lˈibeʁti."
+      ],
+      "lang": "he-IL",
+      "speech": "haʃˈem hˈu lˈibeʁti.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "71d27e9cf98bc47282a88f9a7f23abd7b85f938a745ddfa7b381b4f8433f41c6"
+    },
+    "character-ryder": {
+      "take": 0,
+      "segments": [
+        "haʃˈem hˈu ʁˈajdeʁ."
+      ],
+      "lang": "he-IL",
+      "speech": "haʃˈem hˈu ʁˈajdeʁ.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "28c949594fd06c77b4a1d2fd58af0366aa69fd9f2f844e93171d8bfdbc142c29"
     }
   }
 }

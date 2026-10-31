@@ -1,0 +1,15 @@
+{
+  "reviewed": "2026-10-31",
+  "art_sha256": "2ce901e80e70b1c2a710bc900f1eb802ac09b890302b87cfdab7a593b3968add",
+  "reference": "https://pawpatrol.jp/rubble-crew/index.html",
+  "note": "Visual review of all seven windows in the unchanged launch-kit artwork. Mix is purple; Wheeler is blue. The first release swapped these two windows. References identify the characters independently of game IDs.",
+  "characters": [
+    { "id": "rubble", "name": "ראבל", "helmet": "צהובה", "portrait": [665, 315, 355, 420], "identity": "Yellow bulldog; construction pup also in PAW Patrol", "reference": "https://dev.pawpatrol.com/characters/rubble" },
+    { "id": "mix", "name": "מיקס", "helmet": "סגולה", "portrait": [1605, 360, 365, 430], "identity": "Female bulldog in purple, cement mixer", "reference": "https://www.meinspielzeug.ch/en/baumaschinen-spin-master-paw-patrol-rubble-crew-zementmischer-baufahrzeug-mit-mix-1285650.html?ctx=marke" },
+    { "id": "charger", "name": "צ׳ארג׳ר", "helmet": "אדומה", "portrait": [1240, 245, 425, 475], "identity": "Gray French bulldog with upright ears; red helmet and grabber", "reference": "https://pawpatrol.fandom.com/wiki/Charger" },
+    { "id": "wheeler", "name": "ווילר", "helmet": "כחולה", "portrait": [195, 490, 380, 420], "identity": "Pointer with brown floppy ears; blue helmet and dump truck", "reference": "https://lennies.com/products/rubble-crew-wheelers-dump-truck-with-figure" },
+    { "id": "motor", "name": "מוטור", "helmet": "תכלת", "portrait": [965, 140, 290, 325], "identity": "Small gray female puppy; cyan helmet and roller", "reference": "https://pawpatrol.fandom.com/wiki/Motor" },
+    { "id": "auntie", "name": "דודה קריין", "helmet": "לבנה", "portrait": [85, 115, 490, 415], "identity": "Large light-colored female; white helmet with crane emblem", "reference": "https://pawpatrol.fandom.com/wiki/Auntie_Crane" },
+    { "id": "grandpa", "name": "סבא גראבל", "helmet": "ירוקה", "portrait": [1960, 140, 455, 535], "identity": "Large brown-and-white grandfather bulldog; green helmet and tool belt", "reference": "https://pawpatrol.fandom.com/wiki/Grandpa_Gravel" }
+  ]
+}

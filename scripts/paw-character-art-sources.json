@@ -1,0 +1,105 @@
+{
+  "guide": "https://dev.pawpatrol.com/character-guide",
+  "credit": "PAW Patrol character artwork © Spin Master Ltd.; official PAW Patrol Character Guide.",
+  "images": [
+    {
+      "id": "chase",
+      "name": "Chase",
+      "file": "dist/assets/paw-chase.jpg",
+      "source": "https://cdn.prod.website-files.com/63f8f02e35d18441043c9041/645d3597c72e61ab2b3ffc88_chase-thumbnail.jpg",
+      "reference": "https://dev.pawpatrol.com/characters/chase",
+      "sha256": "0d40bcdde9acaa097a6e9509974bb4e8dbedfceb83b978c9c4b2bcabc61702b4",
+      "bytes": 69761,
+      "width": 830,
+      "height": 830
+    },
+    {
+      "id": "skye",
+      "name": "Skye",
+      "file": "dist/assets/paw-skye.jpg",
+      "source": "https://cdn.prod.website-files.com/63f8f02e35d18441043c9041/645d379757708bca4c572c68_skye-thumbnail.jpg",
+      "reference": "https://dev.pawpatrol.com/characters/skye",
+      "sha256": "2faa46222220b7730672be2b2885de67d7b67a2976fb395fd1df96f67676eb1d",
+      "bytes": 64757,
+      "width": 830,
+      "height": 830
+    },
+    {
+      "id": "marshall",
+      "name": "Marshall",
+      "file": "dist/assets/paw-marshall.jpg",
+      "source": "https://cdn.prod.website-files.com/63f8f02e35d18441043c9041/645d48741c98fa45b1d33c14_marshall-thumbnail.jpg",
+      "reference": "https://dev.pawpatrol.com/characters/marshall-2",
+      "sha256": "2f5f436f27b66f288f34e6e8db1e1112f4fd56c44ec6499d1c2b936be0ad1eda",
+      "bytes": 57611,
+      "width": 830,
+      "height": 830
+    },
+    {
+      "id": "rubble",
+      "name": "Rubble",
+      "file": "dist/assets/paw-rubble.jpg",
+      "source": "https://cdn.prod.website-files.com/63f8f02e35d18441043c9041/645d48697b3b815ec3862e39_rubble-thumbnail.jpg",
+      "reference": "https://dev.pawpatrol.com/characters/rubble",
+      "sha256": "b92dbd791b9b554caae367518f91d48afc5f7a0d6c3d44e965d9b7badfd8c7b3",
+      "bytes": 76410,
+      "width": 830,
+      "height": 830
+    },
+    {
+      "id": "rocky",
+      "name": "Rocky",
+      "file": "dist/assets/paw-rocky.jpg",
+      "source": "https://cdn.prod.website-files.com/63f8f02e35d18441043c9041/645d485ef73d9db4f54efb21_rocky-thumbnail.jpg",
+      "reference": "https://dev.pawpatrol.com/characters/rocky",
+      "sha256": "1399860f53a8bb0cd7c876846b4d43495e8ea4dc5531b6741473db6ed0b8e9df",
+      "bytes": 69410,
+      "width": 830,
+      "height": 830
+    },
+    {
+      "id": "zuma",
+      "name": "Zuma",
+      "file": "dist/assets/paw-zuma.jpg",
+      "source": "https://cdn.prod.website-files.com/63f8f02e35d18441043c9041/645d4850f73d9db4f54ee973_zuma-thumbnail.jpg",
+      "reference": "https://dev.pawpatrol.com/characters/zuma",
+      "sha256": "50527da410ad577ce11a3b9a0af86af5d5c0d4aa65885013aad1720e820c0308",
+      "bytes": 73022,
+      "width": 830,
+      "height": 830
+    },
+    {
+      "id": "everest",
+      "name": "Everest",
+      "file": "dist/assets/paw-everest.jpg",
+      "source": "https://cdn.prod.website-files.com/63f8f02e35d18441043c9041/645d48e28ca0a9562c87eadb_everest-thumbnail.jpg",
+      "reference": "https://dev.pawpatrol.com/characters/everest",
+      "sha256": "2ec1ef297fed735e94c2a757990eafcc9fc8655b8cd04be44fe2ff472f8aa851",
+      "bytes": 65367,
+      "width": 830,
+      "height": 830
+    },
+    {
+      "id": "liberty",
+      "name": "Liberty",
+      "file": "dist/assets/paw-liberty.jpg",
+      "source": "https://cdn.prod.website-files.com/63f8f02e35d18441043c9041/645d5099fc021aca9b3c7868_liberty-thumbnail.jpg",
+      "reference": "https://dev.pawpatrol.com/characters/liberty",
+      "sha256": "6e23aa873747aafad63214fbd5f9d44ee682b36385444faa7f56fe968d068023",
+      "bytes": 72511,
+      "width": 830,
+      "height": 830
+    },
+    {
+      "id": "ryder",
+      "name": "Ryder",
+      "file": "dist/assets/paw-ryder.jpg",
+      "source": "https://cdn.prod.website-files.com/63f8f02e35d18441043c9041/645d2cd8d9658d2cd362a427_ryder-thumbnail.jpg",
+      "reference": "https://dev.pawpatrol.com/characters/ryder",
+      "sha256": "84d6692ee6e8d14e4ff40ff08008ba22ff5e97cfd7216bd74748c0e9688742d1",
+      "bytes": 55765,
+      "width": 830,
+      "height": 830
+    }
+  ]
+}

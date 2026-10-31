@@ -7,10 +7,10 @@ import { sanitizeLetterPractice, recordLetters, suggestedLetters } from './lette
 import { distinctWordPictures } from './vocabulary.js';
 import { SESSION_LENGTH, adventurePhase, choiceCount } from './adventure.js';
 import { sanitizeClockLessons } from './clock-learning.js';
-import { CHARACTER_LEVELS, CHARACTER_MODES, createCharacterSession } from './characters.js';
+import { CHARACTER_MODES, createCharacterSession, sanitizeCharacterSelection } from './characters.js';
 export { SESSION_LENGTH } from './adventure.js';
 
-export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', letterLanguage: 'hebrew', letterWriting: Object.freeze({ hebrew: 0, english: 0 }), letterMainWriting: Object.freeze({ hebrew: 0, english: 0 }), letterWritingForm: Object.freeze({ hebrew: 'alternate', english: 'alternate' }), characterLevel: 'friends', characterMode: 'mixed', sound: true, motion: true });
+export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', letterLanguage: 'hebrew', letterWriting: Object.freeze({ hebrew: 0, english: 0 }), letterMainWriting: Object.freeze({ hebrew: 0, english: 0 }), letterWritingForm: Object.freeze({ hebrew: 'alternate', english: 'alternate' }), characterLevel: 'friends', characterCollectionLevels: Object.freeze({ crew: 'friends', paw: 'paw-friends' }), characterMode: 'mixed', sound: true, motion: true });
 
 export function shuffle(values, rng = Math.random) {
   const copy = [...values];
@@ -133,6 +133,7 @@ export function finishSession(progress, mission, assisted = 0, letterRound = nul
 
 export function sanitizeSettings(input) {
   const result = { ...DEFAULT_SETTINGS, ...Object.fromEntries(['letterWriting', 'letterMainWriting', 'letterWritingForm'].map(key => [key, { ...DEFAULT_SETTINGS[key] }])) };
+  Object.assign(result, sanitizeCharacterSelection(input));
   if (!input || typeof input !== 'object') return result;
   for (const key of ['nikud', 'sound', 'motion']) if (typeof input[key] === 'boolean') result[key] = input[key];
   if (Object.hasOwn(READING_LEVELS, input.reading)) result.reading = input.reading;
@@ -140,7 +141,6 @@ export function sanitizeSettings(input) {
   if ([10, 20].includes(input.englishMax)) result.englishMax = input.englishMax;
   if (Object.hasOwn(CLOCK_LEVELS, input.clockLevel)) result.clockLevel = input.clockLevel;
   if (Object.hasOwn(LETTERS, input.letterLanguage)) result.letterLanguage = input.letterLanguage;
-  if (Object.hasOwn(CHARACTER_LEVELS, input.characterLevel)) result.characterLevel = input.characterLevel;
   if (Object.hasOwn(CHARACTER_MODES, input.characterMode)) result.characterMode = input.characterMode;
   for (const key of ['letterWriting', 'letterMainWriting']) result[key] = Object.fromEntries(Object.entries(LETTERS).map(([language, letters]) => [language, Number.isInteger(input[key]?.[language]) && input[key][language] >= 0 && input[key][language] < letters.length ? input[key][language] : 0]));
   result.letterWritingForm = Object.fromEntries(Object.keys(LETTERS).map(language => [language, input.letterWritingForm?.[language] === 'main' ? 'main' : 'alternate']));

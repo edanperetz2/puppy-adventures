@@ -32,6 +32,11 @@ for (const mission of [...MISSION_IDS, 'characters']) createSession(mission, DEF
 const characterSource = JSON.parse(await readFile(new URL('../scripts/character-art-source.json', root), 'utf8'));
 const characterArt = await readFile(new URL('assets/crew-family.webp', root));
 if (characterArt.subarray(0, 4).toString() !== 'RIFF' || characterArt.subarray(8, 12).toString() !== 'WEBP' || createHash('sha256').update(characterArt).digest('hex') !== characterSource.sha256) throw new Error('Character artwork must match its credited source');
+const pawSources = JSON.parse(await readFile(new URL('../scripts/paw-character-art-sources.json', root), 'utf8'));
+for (const source of pawSources.images) {
+  const bytes = await readFile(new URL(source.file.replace('dist/', './'), root));
+  if (bytes.length !== source.bytes || createHash('sha256').update(bytes).digest('hex') !== source.sha256 || !source.source.endsWith(`_${source.id}-thumbnail.jpg`)) throw new Error(`PAW Patrol picture must match its official named source: ${source.id}`);
+}
 JSON.parse(await readFile(new URL('manifest.webmanifest', root), 'utf8'));
 JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
 for (const asset of JSON.parse(await readFile(new URL('offline.json', root), 'utf8'))) {

@@ -15,7 +15,7 @@ import { mountLetterPad } from './letter-pad.js';
 import { nextReadingStage, sanitizeReadingPractice, finishReadingPractice } from './reading.js';
 import { stickerPage, stickerDefinition } from './stickers.js';
 import { suggestedLetters, practicedLetterCount, recordLetters } from './letter-progress.js';
-import { CHARACTERS, CHARACTER_LEVELS, CHARACTER_MODES, sanitizeCharacterPractice, finishCharacterPractice, nextCharacterLevel } from './characters.js';
+import { CHARACTERS, CHARACTER_COLLECTIONS, CHARACTER_LEVELS, CHARACTER_MODES, characterCollection, selectCharacterLevel, sanitizeCharacterPractice, finishCharacterPractice, nextCharacterLevel } from './characters.js';
 import { characterMenu, characterQuestion, characterAnswer, characterAnswerLabel, characterMissionArt, characterName } from './characters-view.js';
 
 const app = document.querySelector('#app');
@@ -289,8 +289,9 @@ function clockSpeak(keys) {
 }
 
 function openCharacters() {
-  narrator.stop(); round = null; view = 'characters-menu'; render(); focusTitle(); announcements.say('characters-menu');
+  narrator.stop(); round = null; view = 'characters-menu'; render(); focusTitle(); announcements.say(characterMenuClip());
 }
+function characterMenuClip() { return CHARACTER_COLLECTIONS[characterCollection(settings.characterLevel)].menuClip; }
 
 function activityCount(id) { return id === 'characters' ? Object.values(characterPractice.completed).reduce((sum, count) => sum + count, 0) : progress.missions[id]; }
 
@@ -485,7 +486,7 @@ function recommended() {
 
 function leaveTo(destination) {
   narrator.stop();
-  const leave = () => { round = null; recognitionChoice = null; view = destination; render(); focusTitle(); announcements.say(destination === 'characters-menu' ? 'characters-menu' : destination === 'letters-menu' ? 'letters-paths' : destination === 'reading-levels' ? 'reading-levels' : destination === 'home' ? 'choose-activity' : 'stickers'); };
+  const leave = () => { round = null; recognitionChoice = null; view = destination; render(); focusTitle(); announcements.say(destination === 'characters-menu' ? characterMenuClip() : destination === 'letters-menu' ? 'letters-paths' : destination === 'reading-levels' ? 'reading-levels' : destination === 'home' ? 'choose-activity' : 'stickers'); };
   if (view !== 'game') { leave(); return; }
   openDialog(`<h2 id="parent-title">${destination === 'characters-menu' ? 'נחזור לבחירת החברים?' : destination === 'letters-menu' ? 'נחזור למסלולי האותיות?' : destination === 'reading-levels' ? 'נבחר שלב אחר?' : 'נחזור לבית החברים?'}</h2><p>אפשר להתחיל הרפתקה חדשה מתי שתרצי.</p><div class="dialog-actions"><button class="primary-button" data-dialog="stay">ממשיכות לשחק</button><button class="secondary-button" data-dialog="leave">${destination === 'characters-menu' ? 'לבחירת החברים' : destination === 'letters-menu' ? 'למסלולי האותיות' : destination === 'reading-levels' ? 'בוחרות שלב' : 'חוזרות הביתה'}</button></div>`);
   dialog.querySelector('[data-dialog="stay"]').onclick = closeDialog;
@@ -498,7 +499,7 @@ function replay() {
   if (view === 'game') {
     const q = current();
     announcements.say([q.prompt, ...(q.targetClip ? [q.targetClip] : [])]);
-  } else announcements.say(view === 'characters-menu' ? 'characters-menu' : view === 'reading-levels' ? 'reading-levels' : view === 'letters-menu' ? 'letters-paths' : view === 'letters-writing' ? `letters-writing-forms-${settings.letterLanguage}` : view === 'letters-recognition' ? 'letters-recognition' : view === 'letters-lesson' ? letterNarration() : view === 'clock-lesson' ? 'intro-clock' : view === 'album' ? 'stickers' : 'welcome');
+  } else announcements.say(view === 'characters-menu' ? characterMenuClip() : view === 'reading-levels' ? 'reading-levels' : view === 'letters-menu' ? 'letters-paths' : view === 'letters-writing' ? `letters-writing-forms-${settings.letterLanguage}` : view === 'letters-recognition' ? 'letters-recognition' : view === 'letters-lesson' ? letterNarration() : view === 'clock-lesson' ? 'intro-clock' : view === 'album' ? 'stickers' : 'welcome');
 }
 
 function renderSoundButton() {
@@ -648,7 +649,7 @@ function renderSettings() {
     <p class="parent-note">ההגדרות ייכנסו לתוקף בהרפתקה הבאה. האנגלית מבוססת על הקשבה ותמונות. מילים כתובות מוצגות באותיות גדולות בלבד.</p>
     <button class="primary-button" type="submit">שמירת ההגדרות ${uiIcon('check')}</button></form>
     <section class="parent-progress"><h3>מה כבר גילינו?</h3><p id="parent-progress-summary">${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות</p><table><thead><tr><th>תחום</th><th>תשובות ללא עזרה</th><th>עם הדגמה, רמז או ניסיון נוסף</th></tr></thead><tbody>${MISSION_IDS.map(id => MISSIONS[id]).map(m => `<tr><th>${m.id === 'hebrew' ? 'עברית · מילים ושמות' : m.subject}</th><td data-independent="${m.id}">${progress.skills[m.id].correct - progress.skills[m.id].assisted}</td><td data-assisted="${m.id}">${progress.skills[m.id].assisted}</td></tr>`).join('')}</tbody></table><p class="parent-note">מוצגות רק הרפתקאות שהושלמו. זהו תיעוד משחק, ולא מבחן או הערכת יכולת.</p></section>
-    <section id="family-panel"></section><p class="parent-note character-art-credit">איורי הדמויות: Rubble &amp; Crew © Spin Master Ltd. · <a href="https://images.squarespace-cdn.com/content/v1/5595e2eee4b0b03840079b28/1685761053151-FY46DCUKCA43ODFF4MKK/image-asset.jpeg" target="_blank" rel="noopener noreferrer">מקור: McCown Design Agency</a>. משחק השמות נכלל בתחום עברית.</p>
+    <section id="family-panel"></section><p class="parent-note character-art-credit">איורי הדמויות: PAW Patrol / Rubble &amp; Crew © Spin Master Ltd. · <a href="https://dev.pawpatrol.com/character-guide" target="_blank" rel="noopener noreferrer">מדריך הדמויות הרשמי של מפרץ ההרפתקאות</a> · <a href="https://images.squarespace-cdn.com/content/v1/5595e2eee4b0b03840079b28/1685761053151-FY46DCUKCA43ODFF4MKK/image-asset.jpeg" target="_blank" rel="noopener noreferrer">McCown Design Agency</a>. משחק השמות נכלל בתחום עברית.</p>
     <p class="privacy-note">אפשר לשחק ללא חיבור לאלבום משפחתי. בחיבור לאלבום, נשמרים מספר ההרפתקאות והעזרה בכל תחום, והאותיות שתורגלו בכל מסלול. ציורי הכתיבה אינם נשמרים. לא צריך אימייל או חשבון לילדה. אין פרסומות, מעקב או בקשת מיקרופון. שמרו את הקוד המשפחתי כדי לחבר מכשיר חדש.</p>
     <p class="parent-note">איורים נוספים: <a href="assets/Twemoji-LICENSE.txt" target="_blank" rel="noopener">Twemoji · רישיון ושמות היוצרים</a>. כל התמונות שמורות בתוך המשחק.</p>
     <p class="save-notice" ${storageAvailable ? 'hidden' : ''}>הדפדפן לא מאפשר שמירה כרגע. אפשר לשחק, אבל ההתקדמות עלולה להיעלם בסגירה.</p>
@@ -697,12 +698,13 @@ app.addEventListener('click', event => {
     case 'reading-level': if (Object.hasOwn(READING_LEVELS, button.dataset.level)) { settings.reading = button.dataset.level; save(); startMission('hebrew', true); } break;
     case 'reading-stage-sound': if (Object.hasOwn(READING_LEVELS, button.dataset.level)) clockSpeak(READING_LEVELS[button.dataset.level].clip); break;
     case 'characters-menu': if (view === 'game') leaveTo('characters-menu'); else openCharacters(); break;
+    case 'character-collection': if (Object.hasOwn(CHARACTER_COLLECTIONS, button.dataset.collection)) { Object.assign(settings, selectCharacterLevel(settings, settings.characterCollectionLevels[button.dataset.collection])); save(); render(); document.querySelector(`[data-action="character-collection"][data-collection="${button.dataset.collection}"]`)?.focus({ preventScroll: true }); announcements.say(characterMenuClip()); } break;
     case 'character-mode': if (Object.hasOwn(CHARACTER_MODES, button.dataset.mode)) { settings.characterMode = button.dataset.mode; save(); render(); document.querySelector(`[data-action="character-mode"][data-mode="${settings.characterMode}"]`)?.focus({ preventScroll: true }); announcements.say(settings.characterMode === 'mixed' ? 'characters-intro' : `characters-${settings.characterMode}`); } break;
-    case 'character-level': if (Object.hasOwn(CHARACTER_LEVELS, button.dataset.level)) { settings.characterLevel = button.dataset.level; save(); render(); document.querySelector(`[data-action="character-level"][data-level="${settings.characterLevel}"]`)?.focus({ preventScroll: true }); announcements.say(CHARACTER_LEVELS[settings.characterLevel].clip); } break;
+    case 'character-level': if (Object.hasOwn(CHARACTER_LEVELS, button.dataset.level)) { Object.assign(settings, selectCharacterLevel(settings, button.dataset.level)); save(); render(); document.querySelector(`[data-action="character-level"][data-level="${settings.characterLevel}"]`)?.focus({ preventScroll: true }); announcements.say(CHARACTER_LEVELS[settings.characterLevel].clip); } break;
     case 'character-start': startMission('characters', true); break;
     case 'character-sound': { const character = CHARACTERS.find(c => c.id === button.dataset.character); if (character) clockSpeak(character.clip); break; }
-    case 'character-advance': if (Object.hasOwn(CHARACTER_LEVELS, button.dataset.level)) { settings.characterLevel = button.dataset.level; settings.characterMode = round.characterMode; save(); startMission('characters', true); } break;
-    case 'character-repeat': settings.characterLevel = round.characterLevel; settings.characterMode = round.characterMode; save(); startMission('characters', true); break;
+    case 'character-advance': if (Object.hasOwn(CHARACTER_LEVELS, button.dataset.level)) { Object.assign(settings, selectCharacterLevel(settings, button.dataset.level)); settings.characterMode = round.characterMode; save(); startMission('characters', true); } break;
+    case 'character-repeat': Object.assign(settings, selectCharacterLevel(settings, round.characterLevel)); settings.characterMode = round.characterMode; save(); startMission('characters', true); break;
     case 'recommended': recommended(); break;
     case 'welcome': welcome(); break;
     case 'replay': replay(); break;

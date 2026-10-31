@@ -4693,6 +4693,90 @@
       "detected_ipa": "haʃˈem hˈu sˈaba ɡʁˈabel.",
       "phoneme_edit_ratio": 0.0,
       "seconds": 4.83
+    },
+    "characters-menu-paw": {
+      "sha256": "0c9269768fd6c0a79c13855e1c2072ecc3ba636598b71c566ac2b3956534ecd5",
+      "expected_ipa": "bemifʁˈats hahaʁpatkaʔˈot haχaveʁˈim meχakˈim lˈaχ! nikʁˈa ʃemˈot venimtsˈa tmunˈot. baχaʁˈi ʃalˈav venatχˈil.",
+      "detected_ipa": "bemifʁˈats hahaʁpatkaʔˈot haχaveʁˈim meχakˈim lˈaχ, nikʁˈa ʃemˈot venimtsˈa tmunˈot, baχaʁˈi ʃalˈav venatχˈil.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.81
+    },
+    "characters-level-paw-friends": {
+      "sha256": "4b9581a5645498ba3371b4c4d4b592ec719c6b92055a663c6cf87c59ff4d757f",
+      "expected_ipa": "ʃalˈav ʁiʃˈon. tʃˈejs, mˈaʁʃal uskˈaj.",
+      "detected_ipa": "ʃalˈav ʁiʃˈon tʃˈejs mˈaʁʃaluskˈaj",
+      "phoneme_edit_ratio": 0.0294,
+      "seconds": 2.86
+    },
+    "characters-level-paw-team": {
+      "sha256": "0ac51a8c66d8989ef4a57d2c457d2b47d3aa264dd09334f780376cb39360cc93",
+      "expected_ipa": "ʃalˈav ʃenˈi. ɡˈam ʁˈabel, ʁˈoki vezˈuma mitstaʁfˈim.",
+      "detected_ipa": "ʃalˈav ʃenˈi, ɡˈam ʁabˈel, ʁokˈi vezˈuma mitstaʁfˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.38
+    },
+    "characters-level-paw-all": {
+      "sha256": "965ea9fe4f8e6a4996c5615f77d2e39e4222be54b036d5b9a57ffc73941418b3",
+      "expected_ipa": "ʃalˈav ʃliʃˈi. kˈol haχavuʁˈa! ɡˈam ˈeveʁest, lˈibeʁti veʁˈajdeʁ.",
+      "detected_ipa": "ʃalˈav ʃliʃˈi, kˈol haχavuʁˈa, ɡˈam ʔˈeveʁest, libˈeʁti veʁˈajdeʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.38
+    },
+    "character-chase": {
+      "sha256": "67ac78e3d36aa5150a9341723639bfc08362e68f89c07496a6c068b876581f55",
+      "expected_ipa": "haʃˈem hˈu tʃˈejs.",
+      "detected_ipa": "haʃˈem hˈu tʃˈejs.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.27
+    },
+    "character-marshall": {
+      "sha256": "f536f1cfad11743f0125111fe730c82de9f7c0d286a453e08ae23264168777ca",
+      "expected_ipa": "haʃˈem hˈu mˈaʁʃal.",
+      "detected_ipa": "haʃˈem hˈu mˈaʁʃel.",
+      "phoneme_edit_ratio": 0.0588,
+      "seconds": 2.22
+    },
+    "character-skye": {
+      "sha256": "762eea90842a722ef64a365af44da09eb4a2cf463c35c7cb97026a0b0b7eea43",
+      "expected_ipa": "haʃˈem hˈu skˈaj.",
+      "detected_ipa": "haʃˈem hˈu skˈaj.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.89
+    },
+    "character-rocky": {
+      "sha256": "f56a2f831022799553bb81237198256fd71951126cade7f9dc02abf7c6643f6a",
+      "expected_ipa": "haʃˈem hˈu ʁˈoki.",
+      "detected_ipa": "haʃˈem hˈu ʁˈoki.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.94
+    },
+    "character-zuma": {
+      "sha256": "4be3c1668a17a4cd5378196d98c5a3f4aecc539c8fcdf724d50955ec0061f350",
+      "expected_ipa": "haʃˈem hˈu zˈuma.",
+      "detected_ipa": "haʃˈem hˈu zˈuma.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.95
+    },
+    "character-everest": {
+      "sha256": "6a0f742259eff481a1ba94e0246bf700d79326062b5d9701b0e3cba2b6c18d4a",
+      "expected_ipa": "haʃˈem hˈu ˈeveʁest.",
+      "detected_ipa": "haʃˈem hˈu ʔˈeveʁest.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.94
+    },
+    "character-liberty": {
+      "sha256": "71d27e9cf98bc47282a88f9a7f23abd7b85f938a745ddfa7b381b4f8433f41c6",
+      "expected_ipa": "haʃˈem hˈu lˈibeʁti.",
+      "detected_ipa": "haʃˈem hˈu libeʁtˈi.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.97
+    },
+    "character-ryder": {
+      "sha256": "28c949594fd06c77b4a1d2fd58af0366aa69fd9f2f844e93171d8bfdbc142c29",
+      "expected_ipa": "haʃˈem hˈu ʁˈajdeʁ.",
+      "detected_ipa": "haʃˈem hˈu ʁˈajdeʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.12
     }
   }
 }
