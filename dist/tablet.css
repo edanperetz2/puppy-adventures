@@ -1,0 +1,17 @@
+/* Keep the whole question and the next button within a landscape tablet. */
+@media (max-height:850px) and (min-width:760px) {
+  .playing .topbar{height:78px;padding-block:12px}
+  .game-page{padding-top:0}
+  .game-topline .text-button{min-height:32px}
+  .step-track{margin:7px auto 16px}
+  .game-board{padding:18px 28px 10px}
+  .question-visual{min-height:174px;padding:10px 0 14px}
+  .word-card{padding:6px 40px 13px}
+  .target-word{font-size:55px}
+  .answer-button{min-height:124px}
+  .answer-button>.art,.answer-button>.pup{width:94px}
+  .feedback-row{min-height:60px;margin-top:9px}
+  .buddy-bar{margin-top:8px}
+  .buddy-bar .pup{width:46px}
+  .listen-orb{height:140px}
+}

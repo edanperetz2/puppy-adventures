@@ -1,0 +1,8 @@
+node_modules/
+.vercel/
+.env*
+!.env.example
+.openai/
+*.zip
+__pycache__/
+*.pyc

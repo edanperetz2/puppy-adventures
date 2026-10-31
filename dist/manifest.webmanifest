@@ -1,0 +1,12 @@
+{
+  "name": "חבורת ההרפתקאות",
+  "short_name": "ההרפתקאות",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f9f7f0",
+  "theme_color": "#f9f7f0",
+  "icons": [{ "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
