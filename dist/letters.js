@@ -1,5 +1,7 @@
-// Single-line teaching forms: English manuscript and Israeli Hebrew cursive.
-// Each path is one pen stroke, in demonstration order. See README for references.
+import { HEBREW_HANDWRITING } from './hebrew-handwriting.js';
+
+// Each centerline is a pen stroke, not the outline of a glyph.
+// Hebrew uses the original Gveret Levin outlines for consistent, native forms.
 const EN = [
   ['a','M158 110 C123 82 76 104 76 148 C76 195 131 201 157 165','M158 103 L158 188'],
   ['b','M82 46 L82 188','M83 124 C112 83 163 103 163 147 C163 189 110 204 83 168'],
@@ -30,38 +32,38 @@ const EN = [
 ];
 
 const HE = [
-  ['alef','א','אָלֶף','אלף',['M105 63 L62 187','M174 119 C112 119 91 177 169 184']],
-  ['bet','ב','בֵּית','בית',['M79 108 C119 86 179 92 177 124 C173 156 122 172 106 143 L77 189']],
-  ['gimel','ג','גִּימֶל','גימל',['M105 87 C117 123 137 125 160 117 C118 119 79 150 107 180 L124 192']],
-  ['dalet','ד','דָּלֶת','דלת',['M82 104 C152 75 189 110 133 134 L86 144 C152 123 155 163 128 189']],
-  ['he','ה','הֵא','הא',['M79 107 C154 66 193 112 149 157 L112 190','M100 133 C97 156 88 170 75 182']],
+  ['alef','א','אָלֶף','אלף',['M110 66 L66 185','M167 102 C111 119 104 161 149 180']],
+  ['bet','ב','בֵּית','בית',['M83 111 C119 93 170 96 169 125 C165 154 122 168 106 145 L78 185']],
+  ['gimel','ג','גִּימֶל','גימל',['M114 99 C117 116 134 122 157 118 C119 121 78 157 120 185']],
+  ['dalet','ד','דָּלֶת','דלת',['M92 105 C150 84 181 108 139 134 L88 146 C147 135 143 165 124 185']],
+  ['he','ה','הֵא','הא',['M83 110 C146 75 184 114 146 155 L112 185','M100 133 C97 156 88 170 79 179']],
   ['vav','ו','וָו','וו',['M145 99 L111 187']],
-  ['zayin','ז','זַיִן','זין',['M142 86 L107 124 C174 89 185 126 155 153 C132 175 109 183 82 188']],
-  ['het','ח','חֵית','חית',['M108 94 L73 187','M95 124 C168 76 191 115 137 187']],
-  ['tet','ט','טֵית','טית',['M175 96 C112 94 73 135 91 170 C109 210 161 181 157 141']],
+  ['zayin','ז','זַיִן','זין',['M143 87 L108 129 C163 95 180 130 143 160 C124 175 108 185 88 185']],
+  ['het','ח','חֵית','חית',['M116 94 L76 183','M86 125 C176 84 181 112 130 181']],
+  ['tet','ט','טֵית','טית',['M173 97 C114 96 73 137 91 170 C111 209 146 173 150 154']],
   ['yud','י','יוּד','יוד',['M139 114 L127 145']],
-  ['kaf','כ','כַּף','כף',['M85 107 C189 80 191 202 79 182']],
-  ['lamed','ל','לָמֶד','למד',['M173 62 C137 31 128 116 115 163 C101 206 81 193 91 176']],
+  ['kaf','כ','כַּף','כף',['M103 109 C183 105 176 199 90 180']],
+  ['lamed','ל','לָמֶד','למד',['M173 76 C137 42 116 119 109 165 C104 187 88 186 96 168']],
   ['mem','מ','מֵם','מם',['M72 188 L105 121 L109 181 L155 97']],
   ['nun','נ','נוּן','נון',['M147 100 C141 162 122 202 77 186']],
-  ['samekh','ס','סָמֶךְ','סמך',['M126 104 C72 99 66 196 118 188 C166 184 181 94 126 104']],
-  ['ayin','ע','עַיִן','עין',['M105 88 L128 158 C143 210 80 197 96 158 C110 131 142 119 174 119']],
-  ['pe','פ','פֵּא','פא',['M84 111 C145 75 188 109 163 156 C140 201 77 203 78 165 C79 133 125 127 128 146 C130 166 105 176 104 158']],
-  ['tsadi','צ','צָדִי','צדי',['M84 104 C164 78 184 116 113 141 C198 117 191 190 82 182']],
-  ['kof','ק','קוֹף','קוף',['M89 108 C158 81 185 128 143 157','M107 132 L68 223']],
-  ['resh','ר','רֵישׁ','ריש',['M84 109 C164 79 177 127 121 189']],
-  ['shin','ש','שִׁין','שין',['M82 154 C113 148 177 98 160 96 C128 91 88 163 113 185 C137 207 170 176 173 154']],
-  ['tav','ת','תָּו','תו',['M175 161 C174 111 153 88 139 104 C122 124 136 193 71 191']],
-  ['kaf-final','ך','כַּף סוֹפִית','כף סופית',['M82 103 C174 78 170 132 119 222']],
-  ['mem-final','ם','מֵם סוֹפִית','מם סופית',['M79 188 L117 107 C136 80 184 110 166 138 C147 164 110 131 117 107']],
+  ['samekh','ס','סָמֶךְ','סמך',['M125 117 C78 111 70 195 120 186 C164 180 180 94 128 108 L112 112']],
+  ['ayin','ע','עַיִן','עין',['M122 93 C133 122 147 164 131 182 C108 210 76 167 113 140 C132 126 153 118 174 118']],
+  ['pe','פ','פֵּא','פא',['M97 112 C154 73 191 116 160 160 C133 199 76 201 84 162 C89 138 124 132 126 148 C126 158 113 169 111 162']],
+  ['tsadi','צ','צָדִי','צדי',['M108 104 C165 89 181 113 126 140 C185 134 188 185 95 181']],
+  ['kof','ק','קוֹף','קוף',['M101 108 C160 88 188 124 132 169','M107 139 L73 223']],
+  ['resh','ר','רֵישׁ','ריש',['M88 111 C154 84 169 125 119 185']],
+  ['shin','ש','שִׁין','שין',['M88 171 C119 155 182 116 158 98 C131 87 87 159 111 184 C131 205 154 184 160 157']],
+  ['tav','ת','תָּו','תו',['M164 146 C164 112 146 91 140 109 C132 135 140 191 78 189']],
+  ['kaf-final','ך','כַּף סוֹפִית','כף סופית',['M108 102 C168 94 148 157 92 222']],
+  ['mem-final','ם','מֵם סוֹפִית','מם סופית',['M80 186 L115 119 C143 75 185 118 163 151 C140 183 107 142 115 119']],
   ['nun-final','ן','נוּן סוֹפִית','נון סופית',['M145 98 L101 225']],
-  ['pe-final','ף','פֵּא סוֹפִית','פא סופית',['M83 143 C116 112 189 115 178 77 C168 44 134 72 133 106 L111 191 C108 204 91 205 88 196']],
-  ['tsadi-final','ץ','צָדִי סוֹפִית','צדי סופית',['M81 101 C80 136 101 157 122 144','M86 147 C123 118 190 115 178 77 C168 44 134 72 133 106 L110 215']],
+  ['pe-final','ף','פֵּא סוֹפִית','פא סופית',['M87 137 C104 104 182 108 175 75 C165 41 134 73 132 105 L111 184 C108 200 86 196 95 186']],
+  ['tsadi-final','ץ','צָדִי סוֹפִית','צדי סופית',['M88 69 C82 106 100 118 126 118','M126 118 C202 99 179 40 147 77 C130 97 113 164 96 198 C88 212 78 203 94 192']],
 ];
 
 export const LETTERS = Object.freeze({
   english: EN.map(([small, ...strokes]) => Object.freeze({ id: `en-${small}`, familiar: small.toUpperCase(), small, name: small.toUpperCase(), spoken: `The letter ${small.toUpperCase()}.`, clip: `letter-en-${small}`, language: 'english', strokes })),
-  hebrew: HE.map(([id, familiar, spoken, name, strokes]) => Object.freeze({ id: `he-${id}`, familiar, small: familiar, spoken, name, clip: `letter-he-${id}`, language: 'hebrew', final: id.endsWith('-final'), strokes })),
+  hebrew: HE.map(([id, familiar, spoken, name, strokes]) => Object.freeze({ id: `he-${id}`, familiar, small: familiar, spoken, name, clip: `letter-he-${id}`, language: 'hebrew', final: id.endsWith('-final'), outline: HEBREW_HANDWRITING[familiar], strokes })),
 });
 
 export function letterGroup(language, start = 0) {
@@ -70,11 +72,16 @@ export function letterGroup(language, start = 0) {
   return Array.from({ length: 3 }, (_, offset) => letters[(index + offset) % letters.length]);
 }
 
+let shapeId = 0;
+
 export function letterShape(letter, { guide = false, pad = false } = {}) {
-  return `<svg class="letter-shape ${pad ? 'letter-pad' : ''}" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${letter.language === 'english' ? `האות ${letter.familiar} הקטנה` : `האות ${letter.name} בכתב יד`}">
+  const hebrew = letter.language === 'hebrew';
+  const clip = hebrew && pad ? `hebrew-ink-${++shapeId}` : '';
+  return `<svg class="letter-shape ${pad ? 'letter-pad' : ''} ${hebrew ? 'hebrew-handwriting' : ''}" lang="${hebrew ? 'he' : 'en'}" dir="${hebrew ? 'rtl' : 'ltr'}" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${hebrew ? `האות ${letter.name} בכתב יד` : `האות ${letter.familiar} הקטנה`}">
     ${guide ? '<g class="writing-lines" aria-hidden="true"><path d="M15 46H225M15 104H225M15 190H225M15 225H225"/></g>' : ''}
-    <g class="letter-guide" fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">${letter.strokes.map((d, i) => `<path d="${d}" data-stroke="${i}"/>`).join('')}</g>
-    ${pad ? '<g class="letter-ink" fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"></g><g class="letter-start" aria-hidden="true"><circle r="13"/><text text-anchor="middle" dy="4"></text></g><circle class="writing-pencil" r="8" hidden aria-hidden="true"/>' : ''}
+    ${hebrew ? `<path class="letter-model" d="${letter.outline}" fill="currentColor"/>` : ''}
+    ${!hebrew || pad ? `<g class="letter-guide" fill="none" stroke="currentColor" stroke-width="${hebrew ? '2' : '11'}" stroke-linecap="round" stroke-linejoin="round" ${hebrew ? 'aria-hidden="true"' : ''}>${letter.strokes.map((d, i) => `<path d="${d}" data-stroke="${i}"/>`).join('')}</g>` : ''}
+    ${pad ? `${hebrew ? `<defs><clipPath id="${clip}" clipPathUnits="userSpaceOnUse"><path d="${letter.outline}"/></clipPath></defs>` : ''}<g class="letter-ink" ${clip ? `clip-path="url(#${clip})"` : ''} fill="none" stroke="currentColor" stroke-width="${hebrew ? '32' : '11'}" stroke-linecap="round" stroke-linejoin="round"></g><g class="letter-start" aria-hidden="true"><circle r="13"/><text text-anchor="middle" dy="4"></text></g><circle class="writing-pencil" r="8" hidden aria-hidden="true"/>` : ''}
   </svg>`;
 }
 

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { LETTERS, letterGroup, letterShape, advanceTrace } from '../dist/letters.js';
+import { HEBREW_HANDWRITING } from '../dist/hebrew-handwriting.js';
 import { CLIPS } from '../dist/content.js';
 import { createSession, DEFAULT_SETTINGS, sanitizeSettings, sanitizeProgress, finishSession } from '../dist/engine.js';
 
@@ -19,6 +20,33 @@ test('Both alphabets have complete, distinct teaching forms and recorded names',
     for (const path of letter.strokes) assert.match(path, /^M\d+(?:\.\d+)? \d+/u);
     assert.equal(CLIPS[letter.clip]?.lang, letter.language === 'hebrew' ? 'he-IL' : 'en-US');
     assert.equal((letterShape(letter, { pad: true }).match(/data-stroke=/gu) || []).length, letter.strokes.length);
+  }
+});
+
+test('Hebrew uses genuine glyph outlines, with separate writing paths and isolated RTL direction', () => {
+  assert.equal(Object.keys(HEBREW_HANDWRITING).length, 27);
+  assert.equal(new Set(Object.values(HEBREW_HANDWRITING)).size, 27);
+  const clipIds = new Set();
+  for (const letter of LETTERS.hebrew) {
+    assert.equal(letter.outline, HEBREW_HANDWRITING[letter.familiar]);
+    assert.ok(letter.outline.length > 100);
+    const display = letterShape(letter);
+    assert.match(display, /lang="he" dir="rtl"/u);
+    assert.ok(display.includes(`class="letter-model" d="${letter.outline}"`));
+    assert.doesNotMatch(display, /data-stroke=/u, 'Matching choices must show the typeface, without construction lines');
+    for (let copy = 0; copy < 2; copy++) {
+      const pad = letterShape(letter, { pad: true });
+      const id = pad.match(/<clipPath id="([^"]+)"/u)?.[1];
+      assert.ok(id && !clipIds.has(id), 'Writing pads need independent clip paths');
+      assert.ok(pad.includes(`clip-path="url(#${id})"`));
+      clipIds.add(id);
+      assert.equal((pad.match(/data-stroke=/gu) || []).length, letter.strokes.length);
+    }
+  }
+  for (const letter of LETTERS.english) {
+    const svg = letterShape(letter);
+    assert.match(svg, /lang="en" dir="ltr"/u);
+    assert.doesNotMatch(svg, /letter-model|clipPath/u);
   }
 });
 
