@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { LETTERS, letterGroup, letterShape, advanceTrace } from '../dist/letters.js';
 import { HEBREW_HANDWRITING } from '../dist/hebrew-handwriting.js';
+import { writingDuration, PEN_LIFT_MS } from '../dist/letter-pad.js';
 import { CLIPS } from '../dist/content.js';
 import { createSession, DEFAULT_SETTINGS, sanitizeSettings, sanitizeProgress, finishSession } from '../dist/engine.js';
 
@@ -23,23 +24,22 @@ test('Both alphabets have complete, distinct teaching forms and recorded names',
   }
 });
 
-test('Hebrew uses genuine glyph outlines, with separate writing paths and isolated RTL direction', () => {
+test('Hebrew models and writing pads use the same pen paths, with isolated RTL direction and no font clipping', () => {
   assert.equal(Object.keys(HEBREW_HANDWRITING).length, 27);
   assert.equal(new Set(Object.values(HEBREW_HANDWRITING)).size, 27);
-  const clipIds = new Set();
   for (const letter of LETTERS.hebrew) {
     assert.equal(letter.outline, HEBREW_HANDWRITING[letter.familiar]);
     assert.ok(letter.outline.length > 100);
     const display = letterShape(letter);
     assert.match(display, /lang="he" dir="rtl"/u);
-    assert.ok(display.includes(`class="letter-model" d="${letter.outline}"`));
+    for (const stroke of letter.strokes) assert.ok(display.includes(`d="${stroke}"`));
     assert.doesNotMatch(display, /data-stroke=/u, 'Matching choices must show the typeface, without construction lines');
     for (let copy = 0; copy < 2; copy++) {
       const pad = letterShape(letter, { pad: true });
-      const id = pad.match(/<clipPath id="([^"]+)"/u)?.[1];
-      assert.ok(id && !clipIds.has(id), 'Writing pads need independent clip paths');
-      assert.ok(pad.includes(`clip-path="url(#${id})"`));
-      clipIds.add(id);
+      assert.doesNotMatch(pad, /clipPath|clip-path|letter-model/u, 'A wide clipped brush must not fill future parts of crossing strokes');
+      assert.match(pad, /stroke-width="11"/u);
+      assert.match(pad, /class="letter-direction"/u);
+      for (const stroke of letter.strokes) assert.ok(pad.includes(`d="${stroke}"`));
       assert.equal((pad.match(/data-stroke=/gu) || []).length, letter.strokes.length);
     }
   }
@@ -48,6 +48,35 @@ test('Hebrew uses genuine glyph outlines, with separate writing paths and isolat
     assert.match(svg, /lang="en" dir="ltr"/u);
     assert.doesNotMatch(svg, /letter-model|clipPath/u);
   }
+});
+
+test('Reported Hebrew loops begin below the body and remain one continuous pen stroke', () => {
+  for (const id of ['he-shin', 'he-pe-final', 'he-tsadi-final']) {
+    const letter = LETTERS.hebrew.find(item => item.id === id);
+    assert.equal(letter.strokes.length, 1);
+    const [x, y] = letter.strokes[0].match(/^M([\d.]+) ([\d.]+)/u).slice(1).map(Number);
+    assert.ok(y >= 170, `${id} must start at the lower entry, not across the upper loop`);
+    assert.ok(x > 90 && x < 180);
+    assert.equal((letter.strokes[0].match(/M/gu) || []).length, 1);
+  }
+  const tav = LETTERS.hebrew.find(item => item.id === 'he-tav');
+  assert.equal(tav.strokes.length, 2, 'The arch and the left stem are separate strokes');
+});
+
+test('Tracing a small loop cannot jump ahead at its crossing or complete from a stationary finger', () => {
+  const loop = Array.from({ length: 14 }, (_, i) => ({ x: 110 - 10 * Math.cos(i * Math.PI * 2 / 13), y: 100 + 10 * Math.sin(i * Math.PI * 2 / 13) }));
+  assert.ok(advanceTrace(loop, 0, { x: 100, y: 99 }, 25, loop[0]) <= 1);
+  let progress = 0, previous = loop[0];
+  for (const point of loop.slice(1)) { progress = advanceTrace(loop, progress, point, 25, previous); previous = point; }
+  assert.equal(progress, loop.length - 1);
+  assert.equal(advanceTrace(loop, 0, loop[0], 25, loop[0]), 0);
+});
+
+test('Long writing loops have time to unfold and separate strokes have a visible pen lift', () => {
+  assert.ok(writingDuration(380) >= 4000);
+  assert.ok(writingDuration(380) > writingDuration(100) * 2);
+  assert.ok(writingDuration(1) >= 650);
+  assert.ok(PEN_LIFT_MS >= 500);
 });
 
 test('Every starting letter gets a focused six-question game with three genuine choices', () => {
