@@ -1,6 +1,7 @@
-import { WORDS, ANIMALS, COLORS, NUMBERS, STICKERS } from './content.js';
+import { WORDS, ANIMALS, COLORS, NUMBERS, STICKERS, MISSION_IDS } from './content.js';
+import { CLOCK_LEVELS, clockTime } from './clock.js';
 
-export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, sound: true, motion: true });
+export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', sound: true, motion: true });
 export const SESSION_LENGTH = 6;
 
 export function shuffle(values, rng = Math.random) {
@@ -56,15 +57,29 @@ export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Mat
       return { id: `math-${i}`, type: add ? 'add' : 'count', a, b: add ? total - a : 0, answer: String(total), total, item: i % 3 === 0 ? 'apple' : i % 3 === 1 ? 'flower' : 'berry', options: numberOptions(total, max, rng), prompt: add ? 'add' : 'count', hint: add ? 'add-hint' : 'count-hint' };
     });
   }
+  if (mission === 'clock') {
+    const level = CLOCK_LEVELS[settings.clockLevel] || CLOCK_LEVELS.hours;
+    const hours = shuffle(Array.from({ length: 12 }, (_, i) => i + 1), rng);
+    const minutes = level.minutes.length === 1 ? [0, 0, 0, 0, 0, 0] : level.minutes.length === 2 ? shuffle([0, 30, 0, 30, 0, 30], rng) : shuffle([0, 15, 30, 45, 15, 45], rng);
+    return hours.slice(0, SESSION_LENGTH).map((hour, i) => {
+      const time = clockTime(hour, minutes[i]);
+      const next = hour % 12 + 1;
+      const alternatives = level.minutes.filter(n => n !== time.minute);
+      const otherMinute = alternatives.length ? alternatives[Math.floor(rng() * alternatives.length)] : 0;
+      const other = alternatives.length ? clockTime(hour, otherMinute) : clockTime((hour + 10) % 12 + 1, 0);
+      return { id: `clock-${i}`, type: 'clock', time, answer: time.id, options: shuffle([time, other, clockTime(next, time.minute === 45 ? 0 : time.minute)], rng), prompt: 'clock-read', hint: `clock-tip-${time.minute}` };
+    });
+  }
   throw new Error(`Unknown mission: ${mission}`);
 }
 
 export function freshProgress() {
-  return { version: 1, stars: 0, sessions: 0, stickers: [], missions: { hebrew: 0, english: 0, math: 0 }, skills: { hebrew: { correct: 0, assisted: 0 }, english: { correct: 0, assisted: 0 }, math: { correct: 0, assisted: 0 } } };
+  return { version: 1, stars: 0, sessions: 0, stickers: [], missions: Object.fromEntries(MISSION_IDS.map(id => [id, 0])), skills: Object.fromEntries(MISSION_IDS.map(id => [id, { correct: 0, assisted: 0 }])) };
 }
 
 export function finishSession(progress, mission, assisted = 0) {
-  const next = structuredClone(progress);
+  const next = sanitizeProgress(progress);
+  if (!MISSION_IDS.includes(mission)) throw new Error(`Unknown mission: ${mission}`);
   next.stars += SESSION_LENGTH;
   next.sessions += 1;
   next.missions[mission] += 1;
@@ -82,6 +97,7 @@ export function sanitizeSettings(input) {
   if (['short', 'all'].includes(input.reading)) result.reading = input.reading;
   if ([5, 10, 20].includes(input.mathMax)) result.mathMax = input.mathMax;
   if ([10, 20].includes(input.englishMax)) result.englishMax = input.englishMax;
+  if (Object.hasOwn(CLOCK_LEVELS, input.clockLevel)) result.clockLevel = input.clockLevel;
   return result;
 }
 

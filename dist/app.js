@@ -5,6 +5,7 @@ import { Narrator } from './audio.js';
 import { SharedAlbum, normalizeCode } from './sync.js';
 import { SYNC_CONFIG } from './sync-config.js';
 import { mountFamilyPanel, updateFamilyStatus } from './family-ui.js';
+import { analogClock, clockAngles, clockTime, CLOCK_LEVELS } from './clock.js';
 
 const app = document.querySelector('#app');
 const dialog = document.querySelector('#parent-dialog');
@@ -16,6 +17,8 @@ let view = 'home';
 let round = null;
 let audioStatus = 'idle';
 let dialogOpener = null;
+let clockDemo = { hour: 3, minute: 0, highlight: '' };
+let clockReturn = false;
 
 try {
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
@@ -74,6 +77,54 @@ function footer() {
   return `<footer class="footer"><span>${art('paw')} הרפתקה קטנה. גילוי גדול.</span><span>משחקות בקצב שלך ♡</span></footer>`;
 }
 
+function renderClockLesson() {
+  const level = CLOCK_LEVELS[clockReturn ? round.clockLevel : settings.clockLevel];
+  if (!level.minutes.includes(clockDemo.minute)) clockDemo.minute = 0;
+  const time = clockTime(clockDemo.hour, clockDemo.minute);
+  app.innerHTML = `${header()}<main id="main" class="clock-lesson-page">
+    <div class="clock-lesson-topline"><button class="text-button" data-action="home">${uiIcon('home')} לבית החברים</button><span>${level.name}</span></div>
+    <section class="clock-lesson-card"><div class="question-heading"><div><span class="section-kicker">בובי מגלה איתך דברים חדשים</span><h1 tabindex="-1">בואי נכיר את השעון!</h1></div><button class="circle-button" data-action="replay" aria-label="שמיעת ההסבר שוב">${uiIcon('sound')}</button></div>
+      <div class="clock-lesson-layout"><div class="clock-demo-column"><div id="clock-demo">${analogClock(time.hour, time.minute, { interactive: true, highlight: clockDemo.highlight })}</div><p class="clock-tap-note">לחצי על מספר בשעון וגלי מה השעה</p>
+      <button class="clock-demo-time" data-action="clock-speak-time" aria-label="שמיעת השעה שבחרת"><b id="clock-demo-digital" dir="ltr">${time.digital}</b><span id="clock-demo-caption" aria-live="polite">השעה ${time.he}</span>${uiIcon('sound')}</button></div>
+      <div class="clock-lesson-guide"><h2>שני מחוגים, סיפור אחד</h2><button class="hand-guide hour-guide" data-action="clock-hand" data-hand="hour" aria-pressed="${clockDemo.highlight === 'hour'}"><span class="hand-swatch short"></span><span><b>המחוג הקצר</b><small>מראה את השעה</small></span>${uiIcon('sound')}</button><button class="hand-guide minute-guide" data-action="clock-hand" data-hand="minute" aria-pressed="${clockDemo.highlight === 'minute'}"><span class="hand-swatch long"></span><span><b>המחוג הארוך</b><small>מראה את הדקות</small></span>${uiIcon('sound')}</button>
+      <div class="clock-minute-controls"><span class="section-kicker">ומה עושה מחוג הדקות?</span><div class="clock-minute-buttons" role="group" aria-label="בחירת דקות">${level.minutes.map(minute => `<button data-action="clock-set-minute" data-minute="${minute}" aria-pressed="${minute === clockDemo.minute}"><b dir="ltr">${String(minute).padStart(2, '0')}</b><span>${{ 0: 'שעה עגולה', 15: 'ורבע', 30: 'וחצי', 45: 'רבע ל…' }[minute]}</span></button>`).join('')}</div></div>
+      <div class="clock-lesson-buddy">${pup('bobi')}<p>נסתכל, נקשיב וננסה.<br>לומדות בקצב שלך ♡</p></div></div></div>
+      <div class="clock-lesson-actions"><button class="primary-button" data-action="clock-practice">${clockReturn ? 'חוזרות למשחק' : 'מוכנה! בואי נתרגל'} ${uiIcon('arrow')}</button></div><p id="audio-notice" class="audio-notice" role="status" hidden></p>
+    </section></main>${footer()}`;
+}
+
+function openClockLesson(returnToGame = false) {
+  narrator.stop();
+  clockReturn = returnToGame;
+  clockDemo = returnToGame ? { hour: current().time.hour, minute: current().time.minute, highlight: '' } : { hour: 3, minute: 0, highlight: '' };
+  if (returnToGame) round.helped.add(round.index);
+  else round = null;
+  view = 'clock-lesson'; render(); focusTitle(); narrator.say('intro-clock');
+}
+
+function updateClockDemo() {
+  const time = clockTime(clockDemo.hour, clockDemo.minute);
+  const angles = clockAngles(time.hour, time.minute);
+  const face = document.querySelector('#clock-demo .analog-clock');
+  face.querySelector('.clock-hour-hand').setAttribute('transform', `rotate(${angles.hour} 140 140)`);
+  face.querySelector('.clock-minute-hand').setAttribute('transform', `rotate(${angles.minute} 140 140)`);
+  face.classList.remove('highlight-hour', 'highlight-minute');
+  if (clockDemo.highlight) face.classList.add(`highlight-${clockDemo.highlight}`);
+  for (const button of document.querySelectorAll('.dial-hour')) {
+    const selected = Number(button.dataset.hour) === time.hour;
+    button.classList.toggle('selected', selected); button.setAttribute('aria-pressed', String(selected));
+  }
+  for (const button of document.querySelectorAll('[data-action="clock-set-minute"]')) button.setAttribute('aria-pressed', String(Number(button.dataset.minute) === time.minute));
+  for (const button of document.querySelectorAll('[data-action="clock-hand"]')) button.setAttribute('aria-pressed', String(button.dataset.hand === clockDemo.highlight));
+  document.querySelector('#clock-demo-digital').textContent = time.digital;
+  document.querySelector('#clock-demo-caption').textContent = `השעה ${time.he}`;
+}
+
+function clockSpeak(keys) {
+  if (!settings.sound) { settings.sound = true; narrator.enabled = true; save(); renderSoundButton(); }
+  narrator.say(keys);
+}
+
 function renderHome() {
   app.innerHTML = `${header()}<main id="main" class="home-page">
     <section class="hero" aria-labelledby="hero-title">
@@ -102,6 +153,7 @@ function tallyGroup(n, offset, item) {
 }
 
 function questionVisual(q) {
+  if (q.type === 'clock') return `<div class="clock-question-clock">${analogClock(q.time.hour, q.time.minute)}</div><button class="text-button clock-learn-link" data-action="clock-learn">${uiIcon('hint')} נזכרות איך קוראים שעון</button>`;
   if (q.type === 'read') return `<div class="word-card"><span class="card-label">מה כתוב כאן?</span><div class="target-word" lang="he">${wordText(q.word)}</div><span class="word-underline"></span></div>`;
   if (q.type === 'listen') return `<button class="listen-orb" data-action="listen-word" aria-label="שמיעת המילה באנגלית">${uiIcon('sound')}<span class="sound-waves"><i></i><i></i><i></i><i></i><i></i></span><span>לחצי ושמעי את המילה</span></button>`;
   if (q.type === 'count') return `<div class="counting-stage">${tallyGroup(q.a, 0, q.item)}<p class="tally-instruction">אפשר לגעת בכל פריט ולספור ביחד</p></div>`;
@@ -109,6 +161,7 @@ function questionVisual(q) {
 }
 
 function answerVisual(q, option) {
+  if (q.type === 'clock') return `<span class="clock-answer-time" dir="ltr">${option.digital}</span><span class="clock-answer-name">${option.he}</span>`;
   if (q.type === 'read') return art(option.id);
   if (q.kind === 'color') return `<span class="color-balloon" style="--balloon:${option.hex}"><i></i></span>`;
   if (q.type === 'count' || q.type === 'add' || q.kind === 'number') return `<span class="answer-number" dir="ltr">${option.number}</span>`;
@@ -116,6 +169,7 @@ function answerVisual(q, option) {
 }
 
 function answerLabel(q, option) {
+  if (q.type === 'clock') return `השעה ${option.he}, ${option.digital}`;
   if (q.type === 'read') return option.he;
   if (typeof option.number === 'number') return String(option.number);
   return option.he;
@@ -124,13 +178,13 @@ function answerLabel(q, option) {
 function renderGame() {
   const mission = MISSIONS[round.mission];
   const q = current();
-  const title = q.type === 'read' ? 'איזו תמונה מתאימה למילה?' : q.type === 'listen' ? 'מה שמעת באנגלית?' : q.type === 'add' ? 'כמה יש ביחד?' : 'כמה יש בסל?';
-  app.innerHTML = `${header()}<main id="main" class="game-page ${mission.color}">
+  const title = q.type === 'clock' ? 'מה השעה בשעון?' : q.type === 'read' ? 'איזו תמונה מתאימה למילה?' : q.type === 'listen' ? 'מה שמעת באנגלית?' : q.type === 'add' ? 'כמה יש ביחד?' : 'כמה יש בסל?';
+  app.innerHTML = `${header()}<main id="main" class="game-page ${mission.color} ${q.type === 'clock' ? 'clock-game' : ''}">
     <div class="game-topline"><button class="text-button back-button" data-action="home">${uiIcon('home')} למפת ההרפתקאות</button><span class="mission-label">${mission.name}</span><span class="step-label">צעד ${round.index + 1} מתוך ${SESSION_LENGTH}</span></div>
     <div class="step-track" aria-label="התקדמות: ${round.index} מתוך ${SESSION_LENGTH}">${Array.from({ length: SESSION_LENGTH }, (_, i) => `<span class="step-dot ${i < round.index ? 'done' : i === round.index ? 'current' : ''}">${i < round.index ? uiIcon('check') : i + 1}</span>`).join('')}</div>
-    <section class="game-board"><div class="question-heading"><div><span class="section-kicker">${q.type === 'read' ? 'קוראות בעצמך, מגלות ביחד' : q.type === 'listen' ? 'האוזניים מוכנות?' : 'מכינות פיקניק לחברים'}</span><h1 id="question-title" tabindex="-1">${title}</h1></div><button class="circle-button replay-button" data-action="replay" aria-label="שמיעת ההוראות שוב">${uiIcon('sound')}</button></div>
+    <section class="game-board"><div class="question-heading"><div><span class="section-kicker">${q.type === 'clock' ? 'המחוגים מספרים לנו סיפור' : q.type === 'read' ? 'קוראות בעצמך, מגלות ביחד' : q.type === 'listen' ? 'האוזניים מוכנות?' : 'מכינות פיקניק לחברים'}</span><h1 id="question-title" tabindex="-1">${title}</h1></div><button class="circle-button replay-button" data-action="replay" aria-label="שמיעת ההוראות שוב">${uiIcon('sound')}</button></div>
       <div class="question-visual">${questionVisual(q)}</div>
-      <div class="answer-grid ${q.type === 'count' || q.type === 'add' || q.kind === 'number' ? 'numeric-options' : ''}" role="group" aria-label="בחירת תשובה">${q.options.map(option => `<button class="answer-button" data-action="answer" data-answer="${option.id}" aria-label="${answerLabel(q, option)}">${answerVisual(q, option)}<span class="answer-check">${uiIcon('check')}</span></button>`).join('')}</div>
+      <div class="answer-grid ${q.type === 'count' || q.type === 'add' || q.kind === 'number' ? 'numeric-options' : ''}" role="group" aria-label="בחירת תשובה">${q.options.map(option => `${q.type === 'clock' ? '<div class="clock-choice">' : ''}<button class="answer-button ${round.attempted.has(option.id) ? 'try-again' : ''}" data-action="answer" data-answer="${option.id}" aria-label="${answerLabel(q, option)}" ${round.attempted.has(option.id) ? 'disabled' : ''}>${answerVisual(q, option)}<span class="answer-check">${uiIcon('check')}</span></button>${q.type === 'clock' ? `<button class="clock-option-sound" data-action="clock-option-audio" data-clip="${option.clip}" aria-label="שמיעת האפשרות ${option.he}">${uiIcon('sound')}</button></div>` : ''}`).join('')}</div>
       <div class="feedback-row"><div class="feedback" id="feedback" role="status" aria-live="polite">קחי את הזמן. החברים כאן איתך ♡</div><button class="hint-button" data-action="hint">${uiIcon('hint')} רמז קטן</button><button class="primary-button next-button" data-action="next" hidden>ממשיכות ${uiIcon('arrow')}</button></div>
       <p id="audio-notice" class="audio-notice" role="status" hidden></p>
     </section><div class="buddy-bar">${pup(mission.pup)}<span id="buddy-message">${{ luli: 'לולי', bobi: 'בובי', tofi: 'טופי' }[mission.pup]} כאן לעזור לך!</span><span class="buddy-hearts">♡ ♡ ♡</span></div>
@@ -153,6 +207,7 @@ function render() {
   applyPreferences();
   document.body.classList.toggle('playing', view === 'game');
   if (view === 'game') renderGame();
+  else if (view === 'clock-lesson') renderClockLesson();
   else if (view === 'complete') renderComplete();
   else if (view === 'album') renderAlbum();
   else renderHome();
@@ -163,9 +218,10 @@ function focusTitle() {
   document.querySelector('main h1')?.focus({ preventScroll: true });
 }
 
-function startMission(mission) {
+function startMission(mission, skipLesson = false) {
+  if (mission === 'clock' && !skipLesson) { openClockLesson(); return; }
   narrator.stop();
-  round = { mission, questions: createSession(mission, settings), index: 0, resolved: false, attempted: new Set(), counted: new Set(), helped: new Set(), sticker: null, awarded: false };
+  round = { mission, questions: createSession(mission, settings), clockLevel: settings.clockLevel, index: 0, resolved: false, attempted: new Set(), counted: new Set(), helped: new Set(), sticker: null, awarded: false };
   view = 'game';
   render();
   focusTitle();
@@ -192,7 +248,7 @@ function replay() {
   if (view === 'game') {
     const q = current();
     narrator.say([q.prompt, ...(q.targetClip ? [q.targetClip] : [])]);
-  } else narrator.say(view === 'album' ? 'stickers' : 'welcome');
+  } else narrator.say(view === 'clock-lesson' ? 'intro-clock' : view === 'album' ? 'stickers' : 'welcome');
 }
 
 function renderSoundButton() {
@@ -204,6 +260,12 @@ function hint() {
   if (round.resolved) return;
   const q = current();
   round.helped.add(round.index);
+  if (q.type === 'clock') {
+    document.querySelector('#feedback').textContent = q.time.minute === 0 ? 'נתחיל מהמחוג הקצר והסגול. על איזה מספר הוא מצביע?' : 'נבדוק את המחוג הארוך, ואז נסתכל על המחוג הקצר.';
+    const face = document.querySelector('.clock-question-clock .analog-clock');
+    face.classList.remove('highlight-hour', 'highlight-minute'); face.classList.add(q.time.minute === 0 ? 'highlight-hour' : 'highlight-minute');
+    narrator.say(q.hint); return;
+  }
   document.querySelector('#feedback').textContent = q.type === 'read' ? 'נשמע את המילה, ואז נחפש את התמונה.' : q.type === 'listen' ? 'נקשיב שוב לאט. איזו תמונה מתאימה?' : 'געי בפריטים אחד־אחד. נמשיך לספור יחד.';
   narrator.say([q.hint, ...(q.type === 'read' ? [`he-${q.word.id}`] : q.targetClip ? [q.targetClip] : [])], { slow: true });
 }
@@ -235,18 +297,20 @@ function answer(button) {
   button.classList.add('correct');
   for (const option of document.querySelectorAll('.answer-button')) option.disabled = true;
   document.querySelector('.hint-button').hidden = true;
+  const lessonLink = document.querySelector('[data-action="clock-learn"]');
+  if (lessonLink) lessonLink.disabled = true;
   const next = document.querySelector('.next-button');
   next.hidden = false;
   if (round.index === SESSION_LENGTH - 1) next.innerHTML = `למדבקה שלי ${uiIcon('arrow')}`;
-  const answerText = q.type === 'read' ? wordText(q.word) : q.type === 'listen' ? q.target.en : `${q.total}`;
+  const answerText = q.type === 'clock' ? `השעה ${q.time.he}` : q.type === 'read' ? wordText(q.word) : q.type === 'listen' ? q.target.en : `${q.total}`;
   feedback.innerHTML = `${uiIcon('check')} <span>כל הכבוד! <b ${q.type === 'listen' ? 'lang="en" dir="ltr"' : ''}>${answerText}</b></span>`;
   feedback.classList.add('success');
   document.querySelector('.buddy-bar').classList.add('celebrating');
   document.querySelector('#buddy-message').textContent = 'יש! הצלחת!';
-  narrator.say([`correct-${1 + round.index % 3}`, ...(q.type === 'read' ? [`he-${q.word.id}`] : q.targetClip ? [q.targetClip] : [])]);
+  narrator.say([`correct-${1 + round.index % 3}`, ...(q.type === 'clock' ? [q.time.clip] : q.type === 'read' ? [`he-${q.word.id}`] : q.targetClip ? [q.targetClip] : [])]);
   narrator.chime();
   celebrate(16);
-  next.focus({ preventScroll: true });
+  next.focus({ preventScroll: q.type !== 'clock' });
 }
 
 function nextQuestion() {
@@ -315,6 +379,7 @@ function renderSettings() {
     <label class="setting-row"><span>מילים בעברית</span><select name="reading"><option value="short" ${settings.reading === 'short' ? 'selected' : ''}>מתחילות: 2–3 אותיות</option><option value="all" ${settings.reading === 'all' ? 'selected' : ''}>עוד אתגר: כל המילים</option></select></label>
     <label class="setting-row"><span>ספירה וחיבור עד</span><select name="mathMax">${[5, 10, 20].map(n => `<option value="${n}" ${settings.mathMax === n ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
     <label class="setting-row"><span>מספרים באנגלית עד</span><select name="englishMax">${[10, 20].map(n => `<option value="${n}" ${settings.englishMax === n ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+    <label class="setting-row"><span>קריאת שעון</span><select name="clockLevel">${Object.entries(CLOCK_LEVELS).map(([key, level]) => `<option value="${key}" ${settings.clockLevel === key ? 'selected' : ''}>${level.name}</option>`).join('')}</select></label>
     <label class="setting-toggle"><span><b>קול והנחיות</b><small>הקלטות בעברית ובאנגלית</small></span><input name="sound" type="checkbox" ${settings.sound ? 'checked' : ''}></label>
     <label class="setting-toggle"><span><b>תנועה וחגיגות</b><small>כיבוי מצמצם אנימציות</small></span><input name="motion" type="checkbox" ${settings.motion ? 'checked' : ''}></label>
     <p class="parent-note">ההגדרות ייכנסו לתוקף בהרפתקה הבאה. האנגלית מבוססת על הקשבה ותמונות. מילים כתובות מוצגות באותיות גדולות בלבד.</p>
@@ -328,7 +393,7 @@ function renderSettings() {
   dialog.querySelector('#settings-form').onsubmit = event => {
     event.preventDefault();
     const form = new FormData(event.target);
-    settings = sanitizeSettings({ nikud: form.has('nikud'), sound: form.has('sound'), motion: form.has('motion'), reading: form.get('reading'), mathMax: Number(form.get('mathMax')), englishMax: Number(form.get('englishMax')) });
+    settings = sanitizeSettings({ nikud: form.has('nikud'), sound: form.has('sound'), motion: form.has('motion'), reading: form.get('reading'), mathMax: Number(form.get('mathMax')), englishMax: Number(form.get('englishMax')), clockLevel: form.get('clockLevel') });
     save(); narrator.stop(); applyPreferences(); closeDialog();
     // Keep a running question and its answer state intact until the next round.
     if (view === 'game') renderSoundButton(); else render();
@@ -362,6 +427,13 @@ app.addEventListener('click', event => {
     case 'welcome': narrator.say('welcome'); break;
     case 'replay': replay(); break;
     case 'listen-word': if (!settings.sound) { settings.sound = true; narrator.enabled = true; save(); renderSoundButton(); } narrator.say(current().targetClip); break;
+    case 'clock-practice': if (clockReturn && round) { view = 'game'; render(); focusTitle(); replay(); } else startMission('clock', true); break;
+    case 'clock-learn': if (!round.resolved) openClockLesson(true); break;
+    case 'clock-set-hour': clockDemo.hour = Number(button.dataset.hour); clockDemo.highlight = 'hour'; updateClockDemo(); narrator.say(clockTime(clockDemo.hour, clockDemo.minute).clip); break;
+    case 'clock-set-minute': clockDemo.minute = Number(button.dataset.minute); clockDemo.highlight = 'minute'; updateClockDemo(); narrator.say([`clock-tip-${clockDemo.minute}`, clockTime(clockDemo.hour, clockDemo.minute).clip]); break;
+    case 'clock-hand': clockDemo.highlight = button.dataset.hand; updateClockDemo(); clockSpeak(`clock-${button.dataset.hand}-hand`); break;
+    case 'clock-speak-time': clockSpeak(clockTime(clockDemo.hour, clockDemo.minute).clip); break;
+    case 'clock-option-audio': clockSpeak(button.dataset.clip); break;
     case 'hint': hint(); break;
     case 'answer': answer(button); break;
     case 'tally': tally(button); break;

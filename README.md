@@ -1,6 +1,6 @@
 # חבורת ההרפתקאות · Puppy Adventures
 
-A gentle learning game for phones, tablets and computers. Original illustrated puppies guide six-question adventures in Hebrew reading, spoken English, counting and addition. Hebrew uses vowel marks by default. English reading is never required.
+A gentle learning game for phones, tablets and computers. Original illustrated puppies guide six-question adventures in Hebrew reading, spoken English, counting, addition and reading an analog clock. Hebrew uses vowel marks by default. English reading is never required.
 
 **Play:** [puppy-adventures.vercel.app](https://puppy-adventures.vercel.app)
 
@@ -19,6 +19,7 @@ Open the printed local address. To use another port, set `PORT` before starting.
 - **גינת המילים:** read a short Hebrew word and match it to a picture. The instruction is narrated; the target word is spoken only after a requested hint or a correct answer. Start with five short words; parents can enable all twelve.
 - **מפרץ האנגלית:** listen to animals, colors and numbers, then choose a picture or numeral. The English word appears in CAPITALS after success. Each adventure includes two questions from each category.
 - **סדנת המספרים:** alternate counting and addition. Touch each object to count it aloud. Addition is shown with two groups and a left-to-right equation. Parents choose a maximum of 5, 10 or 20; subtraction is not included.
+- **גן השעונים:** learn the short purple hour hand and long green minute hand in Hebrew. Tap numbers on an interactive clock, listen to its time, then complete six clock-reading questions. Whole hours are the default; parents can add half-hours and quarter-hours. Spoken answer choices support children who are still learning to read. The hour hand moves between numbers correctly: 3:30 is halfway between 3 and 4, and 12:45 is read as רבע לאחת. Hints highlight the relevant hand. Returning to the lesson during a question counts as assistance.
 
 There are unlimited retries, gentle feedback and no timer. A completed adventure unlocks one of twelve stickers. Partial adventures do not count toward saved progress. Replaying continues to record completed adventures after all stickers are collected.
 
@@ -26,7 +27,7 @@ There are unlimited retries, gentle feedback and no timer. A completed adventure
 
 Tap **להורים**, then answer the parent puzzle. This is a child-facing navigation gate, not account security.
 
-Choose Hebrew vowel marks, reading word length, math range, English number range, sound and animation. The parent view distinguishes questions answered independently from questions that used a hint or another attempt. These are play records, not an assessment. The reset flow asks for confirmation.
+Choose Hebrew vowel marks, reading word length, math range, English number range, clock level, sound and animation. Under **קריאת שעון**, choose **שעות עגולות**, **שעות וחצאי שעות** or **גם רבעים**. The parent view distinguishes questions answered independently from questions that used a hint or another attempt. These are play records, not an assessment. The reset flow asks for confirmation.
 
 Without pairing, progress stays in this browser. To share an album, open **להורים** on the first device, answer **21**, and choose **יצירת אלבום משפחתי**. Use **העתקת קישור למכשיר נוסף** to open a pairing link on the next device. Complete the parent gate there and tap **חיבור לאלבום הקיים**. Alternatively enter the family code manually. Repeat for each device or browser.
 
@@ -44,7 +45,7 @@ The repository is private. A normal Vercel production URL can be visited by anyo
 
 ## Audio and offline use
 
-All 89 Hebrew and English MP3 recordings are bundled. The game does not call a speech service during play, request a microphone, or require an API key. A same-language browser voice is a fallback if a recording cannot play. The sound button and replay control let the child start or re-enable audio, including on devices that require a tap before playback.
+All 145 Hebrew and English MP3 recordings are bundled. The game does not call a speech service during play, request a microphone, or require an API key. A same-language browser voice is a fallback if a recording cannot play. The sound button and replay control let the child start or re-enable audio, including on devices that require a tap before playback.
 
 A classic service worker caches the game, local fonts and recordings after a successful online visit on HTTPS or localhost. MP3 byte-range responses support Safari's cached-audio requests. The first visit requires a connection. Browser storage policies can remove cached content; revisit online to restore it. The large English speaker button plays the word directly from a tap. Browser layout tests cannot replace a final sound check on the family's physical devices.
 
@@ -70,7 +71,9 @@ npm run prepare-offline
 npm run check
 ```
 
-The curriculum tests exercise 1,800 generated adventures across difficulty settings, unique choices, solvable addition, category coverage, saved data and stickers. Additional tests cover audio byte ranges, browser fetch binding, paired-device merging, retries and offline recovery. The asset check verifies JavaScript syntax, manifests, the offline list and all 89 MP3 files. Browser QA covers widths from 320 through 1920 pixels and two independent browser origins paired to the live database.
+The curriculum tests exercise 2,400 generated adventures, including 600 clock adventures across all three levels. Checks cover hand angles, Hebrew quarter-to phrasing, distinct choices, addition, saved data, stickers and preserving older albums. Additional tests cover audio byte ranges, browser fetch binding, paired-device merging, retries and offline recovery. The asset check verifies JavaScript syntax, manifests, the offline list and all 145 MP3 files. Browser QA covers widths from 320 through 1920 pixels; clock lessons and questions were also checked in phone landscape and tablet layouts.
+
+`supabase/migrations/20261031111908_add_clock_progress.sql` extends the existing sync function's activity list. It preserves albums, prior subject counts and access grants. A transaction-based live test verifies that clock completions merge across devices and remain intact when an older client uploads a three-subject snapshot.
 
 Content and speech text live in `dist/content.js`; question generation and progress rules are in `dist/engine.js`. Illustrations are original SVG in `dist/art.js`, animated by `dist/styles.css`. Narration is in `dist/audio.js`; family sync is in `dist/sync.js` and `dist/family-ui.js`. Increase the cache version in `dist/sw.js` for changed assets and regenerate `dist/offline.json` with `npm run prepare-offline`. Workers activate after their complete asset list downloads. Reload a returning tab to use updated code; an in-progress adventure is not forcibly restarted.
 

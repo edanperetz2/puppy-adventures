@@ -1,0 +1,91 @@
+.mission-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.mission-card{min-width:0}
+.mission-card.lavender .mission-art{background:#eee7f5}
+.lavender .art-orbit{border-color:#bda6ce66}
+.lavender .subject-tag,.lavender .mission-go{color:#9273aa}
+.lavender .mini-sparkle{color:#b59fc7}
+.mission-card.lavender .mission-object{width:110px;right:12px;bottom:0;transform:rotate(-10deg)}
+.mission-card.lavender .mission-pup{left:-2px}
+.analog-clock{display:block;width:100%;height:auto;overflow:visible}
+.clock-hour-hand,.clock-minute-hand{transition:transform .65s ease,opacity .3s,filter .3s}
+.highlight-hour .clock-hour-hand,.highlight-minute .clock-minute-hand{filter:drop-shadow(0 0 5px #cdb0e1)}
+.highlight-hour .clock-minute-hand,.highlight-minute .clock-hour-hand{opacity:.8}
+.clock-lesson-page{max-width:960px;padding:10px 0 35px}
+.clock-lesson-topline{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:15px}
+.clock-lesson-topline>span{font-size:12px;color:#a28bb1}
+.clock-lesson-card{padding:28px 40px 30px;background:#fffdf8;border:1px solid #e8e0eb;border-radius:30px;box-shadow:var(--shadow)}
+.clock-lesson-card h1{font-size:32px}
+.clock-lesson-layout{display:grid;grid-template-columns:minmax(250px,1fr) minmax(250px,1fr);gap:40px;align-items:center;margin-top:26px}
+.clock-demo-column{display:flex;flex-direction:column;align-items:center}
+#clock-demo{width:290px;max-width:100%}
+.explorable-clock{position:relative;width:100%}
+.dial-buttons{position:absolute;inset:0}
+.dial-hour{position:absolute;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:transparent;border:2px solid transparent}
+.dial-hour.selected{border-color:#ba96d0;background:#be9bd024}
+.dial-hour:hover{background:#be9bd024}
+.dial-hour:active:not(:disabled){transform:translate(-50%,-50%) scale(.95)}
+.clock-tap-note{font-size:11px;color:#a994ad;text-align:center;margin-top:10px}
+.clock-demo-time{background:#f1e9f6;border:1px solid #e5d9ee;border-radius:20px;padding:10px 24px;margin-top:15px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:0 14px;min-width:230px;max-width:100%}
+.clock-demo-time>b{font-size:36px;font-weight:600;grid-column:1;line-height:1.4;color:#77578f}
+.clock-demo-time>span{font-size:13px;color:#9a82aa;grid-column:1}
+.clock-demo-time .ui-icon{width:24px;color:#9b7eb2;grid-column:2;grid-row:1/3}
+.clock-lesson-guide h2{font-size:22px;margin-bottom:16px}
+.hand-guide{display:flex;align-items:center;gap:14px;text-align:right;min-height:72px;width:100%;background:#f4edf7;border:1px solid #e7ddef;border-radius:18px;padding:13px 16px;margin:12px 0}
+.hand-guide b{font-size:15px;font-weight:600;color:#89629f}
+.hand-guide small{display:block;font-size:11px;color:#a58bb6;margin-top:2px}
+.hand-guide>.ui-icon{width:20px;color:#ad94be;margin-inline-start:auto}
+.minute-guide{background:#eaf3ee;border-color:#d5e7dc}
+.minute-guide b{color:#397f6e}.minute-guide small,.minute-guide>.ui-icon{color:#7fa996}
+.hand-guide[aria-pressed=true]{box-shadow:0 0 0 3px #e4d6ee}
+.minute-guide[aria-pressed=true]{box-shadow:0 0 0 3px #d9ebe0}
+.hand-swatch{display:block;height:8px;background:#9066b1;border-radius:8px;flex-shrink:0;width:24px}
+.hand-swatch.long{width:35px;height:5px;background:#368b7d}
+.clock-minute-controls{margin-top:22px}
+.clock-minute-buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.clock-minute-buttons button{flex:1;min-width:60px;min-height:56px;padding:7px 9px;border-radius:13px;border:1px solid #e6ded1;background:#f6f1e7;display:flex;flex-direction:column;align-items:center;color:#b19a72;gap:1px}
+.clock-minute-buttons b{font-size:17px;font-weight:600}.clock-minute-buttons span{font-size:9px;white-space:nowrap}
+.clock-minute-buttons button[aria-pressed=true]{background:#e5efe4;border-color:#abc6ac;color:#62907a}
+.clock-lesson-buddy{display:flex;align-items:center;gap:12px;margin-top:17px}
+.clock-lesson-buddy .pup{width:70px;flex-shrink:0}.clock-lesson-buddy p{font-size:12px;line-height:1.8;color:#ac9ab4}
+.clock-lesson-actions{display:flex;align-items:center;justify-content:center;margin-top:25px}
+.clock-lesson-actions .primary-button{min-width:230px}
+.clock-game .question-visual{flex-direction:column;gap:2px;padding:10px 0 12px}
+.clock-question-clock{width:214px;max-width:100%;margin:auto}
+.clock-learn-link{font-size:11px;min-height:36px;margin-top:4px;color:#a18bb0;gap:5px}
+.clock-learn-link:disabled{opacity:.3}
+.clock-learn-link .ui-icon{width:16px}
+.clock-choice{display:flex;flex-direction:column;align-items:stretch;gap:5px;min-width:0}
+.clock-choice .answer-button{width:100%;min-height:98px;display:flex;flex-direction:column;gap:2px;padding:9px}
+.clock-answer-time{font-size:36px;font-weight:600;color:#81618e;line-height:1.4;white-space:nowrap;font-variant-numeric:tabular-nums}
+.clock-answer-name{font-size:13px;color:#a58caf;line-height:1.6}
+.clock-option-sound{display:flex;align-items:center;justify-content:center;min-height:44px;align-self:center;min-width:60px;padding:8px 18px;border-radius:14px;background:#f4edf5;color:#ad94bb}
+.clock-option-sound .ui-icon{width:20px;height:20px}
+.clock-option-sound:hover{background:#eaddf0}
+@media(min-width:1001px){.mission-body{padding-inline:20px}.mission-body h3{font-size:23px}.mission-pup{left:0}.mission-object{right:9px;width:87px}}
+@media(min-width:571px) and (max-width:1000px){.mission-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mission-pup{left:20px;width:140px}.mission-object{right:22px;width:90px}.mission-card.lavender .mission-object{right:20px}}
+@media(max-width:1000px){.clock-lesson-card{padding:25px 27px}.clock-lesson-layout{gap:26px}.clock-lesson-card h1{font-size:28px}.clock-question-clock{width:200px}}
+@media(max-width:760px){.clock-lesson-layout{grid-template-columns:minmax(220px,1fr) minmax(210px,1fr);gap:20px}.clock-lesson-card{padding:22px}.clock-lesson-guide h2{font-size:19px}.hand-guide{padding:12px;gap:10px}.clock-lesson-buddy p{font-size:11px}}
+@media(max-width:570px){
+  .mission-card.lavender .mission-object{width:80px;right:-12px;bottom:62px}.mission-card.lavender .mission-pup{left:-15px;width:124px}
+  .clock-lesson-page{padding-top:0;margin-inline:14px}.clock-lesson-topline{margin-bottom:9px}.clock-lesson-topline .text-button{font-size:11px}.clock-lesson-topline>span{font-size:10px}
+  .clock-lesson-card{padding:19px 18px 22px;border-radius:25px}.clock-lesson-card h1{font-size:25px}
+  .clock-lesson-layout{grid-template-columns:minmax(0,1fr);gap:26px;margin-top:17px}
+  #clock-demo{width:270px}.clock-tap-note{font-size:10px}
+  .clock-demo-time{min-width:215px;margin-top:11px;padding:9px 22px}.clock-demo-time>b{font-size:32px}.clock-demo-time>span{font-size:12px}
+  .clock-lesson-guide h2{text-align:center;font-size:20px;margin-bottom:12px}
+  .hand-guide{min-height:66px;padding:12px 15px}.hand-guide b{font-size:14px}.hand-guide small{font-size:10px}
+  .clock-minute-controls{margin-top:17px}.clock-minute-buttons button{min-width:54px;padding-inline:6px}.clock-lesson-buddy{justify-content:center;margin-top:14px}.clock-lesson-buddy .pup{width:60px}
+  .clock-lesson-actions{margin-top:18px}.clock-lesson-actions .primary-button{min-width:225px;font-size:15px;gap:15px}
+  .clock-question-clock{width:188px}.clock-game .question-visual{padding:8px 0 10px}
+  .clock-choice .answer-button{min-height:91px;padding:6px 4px;border-radius:16px}
+  .clock-answer-time{font-size:26px}.clock-answer-name{font-size:10px;line-height:1.5}
+  .clock-option-sound{min-width:54px;min-height:44px;padding:8px 15px;border-radius:12px}.clock-option-sound .ui-icon{width:18px}
+  .clock-game .feedback.success{font-size:12px}.clock-game .feedback.success b{margin-inline-start:3px}
+}
+@media(max-width:370px){#clock-demo{width:258px}.clock-lesson-card{padding-inline:14px}.clock-lesson-card h1{font-size:22px}.clock-answer-time{font-size:22px}.clock-answer-name{font-size:9px}.clock-lesson-topline>span{font-size:9px}}
+@media(orientation:portrait) and (max-width:570px) and (max-height:700px){.clock-question-clock{width:142px}.clock-learn-link{font-size:10px;min-height:36px}.clock-choice .answer-button{min-height:82px}.clock-answer-time{font-size:23px}.clock-answer-name{font-size:9px}.clock-game .feedback-row{min-height:56px}}
+@media(orientation:landscape) and (max-height:520px) and (min-width:570px){
+  .clock-question-clock{width:143px}.clock-game .question-visual{padding:5px 0;min-height:153px}.clock-learn-link{display:none}
+  .clock-choice .answer-button{min-height:82px;padding:7px 4px}.clock-answer-time{font-size:27px}.clock-answer-name{font-size:10px}.clock-option-sound{min-height:44px;padding:7px 14px}
+  .clock-lesson-page{max-width:900px}.clock-lesson-layout{margin-top:15px;gap:28px}.clock-lesson-card h1{font-size:25px}#clock-demo{width:245px}.clock-lesson-guide h2{font-size:20px}
+}

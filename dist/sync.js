@@ -1,5 +1,5 @@
 import { finishSession, freshProgress, sanitizeProgress } from './engine.js';
-import { STICKERS } from './content.js';
+import { STICKERS, MISSION_IDS } from './content.js';
 
 const KEY = 'puppy-adventures-family-v1';
 const ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
@@ -26,7 +26,7 @@ function deviceId() {
 
 export function withPending(remote, own, confirmed) {
   const next = sanitizeProgress(remote);
-  for (const mission of ['hebrew', 'english', 'math']) {
+  for (const mission of MISSION_IDS) {
     const extra = Math.max(0, own.missions[mission] - confirmed.missions[mission]);
     next.missions[mission] += extra;
     next.skills[mission].correct += extra * 6;
@@ -39,7 +39,7 @@ export function withPending(remote, own, confirmed) {
 }
 
 function sameContribution(a, b) {
-  return ['hebrew', 'english', 'math'].every(m => a.missions[m] === b.missions[m] && a.skills[m].assisted === b.skills[m].assisted);
+  return MISSION_IDS.every(m => a.missions[m] === b.missions[m] && a.skills[m].assisted === b.skills[m].assisted);
 }
 
 export class SharedAlbum {

@@ -1,6 +1,6 @@
 import { readFile, stat, readdir } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
-import { CLIPS, WORDS, ANIMALS, COLORS } from '../dist/content.js';
+import { CLIPS, WORDS, ANIMALS, COLORS, MISSION_IDS } from '../dist/content.js';
 import { createSession, DEFAULT_SETTINGS } from '../dist/engine.js';
 
 const root = new URL('../dist/', import.meta.url);
@@ -16,7 +16,7 @@ for (const [key, clip] of Object.entries(CLIPS)) {
 }
 for (const word of WORDS) if (!CLIPS[`he-${word.id}`]) throw new Error(`Missing reading audio: ${word.id}`);
 for (const word of [...ANIMALS, ...COLORS]) if (!CLIPS[`en-${word.id}`]) throw new Error(`Missing English audio: ${word.id}`);
-for (const mission of ['hebrew', 'english', 'math']) createSession(mission, DEFAULT_SETTINGS);
+for (const mission of MISSION_IDS) createSession(mission, DEFAULT_SETTINGS);
 JSON.parse(await readFile(new URL('manifest.webmanifest', root), 'utf8'));
 JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
 for (const asset of JSON.parse(await readFile(new URL('offline.json', root), 'utf8'))) {

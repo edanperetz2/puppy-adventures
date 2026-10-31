@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { SharedAlbum, newCode, normalizeCode, formatCode, withPending } from '../dist/sync.js';
 import { finishSession, freshProgress } from '../dist/engine.js';
+import { MISSION_IDS } from '../dist/content.js';
 
 function storage() {
   const values = new Map();
@@ -21,14 +22,14 @@ function server() {
     const devices = albums.get(request.access_code);
     const old = devices.get(request.device_key) || freshProgress();
     const next = request.device_totals;
-    for (const mission of ['hebrew', 'english', 'math']) {
+    for (const mission of MISSION_IDS) {
       old.missions[mission] = Math.max(old.missions[mission], next.missions[mission]);
       old.skills[mission].correct = old.missions[mission] * 6;
       old.skills[mission].assisted = Math.max(old.skills[mission].assisted, next.skills[mission].assisted);
     }
     devices.set(request.device_key, old);
     const combined = freshProgress();
-    for (const value of devices.values()) for (const mission of ['hebrew', 'english', 'math']) {
+    for (const value of devices.values()) for (const mission of MISSION_IDS) {
       combined.missions[mission] += value.missions[mission];
       combined.skills[mission].correct += value.skills[mission].correct;
       combined.skills[mission].assisted += value.skills[mission].assisted;
@@ -106,4 +107,27 @@ test('A rejected join preserves the local game and does not create a family', as
   const device = new SharedAlbum({ config, storage: storage(), fetcher: api.fetcher });
   await assert.rejects(device.link(newCode(), freshProgress()), /album_not_found/);
   assert.equal(device.linked, false);
+});
+
+test('Clock practice syncs with the original subjects and survives offline reopening', async () => {
+  const api = server();
+  const local = storage();
+  const first = new SharedAlbum({ config, storage: storage(), fetcher: api.fetcher });
+  let second = new SharedAlbum({ config, storage: local, fetcher: api.fetcher });
+  const code = newCode();
+  await first.link(code, finishSession(freshProgress(), 'hebrew', 1).progress, { create: true });
+  await second.link(code, freshProgress());
+  api.online(false);
+  second.complete('clock', 2);
+  await second.flush();
+  second = new SharedAlbum({ config, storage: local, fetcher: api.fetcher });
+  assert.equal(second.progress.missions.clock, 1);
+  assert.equal(second.progress.missions.hebrew, 1);
+  api.online(true);
+  await second.flush(); await first.flush(); await second.flush();
+  assert.equal(first.progress.sessions, 2);
+  assert.equal(first.progress.missions.clock, 1);
+  assert.equal(first.progress.skills.clock.correct, 6);
+  assert.equal(first.progress.skills.clock.assisted, 2);
+  assert.equal(first.progress.missions.hebrew, 1);
 });
