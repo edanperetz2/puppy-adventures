@@ -129,7 +129,7 @@ test('The shared pronunciation lexicon covers the whole curriculum and rejects u
   assert.equal(hebrewSpeech('לִחְצִי עַל הַתְּמוּנָה.'), 'liχtsˈi ʔˈal hatmunˈa.');
   assert.equal(hebrewSpeech('מְחַכִּים בְּיַחַד'), 'meχakˈim bejˈaχad');
   assert.equal(hebrewSpeech('סִיַּמְתְּ! שֶׁעָזַרְתְּ'), 'sijˈamt! ʃeʔazˈaʁt');
-  assert.throws(() => hebrewSpeech('מִלָּה חֲדָשָׁה'), /pronunciation review/);
+  assert.throws(() => hebrewSpeech('טֶקְסְט שֶׁלֹּא נִבְדַּק'), /pronunciation review/);
   // Canonical-equivalent combining marks must get the same reviewed reading.
   assert.equal(hebrewSpeech('לִחְצִי'.normalize('NFD')), hebrewSpeech('לִחְצִי'.normalize('NFC')));
 });

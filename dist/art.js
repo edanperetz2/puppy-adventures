@@ -41,6 +41,7 @@ const drawings = {
   boat: '<path d="M28 133H177L153 171H54Z" fill="#e6a267"/><path d="M97 31V134" stroke="#a17954" stroke-width="7" stroke-linecap="round"/><path d="M88 36L36 120H88Z" fill="#c7b5dd"/><path d="M108 45L158 119H108Z" fill="#fff2d8"/><path d="M14 176Q32 158 51 176T91 176T131 176T171 176T204 176" stroke="#78bacd" stroke-width="8"/>',
   rocket: '<path d="M67 124L37 159L69 155M132 124L162 159L131 155" fill="#aa8ec7"/><path d="M74 150Q66 75 100 18Q135 77 126 150Z" fill="#e5dfe9"/><path d="M82 47Q100 9 118 47" fill="#e99594"/><circle cx="100" cy="91" r="21" fill="#81bac7" stroke="#fbf0dc" stroke-width="7"/><path d="M84 159L100 195L116 159" fill="#f4ca6b"/>',
   rainbow: '<path d="M24 165V114A76 76 0 0 1 176 114V165" stroke="#e5a1a5" stroke-width="18"/><path d="M43 165V114A57 57 0 0 1 157 114V165" stroke="#f2cd7e" stroke-width="18"/><path d="M62 165V114A38 38 0 0 1 138 114V165" stroke="#8fbdad" stroke-width="18"/><path d="M81 165V114A19 19 0 0 1 119 114V165" stroke="#b7a5d0" stroke-width="18"/>',
+  letters: '<rect x="27" y="42" width="138" height="126" rx="22" fill="#e8dcef" transform="rotate(-8 96 105)"/><path d="M50 129L73 71L97 129M59 110H88" stroke="#a18abb" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M143 110C119 93 104 112 110 131C118 152 143 141 143 119M143 104V142" stroke="#7ba99a" stroke-width="8" stroke-linecap="round"/><path d="M148 165L172 80L186 85L163 170L151 181Z" fill="#e6b86d"/><path d="M151 181L163 170L150 166Z" fill="#a7896c"/>',
   paw: '<g fill="currentColor"><ellipse cx="101" cy="134" rx="48" ry="36"/><ellipse cx="39" cy="91" rx="19" ry="27" transform="rotate(-30 39 91)"/><ellipse cx="80" cy="57" rx="18" ry="26" transform="rotate(-10 80 57)"/><ellipse cx="124" cy="57" rx="18" ry="26" transform="rotate(10 124 57)"/><ellipse cx="163" cy="91" rx="19" ry="27" transform="rotate(30 163 91)"/></g>',
 };
 
@@ -51,6 +52,8 @@ export function art(name, cls = '') {
 
 export function uiIcon(name) {
   const paths = {
+    pencil: '<path d="M4 16L16 4L20 8L8 20L3 21ZM13 7L17 11"/>',
+    again: '<path d="M20 8A8 8 0 1 0 20 16M20 3V9H14"/>',
     sound: '<path d="M11 5L6 9H3V15H6L11 19Z"/><path d="M15 8Q19 12 15 16M18 5Q25 12 18 19"/>',
     muted: '<path d="M11 5L6 9H3V15H6L11 19Z"/><path d="M16 9L22 15M22 9L16 15"/>',
     arrow: '<path d="M18 12H5M10 6L4 12L10 18"/>',

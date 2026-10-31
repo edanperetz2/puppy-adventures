@@ -1,7 +1,8 @@
 import { WORDS, ANIMALS, COLORS, NUMBERS, STICKERS, MISSION_IDS } from './content.js';
 import { CLOCK_LEVELS, clockTime } from './clock.js';
+import { LETTERS, letterGroup } from './letters.js';
 
-export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', sound: true, motion: true });
+export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', letterLanguage: 'hebrew', sound: true, motion: true });
 export const SESSION_LENGTH = 6;
 
 export function shuffle(values, rng = Math.random) {
@@ -27,6 +28,12 @@ export function numberOptions(answer, max, rng = Math.random) {
 
 export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Math.random) {
   const settings = { ...DEFAULT_SETTINGS, ...rawSettings };
+  if (mission === 'letters') {
+    const language = Object.hasOwn(LETTERS, settings.letterLanguage) ? settings.letterLanguage : 'hebrew';
+    const group = letterGroup(language, settings.letterStart);
+    const targets = [group[0], ...shuffle([group[1], group[2], ...group], rng)];
+    return targets.map((letter, i) => ({ id: `letters-${i}`, type: 'letter', letter, answer: letter.id, options: shuffle(group, rng), prompt: `letter-match-${language}`, targetClip: letter.clip, hint: 'letters-hint' }));
+  }
   if (mission === 'hebrew') {
     const pool = WORDS.filter(w => settings.reading === 'all' || w.level === 1);
     const targets = shuffle(pool, rng);
@@ -98,6 +105,7 @@ export function sanitizeSettings(input) {
   if ([5, 10, 20].includes(input.mathMax)) result.mathMax = input.mathMax;
   if ([10, 20].includes(input.englishMax)) result.englishMax = input.englishMax;
   if (Object.hasOwn(CLOCK_LEVELS, input.clockLevel)) result.clockLevel = input.clockLevel;
+  if (Object.hasOwn(LETTERS, input.letterLanguage)) result.letterLanguage = input.letterLanguage;
   return result;
 }
 

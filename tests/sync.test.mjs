@@ -109,6 +109,27 @@ test('A rejected join preserves the local game and does not create a family', as
   assert.equal(device.linked, false);
 });
 
+test('Letter adventures merge with previous subjects and upload once after offline play', async () => {
+  const api = server(), saved = storage();
+  const first = new SharedAlbum({ config, storage: storage(), fetcher: api.fetcher });
+  let second = new SharedAlbum({ config, storage: saved, fetcher: api.fetcher });
+  const code = newCode();
+  await first.link(code, finishSession(freshProgress(), 'math', 1).progress, { create: true });
+  await second.link(code, freshProgress());
+  api.online(false);
+  second.complete('letters', 2);
+  await second.flush();
+  second = new SharedAlbum({ config, storage: saved, fetcher: api.fetcher });
+  assert.equal(second.progress.missions.letters, 1);
+  api.online(true);
+  await second.flush(); await second.flush(); await first.flush();
+  assert.equal(first.progress.sessions, 2);
+  assert.equal(first.progress.missions.math, 1);
+  assert.equal(first.progress.skills.letters.correct, 6);
+  assert.equal(first.progress.skills.letters.assisted, 2);
+  assert.equal(first.progress.stickers.length, 2);
+});
+
 test('Clock practice syncs with the original subjects and survives offline reopening', async () => {
   const api = server();
   const local = storage();

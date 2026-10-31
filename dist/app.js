@@ -7,6 +7,8 @@ import { SharedAlbum, normalizeCode } from './sync.js';
 import { SYNC_CONFIG } from './sync-config.js';
 import { mountFamilyPanel, updateFamilyStatus } from './family-ui.js';
 import { analogClock, clockAngles, clockTime, CLOCK_LEVELS } from './clock.js';
+import { LETTERS, letterGroup, letterShape } from './letters.js';
+import { mountLetterPad } from './letter-pad.js';
 
 const app = document.querySelector('#app');
 const dialog = document.querySelector('#parent-dialog');
@@ -20,6 +22,10 @@ let audioStatus = 'idle';
 let dialogOpener = null;
 let clockDemo = { hour: 3, minute: 0, highlight: '' };
 let clockReturn = false;
+let letterDemo = { language: 'hebrew', index: 0 };
+let letterReturn = false;
+let letterPad = null;
+let lastTraceHint = 0;
 
 try {
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
@@ -88,6 +94,56 @@ function header() {
 
 function footer() {
   return `<footer class="footer"><span>${art('paw')} הרפתקה קטנה. גילוי גדול.</span><span>משחקות בקצב שלך ♡</span></footer>`;
+}
+
+function demoLetter() { return LETTERS[letterDemo.language][letterDemo.index]; }
+function letterNarration() {
+  const letter = demoLetter();
+  return [letterReturn ? 'letters-hint' : `letters-intro-${letterDemo.language}`, letter.clip, ...(letter.final ? ['letters-final'] : [])];
+}
+
+function openLetterLesson(returnToGame = false) {
+  narrator.stop(); letterReturn = returnToGame;
+  if (returnToGame) {
+    const letter = current().letter;
+    round.helped.add(round.index);
+    letterDemo = { language: letter.language, index: LETTERS[letter.language].findIndex(item => item.id === letter.id) };
+  } else {
+    round = null;
+    if (letterDemo.language !== settings.letterLanguage) letterDemo = { language: settings.letterLanguage, index: 0 };
+  }
+  view = 'letters-lesson'; render(); focusTitle(); announcements.say(letterNarration());
+}
+
+function renderLetterLesson() {
+  const letter = demoLetter(), language = letterDemo.language;
+  const letters = LETTERS[language], group = letterGroup(language, letterDemo.index);
+  app.innerHTML = `${header()}<main id="main" class="letter-lesson-page">
+    <div class="letter-lesson-topline"><button class="text-button" data-action="home">${uiIcon('home')} לבית החברים</button><div class="letter-language-tabs" role="group" aria-label="שפת האותיות"><button data-action="letter-language" data-language="hebrew" aria-pressed="${language === 'hebrew'}">עברית · כתב יד</button><button data-action="letter-language" data-language="english" aria-pressed="${language === 'english'}"><bdi>English · A → a</bdi></button></div></div>
+    <section class="letter-lesson-card"><div class="question-heading"><div><span class="section-kicker">לולי מגלה איתך צורות חדשות</span><h1 tabindex="-1">אות מוכרת, צורה חדשה!</h1></div><button class="circle-button" data-action="replay" aria-label="שמיעת ההסבר שוב">${uiIcon('sound')}</button></div>
+      <div class="letter-lesson-layout"><div><div class="letter-pair"><div class="letter-form-card"><small>${language === 'hebrew' ? 'האות שאת מכירה · דפוס' : 'האות שאת מכירה · גדולה'}</small><bdi class="letter-familiar" lang="${language === 'hebrew' ? 'he' : 'en'}">${letter.familiar}</bdi></div><span class="letter-pair-arrow" aria-hidden="true">←</span><div class="letter-form-card new-form"><small>${language === 'hebrew' ? 'אותה אות · כתב יד' : 'אותה אות · קטנה'}</small>${letterShape(letter)}</div></div>
+      <div class="letter-name-row"><span>${language === 'hebrew' ? letter.name : `<bdi>${letter.familiar}</bdi>`}</span><button class="circle-button" data-action="letter-sound" aria-label="שמיעת שם האות">${uiIcon('sound')}</button></div>
+      ${language === 'english' && ['a', 'g'].includes(letter.small) ? `<p class="letter-book-note">בספרים אפשר לראות גם כך: <bdi class="letter-book-form">${letter.small}</bdi></p>` : ''}
+      ${letter.final ? '<p class="letter-final-note">אות סופית · מופיעה בסוף מילה</p>' : ''}
+      <p class="letter-copy">${language === 'hebrew' ? 'האות נשארת אותה אות. כך היא נראית כשכותבים ביד.' : 'אות גדולה ואות קטנה הן אותה אות. כאן נלמד צורת כתיבה פשוטה.'}<br>לחצי על העיפרון כדי לראות איך כותבים, ואז נסי בעצמך.</p>
+      <div class="letter-navigate"><button data-action="letter-previous" aria-label="האות הקודמת">הקודמת →</button><span dir="ltr">${letterDemo.index + 1} / ${letters.length}</span><button data-action="letter-next" aria-label="האות הבאה">← הבאה</button></div>
+      </div><section class="letter-pad-card"><h2>מגלות איך כותבים</h2><div id="letter-writing-pad">${letterShape(letter, { guide: true, pad: true })}<p class="letter-pad-caption" role="status" aria-live="polite"></p></div><div class="letter-pad-controls"><button data-action="letter-demo">${uiIcon('pencil')} הראי לי איך</button><button data-action="letter-step">קו־קו</button><button data-action="letter-reset">${uiIcon('again')} מנסה בעצמי</button></div></section></div>
+      <div class="letter-practice-row"><div><span class="section-kicker">משחק קטן עם שלוש אותיות</span><b dir="${language === 'hebrew' ? 'rtl' : 'ltr'}">${group.map(item => item.familiar).join(' · ')}</b><small>6 צעדים קטנים, בקצב שלך</small></div><button class="primary-button" data-action="letter-practice">${letterReturn ? 'חוזרות לשאלה' : 'בואי נשחק ונמצא אותיות'} ${uiIcon('arrow')}</button></div>
+      <details class="letter-library"><summary>כל האותיות · בוחרות מה ללמוד</summary><div class="letter-library-grid" dir="${language === 'hebrew' ? 'rtl' : 'ltr'}">${letters.map((item, index) => `<button data-action="letter-select" data-index="${index}" aria-pressed="${index === letterDemo.index}" aria-label="לימוד האות ${item.name}">${item.familiar}${item.final ? '<small>סופית</small>' : ''}</button>`).join('')}</div></details><p id="audio-notice" class="audio-notice" role="status" hidden></p>
+    </section></main>${footer()}`;
+  letterPad = mountLetterPad(document.querySelector('#letter-writing-pad'), {
+    motion: settings.motion && !matchMedia('(prefers-reduced-motion: reduce)').matches,
+    onComplete: () => { announcements.say('letters-trace-done'); narrator.chime(); celebrate(12); },
+    onStartNeeded: () => { if (Date.now() - lastTraceHint > 5000) { lastTraceHint = Date.now(); announcements.say('letters-trace-start'); } },
+  });
+}
+
+function selectLetter(index) {
+  const length = LETTERS[letterDemo.language].length;
+  letterDemo.index = (index + length) % length;
+  render();
+  document.querySelector('[data-action="letter-sound"]')?.focus({ preventScroll: true });
+  announcements.say([demoLetter().clip, ...(demoLetter().final ? ['letters-final'] : [])]);
 }
 
 function renderClockLesson() {
@@ -167,6 +223,7 @@ function tallyGroup(n, offset, item) {
 }
 
 function questionVisual(q) {
+  if (q.type === 'letter') return `<div class="letter-question-layout"><div class="letter-question-card"><small>${q.letter.language === 'hebrew' ? 'איזו אות בכתב יד מתאימה?' : 'איזו אות קטנה מתאימה?'}</small><bdi class="letter-familiar">${q.letter.familiar}</bdi></div><button class="text-button letter-learn-link" data-action="letters-learn">${uiIcon('hint')} נזכרות איך כותבים</button></div>`;
   if (q.type === 'clock') return `<div class="clock-question-clock">${analogClock(q.time.hour, q.time.minute)}</div><button class="text-button clock-learn-link" data-action="clock-learn">${uiIcon('hint')} נזכרות איך קוראים שעון</button>`;
   if (q.type === 'read') return `<div class="word-card"><span class="card-label">מה כתוב כאן?</span><div class="target-word" lang="he">${wordText(q.word)}</div><span class="word-underline"></span></div>`;
   if (q.type === 'listen') return `<button class="listen-orb" data-action="listen-word" aria-label="שמיעת המילה באנגלית">${uiIcon('sound')}<span class="sound-waves"><i></i><i></i><i></i><i></i><i></i></span><span>לחצי ושמעי את המילה</span></button>`;
@@ -175,6 +232,7 @@ function questionVisual(q) {
 }
 
 function answerVisual(q, option) {
+  if (q.type === 'letter') return letterShape(option);
   if (q.type === 'clock') return `<span class="clock-answer-time" dir="ltr">${option.digital}</span><span class="clock-answer-name">${option.he}</span>`;
   if (q.type === 'read') return art(option.id);
   if (q.kind === 'color') return `<span class="color-balloon" style="--balloon:${option.hex}"><i></i></span>`;
@@ -183,6 +241,7 @@ function answerVisual(q, option) {
 }
 
 function answerLabel(q, option) {
+  if (q.type === 'letter') return `${option.name} ${option.language === 'hebrew' ? 'בכתב יד' : 'קטנה'}`;
   if (q.type === 'clock') return `השעה ${option.he}, ${option.digital}`;
   if (q.type === 'read') return option.he;
   if (typeof option.number === 'number') return String(option.number);
@@ -192,11 +251,11 @@ function answerLabel(q, option) {
 function renderGame() {
   const mission = MISSIONS[round.mission];
   const q = current();
-  const title = q.type === 'clock' ? 'מה השעה בשעון?' : q.type === 'read' ? 'איזו תמונה מתאימה למילה?' : q.type === 'listen' ? 'מה שמעת באנגלית?' : q.type === 'add' ? 'כמה יש ביחד?' : 'כמה יש בסל?';
-  app.innerHTML = `${header()}<main id="main" class="game-page ${mission.color} ${q.type === 'clock' ? 'clock-game' : ''}">
+  const title = q.type === 'letter' ? 'איזו אות מתאימה?' : q.type === 'clock' ? 'מה השעה בשעון?' : q.type === 'read' ? 'איזו תמונה מתאימה למילה?' : q.type === 'listen' ? 'מה שמעת באנגלית?' : q.type === 'add' ? 'כמה יש ביחד?' : 'כמה יש בסל?';
+  app.innerHTML = `${header()}<main id="main" class="game-page ${mission.color} ${q.type === 'clock' ? 'clock-game' : q.type === 'letter' ? 'letter-game' : ''}">
     <div class="game-topline"><button class="text-button back-button" data-action="home">${uiIcon('home')} למפת ההרפתקאות</button><span class="mission-label">${mission.name}</span><span class="step-label">צעד ${round.index + 1} מתוך ${SESSION_LENGTH}</span></div>
     <div class="step-track" aria-label="התקדמות: ${round.index} מתוך ${SESSION_LENGTH}">${Array.from({ length: SESSION_LENGTH }, (_, i) => `<span class="step-dot ${i < round.index ? 'done' : i === round.index ? 'current' : ''}">${i < round.index ? uiIcon('check') : i + 1}</span>`).join('')}</div>
-    <section class="game-board"><div class="question-heading"><div><span class="section-kicker">${q.type === 'clock' ? 'המחוגים מספרים לנו סיפור' : q.type === 'read' ? 'קוראות בעצמך, מגלות ביחד' : q.type === 'listen' ? 'האוזניים מוכנות?' : 'מכינות פיקניק לחברים'}</span><h1 id="question-title" tabindex="-1">${title}</h1></div><button class="circle-button replay-button" data-action="replay" aria-label="שמיעת ההוראות שוב">${uiIcon('sound')}</button></div>
+    <section class="game-board"><div class="question-heading"><div><span class="section-kicker">${q.type === 'letter' ? 'אות מוכרת, צורה חדשה' : q.type === 'clock' ? 'המחוגים מספרים לנו סיפור' : q.type === 'read' ? 'קוראות בעצמך, מגלות ביחד' : q.type === 'listen' ? 'האוזניים מוכנות?' : 'מכינות פיקניק לחברים'}</span><h1 id="question-title" tabindex="-1">${title}</h1></div><button class="circle-button replay-button" data-action="replay" aria-label="שמיעת ההוראות שוב">${uiIcon('sound')}</button></div>
       <div class="question-visual">${questionVisual(q)}</div>
       <div class="answer-grid ${q.type === 'count' || q.type === 'add' || q.kind === 'number' ? 'numeric-options' : ''}" role="group" aria-label="בחירת תשובה">${q.options.map(option => `${q.type === 'clock' ? '<div class="clock-choice">' : ''}<button class="answer-button ${round.attempted.has(option.id) ? 'try-again' : ''}" data-action="answer" data-answer="${option.id}" aria-label="${answerLabel(q, option)}" ${round.attempted.has(option.id) ? 'disabled' : ''}>${answerVisual(q, option)}<span class="answer-check">${uiIcon('check')}</span></button>${q.type === 'clock' ? `<button class="clock-option-sound" data-action="clock-option-audio" data-clip="${option.clip}" aria-label="שמיעת האפשרות ${option.he}">${uiIcon('sound')}</button></div>` : ''}`).join('')}</div>
       <div class="feedback-row"><div class="feedback" id="feedback" role="status" aria-live="polite">קחי את הזמן. החברים כאן איתך ♡</div><button class="hint-button" data-action="hint">${uiIcon('hint')} רמז קטן</button><button class="primary-button next-button" data-action="next" hidden>ממשיכות ${uiIcon('arrow')}</button></div>
@@ -218,10 +277,12 @@ function renderAlbum() {
 }
 
 function render() {
+  letterPad?.destroy(); letterPad = null;
   applyPreferences();
   document.body.classList.toggle('playing', view === 'game');
   if (view === 'game') renderGame();
   else if (view === 'clock-lesson') renderClockLesson();
+  else if (view === 'letters-lesson') renderLetterLesson();
   else if (view === 'complete') renderComplete();
   else if (view === 'album') renderAlbum();
   else renderHome();
@@ -234,13 +295,14 @@ function focusTitle() {
 
 function startMission(mission, skipLesson = false) {
   if (mission === 'clock' && !skipLesson) { openClockLesson(); return; }
+  if (mission === 'letters' && !skipLesson) { openLetterLesson(); return; }
   narrator.stop();
-  round = { mission, questions: createSession(mission, settings), clockLevel: settings.clockLevel, index: 0, resolved: false, attempted: new Set(), counted: new Set(), helped: new Set(), sticker: null, awarded: false };
+  round = { mission, questions: createSession(mission, { ...settings, letterStart: letterDemo.index }), clockLevel: settings.clockLevel, index: 0, resolved: false, attempted: new Set(), counted: new Set(), helped: new Set(), sticker: null, awarded: false };
   view = 'game';
   render();
   focusTitle();
   const q = current();
-  announcements.say([MISSIONS[mission].intro, ...(q.targetClip ? [q.targetClip] : [])]);
+  announcements.say([mission === 'letters' ? q.prompt : MISSIONS[mission].intro, ...(q.targetClip ? [q.targetClip] : [])]);
 }
 
 function recommended() {
@@ -262,7 +324,7 @@ function replay() {
   if (view === 'game') {
     const q = current();
     announcements.say([q.prompt, ...(q.targetClip ? [q.targetClip] : [])]);
-  } else announcements.say(view === 'clock-lesson' ? 'intro-clock' : view === 'album' ? 'stickers' : 'welcome');
+  } else announcements.say(view === 'letters-lesson' ? letterNarration() : view === 'clock-lesson' ? 'intro-clock' : view === 'album' ? 'stickers' : 'welcome');
 }
 
 function renderSoundButton() {
@@ -273,6 +335,7 @@ function renderSoundButton() {
 function hint() {
   if (round.resolved) return;
   const q = current();
+  if (q.type === 'letter') { openLetterLesson(true); return; }
   round.helped.add(round.index);
   if (q.type === 'clock') {
     document.querySelector('#feedback').textContent = q.time.minute === 0 ? 'נתחיל מהמחוג הקצר והסגול. על איזה מספר הוא מצביע?' : 'נבדוק את המחוג הארוך, ואז נסתכל על המחוג הקצר.';
@@ -313,10 +376,12 @@ function answer(button) {
   document.querySelector('.hint-button').hidden = true;
   const lessonLink = document.querySelector('[data-action="clock-learn"]');
   if (lessonLink) lessonLink.disabled = true;
+  const letterLink = document.querySelector('[data-action="letters-learn"]');
+  if (letterLink) letterLink.disabled = true;
   const next = document.querySelector('.next-button');
   next.hidden = false;
   if (round.index === SESSION_LENGTH - 1) next.innerHTML = `למדבקה שלי ${uiIcon('arrow')}`;
-  const answerText = q.type === 'clock' ? `השעה ${q.time.he}` : q.type === 'read' ? wordText(q.word) : q.type === 'listen' ? q.target.en : `${q.total}`;
+  const answerText = q.type === 'letter' ? q.letter.familiar : q.type === 'clock' ? `השעה ${q.time.he}` : q.type === 'read' ? wordText(q.word) : q.type === 'listen' ? q.target.en : `${q.total}`;
   feedback.innerHTML = `${uiIcon('check')} <span>כל הכבוד! <b ${q.type === 'listen' ? 'lang="en" dir="ltr"' : ''}>${answerText}</b></span>`;
   feedback.classList.add('success');
   document.querySelector('.buddy-bar').classList.add('celebrating');
@@ -407,7 +472,7 @@ function renderSettings() {
   dialog.querySelector('#settings-form').onsubmit = event => {
     event.preventDefault();
     const form = new FormData(event.target);
-    settings = sanitizeSettings({ nikud: form.has('nikud'), sound: form.has('sound'), motion: form.has('motion'), reading: form.get('reading'), mathMax: Number(form.get('mathMax')), englishMax: Number(form.get('englishMax')), clockLevel: form.get('clockLevel') });
+    settings = sanitizeSettings({ nikud: form.has('nikud'), sound: form.has('sound'), motion: form.has('motion'), reading: form.get('reading'), mathMax: Number(form.get('mathMax')), englishMax: Number(form.get('englishMax')), clockLevel: form.get('clockLevel'), letterLanguage: settings.letterLanguage });
     save(); narrator.stop(); applyPreferences(); closeDialog();
     // Keep a running question and its answer state intact until the next round.
     if (view === 'game') renderSoundButton(); else render();
@@ -452,6 +517,16 @@ app.addEventListener('click', event => {
     case 'clock-hand': clockDemo.highlight = button.dataset.hand; updateClockDemo(); clockSpeak(`clock-${button.dataset.hand}-hand`); break;
     case 'clock-speak-time': clockSpeak(clockTime(clockDemo.hour, clockDemo.minute).clip); break;
     case 'clock-option-audio': clockSpeak(button.dataset.clip); break;
+    case 'letter-language': settings.letterLanguage = button.dataset.language; letterDemo = { language: settings.letterLanguage, index: 0 }; save(); render(); announcements.say(letterNarration()); break;
+    case 'letter-select': selectLetter(Number(button.dataset.index)); break;
+    case 'letter-previous': selectLetter(letterDemo.index - 1); break;
+    case 'letter-next': selectLetter(letterDemo.index + 1); break;
+    case 'letter-sound': clockSpeak(demoLetter().clip); break;
+    case 'letter-demo': letterPad.demo(); announcements.say('letters-demo'); break;
+    case 'letter-step': letterPad.step(); break;
+    case 'letter-reset': letterPad.reset(); announcements.say('letters-trace'); break;
+    case 'letter-practice': if (letterReturn && round) { view = 'game'; render(); focusTitle(); replay(); } else startMission('letters', true); break;
+    case 'letters-learn': if (!round.resolved) openLetterLesson(true); break;
     case 'hint': hint(); break;
     case 'answer': answer(button); break;
     case 'tally': tally(button); break;

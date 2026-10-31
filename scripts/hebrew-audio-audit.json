@@ -780,6 +780,265 @@
       "detected_ipa": "kˈol haχaveʁˈim meχakˈim lˈaχ. baχaʁˈi haʁpatkˈa χadaʃˈa.",
       "phoneme_edit_ratio": 0.0,
       "seconds": 2.08
+    },
+    "letters-intro-hebrew": {
+      "sha256": "19153a1e847c4aa30d91fd7a4fa8a0ae0c1ee6e9751e2b84b9b321cbfdb178bb",
+      "expected_ipa": "bˈoʔi nakˈiʁ ʔˈet haʔotijˈot biχtˈav jˈad. liχtsˈi ʔˈal ʔˈot, veʁeʔˈi ʔˈejχ kotvˈim ʔotˈa.",
+      "detected_ipa": "bˈoʔi nakˈiʁ ʔˈet haʔotijˈot biχtˈav jˈad, liχtsˈi ʔˈal ʔˈot veʁaʔˈi ʔˈejχ kotvˈim ʔotˈa.",
+      "phoneme_edit_ratio": 0.0152,
+      "seconds": 5.33
+    },
+    "letters-intro-english": {
+      "sha256": "f624621f3c7020e8d9a5d1ea80a38b035ba2ecc3bd72f440ebd56c136dda3193",
+      "expected_ipa": "bˈoʔi nakˈiʁ ʔˈet haʔotijˈot haktanˈot beʔanɡlˈit. haʔˈot haɡdolˈa vehaʔˈot haktanˈa hˈen ʔotˈa ʔˈot.",
+      "detected_ipa": "bˈoʔi nakˈiʁ ʔˈet haʔotijˈot haktanˈot beʔanɡlˈit. haʔˈot haɡdolˈa vehaʔˈot haktanˈa hˈen ʔotˈa ʔˈot.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 5.34
+    },
+    "letters-demo": {
+      "sha256": "a93a8a6f6e521e1b0ffd71cfc4e3a7c1c881addb9601885f98e78646a8ecc89f",
+      "expected_ipa": "nistakˈel ʔˈejχ kotvˈim. matχilˈim banekudˈa hajeʁukˈa, vemamʃiχˈim ʔˈim haʔipaʁˈon.",
+      "detected_ipa": "nistakˈel ʔˈejχ kotvˈim, matχilˈim banekudˈa hajeʁukˈa vemamʃiχˈim ʔˈim haʔipaʁˈon.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 5.19
+    },
+    "letters-trace": {
+      "sha256": "5fc4e1b5006154ce8183e9eea788d5ca3f54145501454c331409b9b704605580",
+      "expected_ipa": "ʔaχʃˈav toʁˈeχ! ʔivʁˈi baʔˈetsbaʔ ʔˈal hakavˈim. hatχilˈi banekudˈa hajeʁukˈa.",
+      "detected_ipa": "ʔaχʃˈav toʁˈeχ, ʔivʁˈi baʔetsbˈa ʔˈal hakavˈim, hatχilˈi banekudˈa hajeʁukˈa.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 5.27
+    },
+    "letters-trace-done": {
+      "sha256": "6760b2ee51e54aa722337d86bc0afc3f368afcb54f7a10c296ba9abb135442fe",
+      "expected_ipa": "kˈol hakavˈod! katˈavt ʔˈet haʔˈot!",
+      "detected_ipa": "kˈol hakavˈod, katˈavt ʔˈet haʔˈot.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 5.06
+    },
+    "letters-trace-start": {
+      "sha256": "c25d4665b87f690686a2f60e734d5b9fde1bcff42a7a53b4cbc77663f6de02d3",
+      "expected_ipa": "natχˈil banekudˈa hajeʁukˈa, venamʃˈiχ ʔˈal hakˈav.",
+      "detected_ipa": "natχˈil banekudˈa hajeʁukˈa venamʃˈiχ ʔˈal hakˈav.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.88
+    },
+    "letter-match-hebrew": {
+      "sha256": "307b852f3c3a1df5ee331c18ccd4d751af29c23b3c127a37f3be7c72c1c6ba73",
+      "expected_ipa": "ʔˈejzo ʔˈot biχtˈav jˈad matʔimˈa laʔˈot ʃelemˈala?",
+      "detected_ipa": "ʔˈejzo ʔˈot beχtˈav jˈad matʔimˈa laʔˈot ʃelemˈaʔla?",
+      "phoneme_edit_ratio": 0.025,
+      "seconds": 4.97
+    },
+    "letter-match-english": {
+      "sha256": "648265e0242a2a8fd3f96c015f6fcc59235d240e67129b25849b52c2f3cc802b",
+      "expected_ipa": "ʔˈejzo ʔˈot ktanˈa matʔimˈa laʔˈot haɡdolˈa?",
+      "detected_ipa": "ʔˈejzo ʔˈot ktanˈa matʔimˈa laʔˈot haɡdolˈa?",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.75
+    },
+    "letters-hint": {
+      "sha256": "3fb291fef67a6850f68d10d96af6412e1a0257c7d4c1db79e6b8d20d568fb77b",
+      "expected_ipa": "nizakˈeʁ bejˈaχad ʔˈejχ kotvˈim ʔˈet haʔˈot.",
+      "detected_ipa": "nizakˈeʁ bejˈaχad ʔˈejχ kotvˈim ʔˈet haʔˈot.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.89
+    },
+    "letters-final": {
+      "sha256": "957aaafdfc2f54b00e9098e39b7bc3e4ac5d4eabff6238c7d6479ea3be74ca62",
+      "expected_ipa": "zˈo ʔˈot sofˈit. kotvˈim ʔotˈa besˈof milˈa.",
+      "detected_ipa": "zˈo ʔˈod sofˈit, kotvˈim ʔotˈa besˈof milˈa.",
+      "phoneme_edit_ratio": 0.0303,
+      "seconds": 4.83
+    },
+    "letter-he-alef": {
+      "sha256": "f0113cafc370d7a57e37f5eb8042a1f498f03343ab7c3de0c747eb416040c231",
+      "expected_ipa": "haʔˈot ʔˈalef",
+      "detected_ipa": "haʔˈot ʔˈa.",
+      "phoneme_edit_ratio": 0.3333,
+      "seconds": 4.84
+    },
+    "letter-he-bet": {
+      "sha256": "a6137ecc057dedc38059abf30ccba974dcab00bf07f41cb921700943f341ee78",
+      "expected_ipa": "haʔˈot bˈet",
+      "detected_ipa": "haʔˈot bˈajit",
+      "phoneme_edit_ratio": 0.375,
+      "seconds": 4.59
+    },
+    "letter-he-gimel": {
+      "sha256": "e885e8922abda84a36374cb5412acc1ec7ca54bb43597f0fc4684de4f0366d3d",
+      "expected_ipa": "haʔˈot ɡˈimel",
+      "detected_ipa": "haʔˈot ɡˈimel",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.61
+    },
+    "letter-he-dalet": {
+      "sha256": "c882917f5cedb6b1aa775206c204d8e7e3b203f1af223ab996d834340b42718e",
+      "expected_ipa": "haʔˈot dˈalet",
+      "detected_ipa": "haʔˈot dˈalet.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.47
+    },
+    "letter-he-he": {
+      "sha256": "7a038db93d50a26395bf005c9cff6a5db1a24f10da959292aa91393e4619ad0b",
+      "expected_ipa": "haʔˈot hˈej",
+      "detected_ipa": "haʔˈot",
+      "phoneme_edit_ratio": 0.5,
+      "seconds": 4.52
+    },
+    "letter-he-vav": {
+      "sha256": "df773dbf3d10e9ff316283264f0b47aee8f227ce12262588cea5296e5c4054bd",
+      "expected_ipa": "haʔˈot vˈav",
+      "detected_ipa": "haʔˈot vˈav",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.45
+    },
+    "letter-he-zayin": {
+      "sha256": "c6eb5cb7bc56aa49ffa2faec3df73bda7885cb3f91bd261bcb25136be17b2679",
+      "expected_ipa": "haʔˈot zˈajin",
+      "detected_ipa": "haʔˈot zˈajin",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.48
+    },
+    "letter-he-het": {
+      "sha256": "f3091340695f3f3007532fe46f04ef21a29f10648b7eb26bcddd113323f49d5a",
+      "expected_ipa": "haʔˈot χˈet",
+      "detected_ipa": "haʔˈot χˈet",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.62
+    },
+    "letter-he-tet": {
+      "sha256": "c86cf9eb3b26497c8b617c8d0001c1199725e76c2587c2a2b7601f28a46164a0",
+      "expected_ipa": "haʔˈot tˈet",
+      "detected_ipa": "haʔˈot tˈet",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.69
+    },
+    "letter-he-yud": {
+      "sha256": "64a510140b7989d06baa4f8b8ba3ab9230d8f06fe3bac97146029cf619e957dc",
+      "expected_ipa": "haʔˈot jˈud",
+      "detected_ipa": "haʔˈot jˈud",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.59
+    },
+    "letter-he-kaf": {
+      "sha256": "16d4811c3c854bc7b9754f71d0ab19ddfc3218156bd3a842d06b305ad9b5617b",
+      "expected_ipa": "haʔˈot kˈaf",
+      "detected_ipa": "haʔˈot kˈaf.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.67
+    },
+    "letter-he-lamed": {
+      "sha256": "c1eb051057b620cc721c0234e4c9622273f7054498c48d5f0e9000edd4311b13",
+      "expected_ipa": "haʔˈot lˈamed",
+      "detected_ipa": "haʔˈot lˈamed.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.55
+    },
+    "letter-he-mem": {
+      "sha256": "d7ceae46fcfb36ff024e7b1de75ea7799b7ee98198f84480d14dec5914200c6c",
+      "expected_ipa": "haʔˈot mˈem",
+      "detected_ipa": "haʔˈot mˈeʁ.",
+      "phoneme_edit_ratio": 0.125,
+      "seconds": 4.7
+    },
+    "letter-he-nun": {
+      "sha256": "2213fdda778025777cb11cde4e501534fed779ab9b69eb090836c466caa3c873",
+      "expected_ipa": "haʔˈot nˈun",
+      "detected_ipa": "haʔˈot nˈon",
+      "phoneme_edit_ratio": 0.125,
+      "seconds": 4.62
+    },
+    "letter-he-samekh": {
+      "sha256": "2626802249972d1e0ff217cde9a4660e75c697851f45f3f487ae3dddc74dd93c",
+      "expected_ipa": "haʔˈot sˈameχ",
+      "detected_ipa": "haʔˈot sˈameχ.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.55
+    },
+    "letter-he-ayin": {
+      "sha256": "ba2e2b15f55db1a2cccb42671a6b993b5b529df35a34681367b401290fd04dc9",
+      "expected_ipa": "haʔˈot ʔˈajin",
+      "detected_ipa": "haʔˈot ʔˈajin.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.59
+    },
+    "letter-he-pe": {
+      "sha256": "ab89803846dc7810c8ef529863496765f56e4ebb5a7fc50c2019b8dfc733c49d",
+      "expected_ipa": "haʔˈot pˈej",
+      "detected_ipa": "haʔˈot pˈe.",
+      "phoneme_edit_ratio": 0.125,
+      "seconds": 4.47
+    },
+    "letter-he-tsadi": {
+      "sha256": "749d461c32a7cb31a729deeddee38faf200ba3548f417ec575d2e0fd6da6fc6d",
+      "expected_ipa": "haʔˈot tsˈadi",
+      "detected_ipa": "haʔˈot tsˈadi",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.56
+    },
+    "letter-he-kof": {
+      "sha256": "0c3b149505b6c2beef50593bdf27d631aba4d82d3345a19bc6f171ffa05cf932",
+      "expected_ipa": "haʔˈot kˈof",
+      "detected_ipa": "haʔˈot kˈof",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.52
+    },
+    "letter-he-resh": {
+      "sha256": "7ff25de2ac1124893b9e1e9c094a1088a3c79e9c5e298d751353fcc19961186a",
+      "expected_ipa": "haʔˈot ʁˈeʃ",
+      "detected_ipa": "haʔˈot ʁˈeʃ",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.61
+    },
+    "letter-he-shin": {
+      "sha256": "8e810a0074dd7610ded54fa4269aabc27c08801b9d0a0566061d6eee0b8303f8",
+      "expected_ipa": "haʔˈot ʃˈin",
+      "detected_ipa": "haʔotʃˈin",
+      "phoneme_edit_ratio": 0.1111,
+      "seconds": 4.45
+    },
+    "letter-he-tav": {
+      "sha256": "488efffce57a58c2f3d28ac39f47f6916be754c63067b774db5c1d0af6ba7ebc",
+      "expected_ipa": "haʔˈot tˈav",
+      "detected_ipa": "haʔˈot tˈav",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.53
+    },
+    "letter-he-kaf-final": {
+      "sha256": "33d372e55461ca26041698672e60764e362d15f8bd6d99e3936bf829e69e646d",
+      "expected_ipa": "haʔˈot kˈaf sofˈit",
+      "detected_ipa": "haʔˈot kˈav sofˈit.",
+      "phoneme_edit_ratio": 0.0714,
+      "seconds": 4.64
+    },
+    "letter-he-mem-final": {
+      "sha256": "befdcc1767dbc819592d6ec29ffe53a48aabad5564a9474aaf08935c40115c54",
+      "expected_ipa": "haʔˈot mˈem sofˈit",
+      "detected_ipa": "haʔˈot mˈam sofˈit",
+      "phoneme_edit_ratio": 0.0714,
+      "seconds": 4.62
+    },
+    "letter-he-nun-final": {
+      "sha256": "30c608158ee702aa04f928bc76380f35bf2bda7c212f084507de2ffed051b7b8",
+      "expected_ipa": "haʔˈot nˈun sofˈit",
+      "detected_ipa": "haʔˈot nˈun sofˈit",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.7
+    },
+    "letter-he-pe-final": {
+      "sha256": "4cae02537a8a38eebfa195b9b89f2d76a418ef9b87b73e8b9049f937e0dca78c",
+      "expected_ipa": "haʔˈot pˈej sofˈit",
+      "detected_ipa": "haʔˈot pejsofˈit",
+      "phoneme_edit_ratio": 0.0714,
+      "seconds": 4.61
+    },
+    "letter-he-tsadi-final": {
+      "sha256": "394fcbfb03ad65f61164e62ddc771bd6a41bc653c53365308626284d5c18c8b3",
+      "expected_ipa": "haʔˈot tsˈadi sofˈit",
+      "detected_ipa": "haʔˈot tsˈadi sofˈit.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.61
     }
   }
 }
