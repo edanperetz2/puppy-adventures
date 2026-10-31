@@ -1,0 +1,98 @@
+/* Browser chrome, notches, rounded corners and home indicators on mobile. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+#app{min-width:0}
+.answer-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.answer-button{min-width:0}
+.answer-button>.art,.answer-button>.pup{max-width:100%;min-width:0}
+dialog{max-height:85vh;max-height:85dvh;overscroll-behavior:contain}
+.audio-notice button{margin-inline-start:8px;min-height:44px;padding:6px 12px;border-radius:10px;background:#f0e7d5;color:#8d704d}
+.album-sync{margin-top:25px;padding-top:22px;border-top:1px solid var(--line)}
+.album-sync h3{font-size:18px;margin-bottom:9px}
+.album-sync p{font-size:12px;color:#948692;line-height:1.8;margin:7px 0 14px}
+.album-sync .primary-button,.album-sync .secondary-button{font-size:13px;min-height:46px;padding:10px 16px;gap:8px}
+.sync-actions{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.pair-input{font-size:16px;direction:ltr;text-align:left;min-height:46px;width:100%;border:1px solid #dcd4c7;border-radius:11px;background:#fffdf7;padding:10px 12px;color:var(--ink)}
+.sync-status{font-size:11px;color:var(--green);min-height:24px}
+.sync-status.pending{color:#a48251}
+.sync-note{font-size:10px!important}
+.pair-error{color:#aa6b60!important}
+.sync-actions .text-button{padding:8px;font-size:11px}
+@media(pointer:coarse),(max-width:570px){
+  .circle-button,.sound-toggle{min-width:44px;min-height:44px}
+  .parent-button,.nav-button{min-width:44px;min-height:44px}
+  .count-object,.many .count-object,.add-group .count-object{min-width:44px;min-height:44px}
+  .text-button{min-height:44px}
+}
+@media(max-width:760px){
+  select,input{font-size:16px}
+  .setting-row select{max-width:61%;font-size:16px}
+  .top-actions{gap:4px}
+}
+@media(orientation:portrait) and (max-width:570px){
+  .large-add{flex-direction:column;gap:8px}
+  .large-add .add-group{max-width:100%;width:100%;flex:none}
+  .large-add .object-group{max-width:100%}
+  .large-add .plus-sign{font-size:24px;line-height:1}
+  .large-add .group-number{right:0}
+}
+@media(orientation:portrait) and (max-width:570px) and (max-height:700px){
+  .playing .topbar{height:62px;padding-block:9px}
+  .game-page .step-track{margin:7px auto 14px}
+  .question-heading h1{font-size:20px}
+  .question-visual{min-height:144px;padding:9px 0 13px}
+  .word-card{padding:7px 30px 14px}
+  .target-word{font-size:48px}
+  .listen-orb{height:130px;gap:8px}
+  .listen-orb>.ui-icon{width:36px;height:36px}
+  .answer-button{min-height:100px}
+  .numeric-options .answer-button{min-height:78px}
+  .feedback-row{min-height:60px;margin-top:8px}
+}
+@media(max-width:370px){
+  .topbar{gap:8px;padding-inline:12px}
+  .brand{gap:6px;font-size:9px}
+  .brand strong{font-size:12px}
+  .brand-mark{width:36px;height:36px;flex-shrink:0}
+  .brand-mark .art{width:25px}
+}
+/* Short screens keep pictures and answers side by side, while larger groups
+   and enlarged browser text remain scrollable. */
+@media(orientation:landscape) and (max-height:520px) and (min-width:570px){
+  .playing .topbar{height:60px;padding-block:7px}
+  .playing .brand-mark{width:40px;height:40px;border-radius:13px}
+  .playing .brand strong{font-size:15px}
+  .playing .brand{font-size:10px}
+  .game-page{max-width:1000px;padding-top:0}
+  .game-topline .text-button{min-height:30px}
+  .step-track{margin:4px auto 12px;gap:12px}
+  .step-dot{width:23px;height:23px;font-size:10px}
+  .step-dot:not(:last-child):after{width:12px}
+  .game-board{display:grid;grid-template-columns:1fr 1.25fr;column-gap:22px;row-gap:0;padding:14px 22px 8px}
+  .question-heading{grid-column:1/-1}
+  .question-heading h1{font-size:21px}
+  .question-heading .section-kicker{display:none}
+  .question-heading .circle-button{width:40px;height:40px}
+  .question-visual{grid-column:1;grid-row:2;min-height:133px;padding:8px 0}
+  .answer-grid{grid-column:2;grid-row:2;align-self:center;width:100%;gap:10px}
+  .answer-button{min-height:102px;padding:10px;border-radius:18px}
+  .answer-button>.art,.answer-button>.pup{width:78px}
+  .numeric-options .answer-button{min-height:82px}
+  .answer-number{font-size:40px}
+  .word-card{min-width:180px;padding:5px 25px 10px}
+  .target-word{font-size:43px}
+  .card-label{font-size:10px}
+  .listen-orb{height:125px;width:158px;border-radius:23px;gap:7px}
+  .listen-orb>.ui-icon{width:32px;height:32px}
+  .listen-orb>span:last-child{font-size:10px}
+  .feedback-row{grid-column:1/-1;min-height:47px;margin-top:4px}
+  .feedback{font-size:11px}.feedback.success{font-size:13px}
+  .hint-button,.next-button{min-height:42px;font-size:11px;padding:8px 13px}
+  .buddy-bar{margin-top:7px;font-size:11px}
+  .buddy-bar .pup{width:38px}
+  .object-group{padding:7px;gap:0}
+  .count-object,.many .count-object,.add-group .count-object{width:36px;height:38px;padding:3px}
+  .equation{font-size:19px;margin-top:9px;gap:10px}
+  .addition-stage{gap:10px}
+  .tally-instruction{font-size:9px}
+}

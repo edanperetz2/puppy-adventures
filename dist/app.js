@@ -2,6 +2,9 @@ import { MISSIONS, STICKERS } from './content.js';
 import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js';
 import { art, pup, scene, uiIcon } from './art.js';
 import { Narrator } from './audio.js';
+import { SharedAlbum, normalizeCode } from './sync.js';
+import { SYNC_CONFIG } from './sync-config.js';
+import { mountFamilyPanel, updateFamilyStatus } from './family-ui.js';
 
 const app = document.querySelector('#app');
 const dialog = document.querySelector('#parent-dialog');
@@ -18,6 +21,22 @@ try {
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
   if (saved) { settings = sanitizeSettings(saved.settings); progress = sanitizeProgress(saved.progress); }
 } catch { /* A corrupt or unavailable save must never prevent play. */ }
+
+const pendingJoinCode = normalizeCode(new URLSearchParams(location.hash.slice(1)).get('album'));
+if (pendingJoinCode) history.replaceState(null, '', location.pathname + location.search);
+const album = new SharedAlbum({ config: SYNC_CONFIG, onChange: source => {
+  if (!source.linked) return;
+  const updated = source.progress;
+  const changed = JSON.stringify(progress) !== JSON.stringify(updated);
+  progress = updated;
+  save();
+  updateFamilyStatus(source);
+  updateParentProgress();
+  const reset = dialog.querySelector('[data-dialog="reset"]');
+  if (reset) reset.textContent = 'ניתוק מהאלבום ואיפוס המכשיר הזה';
+  if (changed && !dialog.open && ['home', 'album'].includes(view)) render();
+} });
+if (album.linked) progress = album.progress;
 
 const narrator = new Narrator(status => {
   audioStatus = status;
@@ -84,9 +103,9 @@ function tallyGroup(n, offset, item) {
 
 function questionVisual(q) {
   if (q.type === 'read') return `<div class="word-card"><span class="card-label">מה כתוב כאן?</span><div class="target-word" lang="he">${wordText(q.word)}</div><span class="word-underline"></span></div>`;
-  if (q.type === 'listen') return `<button class="listen-orb" data-action="replay" aria-label="שמיעת המילה באנגלית">${uiIcon('sound')}<span class="sound-waves"><i></i><i></i><i></i><i></i><i></i></span><span>מקשיבות ומגלות</span></button>`;
+  if (q.type === 'listen') return `<button class="listen-orb" data-action="listen-word" aria-label="שמיעת המילה באנגלית">${uiIcon('sound')}<span class="sound-waves"><i></i><i></i><i></i><i></i><i></i></span><span>לחצי ושמעי את המילה</span></button>`;
   if (q.type === 'count') return `<div class="counting-stage">${tallyGroup(q.a, 0, q.item)}<p class="tally-instruction">אפשר לגעת בכל פריט ולספור ביחד</p></div>`;
-  return `<div class="addition-stage" dir="ltr"><div class="add-group">${tallyGroup(q.a, 0, q.item)}<span class="group-number">${q.a}</span></div><span class="plus-sign" aria-label="ועוד">+</span><div class="add-group">${tallyGroup(q.b, q.a, q.item)}<span class="group-number">${q.b}</span></div></div><div class="equation" dir="ltr" aria-label="${q.a} ועוד ${q.b}">${q.a} <span>+</span> ${q.b} <span>=</span> <b>?</b></div>`;
+  return `<div class="addition-stage ${Math.max(q.a, q.b) > 10 ? 'large-add' : ''}" dir="ltr"><div class="add-group">${tallyGroup(q.a, 0, q.item)}<span class="group-number">${q.a}</span></div><span class="plus-sign" aria-label="ועוד">+</span><div class="add-group">${tallyGroup(q.b, q.a, q.item)}<span class="group-number">${q.b}</span></div></div><div class="equation" dir="ltr" aria-label="${q.a} ועוד ${q.b}">${q.a} <span>+</span> ${q.b} <span>=</span> <b>?</b></div>`;
 }
 
 function answerVisual(q, option) {
@@ -140,7 +159,7 @@ function render() {
 }
 
 function focusTitle() {
-  window.scrollTo({ top: 0, behavior: 'instant' });
+  window.scrollTo({ top: 0, behavior: 'auto' });
   document.querySelector('main h1')?.focus({ preventScroll: true });
 }
 
@@ -234,7 +253,7 @@ function nextQuestion() {
   if (!round?.resolved) return;
   if (round.index === SESSION_LENGTH - 1) {
     if (!round.awarded) {
-      const result = finishSession(progress, round.mission, round.helped.size);
+      const result = album.linked ? album.complete(round.mission, round.helped.size) : finishSession(progress, round.mission, round.helped.size);
       progress = result.progress;
       round.sticker = result.sticker;
       round.awarded = true;
@@ -264,13 +283,20 @@ function celebrate(amount) {
 }
 
 function openDialog(content) {
-  dialogOpener = document.activeElement;
+  if (!dialog.open) dialogOpener = document.activeElement;
   dialog.innerHTML = `<button class="dialog-close circle-button" aria-label="סגירה" data-dialog="close">${uiIcon('close')}</button>${content}`;
   dialog.querySelector('[data-dialog="close"]').onclick = closeDialog;
   if (!dialog.open) dialog.showModal();
 }
 
-function closeDialog() { dialog.close(); dialogOpener?.focus?.(); }
+function closeDialog() {
+  const action = dialogOpener?.dataset?.action;
+  dialog.close();
+  if (view !== 'game') {
+    render();
+    if (action) app.querySelector(`[data-action="${action}"]`)?.focus();
+  } else dialogOpener?.focus?.();
+}
 
 function parentGate() {
   narrator.stop();
@@ -293,10 +319,12 @@ function renderSettings() {
     <label class="setting-toggle"><span><b>תנועה וחגיגות</b><small>כיבוי מצמצם אנימציות</small></span><input name="motion" type="checkbox" ${settings.motion ? 'checked' : ''}></label>
     <p class="parent-note">ההגדרות ייכנסו לתוקף בהרפתקה הבאה. האנגלית מבוססת על הקשבה ותמונות. מילים כתובות מוצגות באותיות גדולות בלבד.</p>
     <button class="primary-button" type="submit">שמירת ההגדרות ${uiIcon('check')}</button></form>
-    <section class="parent-progress"><h3>מה כבר גילינו?</h3><p>${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות</p><table><thead><tr><th>תחום</th><th>תשובות ללא עזרה</th><th>עם רמז או ניסיון נוסף</th></tr></thead><tbody>${Object.values(MISSIONS).map(m => `<tr><th>${m.subject}</th><td>${progress.skills[m.id].correct - progress.skills[m.id].assisted}</td><td>${progress.skills[m.id].assisted}</td></tr>`).join('')}</tbody></table><p class="parent-note">מוצגות רק הרפתקאות שהושלמו. זהו תיעוד משחק, ולא מבחן או הערכת יכולת.</p></section>
-    <p class="privacy-note">ההתקדמות נשמרת בדפדפן הזה בלבד. אין חשבון, פרסומות, מעקב או בקשת מיקרופון. החלפת מכשיר או ניקוי נתוני הדפדפן לא מעבירים את האלבום.</p>
+    <section class="parent-progress"><h3>מה כבר גילינו?</h3><p id="parent-progress-summary">${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות</p><table><thead><tr><th>תחום</th><th>תשובות ללא עזרה</th><th>עם רמז או ניסיון נוסף</th></tr></thead><tbody>${Object.values(MISSIONS).map(m => `<tr><th>${m.subject}</th><td data-independent="${m.id}">${progress.skills[m.id].correct - progress.skills[m.id].assisted}</td><td data-assisted="${m.id}">${progress.skills[m.id].assisted}</td></tr>`).join('')}</tbody></table><p class="parent-note">מוצגות רק הרפתקאות שהושלמו. זהו תיעוד משחק, ולא מבחן או הערכת יכולת.</p></section>
+    <section id="family-panel"></section>
+    <p class="privacy-note">אפשר לשחק ללא חיבור לאלבום משפחתי. בחיבור לאלבום, נשמרים בו רק מספר ההרפתקאות והעזרה בכל תחום. אין שם, אימייל או חשבון לילדה, פרסומות, מעקב או בקשת מיקרופון. שמרו את הקוד המשפחתי כדי לחבר מכשיר חדש.</p>
     <p class="save-notice" ${storageAvailable ? 'hidden' : ''}>הדפדפן לא מאפשר שמירה כרגע. אפשר לשחק, אבל ההתקדמות עלולה להיעלם בסגירה.</p>
-    <button class="text-button reset-button" data-dialog="reset">איפוס ההתקדמות במכשיר הזה</button>`);
+    <button class="text-button reset-button" data-dialog="reset">${album.linked ? 'ניתוק מהאלבום ואיפוס המכשיר הזה' : 'איפוס ההתקדמות במכשיר הזה'}</button>`);
+  mountFamilyPanel(dialog.querySelector('#family-panel'), { album, getLocalProgress: () => progress, pendingCode: pendingJoinCode });
   dialog.querySelector('#settings-form').onsubmit = event => {
     event.preventDefault();
     const form = new FormData(event.target);
@@ -306,10 +334,21 @@ function renderSettings() {
     if (view === 'game') renderSoundButton(); else render();
   };
   dialog.querySelector('[data-dialog="reset"]').onclick = () => {
-    openDialog(`<h2 id="parent-title">לאפס את האלבום?</h2><p>המדבקות וההתקדמות בדפדפן הזה יימחקו. הגדרות המשחק יישמרו.</p><div class="dialog-actions"><button class="secondary-button" data-dialog="cancel-reset">ביטול</button><button class="primary-button" data-dialog="confirm-reset">איפוס ההתקדמות</button></div>`);
+    openDialog(`<h2 id="parent-title">לאפס את המכשיר הזה?</h2><p>המדבקות וההתקדמות בדפדפן הזה יימחקו. הגדרות המשחק יישמרו.${album.linked ? ' החיבור לאלבום המשפחתי יוסר. האלבום שכבר סונכרן יישמר עבור המכשירים האחרים.' : ''}</p><div class="dialog-actions"><button class="secondary-button" data-dialog="cancel-reset">ביטול</button><button class="primary-button" data-dialog="confirm-reset">איפוס ההתקדמות</button></div>`);
     dialog.querySelector('[data-dialog="cancel-reset"]').onclick = renderSettings;
-    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { progress = freshProgress(); save(); round = null; view = 'home'; render(); renderSettings(); };
+    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); progress = freshProgress(); save(); round = null; view = 'home'; render(); renderSettings(); };
   };
+}
+
+function updateParentProgress() {
+  const summary = dialog.querySelector('#parent-progress-summary');
+  if (summary) summary.textContent = `${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות`;
+  for (const mission of Object.keys(MISSIONS)) {
+    const independent = dialog.querySelector(`[data-independent="${mission}"]`);
+    const assisted = dialog.querySelector(`[data-assisted="${mission}"]`);
+    if (independent) independent.textContent = progress.skills[mission].correct - progress.skills[mission].assisted;
+    if (assisted) assisted.textContent = progress.skills[mission].assisted;
+  }
 }
 
 app.addEventListener('click', event => {
@@ -322,6 +361,7 @@ app.addEventListener('click', event => {
     case 'recommended': recommended(); break;
     case 'welcome': narrator.say('welcome'); break;
     case 'replay': replay(); break;
+    case 'listen-word': if (!settings.sound) { settings.sound = true; narrator.enabled = true; save(); renderSoundButton(); } narrator.say(current().targetClip); break;
     case 'hint': hint(); break;
     case 'answer': answer(button); break;
     case 'tally': tally(button); break;
@@ -333,10 +373,15 @@ app.addEventListener('click', event => {
 });
 
 dialog.addEventListener('click', event => { if (event.target === dialog && event.offsetX >= 0 && event.offsetX <= dialog.clientWidth && event.offsetY >= 0 && event.offsetY <= dialog.clientHeight) return; if (event.target === dialog) closeDialog(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden) narrator.stop(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) narrator.stop(); else void album.flush(); });
+window.addEventListener('online', () => { void album.flush(); });
+window.addEventListener('focus', () => { void album.flush(); });
+setInterval(() => { if (!document.hidden && album.linked) void album.flush(); }, 15000);
 window.addEventListener('pagehide', () => narrator.stop());
 render();
+if (pendingJoinCode && !album.linked) parentGate();
+if (album.linked) void album.flush();
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-  navigator.serviceWorker.register('./sw.js', { type: 'module' }).catch(() => { /* Online play remains available. */ });
+  navigator.serviceWorker.register('./sw.js').catch(() => { /* Online play remains available. */ });
 }
