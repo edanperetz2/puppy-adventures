@@ -3,6 +3,19 @@
 // Recording generation uses these sounds directly, so a voice never has to
 // guess from Hebrew spelling. This data is never shown as reading text.
 export const HEBREW_LEXICON = Object.freeze({
+  "מַסְלוּל": "maslˈul",
+  "לְשַׂחֵק": "lesaχˈek",
+  "וּלְזַהוֹת": "ulezahˈot",
+  "אוֹתִיּוֹת": "ʔotijˈot",
+  "וְאֶפְשָׁר": "veʔefʃˈaʁ",
+  "לִלְמֹד": "lilmˈod",
+  "לִכְתֹּב": "liχtˈov",
+  "נַבִּיט": "nabˈit",
+  "בָּאוֹת": "baʔˈot",
+  "שֶׁמַּתְאִימָה": "ʃematʔimˈa",
+  "לָהּ": "lˈa",
+  "הַצּוּרָה": "hatsuʁˈa",
+  "שֶׁלָּהּ": "ʃelˈa",
   "כַּבָּאִית": "kabaʔˈit",
   "אַמְבּוּלַנְס": "ʔambulˈans",
   "אוֹטוֹבּוּס": "ʔotobˈus",

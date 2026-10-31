@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { SharedAlbum, newCode, normalizeCode, formatCode, withPending } from '../dist/sync.js';
+import { SharedAlbum, newCode, normalizeCode, formatCode, withPending, compactContribution } from '../dist/sync.js';
 import { finishSession, freshProgress } from '../dist/engine.js';
 import { MISSION_IDS } from '../dist/content.js';
 import { STICKERS, LEGACY_STICKERS } from '../dist/stickers.js';
+import { LETTERS } from '../dist/letters.js';
+import { sanitizeLetterPractice, suggestedLetters } from '../dist/letter-progress.js';
 
 function storage() {
   const values = new Map();
@@ -16,6 +18,7 @@ function server() {
   const fetcher = async (_url, options) => {
     if (!online) throw new Error('offline');
     const request = JSON.parse(options.body);
+    if (Buffer.byteLength(JSON.stringify(request.device_totals)) > 4096) return Response.json({ message: 'invalid_progress' }, { status: 400 });
     if (!albums.has(request.access_code)) {
       if (!request.create_album) return Response.json({ message: 'album_not_found' }, { status: 400 });
       albums.set(request.access_code, new Map());
@@ -28,12 +31,21 @@ function server() {
       old.skills[mission].correct = old.missions[mission] * 6;
       old.skills[mission].assisted = Math.max(old.skills[mission].assisted, next.skills[mission].assisted);
     }
+    const letters = sanitizeLetterPractice(next.letterPractice);
+    for (const language of Object.keys(LETTERS)) {
+      old.letterPractice[language].start = Math.max(old.letterPractice[language].start, letters[language].start);
+      for (const mode of ['recognition', 'writing']) old.letterPractice[language][mode] = old.letterPractice[language][mode].map((n, i) => Math.max(n, letters[language][mode][i]));
+    }
     devices.set(request.device_key, old);
     const combined = freshProgress();
     for (const value of devices.values()) for (const mission of MISSION_IDS) {
       combined.missions[mission] += value.missions[mission];
       combined.skills[mission].correct += value.skills[mission].correct;
       combined.skills[mission].assisted += value.skills[mission].assisted;
+    }
+    for (const value of devices.values()) for (const language of Object.keys(LETTERS)) {
+      combined.letterPractice[language].start = Math.max(combined.letterPractice[language].start, value.letterPractice[language].start);
+      for (const mode of ['recognition', 'writing']) combined.letterPractice[language][mode] = combined.letterPractice[language][mode].map((n, i) => n + value.letterPractice[language][mode][i]);
     }
     const response = withPending(combined, freshProgress(), freshProgress());
     // The deployed RPC returns the original twelve IDs plus uncapped totals.
@@ -44,6 +56,92 @@ function server() {
 }
 
 const config = { url: 'https://test.example', key: 'public-test-key' };
+
+test('A Safari album with 26 stickers pairs to an empty Home Screen app and survives reopening', async () => {
+  const api = server(), safariStore = storage(), homeStore = storage();
+  let safari = new SharedAlbum({ config, storage: safariStore, fetcher: api.fetcher });
+  let home = new SharedAlbum({ config, storage: homeStore, fetcher: api.fetcher });
+  const original = legacyProgress(26), code = newCode();
+  await safari.link(code, original, { create: true });
+  await home.link(code, freshProgress());
+  assert.equal(home.progress.stickers.length, 26);
+  assert.equal(safari.progress.stickers.length, 26);
+  assert.equal(original.sessions, 26);
+  safari = new SharedAlbum({ config, storage: safariStore, fetcher: api.fetcher });
+  home = new SharedAlbum({ config, storage: homeStore, fetcher: api.fetcher });
+  assert.equal(home.progress.stickers.length, 26);
+  assert.equal(safari.progress.stickers.length, 26);
+  home.complete('math', 0);
+  await home.flush(); await safari.flush();
+  assert.equal(home.progress.stickers.length, 27);
+  assert.equal(safari.progress.stickers.length, 27);
+  await home.flush(); await safari.flush();
+  assert.equal(home.progress.sessions, 27);
+});
+
+test('Full albums send compact counters within the real RPC payload limit', () => {
+  const progress = legacyProgress(1000);
+  progress.stickers = [...STICKERS];
+  for (const language of Object.keys(LETTERS)) for (const mode of ['recognition', 'writing']) progress.letterPractice[language][mode].fill(1000000);
+  const body = compactContribution(progress);
+  assert.ok(Buffer.byteLength(JSON.stringify(body)) < 4096);
+  assert.equal(body.stickers, undefined);
+  assert.equal(body.missions.hebrew, 1000);
+  assert.equal(body.letterPractice.hebrew.writing[26], 1000000);
+});
+
+test('Both letter paths sync across devices and offline writing survives reopening without awarding adventures', async () => {
+  const api = server(), saved = storage();
+  const first = new SharedAlbum({ config, storage: storage(), fetcher: api.fetcher });
+  let second = new SharedAlbum({ config, storage: saved, fetcher: api.fetcher });
+  const code = newCode();
+  await first.link(code, freshProgress(), { create: true });
+  await second.link(code, freshProgress());
+  first.complete('letters', 1, { language: 'hebrew', ids: LETTERS.hebrew.slice(0, 3).map(letter => letter.id) });
+  await first.flush(); await second.flush();
+  assert.deepEqual(suggestedLetters(second.progress.letterPractice, 'hebrew').map(letter => letter.familiar), ['ד','ה','ו']);
+  api.online(false);
+  second.recordWriting('english', 'en-l');
+  await second.flush();
+  second = new SharedAlbum({ config, storage: saved, fetcher: api.fetcher });
+  assert.equal(second.progress.letterPractice.english.writing[11], 1);
+  assert.equal(second.progress.sessions, 1);
+  assert.equal(second.pending, true);
+  api.online(true);
+  await second.flush(); await first.flush(); await second.flush();
+  assert.equal(first.progress.letterPractice.english.writing[11], 1);
+  assert.equal(first.progress.letterPractice.english.recognition[11], 0);
+  assert.equal(first.progress.sessions, 1);
+  assert.equal(first.progress.stickers.length, 1);
+  assert.deepEqual(first.progress.letterPractice, second.progress.letterPractice);
+});
+
+test('Writing done during an in-flight upload is retained and concurrent devices add their practice once', async () => {
+  const api = server();
+  let pause = false, release;
+  const fetcher = async (...args) => {
+    const response = await api.fetcher(...args);
+    if (pause) { pause = false; await new Promise(resolve => { release = resolve; }); }
+    return response;
+  };
+  const first = new SharedAlbum({ config, storage: storage(), fetcher });
+  const second = new SharedAlbum({ config, storage: storage(), fetcher: api.fetcher });
+  const code = newCode();
+  await first.link(code, freshProgress(), { create: true });
+  await second.link(code, freshProgress());
+  pause = true;
+  first.recordWriting('english', 'en-l');
+  await Promise.resolve();
+  first.recordWriting('hebrew', 'he-vav');
+  second.recordWriting('english', 'en-l');
+  await second.flush();
+  release();
+  await first.flush(); await first.flush(); await second.flush();
+  assert.equal(second.progress.letterPractice.english.writing[11], 2);
+  assert.equal(second.progress.letterPractice.hebrew.writing[5], 1);
+  assert.equal(second.progress.sessions, 0);
+  assert.equal(second.progress.stickers.length, 0);
+});
 
 function legacyProgress(sessions) {
   const progress = freshProgress();

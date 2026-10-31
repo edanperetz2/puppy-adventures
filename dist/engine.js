@@ -3,8 +3,9 @@ import { CLOCK_LEVELS, clockTime } from './clock.js';
 import { LETTERS, letterGroup } from './letters.js';
 import { READING_LEVELS, readingWords, readingTargets } from './reading.js';
 import { isSticker } from './stickers.js';
+import { sanitizeLetterPractice, recordLetters, suggestedLetters } from './letter-progress.js';
 
-export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', letterLanguage: 'hebrew', sound: true, motion: true });
+export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', letterLanguage: 'hebrew', letterWriting: Object.freeze({ hebrew: 0, english: 0 }), sound: true, motion: true });
 export const SESSION_LENGTH = 6;
 
 export function shuffle(values, rng = Math.random) {
@@ -32,9 +33,10 @@ export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Mat
   const settings = { ...DEFAULT_SETTINGS, ...rawSettings };
   if (mission === 'letters') {
     const language = Object.hasOwn(LETTERS, settings.letterLanguage) ? settings.letterLanguage : 'hebrew';
-    const group = letterGroup(language, settings.letterStart);
+    const selected = Array.isArray(settings.letterIds) ? [...new Set(settings.letterIds)].map(id => LETTERS[language].find(letter => letter.id === id)).filter(Boolean) : [];
+    const group = selected.length === 3 ? selected : Number.isInteger(settings.letterStart) ? letterGroup(language, settings.letterStart) : suggestedLetters(settings.letterPractice, language);
     const targets = [group[0], ...shuffle([group[1], group[2], ...group], rng)];
-    return targets.map((letter, i) => ({ id: `letters-${i}`, type: 'letter', letter, answer: letter.id, options: shuffle(group, rng), prompt: `letter-match-${language}`, targetClip: letter.clip, hint: 'letters-hint' }));
+    return targets.map((letter, i) => ({ id: `letters-${i}`, type: 'letter', letter, answer: letter.id, options: shuffle(group, rng), prompt: `letter-match-${language}`, targetClip: letter.clip, hint: 'letters-recognition-hint' }));
   }
   if (mission === 'hebrew') {
     const pool = readingWords(settings.reading);
@@ -84,10 +86,10 @@ export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Mat
 }
 
 export function freshProgress() {
-  return { version: 1, stars: 0, sessions: 0, stickers: [], missions: Object.fromEntries(MISSION_IDS.map(id => [id, 0])), skills: Object.fromEntries(MISSION_IDS.map(id => [id, { correct: 0, assisted: 0 }])) };
+  return { version: 1, stars: 0, sessions: 0, stickers: [], missions: Object.fromEntries(MISSION_IDS.map(id => [id, 0])), skills: Object.fromEntries(MISSION_IDS.map(id => [id, { correct: 0, assisted: 0 }])), letterPractice: sanitizeLetterPractice(null) };
 }
 
-export function finishSession(progress, mission, assisted = 0) {
+export function finishSession(progress, mission, assisted = 0, letterRound = null) {
   const next = sanitizeProgress(progress);
   if (!MISSION_IDS.includes(mission)) throw new Error(`Unknown mission: ${mission}`);
   next.stars += SESSION_LENGTH;
@@ -95,13 +97,14 @@ export function finishSession(progress, mission, assisted = 0) {
   next.missions[mission] += 1;
   next.skills[mission].correct += SESSION_LENGTH;
   next.skills[mission].assisted += assisted;
+  if (mission === 'letters' && letterRound) next.letterPractice = recordLetters(next.letterPractice, letterRound.language, 'recognition', letterRound.ids);
   const sticker = STICKERS.find(id => !next.stickers.includes(id));
   if (sticker) next.stickers.push(sticker);
   return { progress: next, sticker: sticker || null };
 }
 
 export function sanitizeSettings(input) {
-  const result = { ...DEFAULT_SETTINGS };
+  const result = { ...DEFAULT_SETTINGS, letterWriting: { ...DEFAULT_SETTINGS.letterWriting } };
   if (!input || typeof input !== 'object') return result;
   for (const key of ['nikud', 'sound', 'motion']) if (typeof input[key] === 'boolean') result[key] = input[key];
   if (Object.hasOwn(READING_LEVELS, input.reading)) result.reading = input.reading;
@@ -109,6 +112,7 @@ export function sanitizeSettings(input) {
   if ([10, 20].includes(input.englishMax)) result.englishMax = input.englishMax;
   if (Object.hasOwn(CLOCK_LEVELS, input.clockLevel)) result.clockLevel = input.clockLevel;
   if (Object.hasOwn(LETTERS, input.letterLanguage)) result.letterLanguage = input.letterLanguage;
+  result.letterWriting = Object.fromEntries(Object.entries(LETTERS).map(([language, letters]) => [language, Number.isInteger(input.letterWriting?.[language]) && input.letterWriting[language] >= 0 && input.letterWriting[language] < letters.length ? input.letterWriting[language] : 0]));
   return result;
 }
 
@@ -126,5 +130,6 @@ export function sanitizeProgress(input) {
     result.skills[key].correct = nonnegative(input.skills?.[key]?.correct);
     result.skills[key].assisted = Math.min(result.skills[key].correct, nonnegative(input.skills?.[key]?.assisted));
   }
+  result.letterPractice = sanitizeLetterPractice(input.letterPractice, !input.letterPractice && result.missions.letters > 0);
   return result;
 }

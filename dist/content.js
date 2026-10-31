@@ -42,6 +42,9 @@ export { STICKERS } from './stickers.js';
 
 // Explicit clips are bundled at build time: no speech subscription or runtime API.
 export const CLIPS = {
+  'letters-paths': { lang: 'he-IL', text: 'בחרי מסלול. אפשר לשחק ולזהות אותיות, ואפשר ללמוד לכתוב.' },
+  'letters-recognition': { lang: 'he-IL', text: 'נביט באות שלמעלה. מצאי את האות שמתאימה לה.' },
+  'letters-recognition-hint': { lang: 'he-IL', text: 'זו אותה אות. נסתכל על הצורה שלה.' },
   welcome: { lang: 'he-IL', text: 'שלום אריאל, ברוכה הבאה למשחק שלך!' },
   'reading-levels': { lang: 'he-IL', text: 'מה נקרא היום? בחרי שלב. בואי נגלה מילים חדשות!' },
   'reading-short': { lang: 'he-IL', text: 'שלב ראשון. מילים קצרות.' },

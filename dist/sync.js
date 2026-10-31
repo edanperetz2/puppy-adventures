@@ -1,5 +1,6 @@
 import { finishSession, freshProgress, sanitizeProgress } from './engine.js';
 import { STICKERS, MISSION_IDS } from './content.js';
+import { recordLetters, pendingLetterPractice } from './letter-progress.js';
 
 const KEY = 'puppy-adventures-family-v1';
 const ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
@@ -35,11 +36,18 @@ export function withPending(remote, own, confirmed) {
   next.sessions = Object.values(next.missions).reduce((sum, n) => sum + n, 0);
   next.stars = next.sessions * 6;
   next.stickers = STICKERS.slice(0, Math.min(next.sessions, STICKERS.length));
+  next.letterPractice = pendingLetterPractice(next.letterPractice, own.letterPractice, confirmed.letterPractice);
   return next;
 }
 
 function sameContribution(a, b) {
-  return MISSION_IDS.every(m => a.missions[m] === b.missions[m] && a.skills[m].assisted === b.skills[m].assisted);
+  return MISSION_IDS.every(m => a.missions[m] === b.missions[m] && a.skills[m].assisted === b.skills[m].assisted) && JSON.stringify(a.letterPractice) === JSON.stringify(b.letterPractice);
+}
+
+export function compactContribution(progress) {
+  const safe = sanitizeProgress(progress);
+  // The RPC needs counters only; a 1,000-item sticker list exceeds its size cap.
+  return { missions: safe.missions, skills: Object.fromEntries(MISSION_IDS.map(id => [id, { assisted: safe.skills[id].assisted }])), letterPractice: safe.letterPractice };
 }
 
 export class SharedAlbum {
@@ -83,7 +91,7 @@ export class SharedAlbum {
       const response = await this.fetcher(`${this.config.url}/rest/v1/rpc/puppy_sync_album`, {
         method: 'POST',
         headers: { apikey: this.config.key, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ access_code: state.code, device_key: state.device, device_totals: own, create_album: create }),
+        body: JSON.stringify({ access_code: state.code, device_key: state.device, device_totals: compactContribution(own), create_album: create }),
         signal: controller.signal,
       });
       const value = await response.json();
@@ -114,10 +122,10 @@ export class SharedAlbum {
     return this.progress;
   }
 
-  complete(mission, assisted) {
+  complete(mission, assisted, letterRound = null) {
     if (!this.linked) throw new Error('not_linked');
     const before = this.progress;
-    this.state.own = finishSession(this.state.own, mission, assisted).progress;
+    this.state.own = finishSession(this.state.own, mission, assisted, letterRound).progress;
     this.status = 'pending';
     try { this.persist(); } catch { this.status = 'storage-error'; }
     const progress = this.progress;
@@ -125,6 +133,15 @@ export class SharedAlbum {
     this.notify();
     void this.flush();
     return { progress, sticker };
+  }
+
+  recordWriting(language, id) {
+    if (!this.linked) throw new Error('not_linked');
+    this.state.own.letterPractice = recordLetters(this.state.own.letterPractice, language, 'writing', [id]);
+    this.status = 'pending';
+    try { this.persist(); } catch { this.status = 'storage-error'; }
+    this.notify(); void this.flush();
+    return this.progress;
   }
 
   flush() {

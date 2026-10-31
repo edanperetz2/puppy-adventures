@@ -1823,6 +1823,27 @@
       "detected_ipa": "tsipˈoʁ ʔadumˈa ʔomˈedet lejˈad ʔˈets.",
       "phoneme_edit_ratio": 0.0,
       "seconds": 2.39
+    },
+    "letters-paths": {
+      "sha256": "e3d0f4d9c12543a8dee7f0100eb99fac367db363c9cecd5e9d8494500609317d",
+      "expected_ipa": "baχaʁˈi maslˈul. ʔefʃˈaʁ lesaχˈek ulezahˈot ʔotijˈot, veʔefʃˈaʁ lilmˈod liχtˈov.",
+      "detected_ipa": "baχaʁˈim maslˈul. ʔefʃˈaʁ lesaχˈek velezahˈot ʔotijˈot, veʔefʃˈaʁ lilmˈod liχtˈov.",
+      "phoneme_edit_ratio": 0.0448,
+      "seconds": 5.23
+    },
+    "letters-recognition": {
+      "sha256": "85ffa865cc2d781815ff9fee263dbbfc80a53eb6e4d3f715e3d8ae94a18fe6be",
+      "expected_ipa": "nabˈit baʔˈot ʃelemˈala. mitsʔˈi ʔˈet haʔˈot ʃematʔimˈa lˈa.",
+      "detected_ipa": "nabˈit baʔˈot ʃelemˈaʔla, mitsʔˈi ʔˈet haʔˈot ʃemetʔimˈa lˈa.",
+      "phoneme_edit_ratio": 0.0213,
+      "seconds": 4.91
+    },
+    "letters-recognition-hint": {
+      "sha256": "1f150cb06550adce1b3588ac1ae67ed39a2122e997dad984eabbb18d60d914c7",
+      "expected_ipa": "zˈo ʔotˈa ʔˈot. nistakˈel ʔˈal hatsuʁˈa ʃelˈa.",
+      "detected_ipa": "zˈo ʔotˈa ʔˈot, nistakˈel ʔˈal hatsuʁˈa ʃelˈa.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.7
     }
   }
 }

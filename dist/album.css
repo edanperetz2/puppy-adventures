@@ -15,6 +15,10 @@
 .album-page .sticker-grid{margin-top:22px;grid-template-columns:repeat(4,minmax(0,1fr))}
 .album-page .sticker{min-width:0}
 .album-bottom-pages{margin:0 auto 26px}
+.sync-install-note{padding:13px 15px;background:#f4eedf;border:1px solid #e5d8bc;border-radius:13px}
+.sync-install-note b{display:block;color:#8d7754;margin-bottom:5px}
+.album-connect-note{max-width:650px;margin:20px auto;padding:17px 20px;background:#edf2e8;border:1px solid #dce4d5;border-radius:18px;color:#809276;font-size:13px;line-height:1.8}
+.album-connect-note .text-button{display:inline-flex;margin:9px auto 0;min-height:44px;font-size:12px}
 .sticker .sticker-scene{width:100%}
 @media(max-width:570px){
   .album-page .sticker-grid{grid-template-columns:repeat(3,minmax(0,1fr))}

@@ -4346,6 +4346,51 @@
       "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
       "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
       "sha256": "0215b769acbd56bf53f104414e7542c2d098bdfbff6d53394753ee2bbb6e9fd5"
+    },
+    "letters-paths": {
+      "lang": "he-IL",
+      "speech": "baχaʁˈi maslˈul. ʔefʃˈaʁ lesaχˈek ulezahˈot ʔotijˈot, veʔefʃˈaʁ lilmˈod liχtˈov.",
+      "segments": [
+        "baχaʁˈi maslˈul. ʔefʃˈaʁ lesaχˈek ulezahˈot ʔotijˈot, veʔefʃˈaʁ lilmˈod liχtˈov."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "e3d0f4d9c12543a8dee7f0100eb99fac367db363c9cecd5e9d8494500609317d"
+    },
+    "letters-recognition": {
+      "lang": "he-IL",
+      "speech": "nabˈit baʔˈot ʃelemˈala. mitsʔˈi ʔˈet haʔˈot ʃematʔimˈa lˈa.",
+      "segments": [
+        "nabˈit baʔˈot ʃelemˈala. mitsʔˈi ʔˈet haʔˈot ʃematʔimˈa lˈa."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "85ffa865cc2d781815ff9fee263dbbfc80a53eb6e4d3f715e3d8ae94a18fe6be"
+    },
+    "letters-recognition-hint": {
+      "lang": "he-IL",
+      "speech": "zˈo ʔotˈa ʔˈot. nistakˈel ʔˈal hatsuʁˈa ʃelˈa.",
+      "segments": [
+        "zˈo ʔotˈa ʔˈot. nistakˈel ʔˈal hatsuʁˈa ʃelˈa."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "1f150cb06550adce1b3588ac1ae67ed39a2122e997dad984eabbb18d60d914c7"
     }
   }
 }
