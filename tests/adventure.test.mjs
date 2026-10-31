@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSession } from '../dist/engine.js';
 import { READING_LEVELS, finishReadingPractice, sanitizeReadingPractice } from '../dist/reading.js';
+import { clockConceptRank } from '../dist/clock.js';
 
 function seeded(seed) {
   return () => { seed = (1664525 * seed + 1013904223) >>> 0; return seed / 4294967296; };
@@ -90,4 +91,18 @@ test('Clocks introduce whole hours, halves, quarter past and quarter to without 
       assert.ok(q.options.every(option => conceptOrder.indexOf(option.minute) <= rank));
     }
   }
+});
+
+test('The minute-reading adventure increases difficulty and reaches every individual minute',()=>{
+  const seen=new Set();
+  for(let seed=0;seed<400;seed++){
+    const questions=createSession('clock',{clockLevel:'minutes'},seeded(seed));
+    assert.equal(questions.length,10);
+    for(let i=0;i<questions.length;i++){
+      const q=questions[i],rank=clockConceptRank(q.time.minute);seen.add(q.time.minute);
+      if(i)assert.ok(rank>=clockConceptRank(questions[i-1].time.minute));
+      assert.ok(q.options.every(option=>clockConceptRank(option.minute)<=rank));
+    }
+  }
+  assert.equal(seen.size,60);
 });

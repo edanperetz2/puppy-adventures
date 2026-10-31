@@ -1,11 +1,12 @@
 import { ANIMALS, COLORS, NUMBERS, STICKERS, MISSION_IDS } from './content.js';
-import { CLOCK_LEVELS, clockTime } from './clock.js';
+import { CLOCK_LEVELS, clockTime, clockConceptRank } from './clock.js';
 import { LETTERS, letterGroup } from './letters.js';
 import { READING_LEVELS, readingWords, readingTargets } from './reading.js';
 import { isSticker } from './stickers.js';
 import { sanitizeLetterPractice, recordLetters, suggestedLetters } from './letter-progress.js';
 import { distinctWordPictures } from './vocabulary.js';
 import { SESSION_LENGTH, adventurePhase, choiceCount } from './adventure.js';
+import { sanitizeClockLessons } from './clock-learning.js';
 export { SESSION_LENGTH } from './adventure.js';
 
 export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', letterLanguage: 'hebrew', letterWriting: Object.freeze({ hebrew: 0, english: 0 }), sound: true, motion: true });
@@ -93,22 +94,24 @@ export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Mat
   if (mission === 'clock') {
     const level = CLOCK_LEVELS[settings.clockLevel] || CLOCK_LEVELS.hours;
     const hours = shuffle(Array.from({ length: 12 }, (_, i) => i + 1), rng).slice(0, SESSION_LENGTH).sort((a, b) => a - b);
-    const minutes = level.minutes.length === 1 ? Array(SESSION_LENGTH).fill(0) : level.minutes.length === 2 ? [0, 0, 0, 0, 30, 30, 30, 30, 30, 30] : [0, 0, 30, 30, 15, 15, 15, 45, 45, 45];
-    const minuteOrder = [0, 30, 15, 45];
+    const sample = pool => shuffle(pool,rng).slice(0,2).sort((a,b)=>a-b);
+    const minutes = settings.clockLevel === 'minutes'
+      ? [0,30,15,45,...sample([5,10,20,25,35,40,50,55]),...sample([1,2,3,4,6,7,8,9]),...sample(Array.from({length:49},(_,i)=>i+11).filter(n=>n%5))]
+      : level.minutes.length === 1 ? Array(SESSION_LENGTH).fill(0) : level.minutes.length === 2 ? [0, 0, 0, 0, 30, 30, 30, 30, 30, 30] : [0, 0, 30, 30, 15, 15, 15, 45, 45, 45];
     return hours.map((hour, i) => {
       const time = clockTime(hour, minutes[i]);
       const next = hour % 12 + 1;
-      const alternatives = level.minutes.filter(n => n !== time.minute && minuteOrder.indexOf(n) <= minuteOrder.indexOf(time.minute));
+      const alternatives = level.minutes.filter(n => n !== time.minute && clockConceptRank(n) <= clockConceptRank(time.minute));
       const otherMinute = alternatives.length ? alternatives[Math.floor(rng() * alternatives.length)] : 0;
       const other = alternatives.length ? clockTime(hour, otherMinute) : clockTime((hour + 10) % 12 + 1, 0);
-      return { id: `clock-${i}`, type: 'clock', time, answer: time.id, phase: adventurePhase(i), options: shuffle([time, other, clockTime(next, time.minute === 45 ? 0 : time.minute)].slice(0, choiceCount(i)), rng), prompt: 'clock-read', hint: `clock-tip-${time.minute}` };
+      return { id: `clock-${i}`, type: 'clock', time, answer: time.id, phase: adventurePhase(i), options: shuffle([time, other, clockTime(next, time.minute === 45 ? 0 : time.minute)].slice(0, choiceCount(i)), rng), prompt: 'clock-read', hint: [0,15,30,45].includes(time.minute) ? `clock-tip-${time.minute}` : time.minute%5===0 ? 'school-fives' : 'school-minutes' };
     });
   }
   throw new Error(`Unknown mission: ${mission}`);
 }
 
 export function freshProgress() {
-  return { version: 1, stars: 0, sessions: 0, stickers: [], missions: Object.fromEntries(MISSION_IDS.map(id => [id, 0])), skills: Object.fromEntries(MISSION_IDS.map(id => [id, { correct: 0, assisted: 0 }])), letterPractice: sanitizeLetterPractice(null) };
+  return { version: 1, stars: 0, sessions: 0, stickers: [], missions: Object.fromEntries(MISSION_IDS.map(id => [id, 0])), skills: Object.fromEntries(MISSION_IDS.map(id => [id, { correct: 0, assisted: 0 }])), letterPractice: sanitizeLetterPractice(null), clockLessons: 0 };
 }
 
 export function finishSession(progress, mission, assisted = 0, letterRound = null) {
@@ -153,5 +156,6 @@ export function sanitizeProgress(input) {
     result.skills[key].assisted = Math.min(result.skills[key].correct, nonnegative(input.skills?.[key]?.assisted));
   }
   result.letterPractice = sanitizeLetterPractice(input.letterPractice, !input.letterPractice && result.missions.letters > 0);
+  result.clockLessons = sanitizeClockLessons(input.clockLessons);
   return result;
 }

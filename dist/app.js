@@ -7,7 +7,9 @@ import { GameAnnouncements } from './announcements.js';
 import { SharedAlbum, normalizeCode } from './sync.js';
 import { SYNC_CONFIG } from './sync-config.js';
 import { mountFamilyPanel, updateFamilyStatus } from './family-ui.js';
-import { analogClock, clockAngles, clockTime, CLOCK_LEVELS } from './clock.js';
+import { analogClock, CLOCK_LEVELS } from './clock.js';
+import { mountClockSchool } from './clock-school.js';
+import { sanitizeClockPosition, recordClockLesson } from './clock-learning.js';
 import { LETTERS, letterGroup, letterShape } from './letters.js';
 import { mountLetterPad } from './letter-pad.js';
 import { nextReadingStage, sanitizeReadingPractice, finishReadingPractice } from './reading.js';
@@ -24,7 +26,8 @@ let view = 'home';
 let round = null;
 let audioStatus = 'idle';
 let dialogOpener = null;
-let clockDemo = { hour: 3, minute: 0, highlight: '' };
+let clockSchool = null;
+let clockSchoolPosition = sanitizeClockPosition(null);
 let clockReturn = false;
 let letterDemo = { language: 'hebrew', index: 0, recorded: false };
 let recognitionChoice = null;
@@ -35,7 +38,7 @@ let albumPageIndex = null;
 
 try {
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-  if (saved) { settings = sanitizeSettings(saved.settings); progress = sanitizeProgress(saved.progress); readingPractice = sanitizeReadingPractice(saved.readingPractice); }
+  if (saved) { settings = sanitizeSettings(saved.settings); progress = sanitizeProgress(saved.progress); readingPractice = sanitizeReadingPractice(saved.readingPractice); clockSchoolPosition = sanitizeClockPosition(saved.clockSchoolPosition); }
 } catch { /* A corrupt or unavailable save must never prevent play. */ }
 
 const pendingJoinCode = normalizeCode(new URLSearchParams(location.hash.slice(1)).get('album'));
@@ -52,6 +55,7 @@ const album = new SharedAlbum({ config: SYNC_CONFIG, onChange: source => {
   if (reset) reset.textContent = 'ניתוק מהאלבום ואיפוס המכשיר הזה';
   if (changed && !dialog.open && ['home', 'album', 'letters-menu', 'letters-recognition'].includes(view)) render();
   if (view === 'letters-lesson') updateWritingStatus();
+  if (changed && view === 'clock-school') clockSchool?.updateProgress();
 } });
 if (album.linked) progress = album.progress;
 
@@ -78,7 +82,7 @@ function welcome() {
 
 function save() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition }));
     storageAvailable = true;
   } catch { storageAvailable = false; }
 }
@@ -225,47 +229,31 @@ function selectLetter(index) {
 }
 
 
-function renderClockLesson() {
-  const level = CLOCK_LEVELS[clockReturn ? round.clockLevel : settings.clockLevel];
-  if (!level.minutes.includes(clockDemo.minute)) clockDemo.minute = 0;
-  const time = clockTime(clockDemo.hour, clockDemo.minute);
-  app.innerHTML = `${header()}<main id="main" class="clock-lesson-page">
-    <div class="clock-lesson-topline"><button class="text-button" data-action="home">${uiIcon('home')} לבית החברים</button><span>${level.name}</span></div>
-    <section class="clock-lesson-card"><div class="question-heading"><div><span class="section-kicker">בובי מגלה איתך דברים חדשים</span><h1 tabindex="-1">בואי נכיר את השעון!</h1></div><button class="circle-button" data-action="replay" aria-label="שמיעת ההסבר שוב">${uiIcon('sound')}</button></div>
-      <div class="clock-lesson-layout"><div class="clock-demo-column"><div id="clock-demo">${analogClock(time.hour, time.minute, { interactive: true, highlight: clockDemo.highlight })}</div><p class="clock-tap-note">לחצי על מספר בשעון וגלי מה השעה</p>
-      <button class="clock-demo-time" data-action="clock-speak-time" aria-label="שמיעת השעה שבחרת"><b id="clock-demo-digital" dir="ltr">${time.digital}</b><span id="clock-demo-caption" aria-live="polite">השעה ${time.he}</span>${uiIcon('sound')}</button></div>
-      <div class="clock-lesson-guide"><h2>שני מחוגים, סיפור אחד</h2><button class="hand-guide hour-guide" data-action="clock-hand" data-hand="hour" aria-pressed="${clockDemo.highlight === 'hour'}"><span class="hand-swatch short"></span><span><b>המחוג הקצר</b><small>מראה את השעה</small></span>${uiIcon('sound')}</button><button class="hand-guide minute-guide" data-action="clock-hand" data-hand="minute" aria-pressed="${clockDemo.highlight === 'minute'}"><span class="hand-swatch long"></span><span><b>המחוג הארוך</b><small>מראה את הדקות</small></span>${uiIcon('sound')}</button>
-      <div class="clock-minute-controls"><span class="section-kicker">ומה עושה מחוג הדקות?</span><div class="clock-minute-buttons" role="group" aria-label="בחירת דקות">${level.minutes.map(minute => `<button data-action="clock-set-minute" data-minute="${minute}" aria-pressed="${minute === clockDemo.minute}"><b dir="ltr">${String(minute).padStart(2, '0')}</b><span>${{ 0: 'שעה עגולה', 15: 'ורבע', 30: 'וחצי', 45: 'רבע ל…' }[minute]}</span></button>`).join('')}</div></div>
-      <div class="clock-lesson-buddy">${pup('bobi')}<p>נסתכל, נקשיב וננסה.<br>לומדות בקצב שלך ♡</p></div></div></div>
-      <div class="clock-lesson-actions"><button class="primary-button" data-action="clock-practice">${clockReturn ? 'חוזרות למשחק' : 'מוכנה! בואי נתרגל'} ${uiIcon('arrow')}</button></div><p id="audio-notice" class="audio-notice" role="status" hidden></p>
-    </section></main>${footer()}`;
+function renderClockSchool() {
+  app.innerHTML = `${header()}<main id="main" class="clock-school-page"><div id="clock-school-root"></div></main>${footer()}`;
+  clockSchool = mountClockSchool(document.querySelector('#clock-school-root'), {
+    getProgress: () => progress.clockLessons,
+    position: clockSchoolPosition,
+    onPosition: position => { clockSchoolPosition = position; save(); },
+    onRecord: index => {
+      if (album.linked) progress = album.recordClockLesson(index);
+      else progress.clockLessons = recordClockLesson(progress.clockLessons, index);
+      save();
+    },
+    speak: (keys, explicit = false) => explicit ? clockSpeak(keys) : announcements.say(keys),
+    onPractice: () => {
+      if (clockReturn && round) { view = 'game'; render(); focusTitle(); const q = current(); announcements.say([q.prompt, ...(q.targetClip ? [q.targetClip] : [])]); }
+      else startMission('clock', true);
+    },
+    returnToGame: clockReturn, practiceName: CLOCK_LEVELS[settings.clockLevel].name, motion: settings.motion,
+  });
 }
 
 function openClockLesson(returnToGame = false) {
-  narrator.stop();
-  clockReturn = returnToGame;
-  clockDemo = returnToGame ? { hour: current().time.hour, minute: current().time.minute, highlight: '' } : { hour: 3, minute: 0, highlight: '' };
+  narrator.stop(); clockReturn = returnToGame;
   if (returnToGame) round.helped.add(round.index);
   else round = null;
-  view = 'clock-lesson'; render(); focusTitle(); announcements.say('intro-clock');
-}
-
-function updateClockDemo() {
-  const time = clockTime(clockDemo.hour, clockDemo.minute);
-  const angles = clockAngles(time.hour, time.minute);
-  const face = document.querySelector('#clock-demo .analog-clock');
-  face.querySelector('.clock-hour-hand').setAttribute('transform', `rotate(${angles.hour} 140 140)`);
-  face.querySelector('.clock-minute-hand').setAttribute('transform', `rotate(${angles.minute} 140 140)`);
-  face.classList.remove('highlight-hour', 'highlight-minute');
-  if (clockDemo.highlight) face.classList.add(`highlight-${clockDemo.highlight}`);
-  for (const button of document.querySelectorAll('.dial-hour')) {
-    const selected = Number(button.dataset.hour) === time.hour;
-    button.classList.toggle('selected', selected); button.setAttribute('aria-pressed', String(selected));
-  }
-  for (const button of document.querySelectorAll('[data-action="clock-set-minute"]')) button.setAttribute('aria-pressed', String(Number(button.dataset.minute) === time.minute));
-  for (const button of document.querySelectorAll('[data-action="clock-hand"]')) button.setAttribute('aria-pressed', String(button.dataset.hand === clockDemo.highlight));
-  document.querySelector('#clock-demo-digital').textContent = time.digital;
-  document.querySelector('#clock-demo-caption').textContent = `השעה ${time.he}`;
+  view = 'clock-school'; render(); focusTitle(); clockSchool.replay();
 }
 
 function clockSpeak(keys) {
@@ -337,7 +325,7 @@ function renderGame() {
     <div class="step-track" aria-label="התקדמות: ${round.index} מתוך ${SESSION_LENGTH}">${Array.from({ length: SESSION_LENGTH }, (_, i) => `<span class="step-dot ${i < round.index ? 'done' : i === round.index ? 'current' : ''}">${i < round.index ? uiIcon('check') : i + 1}</span>`).join('')}</div>
     <section class="game-board"><div class="question-heading"><div><span class="section-kicker">${ADVENTURE_PHASES[q.phase]}</span><h1 id="question-title" tabindex="-1">${title}</h1></div><button class="circle-button replay-button" data-action="replay" aria-label="שמיעת ההוראות שוב">${uiIcon('sound')}</button></div>
       <div class="question-visual">${questionVisual(q)}</div>
-      <div class="answer-grid ${q.options.length === 2 ? 'two-options' : ''} ${q.type === 'read' && q.word.scene ? 'scene-options' : ''} ${q.type === 'count' || q.type === 'add' || q.kind === 'number' ? 'numeric-options' : ''}" ${q.type === 'letter' ? `dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}"` : ''} role="group" aria-label="בחירת תשובה">${q.options.map(option => `${q.type === 'clock' ? '<div class="clock-choice">' : ''}<button class="answer-button ${round.attempted.has(option.id) ? 'try-again' : ''}" data-action="answer" data-answer="${option.id}" aria-label="${answerLabel(q, option)}" ${round.attempted.has(option.id) ? 'disabled' : ''}>${answerVisual(q, option)}<span class="answer-check">${uiIcon('check')}</span></button>${q.type === 'clock' ? `<button class="clock-option-sound" data-action="clock-option-audio" data-clip="${option.clip}" aria-label="שמיעת האפשרות ${option.he}">${uiIcon('sound')}</button></div>` : ''}`).join('')}</div>
+      <div class="answer-grid ${q.options.length === 2 ? 'two-options' : ''} ${q.type === 'read' && q.word.scene ? 'scene-options' : ''} ${q.type === 'count' || q.type === 'add' || q.kind === 'number' ? 'numeric-options' : ''}" ${q.type === 'letter' ? `dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}"` : ''} role="group" aria-label="בחירת תשובה">${q.options.map(option => `${q.type === 'clock' ? '<div class="clock-choice">' : ''}<button class="answer-button ${round.attempted.has(option.id) ? 'try-again' : ''}" data-action="answer" data-answer="${option.id}" aria-label="${answerLabel(q, option)}" ${round.attempted.has(option.id) ? 'disabled' : ''}>${answerVisual(q, option)}<span class="answer-check">${uiIcon('check')}</span></button>${q.type === 'clock' ? `<button class="clock-option-sound" data-action="clock-option-audio" data-clips="${option.clips.join(' ')}" aria-label="שמיעת האפשרות ${option.he}">${uiIcon('sound')}</button></div>` : ''}`).join('')}</div>
       <div class="feedback-row"><div class="feedback" id="feedback" role="status" aria-live="polite">קחי את הזמן. החברים כאן איתך ♡</div><button class="hint-button" data-action="hint">${uiIcon('hint')} רמז קטן</button><button class="primary-button next-button" data-action="next" hidden>ממשיכות ${uiIcon('arrow')}</button></div>
       <p id="audio-notice" class="audio-notice" role="status" hidden></p>
     </section><div class="buddy-bar">${pup(mission.pup)}<span id="buddy-message">${{ luli: 'לולי', bobi: 'בובי', tofi: 'טופי' }[mission.pup]} כאן לעזור לך!</span><span class="buddy-hearts">♡ ♡ ♡</span></div>
@@ -413,10 +401,11 @@ function turnAlbumPage(index) {
 
 function render() {
   letterPad?.destroy(); letterPad = null;
+  clockSchool?.destroy(); clockSchool = null;
   applyPreferences();
   document.body.classList.toggle('playing', view === 'game');
   if (view === 'game') renderGame();
-  else if (view === 'clock-lesson') renderClockLesson();
+  else if (view === 'clock-school') renderClockSchool();
   else if (view === 'letters-lesson') renderLetterLesson();
   else if (view === 'letters-menu') renderLetterMenu();
   else if (view === 'letters-recognition') renderLetterRecognition();
@@ -462,6 +451,7 @@ function leaveTo(destination) {
 
 function replay() {
   if (!settings.sound) { settings.sound = true; save(); narrator.enabled = true; renderSoundButton(); }
+  if (view === 'clock-school') { clockSchool.replay(true); return; }
   if (view === 'game') {
     const q = current();
     announcements.say([q.prompt, ...(q.targetClip ? [q.targetClip] : [])]);
@@ -529,7 +519,7 @@ function answer(button) {
   feedback.classList.add('success');
   document.querySelector('.buddy-bar').classList.add('celebrating');
   document.querySelector('#buddy-message').textContent = 'יש! הצלחת!';
-  announcements.say([`correct-${1 + round.index % 3}`, ...(q.type === 'clock' ? [q.time.clip] : q.type === 'read' ? [`he-${q.word.id}`] : q.targetClip ? [q.targetClip] : [])]);
+  announcements.say([`correct-${1 + round.index % 3}`, ...(q.type === 'clock' ? q.time.clips : q.type === 'read' ? [`he-${q.word.id}`] : q.targetClip ? [q.targetClip] : [])]);
   narrator.chime();
   celebrate(16);
   next.focus({ preventScroll: q.type !== 'clock' && !(q.type === 'read' && q.word.scene) });
@@ -664,11 +654,7 @@ app.addEventListener('click', event => {
     case 'listen-word': if (!settings.sound) { settings.sound = true; narrator.enabled = true; save(); renderSoundButton(); } announcements.say(current().targetClip); break;
     case 'clock-practice': if (clockReturn && round) { view = 'game'; render(); focusTitle(); replay(); } else startMission('clock', true); break;
     case 'clock-learn': if (!round.resolved) openClockLesson(true); break;
-    case 'clock-set-hour': clockDemo.hour = Number(button.dataset.hour); clockDemo.highlight = 'hour'; updateClockDemo(); announcements.say(clockTime(clockDemo.hour, clockDemo.minute).clip); break;
-    case 'clock-set-minute': clockDemo.minute = Number(button.dataset.minute); clockDemo.highlight = 'minute'; updateClockDemo(); announcements.say([`clock-tip-${clockDemo.minute}`, clockTime(clockDemo.hour, clockDemo.minute).clip]); break;
-    case 'clock-hand': clockDemo.highlight = button.dataset.hand; updateClockDemo(); clockSpeak(`clock-${button.dataset.hand}-hand`); break;
-    case 'clock-speak-time': clockSpeak(clockTime(clockDemo.hour, clockDemo.minute).clip); break;
-    case 'clock-option-audio': clockSpeak(button.dataset.clip); break;
+    case 'clock-option-audio': clockSpeak(button.dataset.clips.split(' ')); break;
     case 'letters-menu': if (view === 'game') leaveTo('letters-menu'); else openLetterMenu(); break;
     case 'letter-mode': openLetterMode(button.dataset.mode); break;
     case 'letter-language': if (Object.hasOwn(LETTERS, button.dataset.language)) { settings.letterLanguage = button.dataset.language; recognitionChoice = null; save(); if (view === 'letters-lesson') openLetterLesson(); else { render(); announcements.say(view === 'letters-recognition' ? 'letters-recognition' : 'letters-paths'); } } break;

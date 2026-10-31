@@ -23,10 +23,11 @@ test('Hebrew quarter-to phrases wrap correctly at twelve, with no digital revers
   assert.equal(clockTime(12,45).he,'רבע לאחת');
   assert.equal(clockTime(12,45).digital,'12:45');
   assert.throws(()=>clockTime(0,0),RangeError);
-  assert.throws(()=>clockTime(3,17),RangeError);
+  assert.equal(clockTime(3,17).digital,'3:17');
+  assert.throws(()=>clockTime(3,60),RangeError);
 });
 
-test('All three clock levels have ten distinct, solvable questions with Hebrew recordings', () => {
+test('All four clock levels have ten distinct, solvable questions with Hebrew recordings', () => {
   for (const clockLevel of Object.keys(CLOCK_LEVELS)) for(let seed=0;seed<200;seed++) {
     const questions=createSession('clock',{...DEFAULT_SETTINGS,clockLevel},seeded(seed));
     assert.equal(questions.length,10);
@@ -38,7 +39,7 @@ test('All three clock levels have ten distinct, solvable questions with Hebrew r
       assert.ok(CLOCK_LEVELS[clockLevel].minutes.includes(q.time.minute));
       assert.ok(CLIPS[q.prompt]); assert.ok(CLIPS[q.hint]);
       assert.equal(q.targetClip,undefined,'The prompt must not speak the correct answer');
-      for(const option of q.options) assert.equal(CLIPS[option.clip]?.lang,'he-IL');
+      for(const option of q.options) for(const clip of option.clips) assert.equal(CLIPS[clip]?.lang,'he-IL');
     }
     if(clockLevel==='hours')assert.ok(questions.every(q=>q.time.minute===0));
     if(clockLevel==='halves')assert.equal(questions.filter(q=>q.time.minute===30).length,6);

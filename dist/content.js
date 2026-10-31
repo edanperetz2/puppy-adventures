@@ -3,6 +3,7 @@ import { HEBREW_NARRATION, HEBREW_NUMBERS, clockSpeech } from './speech.js';
 import { hebrewSpeech } from './hebrew-pronunciation.js';
 import { LETTERS } from './letters.js';
 import { WORDS } from './reading.js';
+import { CLOCK_SCHOOL_SCRIPTS } from './clock-school-content.js';
 export { WORDS, READING_LEVELS } from './reading.js';
 
 export const ANIMALS = [
@@ -117,6 +118,7 @@ for (let hour = 1; hour <= 12; hour++) for (const minute of [0, 15, 30, 45]) {
   CLIPS[time.clip] = { lang: 'he-IL', text: `השעה ${time.he}.`, speech: clockSpeech(hour, minute) };
 }
 
+for (const [key, text] of Object.entries(CLOCK_SCHOOL_SCRIPTS)) CLIPS[key] = { lang: 'he-IL', text, speech: text };
 for (const clip of Object.values(CLIPS)) if (clip.lang === 'he-IL') clip.speech = hebrewSpeech(clip.speech);
 
 for (const letter of LETTERS.hebrew) CLIPS[letter.clip] = { lang: 'he-IL', text: `האות ${letter.name}`, speech: hebrewSpeech(`הָאוֹת ${letter.spoken}`) };

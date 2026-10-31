@@ -1,16 +1,23 @@
+import { CLOCK_MINUTE_LABELS } from './clock-school-content.js';
 export const HOUR_NAMES = ['', 'אחת', 'שתיים', 'שלוש', 'ארבע', 'חמש', 'שש', 'שבע', 'שמונה', 'תשע', 'עשר', 'אחת עשרה', 'שתים עשרה'];
 export const CLOCK_LEVELS = {
   hours: { name: 'שעות עגולות', minutes: [0] },
   halves: { name: 'שעות וחצאי שעות', minutes: [0, 30] },
   quarters: { name: 'גם רבעים', minutes: [0, 15, 30, 45] },
+  minutes: { name: 'כל הדקות · דקה אחרי דקה', minutes: Array.from({length:60},(_,i)=>i) },
 };
 
 export function clockTime(hour, minute = 0) {
-  if (!Number.isInteger(hour) || hour < 1 || hour > 12 || ![0, 15, 30, 45].includes(minute)) throw new RangeError('Invalid learning-clock time');
+  if (!Number.isInteger(hour) || hour < 1 || hour > 12 || !Number.isInteger(minute) || minute < 0 || minute > 59) throw new RangeError('Invalid learning-clock time');
   const next = hour % 12 + 1;
-  const he = minute === 0 ? HOUR_NAMES[hour] : minute === 15 ? `${HOUR_NAMES[hour]} ורבע` : minute === 30 ? `${HOUR_NAMES[hour]} וחצי` : `רבע ל${HOUR_NAMES[next]}`;
-  return { id: `${hour}-${minute}`, hour, minute, he, digital: `${hour}:${String(minute).padStart(2, '0')}`, clip: `clock-time-${hour}-${minute}` };
+  const familiar = [0,15,30,45].includes(minute);
+  const quantity = CLOCK_MINUTE_LABELS[minute];
+  const he = minute === 0 ? HOUR_NAMES[hour] : minute === 15 ? `${HOUR_NAMES[hour]} ורבע` : minute === 30 ? `${HOUR_NAMES[hour]} וחצי` : minute === 45 ? `רבע ל${HOUR_NAMES[next]}` : `${quantity} אחרי השעה ${HOUR_NAMES[hour]}`;
+  const clip = familiar ? `clock-time-${hour}-${minute}` : null;
+  return { id: `${hour}-${minute}`, hour, minute, he, digital: `${hour}:${String(minute).padStart(2, '0')}`, clip, clips: familiar ? [clip] : [`school-minutes-${minute}`,'school-after-hour',`number-${hour}`] };
 }
+
+export const clockConceptRank = minute => minute === 0 ? 0 : minute === 30 ? 1 : minute === 15 ? 2 : minute === 45 ? 3 : minute % 5 === 0 ? 4 : minute < 10 ? 5 : 6;
 
 export function clockAngles(hour, minute) {
   return { hour: (hour % 12) * 30 + minute / 2, minute: minute * 6 };

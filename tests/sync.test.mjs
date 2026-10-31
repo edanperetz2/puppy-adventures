@@ -26,6 +26,7 @@ function server() {
     const devices = albums.get(request.access_code);
     const old = devices.get(request.device_key) || freshProgress();
     const next = request.device_totals;
+    old.clockLessons |= next.clockLessons || 0;
     for (const mission of MISSION_IDS) {
       const previousCount = old.missions[mission];
       old.missions[mission] = Math.max(old.missions[mission], next.missions[mission]);
@@ -39,6 +40,7 @@ function server() {
     }
     devices.set(request.device_key, old);
     const combined = freshProgress();
+    for (const value of devices.values()) combined.clockLessons |= value.clockLessons;
     for (const value of devices.values()) for (const mission of MISSION_IDS) {
       combined.missions[mission] += value.missions[mission];
       combined.skills[mission].correct += value.skills[mission].correct;
@@ -189,6 +191,32 @@ function legacyProgress(sessions) {
   progress.stickers = [...LEGACY_STICKERS];
   return progress;
 }
+
+test('Clock lessons merge across paired devices, survive offline reopening and keep all earned stickers', async()=>{
+  const api=server(),saved=storage(),code=newCode();
+  const first=new SharedAlbum({config,storage:storage(),fetcher:api.fetcher});
+  let second=new SharedAlbum({config,storage:saved,fetcher:api.fetcher});
+  await first.link(code,legacyProgress(26),{create:true});await second.link(code,freshProgress());
+  first.recordClockLesson(1);await first.flush();
+  api.online(false);second.recordClockLesson(0);second.recordClockLesson(5);await second.flush();
+  second=new SharedAlbum({config,storage:saved,fetcher:api.fetcher});
+  assert.equal(second.progress.clockLessons,33);assert.equal(second.progress.stickers.length,26);
+  api.online(true);await second.flush();await first.flush();await second.flush();
+  assert.equal(first.progress.clockLessons,35);assert.equal(second.progress.clockLessons,35);
+  assert.equal(first.progress.stars,156);assert.equal(first.progress.sessions,26);
+  second.recordClockLesson(5);await second.flush();await first.flush();
+  assert.equal(first.progress.clockLessons,35);assert.equal(first.progress.stickers.length,26);
+});
+
+test('A lesson completed during an upload is retained alongside the captured lesson', async()=>{
+  const api=server();let pause=false,release;
+  const fetcher=async(...args)=>{const response=await api.fetcher(...args);if(pause){pause=false;await new Promise(resolve=>{release=resolve;});}return response;};
+  const first=new SharedAlbum({config,storage:storage(),fetcher}),second=new SharedAlbum({config,storage:storage(),fetcher:api.fetcher});
+  const code=newCode();await first.link(code,freshProgress(),{create:true});await second.link(code,freshProgress());
+  pause=true;first.recordClockLesson(0);await Promise.resolve();first.recordClockLesson(1);release();
+  await first.flush();await first.flush();await second.flush();
+  assert.equal(second.progress.clockLessons,3);assert.equal(second.progress.sessions,0);assert.equal(second.progress.stickers.length,0);
+});
 
 test('Expanded rewards derive from shared totals and survive offline progress beyond the old limit', async () => {
   const api = server();
