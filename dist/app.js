@@ -9,6 +9,7 @@ import { mountFamilyPanel, updateFamilyStatus } from './family-ui.js';
 import { analogClock, clockAngles, clockTime, CLOCK_LEVELS } from './clock.js';
 import { LETTERS, letterGroup, letterShape } from './letters.js';
 import { mountLetterPad } from './letter-pad.js';
+import { nextReadingStage, sanitizeReadingPractice, finishReadingPractice } from './reading.js';
 
 const app = document.querySelector('#app');
 const dialog = document.querySelector('#parent-dialog');
@@ -26,10 +27,11 @@ let letterDemo = { language: 'hebrew', index: 0 };
 let letterReturn = false;
 let letterPad = null;
 let lastTraceHint = 0;
+let readingPractice = sanitizeReadingPractice(null);
 
 try {
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-  if (saved) { settings = sanitizeSettings(saved.settings); progress = sanitizeProgress(saved.progress); }
+  if (saved) { settings = sanitizeSettings(saved.settings); progress = sanitizeProgress(saved.progress); readingPractice = sanitizeReadingPractice(saved.readingPractice); }
 } catch { /* A corrupt or unavailable save must never prevent play. */ }
 
 const pendingJoinCode = normalizeCode(new URLSearchParams(location.hash.slice(1)).get('album'));
@@ -71,7 +73,7 @@ function welcome() {
 
 function save() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice }));
     storageAvailable = true;
   } catch { storageAvailable = false; }
 }
@@ -226,7 +228,7 @@ function tallyGroup(n, offset, item) {
 function questionVisual(q) {
   if (q.type === 'letter') return `<div class="letter-question-layout" dir="rtl"><div class="letter-question-card"><small>${q.letter.language === 'hebrew' ? 'איזו אות בכתב יד מתאימה?' : 'איזו אות קטנה מתאימה?'}</small><bdi class="letter-familiar" dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}">${q.letter.familiar}</bdi></div><button class="text-button letter-learn-link" data-action="letters-learn">${uiIcon('hint')} נזכרות איך כותבים</button></div>`;
   if (q.type === 'clock') return `<div class="clock-question-clock">${analogClock(q.time.hour, q.time.minute)}</div><button class="text-button clock-learn-link" data-action="clock-learn">${uiIcon('hint')} נזכרות איך קוראים שעון</button>`;
-  if (q.type === 'read') return `<div class="word-card ${q.word.he.length >= 6 ? 'long-word' : ''}"><span class="card-label">מה כתוב כאן?</span><div class="target-word" lang="he" dir="rtl">${wordText(q.word)}</div><span class="word-underline"></span></div>`;
+  if (q.type === 'read') return `<div class="word-card ${q.word.scene ? 'phrase-word' : q.word.he.length >= 6 ? 'long-word' : ''}"><span class="card-label">מה כתוב כאן?</span><div class="target-word" lang="he" dir="rtl">${q.word.scene ? wordText(q.word).split(' ').map(word => `<span class="reading-token">${word}</span>`).join(' ') : wordText(q.word)}</div><span class="word-underline"></span></div>`;
   if (q.type === 'listen') return `<button class="listen-orb" data-action="listen-word" aria-label="שמיעת המילה באנגלית">${uiIcon('sound')}<span class="sound-waves"><i></i><i></i><i></i><i></i><i></i></span><span>לחצי ושמעי את המילה</span></button>`;
   if (q.type === 'count') return `<div class="counting-stage">${tallyGroup(q.a, 0, q.item)}<p class="tally-instruction">אפשר לגעת בכל פריט ולספור ביחד</p></div>`;
   return `<div class="addition-stage ${Math.max(q.a, q.b) > 10 ? 'large-add' : ''}" dir="ltr"><div class="add-group">${tallyGroup(q.a, 0, q.item)}<span class="group-number">${q.a}</span></div><span class="plus-sign" aria-label="ועוד">+</span><div class="add-group">${tallyGroup(q.b, q.a, q.item)}<span class="group-number">${q.b}</span></div></div><div class="equation" dir="ltr" aria-label="${q.a} ועוד ${q.b}">${q.a} <span>+</span> ${q.b} <span>=</span> <b>?</b></div>`;
@@ -252,14 +254,14 @@ function answerLabel(q, option) {
 function renderGame() {
   const mission = MISSIONS[round.mission];
   const q = current();
-  const title = q.type === 'letter' ? 'איזו אות מתאימה?' : q.type === 'clock' ? 'מה השעה בשעון?' : q.type === 'read' ? 'איזו תמונה מתאימה למילה?' : q.type === 'listen' ? 'מה שמעת באנגלית?' : q.type === 'add' ? 'כמה יש ביחד?' : 'כמה יש בסל?';
+  const title = q.type === 'letter' ? 'איזו אות מתאימה?' : q.type === 'clock' ? 'מה השעה בשעון?' : q.type === 'read' ? q.word.scene ? 'איזו תמונה מתאימה למה שכתוב?' : 'איזו תמונה מתאימה למילה?' : q.type === 'listen' ? 'מה שמעת באנגלית?' : q.type === 'add' ? 'כמה יש ביחד?' : 'כמה יש בסל?';
   const stage = q.type === 'read' ? READING_LEVELS[round.reading] : null;
   app.innerHTML = `${header()}<main id="main" class="game-page ${mission.color} ${q.type === 'clock' ? 'clock-game' : q.type === 'letter' ? 'letter-game' : q.type === 'read' ? 'reading-game' : ''}">
     <div class="game-topline"><button class="text-button back-button" data-action="${q.type === 'read' ? 'reading-levels' : 'home'}">${uiIcon('home')} ${q.type === 'read' ? 'לבחירת שלב' : 'למפת ההרפתקאות'}</button><span class="mission-label">${mission.name}${stage ? ` · ${stage.number ? `שלב ${stage.number}` : stage.name}` : ''}</span><span class="step-label">צעד ${round.index + 1} מתוך ${SESSION_LENGTH}</span></div>
     <div class="step-track" aria-label="התקדמות: ${round.index} מתוך ${SESSION_LENGTH}">${Array.from({ length: SESSION_LENGTH }, (_, i) => `<span class="step-dot ${i < round.index ? 'done' : i === round.index ? 'current' : ''}">${i < round.index ? uiIcon('check') : i + 1}</span>`).join('')}</div>
     <section class="game-board"><div class="question-heading"><div><span class="section-kicker">${q.type === 'letter' ? 'אות מוכרת, צורה חדשה' : q.type === 'clock' ? 'המחוגים מספרים לנו סיפור' : q.type === 'read' ? 'קוראות בעצמך, מגלות ביחד' : q.type === 'listen' ? 'האוזניים מוכנות?' : 'מכינות פיקניק לחברים'}</span><h1 id="question-title" tabindex="-1">${title}</h1></div><button class="circle-button replay-button" data-action="replay" aria-label="שמיעת ההוראות שוב">${uiIcon('sound')}</button></div>
       <div class="question-visual">${questionVisual(q)}</div>
-      <div class="answer-grid ${q.type === 'count' || q.type === 'add' || q.kind === 'number' ? 'numeric-options' : ''}" ${q.type === 'letter' ? `dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}"` : ''} role="group" aria-label="בחירת תשובה">${q.options.map(option => `${q.type === 'clock' ? '<div class="clock-choice">' : ''}<button class="answer-button ${round.attempted.has(option.id) ? 'try-again' : ''}" data-action="answer" data-answer="${option.id}" aria-label="${answerLabel(q, option)}" ${round.attempted.has(option.id) ? 'disabled' : ''}>${answerVisual(q, option)}<span class="answer-check">${uiIcon('check')}</span></button>${q.type === 'clock' ? `<button class="clock-option-sound" data-action="clock-option-audio" data-clip="${option.clip}" aria-label="שמיעת האפשרות ${option.he}">${uiIcon('sound')}</button></div>` : ''}`).join('')}</div>
+      <div class="answer-grid ${q.type === 'read' && q.word.scene ? 'scene-options' : ''} ${q.type === 'count' || q.type === 'add' || q.kind === 'number' ? 'numeric-options' : ''}" ${q.type === 'letter' ? `dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}"` : ''} role="group" aria-label="בחירת תשובה">${q.options.map(option => `${q.type === 'clock' ? '<div class="clock-choice">' : ''}<button class="answer-button ${round.attempted.has(option.id) ? 'try-again' : ''}" data-action="answer" data-answer="${option.id}" aria-label="${answerLabel(q, option)}" ${round.attempted.has(option.id) ? 'disabled' : ''}>${answerVisual(q, option)}<span class="answer-check">${uiIcon('check')}</span></button>${q.type === 'clock' ? `<button class="clock-option-sound" data-action="clock-option-audio" data-clip="${option.clip}" aria-label="שמיעת האפשרות ${option.he}">${uiIcon('sound')}</button></div>` : ''}`).join('')}</div>
       <div class="feedback-row"><div class="feedback" id="feedback" role="status" aria-live="polite">קחי את הזמן. החברים כאן איתך ♡</div><button class="hint-button" data-action="hint">${uiIcon('hint')} רמז קטן</button><button class="primary-button next-button" data-action="next" hidden>ממשיכות ${uiIcon('arrow')}</button></div>
       <p id="audio-notice" class="audio-notice" role="status" hidden></p>
     </section><div class="buddy-bar">${pup(mission.pup)}<span id="buddy-message">${{ luli: 'לולי', bobi: 'בובי', tofi: 'טופי' }[mission.pup]} כאן לעזור לך!</span><span class="buddy-hearts">♡ ♡ ♡</span></div>
@@ -268,17 +270,40 @@ function renderGame() {
 
 function renderComplete() {
   const mission = MISSIONS[round.mission];
-  app.innerHTML = `${header()}<main id="main" class="completion-page"><div class="completion-stars">✦ <span>✧</span> ✦</div><div class="reward-art">${art(round.sticker || mission.sticker)}</div><div class="eyebrow">החברים שמחים כל כך!</div><h1 tabindex="-1">יש! עשית את זה!</h1><p>סיימת את ${mission.name}${round.mission === 'hebrew' && READING_LEVELS[round.reading]?.number ? ` · שלב ${READING_LEVELS[round.reading].number}` : ''}.</p><p class="reward-caption">${round.sticker ? 'מדבקה חדשה הצטרפה לאלבום שלך' : 'עוד הרפתקה נפלאה עם החברים'}</p><div class="completion-pups">${pup('luli')}${pup('bobi')}${pup('tofi')}</div><div class="completion-actions"><button class="primary-button" data-action="album">למדבקות שלי ${uiIcon('album')}</button>${round.mission === 'hebrew' ? '<button class="secondary-button" data-action="reading-levels">לעוד מילים בגינה</button>' : ''}<button class="secondary-button" data-action="home">עוד הרפתקה ${uiIcon('arrow')}</button><button class="text-button" data-action="break">עכשיו הפסקה קטנה ♡</button></div></main>${footer()}`;
+  const reading = round.mission === 'hebrew';
+  const nextKey = reading ? nextReadingStage(round.reading, round.helped.size) : null;
+  const nextStage = nextKey ? READING_LEVELS[nextKey] : null;
+  app.innerHTML = `${header()}<main id="main" class="completion-page">
+    <div class="completion-stars">✦ <span>✧</span> ✦</div><div class="reward-art">${art(round.sticker || mission.sticker)}</div>
+    <div class="eyebrow">החברים שמחים כל כך!</div><h1 tabindex="-1">יש! עשית את זה!</h1>
+    <p>סיימת את ${mission.name}${reading && READING_LEVELS[round.reading]?.number ? ` · שלב ${READING_LEVELS[round.reading].number}` : ''}.</p>
+    <p class="reward-caption">${round.sticker ? 'מדבקה חדשה הצטרפה לאלבום שלך' : 'עוד הרפתקה נפלאה עם החברים'}</p>
+    ${reading ? `<section class="reading-next-offer"><span class="section-kicker">יש עוד דברים חדשים לגלות!</span>${nextStage ? `<button class="primary-button" data-action="reading-level" data-level="${nextKey}">ממשיכות לשלב ${nextStage.number} ${uiIcon('arrow')}</button><small>${nextStage.name}</small>` : `<button class="primary-button" data-action="reading-level" data-level="${round.reading}">קוראות עוד ביחד ${uiIcon('arrow')}</button>`}</section>` : ''}
+    <div class="completion-pups">${pup('luli')}${pup('bobi')}${pup('tofi')}</div>
+    <div class="completion-actions"><button class="${reading ? 'secondary-button' : 'primary-button'}" data-action="album">למדבקות שלי ${uiIcon('album')}</button>
+    ${reading ? `${nextStage ? `<button class="secondary-button" data-action="reading-level" data-level="${round.reading}">עוד בשלב הזה</button>` : ''}<button class="text-button" data-action="reading-levels">לכל שלבי הקריאה</button>` : ''}
+    <button class="secondary-button" data-action="home">עוד הרפתקה ${uiIcon('arrow')}</button><button class="text-button" data-action="break">עכשיו הפסקה קטנה ♡</button></div>
+  </main>${footer()}`;
 }
 
 function renderReadingLevels() {
+  const stages = Object.entries(READING_LEVELS).filter(([, stage]) => stage.number);
+  const selected = READING_LEVELS[settings.reading];
   app.innerHTML = `${header()}<main id="main" class="reading-levels-page" dir="rtl" lang="he">
     <div class="reading-levels-topline"><button class="text-button" data-action="home">${uiIcon('home')} לבית החברים</button><span>גינת המילים · כל פעם מגלות עוד</span></div>
-    <section class="reading-levels-heading"><div><span class="section-kicker">לולי קוראת איתך</span><h1 tabindex="-1">מה נקרא היום?</h1><p>בוחרות שלב, קוראות ומגלות. בקצב שלך ♡</p></div><button class="circle-button" data-action="replay" aria-label="שמיעת ההסבר שוב">${uiIcon('sound')}</button></section>
-    <div class="reading-stage-grid">${Object.entries(READING_LEVELS).filter(([, stage]) => stage.number).map(([key, stage]) => `<article class="reading-stage ${stage.color} ${settings.reading === key ? 'last-chosen' : ''}"><button class="reading-stage-start" data-action="reading-level" data-level="${key}" aria-label="שלב ${stage.number}: ${stage.name}"><span class="reading-stage-number" aria-hidden="true">${stage.number}</span>${stage.fresh ? '<span class="reading-new">חדש בגינה ✦</span>' : ''}<div class="reading-stage-art">${art(stage.art)}</div><span class="reading-stage-range">${stage.range}</span><h2>${stage.name}</h2><p>${stage.description}</p><div class="reading-stage-samples">${stage.samples.map(id => `<span>${wordText(WORDS.find(w => w.id === id))}</span>`).join('<span aria-hidden="true">·</span>')}</div><span class="reading-stage-go">בואי נקרא ${uiIcon('arrow')}</span>${settings.reading === key ? '<span class="reading-last-choice">השלב שבחרת לאחרונה</span>' : ''}</button><button class="circle-button reading-stage-sound" data-action="reading-stage-sound" data-level="${key}" aria-label="שמיעת הסבר על שלב ${stage.number}">${uiIcon('sound')}</button></article>`).join('')}</div>
-    <div class="reading-mixed-row"><button class="secondary-button" data-action="reading-level" data-level="all">מכל הגינה · משחק עם כל המילים ${uiIcon('arrow')}</button><button class="circle-button" data-action="reading-stage-sound" data-level="all" aria-label="שמיעת הסבר על משחק מכל השלבים">${uiIcon('sound')}</button></div><p id="audio-notice" class="audio-notice" role="status" hidden></p>
+    <section class="reading-levels-heading"><div><span class="section-kicker">לולי קוראת איתך</span><h1 tabindex="-1">מה נקרא היום?</h1><p>ממילים ראשונות עד סיפורים קטנים. בקצב שלך ♡</p></div><button class="circle-button" data-action="replay" aria-label="שמיעת ההסבר שוב">${uiIcon('sound')}</button></section>
+    <section class="reading-continue"><div class="reading-continue-art">${art(selected.art || 'flower')}</div><div><span class="section-kicker">נמשיך מאיפה שעצרנו?</span><h2>${selected.number ? `שלב ${selected.number} · ` : ''}${selected.name}</h2></div><button class="primary-button" data-action="reading-level" data-level="${settings.reading}">בואי נקרא ${uiIcon('arrow')}</button></section>
+    <nav class="reading-path" aria-label="קפיצה לשלבי הקריאה">${stages.map(([key, stage]) => `<a href="#reading-stage-${key}" aria-label="מעבר לשלב ${stage.number}: ${stage.name}" ${settings.reading === key ? 'aria-current="step"' : ''}><bdi dir="ltr">${stage.number}</bdi></a>`).join('')}</nav>
+    <div class="reading-stage-grid">${stages.map(([key, stage]) => `<article id="reading-stage-${key}" class="reading-stage ${stage.color} ${stage.number >= 6 ? 'long-samples' : ''} ${settings.reading === key ? 'last-chosen' : ''}">
+      <button class="reading-stage-start" data-action="reading-level" data-level="${key}" aria-label="שלב ${stage.number}: ${stage.name}"><span class="reading-stage-number" aria-hidden="true"><bdi dir="ltr">${stage.number}</bdi></span>${stage.fresh ? '<span class="reading-new">חדש בגינה ✦</span>' : ''}
+      <div class="reading-stage-art">${art(stage.art)}</div><span class="reading-stage-range">${stage.range}</span><h2>${stage.name}</h2><p>${stage.description}</p>
+      <div class="reading-stage-samples">${stage.samples.slice(0, stage.number >= 6 ? 1 : 3).map(id => `<span>${wordText(WORDS.find(word => word.id === id))}</span>`).join('<span aria-hidden="true">·</span>')}</div>
+      <span class="reading-stage-go">בואי נקרא ${uiIcon('arrow')}</span>${settings.reading === key ? '<span class="reading-last-choice">השלב שבחרת לאחרונה</span>' : ''}</button>
+      <button class="circle-button reading-stage-sound" data-action="reading-stage-sound" data-level="${key}" aria-label="שמיעת הסבר על שלב ${stage.number}">${uiIcon('sound')}</button></article>`).join('')}</div>
+    <div class="reading-mixed-row"><button class="secondary-button" data-action="reading-level" data-level="all">מכל הגינה · משחק מכל השלבים ${uiIcon('arrow')}</button><button class="circle-button" data-action="reading-stage-sound" data-level="all" aria-label="שמיעת הסבר על משחק מכל השלבים">${uiIcon('sound')}</button></div><p id="audio-notice" class="audio-notice" role="status" hidden></p>
   </main>${footer()}`;
 }
+
 
 function openReadingLevels() {
   narrator.stop(); round = null; view = 'reading-levels'; render(); focusTitle(); announcements.say('reading-levels');
@@ -314,12 +339,12 @@ function startMission(mission, skipLesson = false) {
   if (mission === 'clock' && !skipLesson) { openClockLesson(); return; }
   if (mission === 'letters' && !skipLesson) { openLetterLesson(); return; }
   narrator.stop();
-  round = { mission, questions: createSession(mission, { ...settings, letterStart: letterDemo.index }), reading: settings.reading, clockLevel: settings.clockLevel, index: 0, resolved: false, attempted: new Set(), counted: new Set(), helped: new Set(), sticker: null, awarded: false };
+  round = { mission, questions: createSession(mission, { ...settings, readingRecent: readingPractice.recent[settings.reading], letterStart: letterDemo.index }), reading: settings.reading, clockLevel: settings.clockLevel, index: 0, resolved: false, attempted: new Set(), counted: new Set(), helped: new Set(), sticker: null, awarded: false };
   view = 'game';
   render();
   focusTitle();
   const q = current();
-  announcements.say([mission === 'letters' ? q.prompt : MISSIONS[mission].intro, ...(q.targetClip ? [q.targetClip] : [])]);
+  announcements.say([...(mission === 'hebrew' ? [READING_LEVELS[round.reading].clip, q.prompt] : [mission === 'letters' ? q.prompt : MISSIONS[mission].intro]), ...(q.targetClip ? [q.targetClip] : [])]);
 }
 
 function recommended() {
@@ -360,7 +385,7 @@ function hint() {
     face.classList.remove('highlight-hour', 'highlight-minute'); face.classList.add(q.time.minute === 0 ? 'highlight-hour' : 'highlight-minute');
     announcements.say(q.hint); return;
   }
-  document.querySelector('#feedback').textContent = q.type === 'read' ? 'נשמע את המילה, ואז נחפש את התמונה.' : q.type === 'listen' ? 'נקשיב שוב לאט. איזו תמונה מתאימה?' : 'געי בפריטים אחד־אחד. נמשיך לספור יחד.';
+  document.querySelector('#feedback').textContent = q.type === 'read' ? 'נשמע מה כתוב, ואז נחפש את התמונה.' : q.type === 'listen' ? 'נקשיב שוב לאט. איזו תמונה מתאימה?' : 'געי בפריטים אחד־אחד. נמשיך לספור יחד.';
   announcements.say([q.hint, ...(q.type === 'read' ? [`he-${q.word.id}`] : q.targetClip ? [q.targetClip] : [])], { slow: true });
 }
 
@@ -406,7 +431,7 @@ function answer(button) {
   announcements.say([`correct-${1 + round.index % 3}`, ...(q.type === 'clock' ? [q.time.clip] : q.type === 'read' ? [`he-${q.word.id}`] : q.targetClip ? [q.targetClip] : [])]);
   narrator.chime();
   celebrate(16);
-  next.focus({ preventScroll: q.type !== 'clock' });
+  next.focus({ preventScroll: q.type !== 'clock' && !(q.type === 'read' && q.word.scene) });
 }
 
 function nextQuestion() {
@@ -417,9 +442,10 @@ function nextQuestion() {
       progress = result.progress;
       round.sticker = result.sticker;
       round.awarded = true;
+      if (round.mission === 'hebrew') readingPractice = finishReadingPractice(readingPractice, round.reading, round.questions.map(q => q.word));
       save();
     }
-    view = 'complete'; render(); focusTitle(); celebrate(40); announcements.say(round.sticker ? 'complete' : 'complete-all'); return;
+    view = 'complete'; render(); focusTitle(); celebrate(40); announcements.say([round.sticker ? 'complete' : 'complete-all', ...(round.mission === 'hebrew' ? [nextReadingStage(round.reading, round.helped.size) ? 'reading-next' : 'reading-more'] : [])]); return;
   }
   round.index++;
   round.resolved = false;
@@ -497,7 +523,7 @@ function renderSettings() {
   dialog.querySelector('[data-dialog="reset"]').onclick = () => {
     openDialog(`<h2 id="parent-title">לאפס את המכשיר הזה?</h2><p>המדבקות וההתקדמות בדפדפן הזה יימחקו. הגדרות המשחק יישמרו.${album.linked ? ' החיבור לאלבום המשפחתי יוסר. האלבום שכבר סונכרן יישמר עבור המכשירים האחרים.' : ''}</p><div class="dialog-actions"><button class="secondary-button" data-dialog="cancel-reset">ביטול</button><button class="primary-button" data-dialog="confirm-reset">איפוס ההתקדמות</button></div>`);
     dialog.querySelector('[data-dialog="cancel-reset"]').onclick = renderSettings;
-    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); progress = freshProgress(); save(); round = null; view = 'home'; render(); renderSettings(); };
+    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
   };
 }
 

@@ -1,7 +1,7 @@
 import { ANIMALS, COLORS, NUMBERS, STICKERS, MISSION_IDS } from './content.js';
 import { CLOCK_LEVELS, clockTime } from './clock.js';
 import { LETTERS, letterGroup } from './letters.js';
-import { READING_LEVELS, readingWords } from './reading.js';
+import { READING_LEVELS, readingWords, readingTargets } from './reading.js';
 
 export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', letterLanguage: 'hebrew', sound: true, motion: true });
 export const SESSION_LENGTH = 6;
@@ -37,11 +37,12 @@ export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Mat
   }
   if (mission === 'hebrew') {
     const pool = readingWords(settings.reading);
-    const targets = shuffle(pool, rng);
+    const targets = readingTargets(pool, settings.readingRecent, SESSION_LENGTH, rng);
     // The short pool has five entries; repeat only after all five were encountered.
     return Array.from({ length: SESSION_LENGTH }, (_, i) => {
       const word = targets[i % targets.length];
-      return { id: `he-${i}`, type: 'read', word, answer: word.id, options: optionsFrom(pool, word, rng), prompt: 'read', hint: 'read-hint' };
+      const choices = word.family ? pool.filter(item => item.family === word.family) : pool.filter(item => !item.family);
+      return { id: `he-${i}`, type: 'read', word, answer: word.id, options: optionsFrom(choices, word, rng), prompt: word.scene ? 'reading-phrase' : 'read', hint: word.scene ? 'reading-phrase-hint' : 'read-hint' };
     });
   }
   if (mission === 'english') {

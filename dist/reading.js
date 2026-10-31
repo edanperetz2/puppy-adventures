@@ -1,9 +1,17 @@
+import { ADVANCED_WORDS } from './reading-advanced.js';
+
 // Reading stages are independent choices, never locked behind a score.
 export const READING_LEVELS = Object.freeze({
   short: { number: 1, name: 'ניצנים', description: 'מילים קצרות ומוכרות', range: '\u20662–3\u2069 אותיות', level: 1, samples: ['fish', 'tree', 'horse'], art: 'flower', color: 'peach', clip: 'reading-short' },
   familiar: { number: 2, name: 'קוראות בביטחון', description: 'עוד מילים מהעולם שלנו', range: '\u20663–4\u2069 אותיות', level: 2, samples: ['house', 'cat', 'butterfly'], art: 'butterfly', color: 'blue', clip: 'reading-familiar' },
-  long: { number: 3, name: 'מגלות מילים ארוכות', description: 'פירות, חיות ודברים חדשים', range: '\u20664–5\u2069 אותיות', level: 3, samples: ['watermelon', 'helicopter', 'table'], art: 'helicopter', color: 'yellow', clip: 'reading-long', fresh: true },
-  challenge: { number: 4, name: 'אתגר המילים', description: 'מוכנה למילים ממש ארוכות?', range: '\u20665–8\u2069 אותיות', level: 4, samples: ['dinosaur', 'bulldozer', 'glasses'], art: 'dinosaur', color: 'lavender', clip: 'reading-challenge', fresh: true },
+  long: { number: 3, name: 'מגלות מילים ארוכות', description: 'פירות, חיות ודברים חדשים', range: '\u20664–5\u2069 אותיות', level: 3, samples: ['watermelon', 'helicopter', 'table'], art: 'helicopter', color: 'yellow', clip: 'reading-long' },
+  challenge: { number: 4, name: 'אתגר המילים', description: 'מוכנה למילים ממש ארוכות?', range: '\u20665–8\u2069 אותיות', level: 4, samples: ['dinosaur', 'bulldozer', 'glasses'], art: 'dinosaur', color: 'lavender', clip: 'reading-challenge' },
+  explorers: { number: 5, name: 'מילים של חוקרות', description: 'רכבי הצלה, חיות וגן משחקים', range: 'אוצר מילים חדש', level: 5, samples: ['firetruck', 'hedgehog'], art: 'firetruck', color: 'peach', clip: 'reading-explorers', fresh: true },
+  colors: { number: 6, name: 'קוראות גם את הצבע', description: 'אותו דבר, צבע אחר', range: 'שם וצבע', level: 6, samples: ['color-ball-red', 'color-car-blue'], art: 'color-ball-red', color: 'blue', clip: 'reading-colors', fresh: true },
+  quantities: { number: 7, name: 'כמה כתוב כאן?', description: 'קוראות מספרים במילים', range: 'כמות ושם', level: 7, samples: ['count-butterfly-2', 'count-flower-3'], art: 'count-butterfly-2', color: 'yellow', clip: 'reading-quantities', fresh: true },
+  positions: { number: 8, name: 'איפה החברים?', description: 'מעל, מתחת, בתוך וליד', range: 'קוראות מיקום', level: 8, samples: ['place-ball-under', 'place-cat-in'], art: 'place-cat-in', color: 'lavender', clip: 'reading-positions', fresh: true },
+  actions: { number: 9, name: 'מה הם עושים?', description: 'ישנים, רצים, קופצים ועפים', range: 'שם ופעולה', level: 9, samples: ['action-dog-jump', 'action-bird-fly'], art: 'action-dog-jump', color: 'peach', clip: 'reading-actions', fresh: true },
+  sentences: { number: 10, name: 'סיפורים קטנים', description: 'מגלות כמה פרטים במשפט', range: 'משפטים קצרים', level: 10, samples: ['facts-car-red-house', 'facts-butterflies-two-blue'], art: 'facts-car-red-house', color: 'blue', clip: 'reading-sentences', fresh: true },
   all: { name: 'מכל הגינה', description: 'מערבבות מילים מכל השלבים', range: 'כל המילים', level: null, clip: 'reading-all' },
 });
 
@@ -44,9 +52,46 @@ export const WORDS = [
   { id: 'chocolate', he: 'שוקולד', pointed: 'שׁוֹקוֹלָד', level: 4 },
   { id: 'trumpet', he: 'חצוצרה', pointed: 'חֲצוֹצְרָה', level: 4 },
   { id: 'cucumber', he: 'מלפפון', pointed: 'מְלָפְפוֹן', level: 4 },
+  ...ADVANCED_WORDS,
 ];
 
 export function readingWords(key = 'short') {
   const stage = Object.hasOwn(READING_LEVELS, key) ? READING_LEVELS[key] : READING_LEVELS.short;
   return WORDS.filter(word => stage.level === null || word.level === stage.level);
+}
+
+export function nextReadingStage(key, assisted) {
+  const stage = Object.hasOwn(READING_LEVELS, key) ? READING_LEVELS[key] : null;
+  if (!stage?.number || !Number.isInteger(assisted) || assisted < 0 || assisted > 1) return null;
+  return Object.keys(READING_LEVELS).find(next => READING_LEVELS[next].number === stage.number + 1) || null;
+}
+
+export function readingTargets(pool, recent, count, rng = Math.random) {
+  if (!pool.length || count <= 0) return [];
+  const ids = new Set(pool.map(word => word.id));
+  const order = [...new Set((Array.isArray(recent) ? recent : []).filter(id => ids.has(id)))];
+  const newWords = pool.filter(word => !order.includes(word.id));
+  for (let i = newWords.length - 1; i > 0; i--) { const n = Math.floor(rng() * (i + 1)); [newWords[i], newWords[n]] = [newWords[n], newWords[i]]; }
+  const queue = [...newWords, ...order.map(id => pool.find(word => word.id === id))].slice(0, count);
+  for (let i = queue.length - 1; i > 0; i--) { const n = Math.floor(rng() * (i + 1)); [queue[i], queue[n]] = [queue[n], queue[i]]; }
+  return Array.from({ length: count }, (_, i) => queue[i % queue.length]);
+}
+
+export function sanitizeReadingPractice(input) {
+  const recent = {};
+  for (const key of Object.keys(READING_LEVELS)) {
+    const ids = new Set(readingWords(key).map(word => word.id));
+    const saved = input && typeof input === 'object' && Array.isArray(input.recent?.[key]) ? input.recent[key] : [];
+    recent[key] = [...new Set(saved.filter(id => ids.has(id)))].slice(-ids.size);
+  }
+  return { recent };
+}
+
+export function finishReadingPractice(input, key, words) {
+  const result = sanitizeReadingPractice(input);
+  if (!Object.hasOwn(READING_LEVELS, key)) return result;
+  const allowed = new Set(readingWords(key).map(word => word.id));
+  const played = [...new Set(words.map(word => word.id).filter(id => allowed.has(id)))];
+  result.recent[key] = [...result.recent[key].filter(id => !played.includes(id)), ...played];
+  return result;
 }
