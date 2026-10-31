@@ -38,10 +38,10 @@ test('Print landmarks distinguish easily confused Hebrew letters and keep final 
   assert.match(form('ב').strokes[1], /L179 190/u, 'Bet has a base extending past its right stem');
   assert.match(form('ד').strokes[0], /L175 96/u, 'Dalet has a roof overhang');
   assert.match(form('ר').strokes[0], /Q/u, 'Resh turns smoothly into its stem');
-  assert.match(form('ה').strokes[1], /^M78 131/u, 'He has an open gap above the left leg');
+  assert.match(form('ה').strokes[1], /^M77 133/u, 'He has an open gap above the left leg');
   assert.match(form('ח').strokes[1], /^M77 96/u, 'Het joins the roof');
   assert.match(form('ת').strokes[1], /57 190/u, 'Tav has a distinct left foot');
-  assert.match(form('י').strokes[0], /V126$/u);
+  assert.match(form('י').strokes[0], /V124$/u);
   assert.match(form('ו').strokes[0], /V190$/u);
   for (const char of ['ך', 'ן', 'ף', 'ץ']) assert.ok(form(char).strokes.some(d => /V224/u.test(d)), `${char} must descend`);
   assert.ok(form('ם').strokes.every(d => !/22[0-9]/u.test(d)), 'Final mem stays on the baseline');
