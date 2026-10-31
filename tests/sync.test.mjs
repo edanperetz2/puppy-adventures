@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { SharedAlbum, newCode, normalizeCode, formatCode, withPending } from '../dist/sync.js';
 import { finishSession, freshProgress } from '../dist/engine.js';
 import { MISSION_IDS } from '../dist/content.js';
+import { STICKERS, LEGACY_STICKERS } from '../dist/stickers.js';
 
 function storage() {
   const values = new Map();
@@ -34,12 +35,67 @@ function server() {
       combined.skills[mission].correct += value.skills[mission].correct;
       combined.skills[mission].assisted += value.skills[mission].assisted;
     }
-    return Response.json(withPending(combined, freshProgress(), freshProgress()));
+    const response = withPending(combined, freshProgress(), freshProgress());
+    // The deployed RPC returns the original twelve IDs plus uncapped totals.
+    response.stickers = LEGACY_STICKERS.slice(0, response.sessions);
+    return Response.json(response);
   };
   return { fetcher, online: value => { online = value; } };
 }
 
 const config = { url: 'https://test.example', key: 'public-test-key' };
+
+function legacyProgress(sessions) {
+  const progress = freshProgress();
+  progress.sessions = sessions;
+  progress.stars = sessions * 6;
+  progress.missions.hebrew = sessions;
+  progress.skills.hebrew.correct = sessions * 6;
+  progress.stickers = [...LEGACY_STICKERS];
+  return progress;
+}
+
+test('Expanded rewards derive from shared totals and survive offline progress beyond the old limit', async () => {
+  const api = server();
+  const saved = storage();
+  const first = new SharedAlbum({ config, storage: storage(), fetcher: api.fetcher });
+  let second = new SharedAlbum({ config, storage: saved, fetcher: api.fetcher });
+  const code = newCode();
+  await first.link(code, legacyProgress(15), { create: true });
+  await second.link(code, freshProgress());
+  assert.deepEqual(first.progress.stickers, STICKERS.slice(0, 15));
+  assert.deepEqual(second.progress.stickers, first.progress.stickers);
+  api.online(false);
+  const earned = second.complete('clock', 1);
+  assert.equal(earned.sticker, STICKERS[15]);
+  await second.flush();
+  second = new SharedAlbum({ config, storage: saved, fetcher: api.fetcher });
+  assert.equal(second.progress.stickers.length, 16);
+  api.online(true);
+  await second.flush(); await first.flush(); await second.flush();
+  assert.equal(first.progress.sessions, 16);
+  assert.deepEqual(first.progress.stickers, STICKERS.slice(0, 16));
+  assert.deepEqual(second.progress.stickers, first.progress.stickers);
+});
+
+test('The thousandth shared reward is stable across devices and repeated uploads', async () => {
+  const api = server();
+  const first = new SharedAlbum({ config, storage: storage(), fetcher: api.fetcher });
+  const second = new SharedAlbum({ config, storage: storage(), fetcher: api.fetcher });
+  const code = newCode();
+  await first.link(code, legacyProgress(999), { create: true });
+  await second.link(code, freshProgress());
+  const result = second.complete('math', 0);
+  assert.equal(result.sticker, 'sticker-1000');
+  await second.flush(); await first.flush(); await second.flush();
+  assert.equal(first.progress.sessions, 1000);
+  assert.deepEqual(first.progress.stickers, STICKERS);
+  assert.deepEqual(second.progress.stickers, STICKERS);
+  assert.equal(first.complete('letters', 0).sticker, null);
+  await first.flush(); await second.flush();
+  assert.equal(second.progress.sessions, 1001);
+  assert.equal(second.progress.stickers.length, 1000);
+});
 
 test('The browser fetch API keeps its required Window receiver', async () => {
   const original = globalThis.fetch;

@@ -50,7 +50,7 @@ test('Completing adventures preserves previous progress and unlocks stickers onc
   assert.equal(original.sessions, 0);
   assert.equal(progress.sessions, 15);
   assert.equal(progress.stars, 90);
-  assert.equal(progress.stickers.length, STICKERS.length);
+  assert.equal(progress.stickers.length, 15);
   assert.equal(progress.skills.hebrew.correct, 90);
   assert.equal(progress.skills.hebrew.assisted, 30);
   assert.equal(progress.missions.english, 0);

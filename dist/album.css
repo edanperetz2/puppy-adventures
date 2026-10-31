@@ -1,0 +1,35 @@
+.nav-count{padding-inline:5px;white-space:nowrap;flex-shrink:0}
+.album-heading{margin-bottom:20px}
+.album-progress{display:block;width:min(340px,85%);height:9px;margin:16px auto 10px;border:0;border-radius:20px;overflow:hidden;background:#e8e1d6;accent-color:var(--green)}
+.album-progress::-webkit-progress-bar{background:#e8e1d6;border-radius:20px}
+.album-progress::-webkit-progress-value{background:var(--green);border-radius:20px}
+.album-progress::-moz-progress-bar{background:var(--green);border-radius:20px}
+.album-heading .album-next-reward{font-size:12px;margin-top:10px}
+.album-pagination{display:flex;align-items:center;justify-content:center;gap:16px;margin:12px auto;max-width:640px}
+.album-pagination .secondary-button{min-height:48px;padding:10px 18px;font-size:13px;white-space:nowrap}
+.album-pagination button:disabled{opacity:.35}
+.album-page-select{display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--muted);min-width:130px}
+.album-page-select select{font-size:14px;min-height:45px;width:100%;max-width:none;background:#fffdf7;color:var(--ink);border:1px solid #d9d0c1;border-radius:13px;padding:8px 14px;cursor:pointer}
+.album-page-range{font-size:12px;color:#86798d;margin:17px 0 5px}
+.album-latest{font-size:12px;min-height:44px;margin:0 auto 15px}
+.album-page .sticker-grid{margin-top:22px;grid-template-columns:repeat(4,minmax(0,1fr))}
+.album-page .sticker{min-width:0}
+.album-bottom-pages{margin:0 auto 26px}
+.sticker .sticker-scene{width:100%}
+@media(max-width:570px){
+  .album-page .sticker-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .album-pagination{gap:9px}
+  .album-pagination .secondary-button{font-size:11px;padding:9px 12px;min-height:46px;border-radius:13px}
+  .album-page-select{min-width:98px;font-size:10px}
+  .album-page-select select{font-size:12px;padding-inline:9px}
+  .album-heading .album-next-reward{font-size:11px}
+  .sticker.unlocked:has(.sticker-scene){padding:7px 7px 14px}
+  .album-page-range{font-size:11px}
+}
+@media(max-width:370px){
+  .album-pagination .secondary-button{font-size:10px;padding-inline:10px}
+  .album-page-select{min-width:90px}
+  .album-nav{padding-inline:6px;gap:5px;min-width:0}
+  .album-nav .ui-icon{width:18px}
+  .nav-count{font-size:8px;padding-inline:4px}
+}

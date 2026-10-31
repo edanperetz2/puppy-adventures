@@ -1,6 +1,8 @@
 import { READING_ART } from './reading-art.js';
 import { MORE_READING_ART } from './reading-more-art.js';
 import { readingScene, hasReadingScene } from './reading-scenes.js';
+import { stickerScene } from './sticker-art.js';
+import { stickerDefinition } from './stickers.js';
 
 const svg = (body, cls = '', viewBox = '0 0 200 200') => `<svg class="${cls}" viewBox="${viewBox}" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${body}</svg>`;
 const eye = (x, y) => `<ellipse cx="${x}" cy="${y}" rx="5" ry="7" fill="#343247"/><circle cx="${x + 1.5}" cy="${y - 2}" r="1.8" fill="white"/>`;
@@ -52,13 +54,15 @@ const drawings = {
 };
 
 export function art(name, cls = '') {
+  const sticker = stickerScene(name, object => art(object));
+  if (sticker !== null) return svg(sticker, `art sticker-scene ${cls}`);
   const scene = readingScene(name, object => art(object));
   if (scene !== null) return svg(scene, `art reading-scene ${cls}`);
   if (name === 'dog') return pup('luli', cls);
   return svg(drawings[name] || drawings.star, `art ${cls}`);
 }
 
-export function hasArt(name) { return name === 'dog' || Object.hasOwn(drawings, name) || hasReadingScene(name); }
+export function hasArt(name) { return name === 'dog' || Object.hasOwn(drawings, name) || hasReadingScene(name) || stickerDefinition(name) !== null; }
 
 export function uiIcon(name) {
   const paths = {

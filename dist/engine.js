@@ -2,6 +2,7 @@ import { ANIMALS, COLORS, NUMBERS, STICKERS, MISSION_IDS } from './content.js';
 import { CLOCK_LEVELS, clockTime } from './clock.js';
 import { LETTERS, letterGroup } from './letters.js';
 import { READING_LEVELS, readingWords, readingTargets } from './reading.js';
+import { isSticker } from './stickers.js';
 
 export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', letterLanguage: 'hebrew', sound: true, motion: true });
 export const SESSION_LENGTH = 6;
@@ -117,7 +118,9 @@ export function sanitizeProgress(input) {
   const nonnegative = x => Number.isSafeInteger(x) && x >= 0 ? x : 0;
   result.stars = nonnegative(input.stars);
   result.sessions = nonnegative(input.sessions);
-  result.stickers = [...new Set(Array.isArray(input.stickers) ? input.stickers.filter(id => STICKERS.includes(id)) : [])];
+  const savedStickers = new Set(Array.isArray(input.stickers) ? input.stickers.filter(isSticker) : []);
+  // Older albums stopped at twelve; completed adventures still earned rewards.
+  result.stickers = STICKERS.filter((id, index) => index < result.sessions || savedStickers.has(id));
   for (const key of Object.keys(result.missions)) {
     result.missions[key] = nonnegative(input.missions?.[key]);
     result.skills[key].correct = nonnegative(input.skills?.[key]?.correct);

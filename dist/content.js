@@ -38,7 +38,7 @@ export const MISSIONS = {
 
 export const MISSION_IDS = Object.keys(MISSIONS);
 
-export const STICKERS = ['flower', 'boat', 'star', 'dog', 'butterfly', 'rocket', 'rainbow', 'ball', 'cat', 'sun', 'house', 'heart'];
+export { STICKERS } from './stickers.js';
 
 // Explicit clips are bundled at build time: no speech subscription or runtime API.
 export const CLIPS = {

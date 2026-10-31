@@ -1,5 +1,6 @@
 [
   "./",
+  "./album.css",
   "./announcements.js",
   "./app.js",
   "./art.js",
@@ -25,6 +26,8 @@
   "./reading.css",
   "./reading.js",
   "./speech.js",
+  "./sticker-art.js",
+  "./stickers.js",
   "./styles.css",
   "./sync-config.js",
   "./sync.js",

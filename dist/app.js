@@ -10,6 +10,7 @@ import { analogClock, clockAngles, clockTime, CLOCK_LEVELS } from './clock.js';
 import { LETTERS, letterGroup, letterShape } from './letters.js';
 import { mountLetterPad } from './letter-pad.js';
 import { nextReadingStage, sanitizeReadingPractice, finishReadingPractice } from './reading.js';
+import { stickerPage, stickerDefinition } from './stickers.js';
 
 const app = document.querySelector('#app');
 const dialog = document.querySelector('#parent-dialog');
@@ -28,6 +29,7 @@ let letterReturn = false;
 let letterPad = null;
 let lastTraceHint = 0;
 let readingPractice = sanitizeReadingPractice(null);
+let albumPageIndex = null;
 
 try {
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
@@ -310,10 +312,23 @@ function openReadingLevels() {
 }
 
 function renderAlbum() {
-  app.innerHTML = `${header()}<main id="main" class="album-page"><button class="text-button back-button" data-action="home">${uiIcon('home')} לבית החברים</button><div class="album-heading"><span class="eyebrow">מזכרות מההרפתקאות שלנו</span><h1 tabindex="-1">המדבקות שלי</h1><p>${progress.stickers.length ? `כבר גילית ${progress.stickers.length} מתוך ${STICKERS.length} מדבקות!` : 'המדבקה הראשונה שלך מחכה בסוף ההרפתקה.'}</p></div><div class="sticker-grid">${STICKERS.map((id, i) => {
-    const unlocked = progress.stickers.includes(id);
-    return `<div class="sticker ${unlocked ? 'unlocked' : 'locked'}" aria-label="${unlocked ? `מדבקה ${i + 1} נאספה` : `מדבקה ${i + 1} מחכה להרפתקה הבאה`}">${unlocked ? art(id) : '<span class="sticker-mystery">?</span>'}<span class="sticker-index">${String(i + 1).padStart(2, '0')}</span></div>`;
-  }).join('')}</div><button class="primary-button" data-action="recommended">יוצאות להרפתקה ${uiIcon('arrow')}</button></main>${footer()}`;
+  const page = stickerPage(progress.stickers, albumPageIndex);
+  albumPageIndex = page.index;
+  const previousButton = `<button class="secondary-button" data-action="album-page" data-page="${page.index - 1}" ${page.index === 0 ? 'disabled' : ''}>לעמוד הקודם</button>`;
+  const nextButton = `<button class="secondary-button" data-action="album-page" data-page="${page.index + 1}" ${page.index === page.pageCount - 1 ? 'disabled' : ''}>לעמוד הבא</button>`;
+  app.innerHTML = `${header()}<main id="main" class="album-page"><button class="text-button back-button" data-action="home">${uiIcon('home')} לבית החברים</button>
+    <div class="album-heading"><span class="eyebrow">מזכרות מההרפתקאות שלנו</span><h1 tabindex="-1">המדבקות שלי</h1><p>כבר גילית <b>${page.collected}</b> מתוך <b>${STICKERS.length.toLocaleString('en-US')}</b> מדבקות!</p><progress class="album-progress" value="${page.collected}" max="${STICKERS.length}" aria-label="${page.collected} מתוך ${STICKERS.length} מדבקות נאספו"></progress><p class="album-next-reward">${page.collected === STICKERS.length ? 'כל המדבקות באלבום שלך! אפשר להמשיך לגלות ולשחק ♡' : 'בכל הרפתקה שלמה מגלות מדבקה חדשה ♡'}</p></div>
+    <nav class="album-pagination" aria-label="דפדוף בראש האלבום">${previousButton}<label class="album-page-select"><span>עמוד ${page.index + 1} מתוך ${page.pageCount}</span><select data-album-page aria-label="בחירת עמוד באלבום">${Array.from({ length: page.pageCount }, (_, index) => `<option value="${index}" ${index === page.index ? 'selected' : ''}>עמוד ${index + 1}</option>`).join('')}</select></label>${nextButton}</nav>
+    <p class="album-page-range" role="status">מדבקות <bdi dir="ltr">${page.start + 1}–${page.end}</bdi></p>
+    ${page.collected ? '<button class="text-button album-latest" data-action="album-latest">למדבקה האחרונה שלי</button>' : ''}
+    <div class="sticker-grid">${page.entries.map(({ id, number, unlocked }) => `<div class="sticker ${unlocked ? 'unlocked' : 'locked'}" role="img" aria-label="${unlocked ? `מדבקה ${number} נאספה: ${stickerDefinition(id).name}` : `מדבקה ${number} מחכה להרפתקה הבאה`}">${unlocked ? art(id) : '<span class="sticker-mystery" aria-hidden="true">?</span>'}<span class="sticker-index" aria-hidden="true">${String(number).padStart(3, '0')}</span></div>`).join('')}</div>
+    <nav class="album-pagination album-bottom-pages" aria-label="דפדוף בתחתית האלבום">${previousButton}${nextButton}</nav>
+    <button class="primary-button" data-action="recommended">יוצאות להרפתקה ${uiIcon('arrow')}</button></main>${footer()}`;
+}
+
+function turnAlbumPage(index) {
+  albumPageIndex = index;
+  render(); focusTitle();
 }
 
 function render() {
@@ -547,7 +562,9 @@ app.addEventListener('click', event => {
   if (button.disabled) return;
   switch (button.dataset.action) {
     case 'home': leaveTo('home'); break;
-    case 'album': if (view === 'game') leaveTo('album'); else { narrator.stop(); view = 'album'; render(); focusTitle(); announcements.say('stickers'); } break;
+    case 'album': albumPageIndex = null; if (view === 'game') leaveTo('album'); else { narrator.stop(); view = 'album'; render(); focusTitle(); announcements.say('stickers'); } break;
+    case 'album-page': turnAlbumPage(Number(button.dataset.page)); break;
+    case 'album-latest': turnAlbumPage(null); break;
     case 'mission': startMission(button.dataset.mission); break;
     case 'reading-levels': if (view === 'game') leaveTo('reading-levels'); else openReadingLevels(); break;
     case 'reading-level': if (Object.hasOwn(READING_LEVELS, button.dataset.level)) { settings.reading = button.dataset.level; save(); startMission('hebrew', true); } break;
@@ -581,6 +598,10 @@ app.addEventListener('click', event => {
     case 'sound': settings.sound = !settings.sound; narrator.stop(); narrator.enabled = settings.sound; save(); renderSoundButton(); if (settings.sound) replay(); break;
     case 'break': narrator.stop(); round = null; view = 'home'; render(); focusTitle(); announcements.say('break'); break;
   }
+});
+
+app.addEventListener('change', event => {
+  if (event.target.matches('select[data-album-page]')) turnAlbumPage(Number(event.target.value));
 });
 
 dialog.addEventListener('click', event => { if (event.target === dialog && event.offsetX >= 0 && event.offsetX <= dialog.clientWidth && event.offsetY >= 0 && event.offsetY <= dialog.clientHeight) return; if (event.target === dialog) closeDialog(); });
