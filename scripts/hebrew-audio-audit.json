@@ -1039,6 +1039,216 @@
       "detected_ipa": "haʔˈot tsˈadi sofˈit.",
       "phoneme_edit_ratio": 0.0,
       "seconds": 4.61
+    },
+    "reading-levels": {
+      "sha256": "dcc842d0079dae7ba5ed8774af05a358b8de7a84d4107fd447dc73bd272b5807",
+      "expected_ipa": "mˈa nikʁˈa hajˈom? baχaʁˈi ʃalˈav. bˈoʔi neɡalˈe milˈim χadaʃˈot!",
+      "detected_ipa": "mˈa nikʁˈa hajˈom? baχaʁˈi ʃalˈav, bˈoʔi neɡalˈe milˈim χadaʃˈot.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.42
+    },
+    "reading-short": {
+      "sha256": "c8b1e51039829715d86e22a6da02fed655e355cfd98be027875063e4c9346191",
+      "expected_ipa": "ʃalˈav ʁiʃˈon. milˈim ktsaʁˈot.",
+      "detected_ipa": "ʃalˈav ʁiʃˈon, milˈim ktsaʁˈot.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.8
+    },
+    "reading-familiar": {
+      "sha256": "c9f47262100b305ae07910dd851cf1b4d28964e0391d43baee3486236abd36b0",
+      "expected_ipa": "ʃalˈav ʃenˈi. milˈim mukaʁˈot.",
+      "detected_ipa": "ʃalˈav ʃenˈi, milˈim mukaʁˈot.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.48
+    },
+    "reading-long": {
+      "sha256": "75c02eb3366c4a1b2970b501b63f156d5bc108a206bb55ada1d04bc62af954ee",
+      "expected_ipa": "ʃalˈav ʃliʃˈi. milˈim ʔaʁukˈot.",
+      "detected_ipa": "ʃalˈav ʃliʃˈi, milˈim ʔaʁukˈot.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.56
+    },
+    "reading-challenge": {
+      "sha256": "257d56d3e9ce76705100061eb2174db5b456598e1900034b167b3f26f563b8db",
+      "expected_ipa": "ʃalˈav ʁeviʔˈi. ʔetɡˈaʁ hamilˈim.",
+      "detected_ipa": "ʃalˈav ʁeviʔˈi, ʔetɡˈaʁ hamilˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.56
+    },
+    "reading-all": {
+      "sha256": "04f02dd798cbedb7beed837d064e25d94c417735e58ab2c0c9405b9e786b3290",
+      "expected_ipa": "kˈol hamilˈim. milˈim mikˈol haʃlavˈim.",
+      "detected_ipa": "kˈol hamilˈim, milˈim mikˈol haʃlavˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.5
+    },
+    "he-rabbit": {
+      "sha256": "d49ff0ef0544b9d8a3166b3a2f41fb59a1751d4e511d1bde0e81bf521bb82154",
+      "expected_ipa": "ʔaʁnˈav",
+      "detected_ipa": "ʔaʁnˈav",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.49
+    },
+    "he-duck": {
+      "sha256": "ca1d4c537255b2105a95a2dd5b74232bbe7207fc7cc681566e8e7f566094f939",
+      "expected_ipa": "baʁvˈaz",
+      "detected_ipa": "baʁvˈaz",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.47
+    },
+    "he-apple": {
+      "sha256": "308925b2b4d77a614ad8d3381756de3cf11275efff18848fdd36bfda6ccd869e",
+      "expected_ipa": "tapˈuaχ",
+      "detected_ipa": "tapˈuaχ",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.44
+    },
+    "he-watermelon": {
+      "sha256": "54882188cb19e68aaba846ee2c16a9ceee93d18f0c01f8353fa602a2f7110d19",
+      "expected_ipa": "ʔavtˈiaχ",
+      "detected_ipa": "ʔavtˈiaχ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.41
+    },
+    "he-pineapple": {
+      "sha256": "deee04c5e3dabc5c598db33742b0cbe885b2debb8bc4a252a8adaa7574048265",
+      "expected_ipa": "ʔanˈanas",
+      "detected_ipa": "ʔanˈanas",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.22
+    },
+    "he-airplane": {
+      "sha256": "d72dbb85de273eae7c66e7625f0b4cd4f07ac127ef75e6b0e8ee4e246c13d729",
+      "expected_ipa": "matˈos",
+      "detected_ipa": "matˈos",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.27
+    },
+    "he-helicopter": {
+      "sha256": "04d8c0117f3d4c1d53714164915e2dadeae628b6e6f900ba82fa296009aae513",
+      "expected_ipa": "masˈok",
+      "detected_ipa": "masˈok",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.25
+    },
+    "he-window": {
+      "sha256": "2ead6a253642be0e8ab07f24b9c27f69bada18950c2c96beb314271b5a749a67",
+      "expected_ipa": "χalˈon",
+      "detected_ipa": "χalˈon",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.34
+    },
+    "he-table": {
+      "sha256": "32a5f5aed9d5abfb1442cad4cc75648d9bd383a0375e6d460d08d74909711c47",
+      "expected_ipa": "ʃulχˈan",
+      "detected_ipa": "ʃulχˈan",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.41
+    },
+    "he-snail": {
+      "sha256": "fe1e4d97c840dd74e951d166b28ed001e707df6a097b11e04237919214cb254f",
+      "expected_ipa": "ʃablˈul",
+      "detected_ipa": "ʃablˈul",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.33
+    },
+    "he-guitar": {
+      "sha256": "5893a5350877ef0acf4968a429958ec6caaca6760c481d4dc87963d03d36a5e0",
+      "expected_ipa": "ɡitˈaʁa",
+      "detected_ipa": "ɡitˈaʁa",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.25
+    },
+    "he-car": {
+      "sha256": "3e1f786948a1b8b55926f454ee0d91c5f50b97b042051e32dc82f00a4a6e2a8e",
+      "expected_ipa": "meχonˈit",
+      "detected_ipa": "meχonˈit",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.36
+    },
+    "he-bicycle": {
+      "sha256": "d1dec3b99685ddae97545424fe38ec6b30b5bcf3746419f76960ae4d9a267927",
+      "expected_ipa": "ʔofanˈajim",
+      "detected_ipa": "ʔofanˈajim",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.3
+    },
+    "he-glasses": {
+      "sha256": "04fe0a20c3218e0984856e05bb9e19ffbcda64b1e028ba4d066eae7fea0e42f9",
+      "expected_ipa": "miʃkafˈajim",
+      "detected_ipa": "miʃkafˈajim",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.28
+    },
+    "he-scissors": {
+      "sha256": "ff1b72edb2a532001b5dd31b05b2d2f4339bfa6a910a84d4d58dd50c253ceffd",
+      "expected_ipa": "mispaʁˈajim",
+      "detected_ipa": "mispaʁˈajim",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.12
+    },
+    "he-umbrella": {
+      "sha256": "706b96055dbcbe6939718c7dfc28aa29002de1324f2819630c17b2bc3cee5fe2",
+      "expected_ipa": "mitʁijˈa",
+      "detected_ipa": "mitʁijˈa",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.69
+    },
+    "he-telescope": {
+      "sha256": "23c98f4c97b7884e3bc3073b202efb15b1b9fe9e0c56d7fb647218e76fa1dbc2",
+      "expected_ipa": "teleskˈop",
+      "detected_ipa": "tˈeleskˈop",
+      "phoneme_edit_ratio": 0,
+      "seconds": 5.41
+    },
+    "he-tractor": {
+      "sha256": "51483ce4262df92e133709d8cfd8962646884ded2416eaf0c0e7c81ae828c8d0",
+      "expected_ipa": "tʁˈaktoʁ",
+      "detected_ipa": "tʁˈaktoʁ",
+      "phoneme_edit_ratio": 0,
+      "seconds": 5.52
+    },
+    "he-bulldozer": {
+      "sha256": "53f01568c835058a6169f6c43c414cd779126a8e89f013d44fa365e260bd6d77",
+      "expected_ipa": "buldˈozeʁ",
+      "detected_ipa": "buldˈozeʁ",
+      "phoneme_edit_ratio": 0,
+      "seconds": 5.28
+    },
+    "he-dinosaur": {
+      "sha256": "7dde2fc767985b62f577e281e98b15b8ac79fcf71bb78288fae67b1b44689ef3",
+      "expected_ipa": "dinozˈauʁ",
+      "detected_ipa": "dinosˈaʔuʁ",
+      "phoneme_edit_ratio": 0.125,
+      "seconds": 4.36
+    },
+    "he-chocolate": {
+      "sha256": "cdc24874e638fbc59558e7e011b2ed5aa662c511119415ce65791f00720cfa7e",
+      "expected_ipa": "ʃokolˈad",
+      "detected_ipa": "ʃokolˈad",
+      "phoneme_edit_ratio": 0,
+      "seconds": 5.08
+    },
+    "he-trumpet": {
+      "sha256": "ad8b3b4cf2a445d4f1a510d182f7da6626cac505f08a1bf4d8c75c8bf7bf0d32",
+      "expected_ipa": "χatsotsʁˈa",
+      "detected_ipa": "χatsotsʁˈa",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.58
+    },
+    "he-cucumber": {
+      "sha256": "2f79c8452c14ae9c158060afb65a45447e80062176bb976535af69807a57bf91",
+      "expected_ipa": "melafefˈon",
+      "detected_ipa": "melafˈefon",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.28
+    },
+    "he-grapes": {
+      "sha256": "bc697b013781c0b560019240b4913f14397b2514badc50afc760bf750dd6661c",
+      "expected_ipa": "ʔanavˈim",
+      "detected_ipa": "ʔanavˈim",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.2
     }
   }
 }

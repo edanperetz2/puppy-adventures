@@ -1,6 +1,7 @@
-import { WORDS, ANIMALS, COLORS, NUMBERS, STICKERS, MISSION_IDS } from './content.js';
+import { ANIMALS, COLORS, NUMBERS, STICKERS, MISSION_IDS } from './content.js';
 import { CLOCK_LEVELS, clockTime } from './clock.js';
 import { LETTERS, letterGroup } from './letters.js';
+import { READING_LEVELS, readingWords } from './reading.js';
 
 export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', letterLanguage: 'hebrew', sound: true, motion: true });
 export const SESSION_LENGTH = 6;
@@ -35,12 +36,12 @@ export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Mat
     return targets.map((letter, i) => ({ id: `letters-${i}`, type: 'letter', letter, answer: letter.id, options: shuffle(group, rng), prompt: `letter-match-${language}`, targetClip: letter.clip, hint: 'letters-hint' }));
   }
   if (mission === 'hebrew') {
-    const pool = WORDS.filter(w => settings.reading === 'all' || w.level === 1);
+    const pool = readingWords(settings.reading);
     const targets = shuffle(pool, rng);
     // The short pool has five entries; repeat only after all five were encountered.
     return Array.from({ length: SESSION_LENGTH }, (_, i) => {
       const word = targets[i % targets.length];
-      return { id: `he-${i}`, type: 'read', word, answer: word.id, options: optionsFrom(WORDS, word, rng), prompt: 'read', hint: 'read-hint' };
+      return { id: `he-${i}`, type: 'read', word, answer: word.id, options: optionsFrom(pool, word, rng), prompt: 'read', hint: 'read-hint' };
     });
   }
   if (mission === 'english') {
@@ -101,7 +102,7 @@ export function sanitizeSettings(input) {
   const result = { ...DEFAULT_SETTINGS };
   if (!input || typeof input !== 'object') return result;
   for (const key of ['nikud', 'sound', 'motion']) if (typeof input[key] === 'boolean') result[key] = input[key];
-  if (['short', 'all'].includes(input.reading)) result.reading = input.reading;
+  if (Object.hasOwn(READING_LEVELS, input.reading)) result.reading = input.reading;
   if ([5, 10, 20].includes(input.mathMax)) result.mathMax = input.mathMax;
   if ([10, 20].includes(input.englishMax)) result.englishMax = input.englishMax;
   if (Object.hasOwn(CLOCK_LEVELS, input.clockLevel)) result.clockLevel = input.clockLevel;

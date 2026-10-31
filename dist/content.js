@@ -2,21 +2,8 @@ import { clockTime } from './clock.js';
 import { HEBREW_NARRATION, HEBREW_NUMBERS, clockSpeech } from './speech.js';
 import { hebrewSpeech } from './hebrew-pronunciation.js';
 import { LETTERS } from './letters.js';
-
-export const WORDS = [
-  { id: 'fish', he: 'דג', pointed: 'דָּג', level: 1 },
-  { id: 'sea', he: 'ים', pointed: 'יָם', level: 1 },
-  { id: 'tree', he: 'עץ', pointed: 'עֵץ', level: 1 },
-  { id: 'bear', he: 'דוב', pointed: 'דֹּב', level: 1 },
-  { id: 'horse', he: 'סוס', pointed: 'סוּס', level: 1 },
-  { id: 'ball', he: 'כדור', pointed: 'כַּדּוּר', level: 2 },
-  { id: 'house', he: 'בית', pointed: 'בַּיִת', level: 2 },
-  { id: 'sun', he: 'שמש', pointed: 'שֶׁמֶשׁ', level: 2 },
-  { id: 'dog', he: 'כלב', pointed: 'כֶּלֶב', level: 2 },
-  { id: 'cat', he: 'חתול', pointed: 'חָתוּל', level: 2 },
-  { id: 'flower', he: 'פרח', pointed: 'פֶּרַח', level: 2 },
-  { id: 'butterfly', he: 'פרפר', pointed: 'פַּרְפַּר', level: 2 },
-];
+import { WORDS } from './reading.js';
+export { WORDS, READING_LEVELS } from './reading.js';
 
 export const ANIMALS = [
   { id: 'dog', en: 'DOG', he: 'כלב' },
@@ -56,6 +43,12 @@ export const STICKERS = ['flower', 'boat', 'star', 'dog', 'butterfly', 'rocket',
 // Explicit clips are bundled at build time: no speech subscription or runtime API.
 export const CLIPS = {
   welcome: { lang: 'he-IL', text: 'שלום אריאל, ברוכה הבאה למשחק שלך!' },
+  'reading-levels': { lang: 'he-IL', text: 'מה נקרא היום? בחרי שלב. בואי נגלה מילים חדשות!' },
+  'reading-short': { lang: 'he-IL', text: 'שלב ראשון. מילים קצרות.' },
+  'reading-familiar': { lang: 'he-IL', text: 'שלב שני. מילים מוכרות.' },
+  'reading-long': { lang: 'he-IL', text: 'שלב שלישי. מילים ארוכות.' },
+  'reading-challenge': { lang: 'he-IL', text: 'שלב רביעי. אתגר המילים.' },
+  'reading-all': { lang: 'he-IL', text: 'כל המילים. מילים מכל השלבים.' },
   'meet-friends': { lang: 'he-IL', text: 'ברוכה הבאה לחבורת ההרפתקאות! החברים שלנו מחכים לך. בחרי הרפתקה, ובואי נשחק יחד!' },
   'choose-activity': { lang: 'he-IL', text: 'כל החברים מחכים לך. בחרי הרפתקה חדשה!' },
   'letters-intro-hebrew': { lang: 'he-IL', text: 'בואי נכיר את האותיות בכתב יד. לחצי על אות, וראי איך כותבים אותה.' },
