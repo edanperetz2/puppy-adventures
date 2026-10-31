@@ -39,7 +39,7 @@ export function mountClockSchool(root, { getProgress, position, onPosition, onRe
   }
   function journey(){
     if(screen==='free'||(!lesson().journey&&!lesson().turn))return '';
-    return `<section class="minute-journey" aria-label="טיול הדקות של בובי"><h2>טיול הדקות של בובי</h2><p>כל נקודה היא דקה. כל קבוצה היא 5 דקות.</p><div class="journey-track" aria-hidden="true"><span class="journey-dog">${pup('bobi')}</span><span class="journey-finish">✦</span></div><div class="minute-bundles" aria-hidden="true">${Array.from({length:12},(_,group)=>`<div class="minute-bundle"><div>${Array.from({length:5},()=>'<i data-minute-bead></i>').join('')}</div><small>${(group+1)*5}</small></div>`).join('')}</div><div class="journey-quantity"><b data-journey-count>0 דקות</b><span class="hour-bundle"><strong>1</strong> שעה = 60 דקות</span></div><p class="journey-speed">זה טיול בדמיון — הדקות במשחק עוברות מהר.</p>${screen==='try'&&(!lesson().journey||task().duration!==1)?button('five-minutes','עוד 5 דקות','secondary-button'):''}${lesson().journey&&(screen==='explain'||task().duration===1)?`<div class="real-minute">${button('real-minute','נרגיש דקה אמיתית','text-button')}<p data-real-status role="status">כאן הדקה תעבור בקצב אמיתי.</p><progress data-real-progress max="60" value="0" aria-label="הזמן שעבר בדקה אמיתית"></progress><small data-real-count aria-hidden="true">0 / 60 שניות</small></div>`:''}</section>`;
+    return `<section class="minute-journey" aria-label="טיול הדקות של בובי"><h2>טיול הדקות של בובי</h2><p>כל נקודה היא דקה. כל קבוצה היא 5 דקות.</p><div class="journey-track" aria-hidden="true"><span class="journey-dog">${pup('bobi')}</span><span class="journey-finish">✦</span></div><div class="minute-bundles" aria-hidden="true">${Array.from({length:12},(_,group)=>`<div class="minute-bundle"><div>${Array.from({length:5},()=>'<i data-minute-bead></i>').join('')}</div><small>${(group+1)*5}</small></div>`).join('')}</div><div class="journey-quantity"><b data-journey-count>0 דקות</b><span class="hour-bundle"><strong>1</strong> שעה = 60 דקות</span></div><p class="journey-speed">זה טיול בדמיון — הדקות במשחק עוברות מהר.</p>${screen==='try'?`<div class="journey-add-buttons">${button('one-minute','עוד דקה','primary-button')}${!lesson().journey||task().duration!==1?button('five-minutes','עוד 5 דקות','secondary-button'):''}</div>`:''}${lesson().journey&&(screen==='explain'||task().duration===1)?`<div class="real-minute">${button('real-minute','נרגיש דקה אמיתית','text-button')}<p data-real-status role="status">כאן הדקה תעבור בקצב אמיתי.</p><progress data-real-progress max="60" value="0" aria-label="הזמן שעבר בדקה אמיתית"></progress><small data-real-count aria-hidden="true">0 / 60 שניות</small></div>`:''}</section>`;
   }
   function updateJourney(total){
     const node=root.querySelector('.minute-journey');if(!node)return;
@@ -56,7 +56,7 @@ export function mountClockSchool(root, { getProgress, position, onPosition, onRe
   function realMinute(){
     const status=root.querySelector('[data-real-status]');if(realTimer){stopRealMinute();status.textContent='עצרנו. אפשר לנסות שוב כשתרצי.';return;}
     const start=performance.now(),base=screen==='try'?task().start:0;
-    realRestore=[...root.querySelectorAll('[data-school=demo],[data-school=try],[data-school=check],[data-school=select],[data-school=step],[data-school=five-minutes],.clock-grip,[data-dial-number]')].map(node=>[node,node.disabled]);
+    realRestore=[...root.querySelectorAll('[data-school=demo],[data-school=try],[data-school=check],[data-school=select],[data-school=step],[data-school=five-minutes],[data-school=one-minute],.clock-grip,[data-dial-number]')].map(node=>[node,node.disabled]);
     for(const[node]of realRestore)node.disabled=true;
     root.querySelector('[data-school=real-minute]').textContent='נעצור את הדקה';status.textContent='נרגיש יחד איך דקה עוברת. אפשר לעצור.';dial.set(base);speak('school-real-minute');
     realTimer=setInterval(()=>{
@@ -92,12 +92,12 @@ export function mountClockSchool(root, { getProgress, position, onPosition, onRe
   }
   function openLesson(index,resume=false){persist();lessonIndex=index;taskIndex=resume&&saved.lesson===index&&!hasClockLesson(getProgress(),index)?saved.index:0;screen=resume&&taskIndex>0?'try':'explain';moved=false;result=false;feedback='';if(!resume||saved.lesson!==index)saved={lesson:index,index:0,total:lesson().tasks[0].start};render();titleFocus();speak(screen==='explain'?lesson().intro:taskClips(lesson(),task()));}
   function updateFeedback(){const node=root.querySelector('[data-school-feedback]');if(!node)return;node.textContent=feedback;node.classList.toggle('success',result);root.querySelector('[data-school=check]').hidden=result||lesson().hand==='face';root.querySelector('[data-school=next-task]').hidden=!result;root.querySelector('[data-school=demo]').disabled=result;}
-  function success(){result=true;feedback='כל הכבוד! הצלחת!';updateFeedback();for(const b of root.querySelectorAll('.school-hand-controls button,.clock-grip,[data-dial-number],[data-school=five-minutes],[data-school=real-minute]'))b.disabled=true;speak(['correct-1',...(lesson().journey?[task().duration===1?'school-one-minute':'school-one-hour']:lesson().hand==='face'?[]:dial.time().clips)]);root.querySelector('[data-school=next-task]').focus({preventScroll:true});}
+  function success(){result=true;feedback='כל הכבוד! הצלחת!';updateFeedback();for(const b of root.querySelectorAll('.school-hand-controls button,.clock-grip,[data-dial-number],[data-school=five-minutes],[data-school=one-minute],[data-school=real-minute]'))b.disabled=true;speak(['correct-1',...(lesson().journey?[task().duration===1?'school-one-minute':'school-one-hour']:lesson().hand==='face'?[]:dial.time().clips)]);root.querySelector('[data-school=next-task]').focus({preventScroll:true});}
   function showDemo(){
     if(demonstrating||result)return;demonstrating=true;
     const t=screen==='explain'?(lesson().demo||lesson().tasks[0]):task();speak(['school-demo']);
     const status=root.querySelector('[data-demo-status]')||root.querySelector('[data-school-feedback]');status.textContent='עכשיו בובי מדגים. אחר כך תורך ♡';
-    const disabledBefore=[...root.querySelectorAll('[data-school=check],[data-school=try],[data-school=demo],[data-school=step],[data-school=select],[data-school=real-minute],[data-school=five-minutes]')].map(b=>[b,b.disabled]);
+    const disabledBefore=[...root.querySelectorAll('[data-school=check],[data-school=try],[data-school=demo],[data-school=step],[data-school=select],[data-school=real-minute],[data-school=five-minutes],[data-school=one-minute]')].map(b=>[b,b.disabled]);
     for(const [b] of disabledBefore)b.disabled=true;
     if(lesson().hand==='face'){
       root.querySelector(`[data-dial-number="${t.number}"]`).classList.add('number-example');
@@ -120,6 +120,7 @@ export function mountClockSchool(root, { getProgress, position, onPosition, onRe
       case 'time':speak(dial.time().clips,true);break;
       case 'select':selected=b.dataset.hand;dial.select(selected);for(const x of root.querySelectorAll('.school-hand-select'))x.setAttribute('aria-pressed',String(x.dataset.hand===selected));break;
       case 'step':dial.step(b.dataset.hand,Number(b.dataset.direction));break;
+      case 'one-minute':dial.step('minute',1);break;
       case 'five-minutes':dial.step('minute',5);break;
       case 'real-minute':realMinute();break;
       case 'try':screen='try';result=false;moved=false;feedback='';saved={lesson:lessonIndex,index:taskIndex,total:task().start};render();onPosition(saved);titleFocus();speak(taskClips(lesson(),task()));break;
