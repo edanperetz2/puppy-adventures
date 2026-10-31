@@ -5,17 +5,20 @@ import { CLIPS } from '../dist/content.js';
 import { art, hasArt } from '../dist/art.js';
 import { hebrewSpeech } from '../dist/hebrew-pronunciation.js';
 import { createSession, DEFAULT_SETTINGS, sanitizeSettings } from '../dist/engine.js';
+import { VOCABULARY, distinctWordPictures } from '../dist/vocabulary.js';
 
 function seeded(seed) { seed = Math.imul(seed + 1, 0x9e3779b1) >>> 0; return () => { seed = (1664525 * seed + 1013904223) >>> 0; return seed / 4294967296; }; }
 const lettersIn = text => [...text.matchAll(/[א-ת]/gu)].length;
 
 test('Ten reading stages have illustrated words, phrases and sentences with complete Hebrew pronunciation', () => {
-  assert.equal(WORDS.length, 108);
+  assert.equal(WORDS.length, 416);
+  assert.equal(WORDS.filter(word => !word.scene).length, 276);
+  assert.equal(new Set(WORDS.map(word => word.he)).size, WORDS.length, 'Repeated spellings must not inflate the vocabulary');
   assert.equal(new Set(WORDS.map(word => word.id)).size, WORDS.length);
   assert.deepEqual(Object.values(READING_LEVELS).filter(stage => stage.number).map(stage => stage.number), Array.from({ length: 10 }, (_, i) => i + 1));
   for (const key of ['long', 'challenge']) {
     const pool = readingWords(key);
-    assert.equal(pool.length, 12);
+    assert.ok(pool.length >= 22);
     for (const word of pool) {
       assert.ok(lettersIn(word.pointed) >= (key === 'long' ? 4 : 5), `${word.pointed} must be longer than beginner words`);
       assert.ok(lettersIn(word.he) <= (key === 'long' ? 5 : 8));
@@ -26,7 +29,7 @@ test('Ten reading stages have illustrated words, phrases and sentences with comp
     assert.ok(hasArt(word.id), `Missing illustration: ${word.id}`);
     assert.match(word.pointed, /[\u05b0-\u05bd]/u);
     assert.equal(CLIPS[`he-${word.id}`]?.lang, 'he-IL');
-    assert.equal(CLIPS[`he-${word.id}`]?.speech, hebrewSpeech(word.pointed));
+    assert.equal(CLIPS[`he-${word.id}`]?.speech, hebrewSpeech(word.spoken || word.pointed));
   }
   for (const stage of Object.values(READING_LEVELS)) {
     assert.equal(CLIPS[stage.clip]?.lang, 'he-IL');
@@ -37,13 +40,13 @@ test('Ten reading stages have illustrated words, phrases and sentences with comp
 test('Phrase choices require the color, quantity, position or action, with no noun-only shortcuts', () => {
   for (const key of ['colors', 'quantities', 'positions', 'actions', 'sentences']) {
     const pool = readingWords(key);
-    assert.equal(pool.length, 12);
-    assert.equal(new Set(pool.map(word => word.family)).size, 4);
+    assert.ok(pool.length >= 20);
+    assert.ok(new Set(pool.map(word => word.family)).size >= 4);
     for (const word of pool) {
       const family = pool.filter(item => item.family === word.family);
-      assert.equal(family.length, 3);
+      assert.ok(family.length >= 3);
       assert.ok(family.every(item => item.scene.object === word.scene.object));
-      assert.equal(new Set(family.map(item => JSON.stringify(item.scene))).size, 3);
+      assert.equal(new Set(family.map(item => JSON.stringify(item.scene))).size, family.length);
     }
     for (let seed = 0; seed < 40; seed++) for (const q of createSession('hebrew', { ...DEFAULT_SETTINGS, reading: key }, seeded(seed))) {
       assert.equal(q.prompt, 'reading-phrase');
@@ -64,7 +67,7 @@ test('Phrase choices require the color, quantity, position or action, with no no
 });
 
 test('Completed rounds rotate through the stage before reviewing its oldest items', () => {
-  for (const key of ['long', 'challenge', 'explorers', 'colors', 'quantities', 'positions', 'actions', 'sentences', 'all']) {
+  for (const key of Object.keys(READING_LEVELS)) {
     const pool = readingWords(key);
     let practice = sanitizeReadingPractice(null), seen = new Set(), previous = new Set();
     const rounds = Math.ceil(pool.length / 6);
@@ -72,7 +75,11 @@ test('Completed rounds rotate through the stage before reviewing its oldest item
       const targets = readingTargets(pool, practice.recent[key], 6, seeded(round));
       assert.equal(new Set(targets.map(word => word.id)).size, 6);
       assert.ok(targets.every(word => !previous.has(word.id)), 'A new round should not repeat the previous six');
-      if (round < rounds) assert.ok(targets.every(word => !seen.has(word.id)), 'Unseen items come before review');
+      const unseen = pool.filter(word => !seen.has(word.id));
+      assert.equal(targets.filter(word => !seen.has(word.id)).length, Math.min(6, unseen.length), 'Every remaining unseen target comes before review');
+      const repeated = targets.filter(word => seen.has(word.id));
+      const oldest = practice.recent[key].slice(0, repeated.length);
+      assert.deepEqual(new Set(repeated.map(word => word.id)), new Set(oldest), 'Review fills a partial round from the oldest practiced targets');
       for (const word of targets) seen.add(word.id);
       const before = structuredClone(practice);
       const updated = finishReadingPractice(practice, key, targets);
@@ -102,8 +109,9 @@ test('Advancement offers only the immediately following stage after five indepen
 test('Chosen stages keep targets and distractors at that stage, with six varied questions', () => {
   for (const [key, stage] of Object.entries(READING_LEVELS)) {
     const pool = readingWords(key), seen = new Set();
+    let practice = sanitizeReadingPractice(null);
     for (let seed = 0; seed < 120; seed++) {
-      const questions = createSession('hebrew', { ...DEFAULT_SETTINGS, reading: key }, seeded(seed));
+      const questions = createSession('hebrew', { ...DEFAULT_SETTINGS, reading: key, readingRecent: practice.recent[key] }, seeded(seed));
       assert.equal(questions.length, 6);
       assert.equal(new Set(questions.map(q => q.answer)).size, Math.min(6, pool.length));
       for (const q of questions) {
@@ -115,8 +123,59 @@ test('Chosen stages keep targets and distractors at that stage, with six varied 
         if (stage.level !== null) assert.ok(q.options.every(word => word.level === stage.level));
         assert.equal(q.targetClip, undefined, 'The opening instruction must let Ariel read before revealing the spoken answer');
       }
+      practice = finishReadingPractice(practice, key, questions.map(q => q.word));
     }
     assert.equal(seen.size, pool.length, 'Every word must be reachable across rounds');
+  }
+});
+
+test('New vocabulary spans everyday subjects and excludes overlapping picture meanings', () => {
+  assert.equal(VOCABULARY.length, 228);
+  assert.ok(new Set(VOCABULARY.map(word => word.theme)).size >= 9);
+  for (const [broad, specific] of [['bird', 'parrot'], ['fish', 'shark'], ['car', 'taxi'], ['shoe', 'sandal'], ['handbag', 'backpack']]) {
+    assert.equal(distinctWordPictures({ id: broad }, { id: specific }), false);
+    assert.equal(distinctWordPictures({ id: specific }, { id: broad }), false);
+  }
+  for (const key of ['short', 'familiar', 'long', 'challenge', 'explorers', 'all']) {
+    let practice = sanitizeReadingPractice(null);
+    for (let seed = 0; seed < 90; seed++) {
+      const questions = createSession('hebrew', { ...DEFAULT_SETTINGS, reading: key, readingRecent: practice.recent[key] }, seeded(seed));
+      for (const question of questions.filter(q => !q.word.scene)) for (const option of question.options) {
+        if (option.id !== question.answer) assert.ok(distinctWordPictures(question.word, option));
+      }
+      practice = finishReadingPractice(practice, key, questions.map(q => q.word));
+    }
+  }
+});
+
+test('Expanded phrases use feminine quantities and verbs, and visibly different scene details', () => {
+  const find = id => WORDS.find(word => word.id === id);
+  assert.equal(find('count-banana-2').pointed, 'שְׁתֵּי בָּנָנוֹת');
+  assert.equal(find('count-cookie-3').pointed, 'שָׁלוֹשׁ עוּגִיּוֹת');
+  assert.equal(find('action-bird-drink').pointed, 'צִפּוֹר שׁוֹתָה');
+  assert.equal(find('action-dog-drink').pointed, 'כֶּלֶב שׁוֹתֶה');
+  assert.notEqual(art('facts-balloons-three-red'), art('facts-balloons-three-blue'));
+  assert.notEqual(art('facts-bee-small-above'), art('facts-bee-big-above'));
+  assert.notEqual(art('action-cat-eat'), art('action-cat-drink'));
+  assert.notEqual(art('facts-books-two-on'), art('facts-books-two-under'));
+});
+
+test('An older reading history retains its real practice and offers added words before review', () => {
+  const old = { recent: { long: ['rabbit', 'duck', 'apple', 'grapes', 'watermelon', 'pineapple', 'airplane', 'helicopter', 'window', 'table', 'snail', 'guitar'] } };
+  const saved = sanitizeReadingPractice(old);
+  assert.deepEqual(saved.recent.long, old.recent.long);
+  const targets = readingTargets(readingWords('long'), saved.recent.long, 6, seeded(19));
+  assert.ok(targets.every(word => !old.recent.long.includes(word.id)));
+  assert.deepEqual(sanitizeReadingPractice(JSON.parse(JSON.stringify(saved))), saved);
+});
+
+test('Short-word audio context retains the target word without adding it to the reading prompt', () => {
+  for (const id of ['panda', 'banana', 'strawberry', 'pretzel', 'shoe', 'drum', 'yoyo']) {
+    const word = WORDS.find(item => item.id === id);
+    assert.equal(word.spoken, `הַמִּלָּה הִיא ${word.pointed}.`);
+    assert.equal(CLIPS[`he-${id}`].text, word.pointed);
+    assert.doesNotMatch(word.pointed, /הַמִּלָּה/u);
+    assert.equal(CLIPS[`he-${id}`].speech, hebrewSpeech(word.spoken));
   }
 });
 

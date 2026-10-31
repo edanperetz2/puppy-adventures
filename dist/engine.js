@@ -4,6 +4,7 @@ import { LETTERS, letterGroup } from './letters.js';
 import { READING_LEVELS, readingWords, readingTargets } from './reading.js';
 import { isSticker } from './stickers.js';
 import { sanitizeLetterPractice, recordLetters, suggestedLetters } from './letter-progress.js';
+import { distinctWordPictures } from './vocabulary.js';
 
 export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', letterLanguage: 'hebrew', letterWriting: Object.freeze({ hebrew: 0, english: 0 }), sound: true, motion: true });
 export const SESSION_LENGTH = 6;
@@ -41,10 +42,10 @@ export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Mat
   if (mission === 'hebrew') {
     const pool = readingWords(settings.reading);
     const targets = readingTargets(pool, settings.readingRecent, SESSION_LENGTH, rng);
-    // The short pool has five entries; repeat only after all five were encountered.
+    // Prefer unseen reading targets before reviewing the oldest practiced ones.
     return Array.from({ length: SESSION_LENGTH }, (_, i) => {
       const word = targets[i % targets.length];
-      const choices = word.family ? pool.filter(item => item.family === word.family) : pool.filter(item => !item.family);
+      const choices = word.family ? pool.filter(item => item.family === word.family) : pool.filter(item => !item.family && distinctWordPictures(word, item));
       return { id: `he-${i}`, type: 'read', word, answer: word.id, options: optionsFrom(choices, word, rng), prompt: word.scene ? 'reading-phrase' : 'read', hint: word.scene ? 'reading-phrase-hint' : 'read-hint' };
     });
   }

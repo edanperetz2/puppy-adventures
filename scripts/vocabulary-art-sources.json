@@ -1,0 +1,814 @@
+{
+  "release": "v15.1.0",
+  "license": "CC-BY-4.0",
+  "pictures": {
+    "mouse": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f401.svg",
+      "sha256": "e92c81d0ebb0224b43a552386602d8a41dc3e6220514b4d365495025bdedfbf0"
+    },
+    "fox": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f98a.svg",
+      "sha256": "5b5b42dd21db3a10ad01b079ccd22da94aa5a00a216fcef3052020354f6a5580"
+    },
+    "lion": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f981.svg",
+      "sha256": "bd269f15a1e303fda5c87a4ff92f3e981a4ed5c4eab175393a73897d714c5f84"
+    },
+    "monkey": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f412.svg",
+      "sha256": "b4544110be26cf10e8b486633f7cf5e5c7483373deb740de5ce131dfc014c6a6"
+    },
+    "giraffe": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f992.svg",
+      "sha256": "07a63c7cec7bf62f111d9967e3fd519a90c5148204e1cd99fc1811bba48ce9a9"
+    },
+    "elephant": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f418.svg",
+      "sha256": "b23f4d2146dcf07d2dc7fc72d206788581f0ec8c5979a2704ad93d772bc83682"
+    },
+    "panda": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f43c.svg",
+      "sha256": "f62d0a2b082c192743e4ea6e3ec841c76efb17fe882c068e00d5264e9ad42128"
+    },
+    "kangaroo": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f998.svg",
+      "sha256": "b8d61f1e5d5aa393302e4f3845bb912e6a1168878e24341476ad0dc0c8a626f4"
+    },
+    "koala": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f428.svg",
+      "sha256": "3248d764a53f410897bd0742e4e87603e122d9130b1d54a2fdba36f001970be5"
+    },
+    "tiger": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f405.svg",
+      "sha256": "99e45ff69c027c505be5bd26a3ec6159505a880686f040ccabe9ede004a748ee"
+    },
+    "leopard": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f406.svg",
+      "sha256": "f7bed20ca8eb7c35fb2f4677b9af3820bd9d5c0341a0dcca339bd9448d0eefa4"
+    },
+    "cow": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f404.svg",
+      "sha256": "91749a903f15edb113b92edafda8dd70f9e9bd1bee49cfb9b8bbe500a8881020"
+    },
+    "sheep": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f411.svg",
+      "sha256": "23d57bfbd45dd5c58a6762db275b4eade1a98b613b34f04877128ad2dfecf36b"
+    },
+    "camel": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f42a.svg",
+      "sha256": "5aa547209a11b2ef5fa49b194177854e7a035b635a565e2b076037526fc72125"
+    },
+    "pig": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f416.svg",
+      "sha256": "0ff3bbb78d83d494ac21abbc63e95f1db5ea594c82f8efe4e3b08cf85d104642"
+    },
+    "zebra": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f993.svg",
+      "sha256": "303de99b0b43eeaf599b59598588e5805f0c59ced55462bb128f93030172185a"
+    },
+    "goat": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f410.svg",
+      "sha256": "818b0c0ae7322fec7e3db3499dbd7b78dc5a3fec41813b2147ad67251bd74212"
+    },
+    "deer": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f98c.svg",
+      "sha256": "eddcd2e43a46c652103e0df0fcb57a9be561e7c8cc5c7468ff643fe0ad397f75"
+    },
+    "owl": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f989.svg",
+      "sha256": "9305c70ce193140e274162fd3237143ffa5fcaeedf15ce573291f076ddecc508"
+    },
+    "penguin": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f427.svg",
+      "sha256": "68dc119e054a8660c1d0e7ee999b649be22309e050a7f68ba9458f36eb2db489"
+    },
+    "flamingo": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9a9.svg",
+      "sha256": "df7e3f837657268451b7bbff123254f520050c4ab336955b6fcac1782aad63fc"
+    },
+    "parrot": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f99c.svg",
+      "sha256": "6ca5357a83bea09872817fb4f6f24f0b287e9f5dff221f0e6be733a342a84c5f"
+    },
+    "peacock": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f99a.svg",
+      "sha256": "6f9be75cbe9c98a640ea9410a0bfbb472da7a8e0f383a24b807fbeb0832dc395"
+    },
+    "eagle": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f985.svg",
+      "sha256": "70d3f8b904079499625475ec4758f178378983f9b569481e08c3fc8e243f7a75"
+    },
+    "swan": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9a2.svg",
+      "sha256": "fe56a4a7f9ab3267cef021fcf1316d6fa5053c9497c6f43dc3bd270b570511d8"
+    },
+    "rooster": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f413.svg",
+      "sha256": "b2701807925b8f58988d75c5a1a619cc58e3b47e9fb62bdd91d2f6ff24f5f344"
+    },
+    "chick": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f425.svg",
+      "sha256": "eb142780323f9846917143611381012150523a573d467c44fa5c5015979f73b2"
+    },
+    "bat": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f987.svg",
+      "sha256": "15e1e1bac9988be3960759f24289e3a5bfb04ad0a42a88f1ab10680df1bfa61c"
+    },
+    "turtle": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f422.svg",
+      "sha256": "c79bb7aa13c847aead252a730ab44f5e631d8409569717b963d1f0f476252342"
+    },
+    "crocodile": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f40a.svg",
+      "sha256": "8acb7dfd69ceb853d57eeaaf63b2b3237ae8dfdf9d770c0637e20bb9c0331b3c"
+    },
+    "frog": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f438.svg",
+      "sha256": "82f93e8eec264c4c0f1c932e61b80735904d8f853cbfabd80965576deb827d41"
+    },
+    "snake": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f40d.svg",
+      "sha256": "0b5464f87e1571fffee05d254c8fe1cf1f880c20d8a8c100b942537606dab54b"
+    },
+    "lizard": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f98e.svg",
+      "sha256": "e6def08ca112ef70631be14be4425ec4aec800eaeccc6a76d6c38e48f72b2f50"
+    },
+    "whale": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f40b.svg",
+      "sha256": "8ef657c5e310650e105b56ca7b9a38d2f3af5ab2684077df5ace79ab67ba4dda"
+    },
+    "shark": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f988.svg",
+      "sha256": "accb7bae5d222c1610528269fbfb44a75d7a96e955a8526334fc7c2153a0edca"
+    },
+    "dolphin": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f42c.svg",
+      "sha256": "94eba04777cdb147a9359132effa6bf8b0ebccd8c08ba1a6eec4e17e5acd2ac6"
+    },
+    "octopus": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f419.svg",
+      "sha256": "92d125d9c4c2d7e7d8ff450d0fb1cd80c089804fa06663cf1e12ac29ed173c54"
+    },
+    "bee": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f41d.svg",
+      "sha256": "462a19f9db69d8938155c589be0aeed4ce3538ea734c2d3278b205c83932de3d"
+    },
+    "crab": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f980.svg",
+      "sha256": "7c95cad49ca19cee604037d049a7f154fb02b785a95b9d32f99d7efe33cb2218"
+    },
+    "spider": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f577.svg",
+      "sha256": "6d51bdacfb5d8e24974f1e1f1a6a53cc0a28c0272d3e080e5f8337885a86af4f"
+    },
+    "worm": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1fab1.svg",
+      "sha256": "bccb133e349cee44831442487a28b698f764736ae56cd24bc1c26dd035a84d87"
+    },
+    "ant": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f41c.svg",
+      "sha256": "b7cfb5d596c82ab8d4c8af0e0f7cf7715bb644f0692bded2ab6e9c181c16dd1f"
+    },
+    "mosquito": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f99f.svg",
+      "sha256": "666ccd0b8a6c0c00a842aafeb07fb35c2e5c8a3805cc1111573c79852b076a6e"
+    },
+    "fly": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1fab0.svg",
+      "sha256": "7e196d9a0d2d7bf9a36a79dd52404068ee7703bebcdf959cbae71a846953870f"
+    },
+    "pear": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f350.svg",
+      "sha256": "a5d2dbbe61a52c63dd703f8406e906dfc047dbffaafe1ddbfb26f6bb4a6e7047"
+    },
+    "banana": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f34c.svg",
+      "sha256": "27f2f433eb1084f3728a430bd72c8891819a45396354d89ab496a5afce76e6e4"
+    },
+    "peach": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f351.svg",
+      "sha256": "e61b5a90bacb2e21ac945fd311a1e54926745c60e5d1cc9993983a58d77d0fb5"
+    },
+    "strawberry": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f353.svg",
+      "sha256": "8fc89f2be1a50a72d5c44f28d2f84b642f7065bc4f97c6540ee3ae86d2eda2fc"
+    },
+    "lemon": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f34b.svg",
+      "sha256": "d61acad4354635834f30e08921b03c2412f5bf0669846f8a93c7ac085b0315da"
+    },
+    "cherries": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f352.svg",
+      "sha256": "55169c27fc03a0e20bec5144194584685bbc44f4bd92ce6be21e5aa429c7b137"
+    },
+    "orange-fruit": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f34a.svg",
+      "sha256": "f9806aebac632973570632862ce5c2b8ecb588bed24a5c0ba1c5f3316c43c598"
+    },
+    "mango": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f96d.svg",
+      "sha256": "0ee93dec9d72a8fbb747400746b31a003e33ef1ef2066dcf1280a4e8c0d86035"
+    },
+    "kiwi": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f95d.svg",
+      "sha256": "36c97cee9a3aa1bfca24600ddd5a93c2e3113f972fc0a33b018a12f3c3adfdd7"
+    },
+    "melon": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f348.svg",
+      "sha256": "bc50515cb2506c1fccf4e1f5c48e038ef24ad5823f4493b77204f0273bd4e851"
+    },
+    "blueberries": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1fad0.svg",
+      "sha256": "54a9e8e6ca7263f6e346925de94ebf7e843a8844739badd86926937eae8c6cc1"
+    },
+    "olive": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1fad2.svg",
+      "sha256": "a6b958960501e622e6a5a252098f7e9bb55f8b4675d0324ac2e1b7bf7076a9a3"
+    },
+    "coconut": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f965.svg",
+      "sha256": "b43d2f0bfc2be24eb0cb39819c505f4cbd59b525e94828bb0824a4ae406ac04a"
+    },
+    "avocado": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f951.svg",
+      "sha256": "ecb631c1bcb4d79eb88aa0a49d6f5393d088770c04cb96a0c07ace0ce5d69803"
+    },
+    "tomato": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f345.svg",
+      "sha256": "4f88e52dc73fa86a88747dec7243d38e0bdd263400c29ac6bd0786cba71768f4"
+    },
+    "carrot": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f955.svg",
+      "sha256": "095282c0ebfd6b8fd35cdad033cec807db20afa8a2558e3ebbc038670efd73c5"
+    },
+    "corn": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f33d.svg",
+      "sha256": "f9e206caef297d521a5b47c1bf560312ff66050eabec9502f07674b66da428e1"
+    },
+    "pepper": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1fad1.svg",
+      "sha256": "444c3096b758c9e12bc5dd8ae139c6a0af2299610983f82c09254520343b0251"
+    },
+    "eggplant": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f346.svg",
+      "sha256": "6a51feacbc0c6653c8adf378b5bf03b10a82f8ff387674f6434d3ee9019416af"
+    },
+    "onion": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9c5.svg",
+      "sha256": "786b1f098ae1753dc68442fe551210b6aff2e680b0f71b8895c1221a0821c517"
+    },
+    "garlic": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9c4.svg",
+      "sha256": "9b7610a3255bfd813aba95784aa6818e803cb3e27f1cbc69177660f85836b74c"
+    },
+    "broccoli": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f966.svg",
+      "sha256": "dd7e6102a1abbe1d8c4d978468447686c35424b195ef1df52d669232da0f9a59"
+    },
+    "mushroom": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f344.svg",
+      "sha256": "a860eafef10242b3b82012394910768a5f03c2fd6be66d4815bf0ad23bc9c245"
+    },
+    "lettuce": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f96c.svg",
+      "sha256": "85bc3d551df60cbcb3acc5ffa09aaac572b3de0d1c9ed34b49b96dde04d1496a"
+    },
+    "bread": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f35e.svg",
+      "sha256": "e4854fc34fa77c36e266eb9d7fe2b658d281d0adea7754a1994f238192a6269b"
+    },
+    "pretzel": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f968.svg",
+      "sha256": "04977f1daff073438f431223773b2df546e4a8744ff2aaeaa0e4c493cab7c222"
+    },
+    "croissant": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f950.svg",
+      "sha256": "eb3500e968fa39c7a79a2ebd5ecfb0289d874e01a75cbe1b3c843d746598e33c"
+    },
+    "egg": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f95a.svg",
+      "sha256": "26d7a3741923d3f0faafa00443364be1fdb73c4b4a8797700f74d008b5d52408"
+    },
+    "cheese": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9c0.svg",
+      "sha256": "12d7cc96a5ea9d9156111287ad37fe7f6307e22c9edcf142d749cbecee3d1371"
+    },
+    "cake": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f382.svg",
+      "sha256": "ad38cf5ad3543ba3fe2e12df581ca0362ff9ba7c588eed5f8dda9d4999da7bd6"
+    },
+    "cookie": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f36a.svg",
+      "sha256": "88724da3173eaf855fc8b8094480d1d923f69c420107501da8d40b503163bcf2"
+    },
+    "candy": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f36c.svg",
+      "sha256": "f63e8881aa5a91bcbb208d40f8236dff8ed953f4a5254ac435fd61369b4be573"
+    },
+    "pizza": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f355.svg",
+      "sha256": "38fedd10ba8a4fb9f35fc2d5b82d3af638c35f7f846ca904f06d0969815e6103"
+    },
+    "ice-cream": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f368.svg",
+      "sha256": "08531c9d5637decdb403965474c148a264048b018d96a3eb46e9cddbfb953cb8"
+    },
+    "hotdog": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f32d.svg",
+      "sha256": "470f3434143e11712ff1f57a122c195a7f587b69b3923f28bf60f1d7b76bcdcb"
+    },
+    "burger": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f354.svg",
+      "sha256": "1b4dd5c3ef3320cfe96b6040a7ccff367f4e7dd19d2236e3360bc5aaa6d04816"
+    },
+    "fries": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f35f.svg",
+      "sha256": "668e2da996600cbe8fdd691f02b8efb397cbe14d36b7a61c22eb7aff29aafe10"
+    },
+    "spaghetti": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f35d.svg",
+      "sha256": "d0c4cf60ccfd16110e16e2a7aa596b669a7c1bec65c088bd8ede97c9519ee69b"
+    },
+    "rice": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f35a.svg",
+      "sha256": "4cdea01f8b856397d0769c98e98ff91b21c941da5557ea6e02851f4f8ecead0a"
+    },
+    "soup": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f372.svg",
+      "sha256": "afbca0c44ada5336913c7be1899b3e40ee74ee19eb8bb603d3d898d14fdb30ff"
+    },
+    "salad": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f957.svg",
+      "sha256": "4a49195ae414da872efd17fb4f130dbe9797d064b010bf3de41f8f14e641ef7b"
+    },
+    "door": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f6aa.svg",
+      "sha256": "19e3a07fb16d79e5ff225ce303bc5ac1343a2aa0188edc1795b1edbf9c566dfe"
+    },
+    "honey": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f36f.svg",
+      "sha256": "87401b5ac6a1b2e38aef0680fdd5abf151a96cb1250c537bb340ac130172a590"
+    },
+    "bed": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f6cf.svg",
+      "sha256": "dcc1fb41f2bf8d3a50e19e200cc288725d2b3f2190de8f3b50714e16ebb3b366"
+    },
+    "salt": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9c2.svg",
+      "sha256": "d704d38076152d150f75c9ec28fbba7083e35580b48f699930ef159b941d3404"
+    },
+    "chair": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1fa91.svg",
+      "sha256": "a910cd884c5ffb702780be0be00aa856118499148024f581e5d5184c99328d66"
+    },
+    "mirror": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1fa9e.svg",
+      "sha256": "6c2a9269485332f69a405b05805c0a85d9cd214254891ef282ec3a132664b808"
+    },
+    "bathtub": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f6c1.svg",
+      "sha256": "6d7c12fc386d73d1d83bfa30d66c4ca74e1a48adbd93c3d9c6cb3f888c48dbd4"
+    },
+    "toilet": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f6bd.svg",
+      "sha256": "9572d0b51b696deeb679fb45f3ef0b823ac7a6fe100605d9b5c4a87cbde48a79"
+    },
+    "soap": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9fc.svg",
+      "sha256": "f6a74ac3871e6c2b2011119bc7a9c9c4132723a98ea9908eba51c1a85cdff894"
+    },
+    "sponge": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9fd.svg",
+      "sha256": "e1984ca5b07ef5f89f36ae9ef12825872d748c52f23207b5722c702797743f38"
+    },
+    "broom": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9f9.svg",
+      "sha256": "95670746ab05c2c486434a13fea927c3dae244c7c326923f851991a4cc2acd26"
+    },
+    "basket": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9fa.svg",
+      "sha256": "534ee9b69dbce7ecf92dd9c7cb4759af5188b4a9a2c695dfac933d86fccdea5e"
+    },
+    "mug": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f375.svg",
+      "sha256": "37d814314fd2c40ea44b63849a4551473f501ebc7623caa47ce5e76a8af30b7f"
+    },
+    "bucket": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1faa3.svg",
+      "sha256": "d2104ba5a20316bdf3be0d986b5d582c2ec29b479ff01be9e269f28131d2e6d3"
+    },
+    "spoon": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f944.svg",
+      "sha256": "41d1412158e78bc74f484b968b4e539e88af1644cff7df8f61edb184563b62bb"
+    },
+    "knife": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f52a.svg",
+      "sha256": "5e65d30dfe04f3a1f363646d04d5958ced5b00c5506a2e0aed2f7bd3e0b82df6"
+    },
+    "teapot": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1fad6.svg",
+      "sha256": "5f6cfbb95a24944b5196aad7d85f3aacf782d9008ac0498876b0b01825003acb"
+    },
+    "key": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f511.svg",
+      "sha256": "8134ea8a0d84b021a3d597d6a697139a78dc31250de036432f23e2207a7fb3d2"
+    },
+    "bell": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f514.svg",
+      "sha256": "5f70fb8150f0a1f184b40f86d012db040d229056b9b0d8c681f08987cb124e5f"
+    },
+    "lock": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f512.svg",
+      "sha256": "da529c0b4b9c509eda412f434fae8c4a950cd11c0da7906b4e0bfaabb6d9d869"
+    },
+    "candle": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f56f.svg",
+      "sha256": "64ee251227c0023a7b0ebcbc9b12378f2953648a17139b8dd0286f2d7753f31b"
+    },
+    "flashlight": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f526.svg",
+      "sha256": "bfecadeefa09182b8842f3ba39c2301a0b82e0357602ec5f98e7b75bbaa70501"
+    },
+    "battery": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f50b.svg",
+      "sha256": "243852e3538dad5c36762fc1adf1f678ea056fd092f082fcc3380c3186153ad5"
+    },
+    "plug": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f50c.svg",
+      "sha256": "34ac734f0fcaa275fc8293536414c658ab0e6ec74da2a2092f82794179f2fe18"
+    },
+    "ladder": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1fa9c.svg",
+      "sha256": "84a9641e66a17b9d126aee71fbbf228e9ec9902562de8339e710f3eadd75fab2"
+    },
+    "hammer": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f528.svg",
+      "sha256": "1b8052e038108784e4ab7d367a41ac82ed7f73a345b79a318d8bf48c13384d42"
+    },
+    "magnet": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9f2.svg",
+      "sha256": "8e2085bd325bb4240701de5612b9cbc7cf660a5d988fd8e1f72340556f239635"
+    },
+    "screwdriver": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1fa9b.svg",
+      "sha256": "52378e24bd69ea02ce78c4d02eadd2e82a8f851a4552ed79a19dd988d58b2ea6"
+    },
+    "tent": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/26fa.svg",
+      "sha256": "ca1fcf547910fff111a67699bdf9952360e27b3e22f463381ca22e439e7d6a1c"
+    },
+    "brick": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9f1.svg",
+      "sha256": "16a8794658ac602ad41c10187cb4d610c98152e29c480a0103cd7126a6d8a030"
+    },
+    "moon": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f319.svg",
+      "sha256": "aafb5b77ba9325aa6139eb5229ed862fd93b44bfc91e34801998c1dd9fde72d8"
+    },
+    "rain": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f327.svg",
+      "sha256": "d799b3d98276a4a3f0431c9b8bf83733bc4012ba82afe1cded8bf6a3ceb9ac60"
+    },
+    "cloud": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/2601.svg",
+      "sha256": "dcc39caa0f9e698689671444e35d5e5938816717dcf719cba9abb30dc0379e5e"
+    },
+    "snow": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/2744.svg",
+      "sha256": "9d51dd37d9ca180799c29c8a14e2079d01d2d3b576a096f3edcabe8bb8bcde0d"
+    },
+    "rainbow": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f308.svg",
+      "sha256": "555858f907bda45e059201a8a3d8910876ef8d830b9b82cfc0ca9aa55c7b029a"
+    },
+    "lightning": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/26a1.svg",
+      "sha256": "d3a6d0c18f6887f771aa3cd51db375e7a9588e1af63801cc100cd9bcc5bccaac"
+    },
+    "wind": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f32c.svg",
+      "sha256": "69906c5a51f73877cc5687664757da30b50dfd51a0410c3242baae262764a3cc"
+    },
+    "fire": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f525.svg",
+      "sha256": "4fa646a4dbc10513ddeb70561789483638faf456e15186f4eb7291c5c455cbb6"
+    },
+    "rock": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1faa8.svg",
+      "sha256": "9abdc4bb80a5473a6ad3e23cc401ed5995453ec457c30adf552ff10e9f80bc1c"
+    },
+    "mountain": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/26f0.svg",
+      "sha256": "0ba82e9c31250e64b3c9243f5bd9801cfe43c0b7a63c073036df8a33abd6b10c"
+    },
+    "leaf": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f343.svg",
+      "sha256": "c050272691fb54b85e2ba0a3a2d2a60dfdd29cee0ed8b87a5b95638c8f8e6568"
+    },
+    "shirt": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f455.svg",
+      "sha256": "37722c23ce04fce70cd43f573983b385b15d5e55bc7d85f907c1003f55b925b5"
+    },
+    "seedling": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f331.svg",
+      "sha256": "0be5e03bf83a6d8981bef07f84bfd64b54c36d34a7824b69a706891648eed9ce"
+    },
+    "shell": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f41a.svg",
+      "sha256": "37491376f5143be2d611acb74ffae710603519a90f6988bbbf281dadc63fb895"
+    },
+    "cactus": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f335.svg",
+      "sha256": "afd54f75d4bbb47593548f756b0ff8c4612fef66b7f8a6cfd6128b7fa28aa194"
+    },
+    "pants": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f456.svg",
+      "sha256": "90c499b62a4bf32b6d40f0c9f4443137d7ba9255775de2b8c25a3e83fcd8abe6"
+    },
+    "dress": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f457.svg",
+      "sha256": "2a6454d85a907602621164bbac894a6f2c9f2008b25590b9dd8c9f8c84f7c0b3"
+    },
+    "gloves": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9e4.svg",
+      "sha256": "50a3500f380dd4d32c4e79bf8c2574e3712953f59daef2490b8247512c2475fd"
+    },
+    "coat": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9e5.svg",
+      "sha256": "a2d6893b9211973f10780c2010d4828aaf5e05152d7c9161813e132c7fdd4711"
+    },
+    "scarf": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9e3.svg",
+      "sha256": "137d15672b897faa322590e610abcf60df800c74867f05419712687eb0b24460"
+    },
+    "socks": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9e6.svg",
+      "sha256": "6303c4d2170818213889bf9d2771b60574b89597f3ae6a6e96733f98c6b02f36"
+    },
+    "shoe": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f45f.svg",
+      "sha256": "c7d442c9b785d8d043a726ae6730620b1706a68b2171bf3658bdfb0bdec5a9cd"
+    },
+    "boot": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f462.svg",
+      "sha256": "8f7a4b125ade2f155cf33797328f276828ba0cdcf7e83495df979cc26487eb71"
+    },
+    "sandal": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f461.svg",
+      "sha256": "00469a7d44acbc8c78c9fc2d7b30207ca59e353ac8d6852f74a8c3ca8ecf2187"
+    },
+    "crown": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f451.svg",
+      "sha256": "3916390d4395ed16641c0e23d5e5a1bef9de6ce71b02c3941c0ee6f2d899c806"
+    },
+    "hat": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9e2.svg",
+      "sha256": "4c8de148f2e0ee1ac72587acd2e7d99d39042e1a87a07025a998bbac86014f8b"
+    },
+    "ring": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f48d.svg",
+      "sha256": "858882b8824e52af3f1ff2a1da62a0093b92c0020058d59598fa91e3a055333e"
+    },
+    "ribbon": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f380.svg",
+      "sha256": "eb48df1cae357dd22640d42beccb277f56098ee9d19b46a24028b660ddc81fec"
+    },
+    "handbag": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f45c.svg",
+      "sha256": "951d12e5b8a99a80533c33049699d3ebcb628e560b89d5597d8d814f17040658"
+    },
+    "hand": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/270b.svg",
+      "sha256": "76637c8dd1c4dbfb6ead5b20a79244fd94e38b7ce90a1f728ff647ac46d88ec9"
+    },
+    "foot": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9b6.svg",
+      "sha256": "5e1ccee0e5ef0c0cac343fe9368c0fe8fac5eae7cfc2a22aabdb080cf4bda161"
+    },
+    "ear": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f442.svg",
+      "sha256": "04eb0ebe1848d9b628fbc435f45e15dab6f01422fd064b798d447a8908c9c322"
+    },
+    "nose": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f443.svg",
+      "sha256": "c19afe0f18a097f540fb8c4192129a0174161afd9589965020b8135caf959710"
+    },
+    "eye": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f441.svg",
+      "sha256": "4cb5bebe92bb24bcc94a8d70d30872651c6b33e146c839e746927e3ce4a5d532"
+    },
+    "mouth": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f444.svg",
+      "sha256": "033caa64a2f2dbe91f16210f2d9912949d30eb0cd097dc52cdf90d6ff63bdd8c"
+    },
+    "tooth": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9b7.svg",
+      "sha256": "aa42bdf414ecb7d63a87ce2e30ec71c3ee5664115badce8e4e17d20d2c4a2317"
+    },
+    "tongue": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f445.svg",
+      "sha256": "7ba3e8cfbd718c54aeaf8b78b8487552f08f520d1d0653a18860f46d428074e9"
+    },
+    "brain": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9e0.svg",
+      "sha256": "74941007c155caffc21e0cf1da9935688adc5a13b49704a69d1c8b682ae81293"
+    },
+    "muscle": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f4aa.svg",
+      "sha256": "9abe6b1f8f8e8903d93e62630394568dbbd09e4fdad84026e2374f3935d5d25f"
+    },
+    "book": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f4d6.svg",
+      "sha256": "78f4d87e4e97c7ab24215a1a04cf9093a1a7556709e00c2e65543ad21e54413d"
+    },
+    "notebook": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f4d3.svg",
+      "sha256": "51c171c1a43535c53fda1a24bc0c941d3d7fa095cb2d089fa73916c5ce826b21"
+    },
+    "pencil": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/270f.svg",
+      "sha256": "18ebb4538d20d645b88c6973262ac644480f77e229efcb22b1e6149b2f3bb558"
+    },
+    "bone": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9b4.svg",
+      "sha256": "b49d3777c2cd6eca606d70f43dc714ed933de0345a6826673672dfd341f16cf2"
+    },
+    "pen": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f58a.svg",
+      "sha256": "e443e632207b1bff6579fddd794cf95d957c0720ea6aa0d88d7ce4415c65d2df"
+    },
+    "ruler": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f4cf.svg",
+      "sha256": "3d8f2cba26552f2d8d7f1483e1849d2c185a946f813778eeb0d21eea1b6cc3ad"
+    },
+    "paintbrush": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f58c.svg",
+      "sha256": "8fd6761aa411e999f414487ca62b585c39d88dffa8ecee3f27bc98628af720d6"
+    },
+    "violin": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f3bb.svg",
+      "sha256": "bc6126c4138044a553b1706f341dfaf6c6ab52a21bb9393b48b7e532d8e05ebb"
+    },
+    "drum": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f941.svg",
+      "sha256": "fdbd047fbef377c14c4fdf9769a6b3e5c5c891b234d2ac029548fb89a2c1d3ce"
+    },
+    "piano": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f3b9.svg",
+      "sha256": "8e5ff375a877d01b706e24100114fb184b2d3aed95e076c63adf586489c0162f"
+    },
+    "saxophone": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f3b7.svg",
+      "sha256": "ff23e5f6e1fb6cdf612fc85fd233436f681762f0e157274069d4a807ba7334aa"
+    },
+    "flute": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1fa88.svg",
+      "sha256": "0beaa72dbdf56ea0db05bb63bb7f8449e65f65ea2eaa573236bc4f8858589cb1"
+    },
+    "accordion": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1fa97.svg",
+      "sha256": "2299ff507b38172a3f67fbbed40b9bae19463773f2fb6c6f282c2a0caf11a403"
+    },
+    "microphone": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f3a4.svg",
+      "sha256": "8435a7c9462d723e4a7ee598bf0525393b078204da122ee8631524f70b3e47dd"
+    },
+    "headphones": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f3a7.svg",
+      "sha256": "c42f819447dd37c4e596f14d0090e3479e7dfd28f78c510c887baa1ae779b00c"
+    },
+    "camera": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f4f7.svg",
+      "sha256": "d53afdbf8189af1d63c0b666b339e3d1116503eef12f9319278f7243c38bcb1d"
+    },
+    "television": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f4fa.svg",
+      "sha256": "7f8739611bef5e30d579db0b3783d260cc84bb38e9b3b0f51b566c04d1303564"
+    },
+    "phone": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/260e.svg",
+      "sha256": "c63cb7c1d50d26f952c92776aa366684242aeb63e9951675ce0a6a331c89c6aa"
+    },
+    "computer": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f4bb.svg",
+      "sha256": "d79848b4a09f0c1ea74b7cef8c3296593d60788a32d0edde3177a492c39b61b3"
+    },
+    "radio": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f4fb.svg",
+      "sha256": "7526920aa0ca7877d4d674ac9c6b9fb72e24a9b6f722d87d0249e5ad3dd2b02d"
+    },
+    "kite": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1fa81.svg",
+      "sha256": "5be363db5302c0689f5595d3c80bfc1ec5fb0d11d24789d3c144c1cf086942e1"
+    },
+    "balloon": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f388.svg",
+      "sha256": "57ccb51903834dfeedd2809b2ae4775eb0751945d3f75ab2e5942b5c25b2aa27"
+    },
+    "puzzle": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9e9.svg",
+      "sha256": "f23a8504fef02ce03de4b14c315416952f8467cdc271edead25aec9759d6f566"
+    },
+    "robot": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f916.svg",
+      "sha256": "20e5f9466f9c909d9cdf67a83af252df198ba686c57cfc0271afab9d48cee699"
+    },
+    "yoyo": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1fa80.svg",
+      "sha256": "4e4151d23eb41dd208dacdec1e05c1575a5328459025023959e4912147908b85"
+    },
+    "cube": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f3b2.svg",
+      "sha256": "ee7c99b0f55d18bd845daa7335f47634fbb4fcb065014089ef9386a3c06c6396"
+    },
+    "gift": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f381.svg",
+      "sha256": "05a6562177e8e5f89852e08f7bbd6b62597b35d70c92238fcab4d6674ec76048"
+    },
+    "trophy": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f3c6.svg",
+      "sha256": "7510cc92013c2cd6c8271e3435539d9870044945e4a50151a50b18e61ee4ba83"
+    },
+    "medal": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f3c5.svg",
+      "sha256": "4d0cb194e2d91bb93202a4e680ae85106cfc6cdedb218582caeac779d47fafe6"
+    },
+    "train": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f682.svg",
+      "sha256": "996a4d8d7f90b6de57374194b2dea500b91acb6fec78bd6e1f647351e32d9c9a"
+    },
+    "ship": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f6a2.svg",
+      "sha256": "e573879b6b29dd6673e156b3039c12f2634b9df1656c74299e54bf4ee9e0577e"
+    },
+    "boat": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f6f6.svg",
+      "sha256": "2d7a584b699715c864fe63fd2deda35fad6438281700074006f87b0f0ba3a0e1"
+    },
+    "truck": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f69a.svg",
+      "sha256": "e4eaaf15ff7fbb18cbb400ffe812c80e22d9818971c3e0f6d54e3da9c8e79e66"
+    },
+    "motorcycle": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f3cd.svg",
+      "sha256": "1908bb9781adeee5583a6cff8ad01437b50ce855e89718ff69995a48cf705b59"
+    },
+    "scooter": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f6f4.svg",
+      "sha256": "f118a50979209d1a4abad3b564b983fd4eb0c99797cad02b0076d1f19fb7e82a"
+    },
+    "spaceship": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f680.svg",
+      "sha256": "3892ef66f49ce43d49c8719e9277da0e0e821059f0cc239a549f6629cc12b3cf"
+    },
+    "satellite": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f6f0.svg",
+      "sha256": "759a8b4db87726c312f18f8488a5026f42d12b486fc0f692866b8096f6d0e2ea"
+    },
+    "police-car": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f693.svg",
+      "sha256": "47f3a37e17f4ffae8ec137b34da2f4783186602c9aa0de5d8bd28480a9c1ed15"
+    },
+    "taxi": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f695.svg",
+      "sha256": "6ed3a1558c46998b51299fc1cee010f5a1bb52904f6e824cdc51f923abf1a797"
+    },
+    "road-sign": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f6d1.svg",
+      "sha256": "1897d9f35e2355325e970aae478824a3acee1e5d7e6e5ec7abb1398a9606ede5"
+    },
+    "bridge": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f309.svg",
+      "sha256": "7f1b02557c28fba94b0f3ce12d82d546d1852c5d80bacd4d8424c0e378b1053c"
+    },
+    "palace": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f3f0.svg",
+      "sha256": "aa33d2ebf419ec83d3f913be6de908bed392aa7849962aa66d9f5e37781c7483"
+    },
+    "suitcase": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9f3.svg",
+      "sha256": "286e538b9c8abddf19b90904d060cc26c0ce9596cc950143a21fcb8a0fb82e70"
+    },
+    "ticket": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f3ab.svg",
+      "sha256": "29117260542b676beb371b5630bb9a88ba685019885df1ff54dd774b086db9a8"
+    },
+    "anchor": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/2693.svg",
+      "sha256": "83abd4d9157d99b56a1db3702b5d1c62687acb6346ba3a2a1dd8bbe71db7bad4"
+    },
+    "wheel": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f6de.svg",
+      "sha256": "c028f5f2b89bc4c3c6bdaf297926abbe70b94f5f8bbe885d7a01c52025a7276d"
+    },
+    "parachute": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1fa82.svg",
+      "sha256": "41d2cb346bc211b841e72cefb49d0f02c67d15efe35b030c4a8df311af13643d"
+    },
+    "compass": {
+      "source": "https://raw.githubusercontent.com/jdecked/twemoji/v15.1.0/assets/svg/1f9ed.svg",
+      "sha256": "d986071e709430122f36a875048f8fde5ca2261cf47b2b5dcd12205da1ba52f2"
+    }
+  }
+}

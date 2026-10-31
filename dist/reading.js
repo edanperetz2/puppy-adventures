@@ -1,4 +1,5 @@
 import { ADVANCED_WORDS } from './reading-advanced.js';
+import { VOCABULARY_WORDS } from './vocabulary.js';
 
 // Reading stages are independent choices, never locked behind a score.
 export const READING_LEVELS = Object.freeze({
@@ -52,6 +53,7 @@ export const WORDS = [
   { id: 'chocolate', he: 'שוקולד', pointed: 'שׁוֹקוֹלָד', level: 4 },
   { id: 'trumpet', he: 'חצוצרה', pointed: 'חֲצוֹצְרָה', level: 4 },
   { id: 'cucumber', he: 'מלפפון', pointed: 'מְלָפְפוֹן', level: 4 },
+  ...VOCABULARY_WORDS,
   ...ADVANCED_WORDS,
 ];
 

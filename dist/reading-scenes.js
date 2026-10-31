@@ -14,9 +14,10 @@ export function readingScene(id, baseArt) {
   const spec = READING_SCENES[id];
   const raw = (object, color) => {
     let body = baseArt(object).replace(/^<svg\b[^>]*>/u, '').replace(/<\/svg>$/u, '');
+    if (object === 'pencil' && spec.kind === 'position' && spec.position === 'on') body = `<g transform="rotate(-45 100 100)">${body}</g>`;
     if (color && palette[color]) {
       const [tone, light] = palette[color];
-      const replacements = { ball: { '#f0b15f': tone, '#6aafa9': light }, flower: { '#e7a4ac': tone }, car: { '#82b5ad': tone }, butterfly: { '#b49ace': tone, '#edb4c1': light, '#f2c976': light }, bird: { '#85b8cd': tone, '#6ca7c2': tone, '#c0dce5': light } }[object] || {};
+      const replacements = { ball: { '#f0b15f': tone, '#6aafa9': light }, flower: { '#e7a4ac': tone }, car: { '#82b5ad': tone }, butterfly: { '#b49ace': tone, '#edb4c1': light, '#f2c976': light }, bird: { '#85b8cd': tone, '#6ca7c2': tone, '#c0dce5': light }, star: { '#f3c65c': tone, '#e5aa3b': tone, '#ffedaa': light }, heart: { '#ec859c': tone, '#ffc0ce': light }, balloon: { '#BB1A34': tone } }[object] || {};
       for (const [from, to] of Object.entries(replacements)) body = body.replaceAll(from, to);
     }
     return body;
@@ -48,18 +49,32 @@ export function readingScene(id, baseArt) {
     } else if (spec.anchor === 'box') {
       body += '<path d="M76 112L94 99H169L183 112V183H76Z" fill="#d7b387"/><path d="M85 113H174V131H85Z" fill="#b78c68"/>';
       const pos = { in: [82, 80, 91], on: [82, 28, 91], near: [0, 110, 83] }[spec.position];
+      if (spec.object === 'pencil' && spec.position === 'on') pos[1] = 68;
       body += at(spec.object, ...pos, spec.color);
       if (spec.position === 'in') body += '<path d="M76 131H183V183H76Z" fill="#dab88c"/><path d="M126 136V179" stroke="#c9a37d" stroke-width="3"/>';
       body += '<path d="M76 112L61 125L110 133L126 115M182 112L196 125L150 134L129 115" fill="#e6c69c"/>';
     } else if (spec.anchor === 'flower') {
       body += at('flower', 62, 68, 128);
       const pos = { above: [95, 0, 61], on: [95, 55, 61], near: [0, 120, 61] }[spec.position];
+      if (spec.size) { pos[2] = spec.size === 'small' ? 43 : 83; if (spec.position !== 'near') pos[0] = 125 - pos[2] / 2; }
       body += at(spec.object, ...pos, spec.color);
     } else if (spec.anchor === 'tree') {
       body += at('tree', 61, 74, 133);
       if (spec.position === 'on') body += '<path d="M118 100H171" stroke="#a47e5c" stroke-width="5" stroke-linecap="round"/>';
       const pos = { above: [111, 0, 66], on: [105, 41, 68], near: [0, 126, 68] }[spec.position];
       body += at(spec.object, ...pos, spec.color);
+    }
+  }
+  if (spec.kind === 'arrangement') {
+    if (spec.anchor === 'table') {
+      body = ground + at('table', 10, 30, 180);
+      const y = spec.position === 'on' ? 47 : 135;
+      const xs = spec.count === 2 ? [56, 108] : [34, 82, 130];
+      body += xs.map(x => at(spec.object, x, y, 38)).join('');
+    } else if (spec.anchor === 'plate') {
+      body = at('plate', 66, 55, 130);
+      const positions = spec.position === 'near' ? [[2, 55], [3, 105], [10, 151]] : spec.count === 2 ? [[87, 89], [134, 89]] : [[111, 72], [88, 111], [136, 111]];
+      body += positions.map(([x, y]) => at(spec.object, x, y, 37)).join('');
     }
   }
   if (spec.kind === 'travel') {
@@ -72,7 +87,17 @@ export function readingScene(id, baseArt) {
     const x = spec.reference ? 3 : 19;
     const lift = spec.action === 'jump' || spec.action === 'fly' ? 30 : 0;
     const y = 185 - size * .88 - lift;
-    if (spec.action === 'sleep') {
+    if (spec.action === 'eat' || spec.action === 'drink') {
+      body += place(actor(spec.object, false), 20, 18, 147, 'scene-feeding');
+      body += '<path d="M57 153H144L135 181H67Z" fill="#8bb8c5"/><ellipse cx="100" cy="153" rx="43" ry="12" fill="#c6dfe6"/>';
+      if (spec.action === 'drink') {
+        body += '<ellipse cx="100" cy="153" rx="34" ry="8" fill="#65b6df"/><path d="M89 117q-11 13-4 17q7 3 7-5M114 115q-11 13-4 17q7 3 7-5" fill="#65b6df"/>';
+      } else {
+        body += '<g fill="#ac825c"><circle cx="76" cy="153" r="5"/><circle cx="91" cy="150" r="5"/><circle cx="108" cy="153" r="5"/><circle cx="123" cy="150" r="5"/></g>';
+        const food = spec.object === 'rabbit' ? 'carrot' : spec.object === 'bird' ? 'apple' : 'bone';
+        body += at(food, 86, 116, 31);
+      }
+    } else if (spec.action === 'sleep') {
       body += '<ellipse cx="102" cy="168" rx="78" ry="17" fill="#d8e4e6"/>' + moon;
       const pose = spec.object === 'dog' ? `<g transform="rotate(-75 100 103)">${actor(spec.object, true)}</g>` : actor(spec.object, true);
       body += place(pose, x, 185 - size * .78, size, 'scene-sleeping');

@@ -104,7 +104,7 @@ export const CLIPS = {
 };
 
 for (const [key, speech] of Object.entries(HEBREW_NARRATION)) CLIPS[key].speech = speech;
-for (const w of WORDS) CLIPS[`he-${w.id}`] = { lang: 'he-IL', text: w.pointed, speech: w.pointed };
+for (const w of WORDS) CLIPS[`he-${w.id}`] = { lang: 'he-IL', text: w.pointed, speech: w.spoken || w.pointed };
 for (const a of ANIMALS) CLIPS[`en-${a.id}`] = { lang: 'en-US', text: a.en.toLowerCase() };
 for (const c of COLORS) CLIPS[`en-${c.id}`] = { lang: 'en-US', text: c.en.toLowerCase() };
 for (let n = 0; n <= 20; n++) {

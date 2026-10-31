@@ -1,8 +1,14 @@
+import { VOCABULARY_LEXICON } from './vocabulary.js';
+import { EXTRA_READING_LEXICON } from './vocabulary-phrases.js';
+
 // Reviewed pronunciation dictionary for the complete Hebrew curriculum.
 // Values are explicit IPA: consonants, vowels, stress and feminine endings.
 // Recording generation uses these sounds directly, so a voice never has to
 // guess from Hebrew spelling. This data is never shown as reading text.
 export const HEBREW_LEXICON = Object.freeze({
+  'הִיא': 'hˈi',
+  ...VOCABULARY_LEXICON,
+  ...EXTRA_READING_LEXICON,
   "מַסְלוּל": "maslˈul",
   "לְשַׂחֵק": "lesaχˈek",
   "וּלְזַהוֹת": "ulezahˈot",

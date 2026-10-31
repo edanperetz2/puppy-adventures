@@ -1,3 +1,5 @@
+import { EXTRA_READING_WORDS } from './vocabulary-phrases.js';
+
 // Curated language and scene facts stay together so every picture has one meaning.
 const entry = (id, he, pointed, level, family, scene) => ({ id, he, pointed, level, ...(family ? { family, scene } : {}) });
 
@@ -74,5 +76,7 @@ for (const [id, he, pointed, family, scene] of [
   ['bird-blue-on', 'ציפור כחולה עומדת על עץ.', 'צִפּוֹר כְּחֻלָּה עוֹמֶדֶת עַל עֵץ.', 'facts-bird', { kind: 'position', object: 'bird', color: 'blue', anchor: 'tree', position: 'on' }],
   ['bird-red-near', 'ציפור אדומה עומדת ליד עץ.', 'צִפּוֹר אֲדֻמָּה עוֹמֶדֶת לְיַד עֵץ.', 'facts-bird', { kind: 'position', object: 'bird', color: 'red', anchor: 'tree', position: 'near' }],
 ]) ADVANCED_WORDS.push(entry(`facts-${id}`, he, pointed, 10, family, scene));
+
+ADVANCED_WORDS.push(...EXTRA_READING_WORDS);
 
 export const READING_SCENES = Object.freeze(Object.fromEntries(ADVANCED_WORDS.filter(word => word.scene).map(word => [word.id, Object.freeze(word.scene)])));
