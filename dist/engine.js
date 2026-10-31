@@ -1,4 +1,4 @@
-import { ANIMALS, COLORS, NUMBERS, STICKERS, MISSION_IDS } from './content.js';
+import { ANIMALS, COLORS, NUMBERS, STICKERS, MISSIONS, MISSION_IDS } from './content.js';
 import { CLOCK_LEVELS, clockTime, clockConceptRank } from './clock.js';
 import { LETTERS, letterGroup } from './letters.js';
 import { READING_LEVELS, readingWords, readingTargets } from './reading.js';
@@ -7,9 +7,10 @@ import { sanitizeLetterPractice, recordLetters, suggestedLetters } from './lette
 import { distinctWordPictures } from './vocabulary.js';
 import { SESSION_LENGTH, adventurePhase, choiceCount } from './adventure.js';
 import { sanitizeClockLessons } from './clock-learning.js';
+import { CHARACTER_LEVELS, CHARACTER_MODES, createCharacterSession } from './characters.js';
 export { SESSION_LENGTH } from './adventure.js';
 
-export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', letterLanguage: 'hebrew', letterWriting: Object.freeze({ hebrew: 0, english: 0 }), letterMainWriting: Object.freeze({ hebrew: 0, english: 0 }), letterWritingForm: Object.freeze({ hebrew: 'alternate', english: 'alternate' }), sound: true, motion: true });
+export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', letterLanguage: 'hebrew', letterWriting: Object.freeze({ hebrew: 0, english: 0 }), letterMainWriting: Object.freeze({ hebrew: 0, english: 0 }), letterWritingForm: Object.freeze({ hebrew: 'alternate', english: 'alternate' }), characterLevel: 'friends', characterMode: 'mixed', sound: true, motion: true });
 
 export function shuffle(values, rng = Math.random) {
   const copy = [...values];
@@ -39,6 +40,7 @@ function readingOrder(a, b) {
 
 export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Math.random) {
   const settings = { ...DEFAULT_SETTINGS, ...rawSettings };
+  if (mission === 'characters') return createCharacterSession(settings, rng);
   if (mission === 'letters') {
     const language = Object.hasOwn(LETTERS, settings.letterLanguage) ? settings.letterLanguage : 'hebrew';
     const selected = Array.isArray(settings.letterIds) ? [...new Set(settings.letterIds)].map(id => LETTERS[language].find(letter => letter.id === id)).filter(Boolean) : [];
@@ -116,12 +118,13 @@ export function freshProgress() {
 
 export function finishSession(progress, mission, assisted = 0, letterRound = null) {
   const next = sanitizeProgress(progress);
-  if (!MISSION_IDS.includes(mission)) throw new Error(`Unknown mission: ${mission}`);
+  const skill = Object.hasOwn(MISSIONS, mission) ? MISSIONS[mission].progressMission || mission : null;
+  if (!MISSION_IDS.includes(skill)) throw new Error(`Unknown mission: ${mission}`);
   next.stars += SESSION_LENGTH;
   next.sessions += 1;
-  next.missions[mission] += 1;
-  next.skills[mission].correct += SESSION_LENGTH;
-  next.skills[mission].assisted += assisted;
+  next.missions[skill] += 1;
+  next.skills[skill].correct += SESSION_LENGTH;
+  next.skills[skill].assisted += assisted;
   if (mission === 'letters' && letterRound) next.letterPractice = recordLetters(next.letterPractice, letterRound.language, 'recognition', letterRound.ids);
   const sticker = STICKERS.find(id => !next.stickers.includes(id));
   if (sticker) next.stickers.push(sticker);
@@ -137,6 +140,8 @@ export function sanitizeSettings(input) {
   if ([10, 20].includes(input.englishMax)) result.englishMax = input.englishMax;
   if (Object.hasOwn(CLOCK_LEVELS, input.clockLevel)) result.clockLevel = input.clockLevel;
   if (Object.hasOwn(LETTERS, input.letterLanguage)) result.letterLanguage = input.letterLanguage;
+  if (Object.hasOwn(CHARACTER_LEVELS, input.characterLevel)) result.characterLevel = input.characterLevel;
+  if (Object.hasOwn(CHARACTER_MODES, input.characterMode)) result.characterMode = input.characterMode;
   for (const key of ['letterWriting', 'letterMainWriting']) result[key] = Object.fromEntries(Object.entries(LETTERS).map(([language, letters]) => [language, Number.isInteger(input[key]?.[language]) && input[key][language] >= 0 && input[key][language] < letters.length ? input[key][language] : 0]));
   result.letterWritingForm = Object.fromEntries(Object.keys(LETTERS).map(language => [language, input.letterWritingForm?.[language] === 'main' ? 'main' : 'alternate']));
   return result;

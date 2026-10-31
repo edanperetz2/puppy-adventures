@@ -1,4 +1,4 @@
-import { MISSIONS, STICKERS, WORDS, READING_LEVELS } from './content.js';
+import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js';
 import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js';
 import { ADVENTURE_PHASES } from './adventure.js';
 import { art, pup, scene, uiIcon } from './art.js';
@@ -15,6 +15,8 @@ import { mountLetterPad } from './letter-pad.js';
 import { nextReadingStage, sanitizeReadingPractice, finishReadingPractice } from './reading.js';
 import { stickerPage, stickerDefinition } from './stickers.js';
 import { suggestedLetters, practicedLetterCount, recordLetters } from './letter-progress.js';
+import { CHARACTERS, CHARACTER_LEVELS, CHARACTER_MODES, sanitizeCharacterPractice, finishCharacterPractice, nextCharacterLevel } from './characters.js';
+import { characterMenu, characterQuestion, characterAnswer, characterAnswerLabel, characterMissionArt, characterName } from './characters-view.js';
 
 const app = document.querySelector('#app');
 const dialog = document.querySelector('#parent-dialog');
@@ -35,10 +37,11 @@ let letterPad = null;
 let lastTraceHint = 0;
 let readingPractice = sanitizeReadingPractice(null);
 let albumPageIndex = null;
+let characterPractice = sanitizeCharacterPractice(null);
 
 try {
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-  if (saved) { settings = sanitizeSettings(saved.settings); progress = sanitizeProgress(saved.progress); readingPractice = sanitizeReadingPractice(saved.readingPractice); clockSchoolPosition = sanitizeClockPosition(saved.clockSchoolPosition); }
+    if (saved) { settings = sanitizeSettings(saved.settings); progress = sanitizeProgress(saved.progress); readingPractice = sanitizeReadingPractice(saved.readingPractice); clockSchoolPosition = sanitizeClockPosition(saved.clockSchoolPosition); characterPractice = sanitizeCharacterPractice(saved.characterPractice); }
 } catch { /* A corrupt or unavailable save must never prevent play. */ }
 
 const pendingJoinCode = normalizeCode(new URLSearchParams(location.hash.slice(1)).get('album'));
@@ -53,7 +56,7 @@ const album = new SharedAlbum({ config: SYNC_CONFIG, onChange: source => {
   updateParentProgress();
   const reset = dialog.querySelector('[data-dialog="reset"]');
   if (reset) reset.textContent = 'ניתוק מהאלבום ואיפוס המכשיר הזה';
-  if (changed && !dialog.open && ['home', 'album', 'letters-menu', 'letters-writing', 'letters-recognition'].includes(view)) render();
+  if (changed && !dialog.open && ['home', 'album', 'letters-menu', 'letters-writing', 'letters-recognition', 'characters-menu'].includes(view)) render();
   if (view === 'letters-lesson') updateWritingStatus();
   if (changed && view === 'clock-school') clockSchool?.updateProgress();
 } });
@@ -82,7 +85,7 @@ function welcome() {
 
 function save() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition, characterPractice }));
     storageAvailable = true;
   } catch { storageAvailable = false; }
 }
@@ -285,6 +288,12 @@ function clockSpeak(keys) {
   announcements.say(keys);
 }
 
+function openCharacters() {
+  narrator.stop(); round = null; view = 'characters-menu'; render(); focusTitle(); announcements.say('characters-menu');
+}
+
+function activityCount(id) { return id === 'characters' ? Object.values(characterPractice.completed).reduce((sum, count) => sum + count, 0) : progress.missions[id]; }
+
 function renderHome() {
   app.innerHTML = `${header()}<main id="main" class="home-page">
     <section class="hero" aria-labelledby="hero-title">
@@ -298,9 +307,9 @@ function renderHome() {
     </section>
     <section class="missions" aria-labelledby="missions-title"><div class="section-heading"><div><span class="section-kicker">כל פעם מגלות משהו חדש</span><h2 id="missions-title">לאן נצא היום?</h2></div><span class="rounds-note">${SESSION_LENGTH} צעדים · מתחילות בקל ומתקדמות ${art('paw')}</span></div>
       <div class="mission-grid">${Object.values(MISSIONS).map(m => `<button class="mission-card ${m.color}" data-action="mission" data-mission="${m.id}" aria-label="${m.name} — ${m.description}">
-        <div class="mission-art"><span class="art-orbit"></span>${art(m.icon, 'mission-object')}${pup(m.pup, 'mission-pup')}<span class="mini-sparkle">✦</span></div>
+        <div class="mission-art"><span class="art-orbit"></span>${m.id === 'characters' ? characterMissionArt() : art(m.icon, 'mission-object') + pup(m.pup, 'mission-pup')}<span class="mini-sparkle">✦</span></div>
         <div class="mission-body"><span class="subject-tag" ${m.id === 'english' ? 'lang="en" dir="ltr"' : ''}>${m.subject}</span><h3>${m.name}</h3><p>${m.subtitle}</p><span class="mission-go">בואי נשחק ${uiIcon('arrow')}</span></div>
-        ${progress.missions[m.id] ? `<span class="mission-done" aria-label="כבר סיימת ${progress.missions[m.id]} הרפתקאות">${uiIcon('check')}</span>` : ''}
+        ${activityCount(m.id) ? `<span class="mission-done" aria-label="כבר סיימת ${activityCount(m.id)} הרפתקאות">${uiIcon('check')}</span>` : ''}
       </button>`).join('')}</div>
     </section>
     <section class="album-teaser"><span class="teaser-art">${art(progress.stickers.at(-1) || 'star')}</span><div><h3>${progress.stickers.length ? 'האלבום שלך כבר מתמלא!' : 'כל הרפתקה מתחילה בחיוך'}</h3><p>${progress.stickers.length ? `${progress.stickers.length} מדבקות מחכות לך באלבום` : 'בכל הרפתקה שלמה מגלות מדבקה חדשה'}</p></div><button class="text-button" data-action="album">לאלבום שלי ${uiIcon('arrow')}</button></section>
@@ -314,6 +323,7 @@ function tallyGroup(n, offset, item) {
 }
 
 function questionVisual(q) {
+  if (q.type === 'character') return characterQuestion(q, settings.nikud);
   if (q.type === 'letter') return `<div class="letter-question-layout" dir="rtl"><div class="letter-question-card"><small>${q.letter.language === 'hebrew' ? 'איזו אות בכתב יד מתאימה?' : 'איזו אות קטנה מתאימה?'}</small><bdi class="letter-familiar" dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}">${q.letter.familiar}</bdi></div><div id="letter-recognition-model" class="letter-recognition-model" ${q.showModel ? '' : 'hidden'}>${letterShape(q.letter)}<span>זו אותה אות · נסתכל על הצורה</span></div></div>`;
   if (q.type === 'clock') return `<div class="clock-question-clock">${analogClock(q.time.hour, q.time.minute)}</div><button class="text-button clock-learn-link" data-action="clock-learn">${uiIcon('hint')} נזכרות איך קוראים שעון</button>`;
   if (q.type === 'read') return `<div class="word-card ${q.word.scene ? 'phrase-word' : q.word.he.length >= 6 ? 'long-word' : ''}"><span class="card-label">מה כתוב כאן?</span><div class="target-word" lang="he" dir="rtl">${q.word.scene ? wordText(q.word).split(' ').map(word => `<span class="reading-token">${word}</span>`).join(' ') : wordText(q.word)}</div><span class="word-underline"></span></div>`;
@@ -323,6 +333,7 @@ function questionVisual(q) {
 }
 
 function answerVisual(q, option) {
+  if (q.type === 'character') return characterAnswer(q, option, settings.nikud);
   if (q.type === 'letter') return letterShape(option);
   if (q.type === 'clock') return `<span class="clock-answer-time" dir="ltr">${option.digital}</span><span class="clock-answer-name">${option.he}</span>`;
   if (q.type === 'read') return art(option.id);
@@ -332,6 +343,7 @@ function answerVisual(q, option) {
 }
 
 function answerLabel(q, option) {
+  if (q.type === 'character') return characterAnswerLabel(q, option);
   if (q.type === 'letter') return `${option.name} ${option.language === 'hebrew' ? 'בכתב יד' : 'קטנה'}`;
   if (q.type === 'clock') return `השעה ${option.he}, ${option.digital}`;
   if (q.type === 'read') return option.he;
@@ -342,14 +354,14 @@ function answerLabel(q, option) {
 function renderGame() {
   const mission = MISSIONS[round.mission];
   const q = current();
-  const title = q.type === 'letter' ? 'איזו אות מתאימה?' : q.type === 'clock' ? 'מה השעה בשעון?' : q.type === 'read' ? q.word.scene ? 'איזו תמונה מתאימה למה שכתוב?' : 'איזו תמונה מתאימה למילה?' : q.type === 'listen' ? 'מה שמעת באנגלית?' : q.type === 'add' ? 'כמה יש ביחד?' : 'כמה יש בסל?';
+  const title = q.type === 'character' ? q.direction === 'picture-name' ? 'מה השם של הדמות?' : 'איזו דמות מתאימה לשם?' : q.type === 'letter' ? 'איזו אות מתאימה?' : q.type === 'clock' ? 'מה השעה בשעון?' : q.type === 'read' ? q.word.scene ? 'איזו תמונה מתאימה למה שכתוב?' : 'איזו תמונה מתאימה למילה?' : q.type === 'listen' ? 'מה שמעת באנגלית?' : q.type === 'add' ? 'כמה יש ביחד?' : 'כמה יש בסל?';
   const stage = q.type === 'read' ? round.reading === 'all' ? Object.values(READING_LEVELS).find(level => level.level === q.word.level) : READING_LEVELS[round.reading] : null;
-  app.innerHTML = `${header()}<main id="main" class="game-page ${mission.color} ${q.type === 'clock' ? 'clock-game' : q.type === 'letter' ? 'letter-game' : q.type === 'read' ? 'reading-game' : ''}">
-    <div class="game-topline"><button class="text-button back-button" data-action="${q.type === 'read' ? 'reading-levels' : q.type === 'letter' ? 'letters-menu' : 'home'}">${uiIcon('home')} ${q.type === 'read' ? 'לבחירת שלב' : q.type === 'letter' ? 'למסלולי האותיות' : 'למפת ההרפתקאות'}</button><span class="mission-label">${mission.name}${q.type === 'letter' ? ' · משחק זיהוי' : ''}${stage ? ` · ${stage.number ? `שלב ${stage.number}` : stage.name}` : ''}</span><span class="step-label">צעד ${round.index + 1} מתוך ${SESSION_LENGTH}</span></div>
+  app.innerHTML = `${header()}<main id="main" class="game-page ${mission.color} ${q.type === 'character' ? 'character-game' : q.type === 'clock' ? 'clock-game' : q.type === 'letter' ? 'letter-game' : q.type === 'read' ? 'reading-game' : ''}">
+    <div class="game-topline"><button class="text-button back-button" data-action="${q.type === 'character' ? 'characters-menu' : q.type === 'read' ? 'reading-levels' : q.type === 'letter' ? 'letters-menu' : 'home'}">${uiIcon('home')} ${q.type === 'character' ? 'לבחירת חברים' : q.type === 'read' ? 'לבחירת שלב' : q.type === 'letter' ? 'למסלולי האותיות' : 'למפת ההרפתקאות'}</button><span class="mission-label">${mission.name}${q.type === 'character' ? ` · שלב ${CHARACTER_LEVELS[round.characterLevel].number}` : ''}${q.type === 'letter' ? ' · משחק זיהוי' : ''}${stage ? ` · ${stage.number ? `שלב ${stage.number}` : stage.name}` : ''}</span><span class="step-label">צעד ${round.index + 1} מתוך ${SESSION_LENGTH}</span></div>
     <div class="step-track" aria-label="התקדמות: ${round.index} מתוך ${SESSION_LENGTH}">${Array.from({ length: SESSION_LENGTH }, (_, i) => `<span class="step-dot ${i < round.index ? 'done' : i === round.index ? 'current' : ''}">${i < round.index ? uiIcon('check') : i + 1}</span>`).join('')}</div>
     <section class="game-board"><div class="question-heading"><div><span class="section-kicker">${ADVENTURE_PHASES[q.phase]}</span><h1 id="question-title" tabindex="-1">${title}</h1></div><button class="circle-button replay-button" data-action="replay" aria-label="שמיעת ההוראות שוב">${uiIcon('sound')}</button></div>
       <div class="question-visual">${questionVisual(q)}</div>
-      <div class="answer-grid ${q.options.length === 2 ? 'two-options' : ''} ${q.type === 'read' && q.word.scene ? 'scene-options' : ''} ${q.type === 'count' || q.type === 'add' || q.kind === 'number' ? 'numeric-options' : ''}" ${q.type === 'letter' ? `dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}"` : ''} role="group" aria-label="בחירת תשובה">${q.options.map(option => `${q.type === 'clock' ? '<div class="clock-choice">' : ''}<button class="answer-button ${round.attempted.has(option.id) ? 'try-again' : ''}" data-action="answer" data-answer="${option.id}" aria-label="${answerLabel(q, option)}" ${round.attempted.has(option.id) ? 'disabled' : ''}>${answerVisual(q, option)}<span class="answer-check">${uiIcon('check')}</span></button>${q.type === 'clock' ? `<button class="clock-option-sound" data-action="clock-option-audio" data-clips="${option.clips.join(' ')}" aria-label="שמיעת האפשרות ${option.he}">${uiIcon('sound')}</button></div>` : ''}`).join('')}</div>
+      <div class="answer-grid ${q.options.length === 2 ? 'two-options' : ''} ${q.type === 'character' ? q.direction === 'picture-name' ? 'character-names' : 'character-pictures' : ''} ${q.type === 'read' && q.word.scene ? 'scene-options' : ''} ${q.type === 'count' || q.type === 'add' || q.kind === 'number' ? 'numeric-options' : ''}" ${q.type === 'letter' ? `dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}"` : ''} role="group" aria-label="בחירת תשובה">${q.options.map(option => `${q.type === 'clock' ? '<div class="clock-choice">' : ''}<button class="answer-button ${round.attempted.has(option.id) ? 'try-again' : ''}" data-action="answer" data-answer="${option.id}" aria-label="${answerLabel(q, option)}" ${round.attempted.has(option.id) ? 'disabled' : ''}>${answerVisual(q, option)}<span class="answer-check">${uiIcon('check')}</span></button>${q.type === 'clock' ? `<button class="clock-option-sound" data-action="clock-option-audio" data-clips="${option.clips.join(' ')}" aria-label="שמיעת האפשרות ${option.he}">${uiIcon('sound')}</button></div>` : ''}`).join('')}</div>
       <div class="feedback-row"><div class="feedback" id="feedback" role="status" aria-live="polite">קחי את הזמן. החברים כאן איתך ♡</div><button class="hint-button" data-action="hint">${uiIcon('hint')} רמז קטן</button><button class="primary-button next-button" data-action="next" hidden>ממשיכות ${uiIcon('arrow')}</button></div>
       <p id="audio-notice" class="audio-notice" role="status" hidden></p>
     </section><div class="buddy-bar">${pup(mission.pup)}<span id="buddy-message">${{ luli: 'לולי', bobi: 'בובי', tofi: 'טופי' }[mission.pup]} כאן לעזור לך!</span><span class="buddy-hearts">♡ ♡ ♡</span></div>
@@ -360,20 +372,24 @@ function renderComplete() {
   const mission = MISSIONS[round.mission];
   const reading = round.mission === 'hebrew';
   const letters = round.mission === 'letters';
+  const characters = round.mission === 'characters';
+  const nextCharacters = characters ? nextCharacterLevel(round.characterLevel, round.helped.size) : null;
   const nextLetters = letters ? suggestedLetters(progress.letterPractice, round.letterLanguage) : [];
   const nextKey = reading ? nextReadingStage(round.reading, round.helped.size) : null;
   const nextStage = nextKey ? READING_LEVELS[nextKey] : null;
   app.innerHTML = `${header()}<main id="main" class="completion-page">
     <div class="completion-stars">✦ <span>✧</span> ✦</div><div class="reward-art">${art(round.sticker || mission.sticker)}</div>
     <div class="eyebrow">החברים שמחים כל כך!</div><h1 tabindex="-1">יש! עשית את זה!</h1>
-    <p>סיימת את ${mission.name}${reading && READING_LEVELS[round.reading]?.number ? ` · שלב ${READING_LEVELS[round.reading].number}` : ''}.</p>
+    <p>סיימת את ${mission.name}${characters ? ` · שלב ${CHARACTER_LEVELS[round.characterLevel].number}` : ''}${reading && READING_LEVELS[round.reading]?.number ? ` · שלב ${READING_LEVELS[round.reading].number}` : ''}.</p>
     <p class="reward-caption">${round.sticker ? 'מדבקה חדשה הצטרפה לאלבום שלך' : 'עוד הרפתקה נפלאה עם החברים'}</p>
     ${reading ? `<section class="reading-next-offer"><span class="section-kicker">יש עוד דברים חדשים לגלות!</span>${nextStage ? `<button class="primary-button" data-action="reading-level" data-level="${nextKey}">ממשיכות לשלב ${nextStage.number} ${uiIcon('arrow')}</button><small>${nextStage.name}</small>` : `<button class="primary-button" data-action="reading-level" data-level="${round.reading}">קוראות עוד ביחד ${uiIcon('arrow')}</button>`}</section>` : ''}
     ${letters ? `<section class="letter-next-offer"><span class="section-kicker">תרגלת ${practicedLetterCount(progress.letterPractice, round.letterLanguage, 'recognition')} מתוך ${LETTERS[round.letterLanguage].length} אותיות</span>${letterGroupPreview(nextLetters, round.letterLanguage)}<button class="primary-button" data-action="letter-recognition-next">ממשיכות לאותיות הבאות ${uiIcon('arrow')}</button></section>` : ''}
+    ${characters ? `<section class="character-next-offer"><span class="section-kicker">החברים שמחים לפגוש אותך!</span>${nextCharacters ? `<button class="primary-button" data-action="character-advance" data-level="${nextCharacters}">ממשיכות לשלב ${CHARACTER_LEVELS[nextCharacters].number} ${uiIcon('arrow')}</button><small>${CHARACTER_LEVELS[nextCharacters].name}</small>` : `<button class="primary-button" data-action="character-repeat">עוד הרפתקה עם החברים ${uiIcon('arrow')}</button>`}</section>` : ''}
     <div class="completion-pups">${pup('luli')}${pup('bobi')}${pup('tofi')}</div>
-    <div class="completion-actions"><button class="${reading || letters ? 'secondary-button' : 'primary-button'}" data-action="album">למדבקות שלי ${uiIcon('album')}</button>
+    <div class="completion-actions"><button class="${reading || letters || characters ? 'secondary-button' : 'primary-button'}" data-action="album">למדבקות שלי ${uiIcon('album')}</button>
     ${reading ? `${nextStage ? `<button class="secondary-button" data-action="reading-level" data-level="${round.reading}">עוד בשלב הזה</button>` : ''}<button class="text-button" data-action="reading-levels">לכל שלבי הקריאה</button>` : ''}
     ${letters ? '<button class="secondary-button" data-action="letter-recognition-repeat">עוד עם האותיות האלה</button><button class="text-button" data-action="letters-menu">למסלולי האותיות</button>' : ''}
+    ${characters ? `${nextCharacters ? '<button class="secondary-button" data-action="character-repeat">עוד בשלב הזה</button>' : ''}<button class="text-button" data-action="characters-menu">לבחירת החברים והמשחק</button>` : ''}
     <button class="secondary-button" data-action="home">עוד הרפתקה ${uiIcon('arrow')}</button><button class="text-button" data-action="break">עכשיו הפסקה קטנה ♡</button></div>
   </main>${footer()}`;
 }
@@ -435,6 +451,7 @@ function render() {
   else if (view === 'letters-writing') renderLetterWriting();
   else if (view === 'letters-recognition') renderLetterRecognition();
   else if (view === 'reading-levels') renderReadingLevels();
+  else if (view === 'characters-menu') app.innerHTML = header() + characterMenu(settings, characterPractice) + footer();
   else if (view === 'complete') renderComplete();
   else if (view === 'album') renderAlbum();
   else renderHome();
@@ -446,30 +463,31 @@ function focusTitle() {
 }
 
 function startMission(mission, skipLesson = false) {
+  if (mission === 'characters' && !skipLesson) { openCharacters(); return; }
   if (mission === 'hebrew' && !skipLesson) { openReadingLevels(); return; }
   if (mission === 'clock' && !skipLesson) { openClockLesson(); return; }
   if (mission === 'letters' && !skipLesson) { openLetterMenu(); return; }
   narrator.stop();
   const letterIds = mission === 'letters' ? recognitionGroup().map(letter => letter.id) : null;
-  const questions = createSession(mission, { ...settings, readingRecent: readingPractice.recent[settings.reading], letterPractice: progress.letterPractice, letterIds });
-  round = { mission, questions, letterIds, letterLanguage: settings.letterLanguage, reading: settings.reading, clockLevel: settings.clockLevel, index: 0, resolved: false, attempted: new Set(), counted: new Set(), helped: new Set(questions.flatMap((q, i) => q.showModel ? [i] : [])), sticker: null, awarded: false };
+  const questions = createSession(mission, { ...settings, readingRecent: readingPractice.recent[settings.reading], letterPractice: progress.letterPractice, letterIds, characterPractice });
+  round = { mission, questions, letterIds, letterLanguage: settings.letterLanguage, reading: settings.reading, clockLevel: settings.clockLevel, characterLevel: settings.characterLevel, characterMode: settings.characterMode, index: 0, resolved: false, attempted: new Set(), counted: new Set(), helped: new Set(questions.flatMap((q, i) => q.showModel ? [i] : [])), sticker: null, awarded: false };
   view = 'game';
   render();
   focusTitle();
   const q = current();
-  announcements.say([...(mission === 'hebrew' ? [READING_LEVELS[round.reading].clip, q.prompt] : [mission === 'letters' ? q.prompt : MISSIONS[mission].intro]), ...(q.showModel ? ['letters-recognition-hint'] : []), ...(q.targetClip ? [q.targetClip] : [])]);
+  announcements.say([...(mission === 'characters' ? round.characterMode === 'mixed' ? ['characters-intro', q.prompt] : [q.prompt] : mission === 'hebrew' ? [READING_LEVELS[round.reading].clip, q.prompt] : [mission === 'letters' ? q.prompt : MISSIONS[mission].intro]), ...(q.showModel ? ['letters-recognition-hint'] : []), ...(q.targetClip ? [q.targetClip] : [])]);
 }
 
 function recommended() {
-  const next = Object.keys(MISSIONS).reduce((a, b) => progress.missions[a] <= progress.missions[b] ? a : b);
+  const next = Object.keys(MISSIONS).reduce((a, b) => activityCount(a) <= activityCount(b) ? a : b);
   startMission(next);
 }
 
 function leaveTo(destination) {
   narrator.stop();
-  const leave = () => { round = null; recognitionChoice = null; view = destination; render(); focusTitle(); announcements.say(destination === 'letters-menu' ? 'letters-paths' : destination === 'reading-levels' ? 'reading-levels' : destination === 'home' ? 'choose-activity' : 'stickers'); };
+  const leave = () => { round = null; recognitionChoice = null; view = destination; render(); focusTitle(); announcements.say(destination === 'characters-menu' ? 'characters-menu' : destination === 'letters-menu' ? 'letters-paths' : destination === 'reading-levels' ? 'reading-levels' : destination === 'home' ? 'choose-activity' : 'stickers'); };
   if (view !== 'game') { leave(); return; }
-  openDialog(`<h2 id="parent-title">${destination === 'letters-menu' ? 'נחזור למסלולי האותיות?' : destination === 'reading-levels' ? 'נבחר שלב אחר?' : 'נחזור לבית החברים?'}</h2><p>אפשר להתחיל הרפתקה חדשה מתי שתרצי.</p><div class="dialog-actions"><button class="primary-button" data-dialog="stay">ממשיכות לשחק</button><button class="secondary-button" data-dialog="leave">${destination === 'letters-menu' ? 'למסלולי האותיות' : destination === 'reading-levels' ? 'בוחרות שלב' : 'חוזרות הביתה'}</button></div>`);
+  openDialog(`<h2 id="parent-title">${destination === 'characters-menu' ? 'נחזור לבחירת החברים?' : destination === 'letters-menu' ? 'נחזור למסלולי האותיות?' : destination === 'reading-levels' ? 'נבחר שלב אחר?' : 'נחזור לבית החברים?'}</h2><p>אפשר להתחיל הרפתקה חדשה מתי שתרצי.</p><div class="dialog-actions"><button class="primary-button" data-dialog="stay">ממשיכות לשחק</button><button class="secondary-button" data-dialog="leave">${destination === 'characters-menu' ? 'לבחירת החברים' : destination === 'letters-menu' ? 'למסלולי האותיות' : destination === 'reading-levels' ? 'בוחרות שלב' : 'חוזרות הביתה'}</button></div>`);
   dialog.querySelector('[data-dialog="stay"]').onclick = closeDialog;
   dialog.querySelector('[data-dialog="leave"]').onclick = () => { closeDialog(); leave(); };
 }
@@ -480,7 +498,7 @@ function replay() {
   if (view === 'game') {
     const q = current();
     announcements.say([q.prompt, ...(q.targetClip ? [q.targetClip] : [])]);
-  } else announcements.say(view === 'reading-levels' ? 'reading-levels' : view === 'letters-menu' ? 'letters-paths' : view === 'letters-writing' ? `letters-writing-forms-${settings.letterLanguage}` : view === 'letters-recognition' ? 'letters-recognition' : view === 'letters-lesson' ? letterNarration() : view === 'clock-lesson' ? 'intro-clock' : view === 'album' ? 'stickers' : 'welcome');
+  } else announcements.say(view === 'characters-menu' ? 'characters-menu' : view === 'reading-levels' ? 'reading-levels' : view === 'letters-menu' ? 'letters-paths' : view === 'letters-writing' ? `letters-writing-forms-${settings.letterLanguage}` : view === 'letters-recognition' ? 'letters-recognition' : view === 'letters-lesson' ? letterNarration() : view === 'clock-lesson' ? 'intro-clock' : view === 'album' ? 'stickers' : 'welcome');
 }
 
 function renderSoundButton() {
@@ -492,6 +510,10 @@ function hint() {
   if (round.resolved) return;
   const q = current();
   round.helped.add(round.index);
+  if (q.type === 'character') {
+    document.querySelector('#feedback').textContent = 'נשמע את השם ביחד, ונמשיך לנסות ♡';
+    announcements.say([q.hint, q.character.clip]); return;
+  }
   if (q.type === 'letter') {
     document.querySelector('#letter-recognition-model').hidden = false;
     document.querySelector('#feedback').textContent = 'זו אותה אות. נסתכל על הצורה שלה ונמצא אותה למטה.';
@@ -539,15 +561,15 @@ function answer(button) {
   const next = document.querySelector('.next-button');
   next.hidden = false;
   if (round.index === SESSION_LENGTH - 1) next.innerHTML = `למדבקה שלי ${uiIcon('arrow')}`;
-  const answerText = q.type === 'letter' ? q.letter.familiar : q.type === 'clock' ? `השעה ${q.time.he}` : q.type === 'read' ? wordText(q.word) : q.type === 'listen' ? q.target.en : `${q.total}`;
+  const answerText = q.type === 'character' ? characterName(q.character, settings.nikud) : q.type === 'letter' ? q.letter.familiar : q.type === 'clock' ? `השעה ${q.time.he}` : q.type === 'read' ? wordText(q.word) : q.type === 'listen' ? q.target.en : `${q.total}`;
   feedback.innerHTML = `${uiIcon('check')} <span>כל הכבוד! <b ${q.type === 'listen' ? 'lang="en" dir="ltr"' : ''}>${answerText}</b></span>`;
   feedback.classList.add('success');
   document.querySelector('.buddy-bar').classList.add('celebrating');
   document.querySelector('#buddy-message').textContent = 'יש! הצלחת!';
-  announcements.say([`correct-${1 + round.index % 3}`, ...(q.type === 'clock' ? q.time.clips : q.type === 'read' ? [`he-${q.word.id}`] : q.targetClip ? [q.targetClip] : [])]);
+  announcements.say([`correct-${1 + round.index % 3}`, ...(q.type === 'character' ? [q.character.clip] : q.type === 'clock' ? q.time.clips : q.type === 'read' ? [`he-${q.word.id}`] : q.targetClip ? [q.targetClip] : [])]);
   narrator.chime();
   celebrate(16);
-  next.focus({ preventScroll: q.type !== 'clock' && !(q.type === 'read' && q.word.scene) });
+  next.focus({ preventScroll: q.type !== 'character' && q.type !== 'clock' && !(q.type === 'read' && q.word.scene) });
 }
 
 function nextQuestion() {
@@ -560,10 +582,11 @@ function nextQuestion() {
       round.sticker = result.sticker;
       round.awarded = true;
       if (round.mission === 'hebrew') readingPractice = finishReadingPractice(readingPractice, round.reading, round.questions.map(q => q.word));
+      if (round.mission === 'characters') characterPractice = finishCharacterPractice(characterPractice, round.characterLevel, round.questions);
       if (round.mission === 'letters') recognitionChoice = null;
       save();
     }
-    view = 'complete'; render(); focusTitle(); celebrate(40); announcements.say([round.sticker ? 'complete' : 'complete-all', ...(round.mission === 'hebrew' ? [nextReadingStage(round.reading, round.helped.size) ? 'reading-next' : 'reading-more'] : [])]); return;
+    view = 'complete'; render(); focusTitle(); celebrate(40); announcements.say([round.sticker ? 'complete' : 'complete-all', ...(round.mission === 'hebrew' ? [nextReadingStage(round.reading, round.helped.size) ? 'reading-next' : 'reading-more'] : round.mission === 'characters' && nextCharacterLevel(round.characterLevel, round.helped.size) ? ['reading-next'] : [])]); return;
   }
   round.index++;
   round.resolved = false;
@@ -624,8 +647,8 @@ function renderSettings() {
     <label class="setting-toggle"><span><b>תנועה וחגיגות</b><small>כיבוי מצמצם אנימציות</small></span><input name="motion" type="checkbox" ${settings.motion ? 'checked' : ''}></label>
     <p class="parent-note">ההגדרות ייכנסו לתוקף בהרפתקה הבאה. האנגלית מבוססת על הקשבה ותמונות. מילים כתובות מוצגות באותיות גדולות בלבד.</p>
     <button class="primary-button" type="submit">שמירת ההגדרות ${uiIcon('check')}</button></form>
-    <section class="parent-progress"><h3>מה כבר גילינו?</h3><p id="parent-progress-summary">${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות</p><table><thead><tr><th>תחום</th><th>תשובות ללא עזרה</th><th>עם הדגמה, רמז או ניסיון נוסף</th></tr></thead><tbody>${Object.values(MISSIONS).map(m => `<tr><th>${m.subject}</th><td data-independent="${m.id}">${progress.skills[m.id].correct - progress.skills[m.id].assisted}</td><td data-assisted="${m.id}">${progress.skills[m.id].assisted}</td></tr>`).join('')}</tbody></table><p class="parent-note">מוצגות רק הרפתקאות שהושלמו. זהו תיעוד משחק, ולא מבחן או הערכת יכולת.</p></section>
-    <section id="family-panel"></section>
+    <section class="parent-progress"><h3>מה כבר גילינו?</h3><p id="parent-progress-summary">${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות</p><table><thead><tr><th>תחום</th><th>תשובות ללא עזרה</th><th>עם הדגמה, רמז או ניסיון נוסף</th></tr></thead><tbody>${MISSION_IDS.map(id => MISSIONS[id]).map(m => `<tr><th>${m.id === 'hebrew' ? 'עברית · מילים ושמות' : m.subject}</th><td data-independent="${m.id}">${progress.skills[m.id].correct - progress.skills[m.id].assisted}</td><td data-assisted="${m.id}">${progress.skills[m.id].assisted}</td></tr>`).join('')}</tbody></table><p class="parent-note">מוצגות רק הרפתקאות שהושלמו. זהו תיעוד משחק, ולא מבחן או הערכת יכולת.</p></section>
+    <section id="family-panel"></section><p class="parent-note character-art-credit">איורי הדמויות: Rubble &amp; Crew © Spin Master Ltd. · <a href="https://images.squarespace-cdn.com/content/v1/5595e2eee4b0b03840079b28/1685761053151-FY46DCUKCA43ODFF4MKK/image-asset.jpeg" target="_blank" rel="noopener noreferrer">מקור: McCown Design Agency</a>. משחק השמות נכלל בתחום עברית.</p>
     <p class="privacy-note">אפשר לשחק ללא חיבור לאלבום משפחתי. בחיבור לאלבום, נשמרים מספר ההרפתקאות והעזרה בכל תחום, והאותיות שתורגלו בכל מסלול. ציורי הכתיבה אינם נשמרים. לא צריך אימייל או חשבון לילדה. אין פרסומות, מעקב או בקשת מיקרופון. שמרו את הקוד המשפחתי כדי לחבר מכשיר חדש.</p>
     <p class="parent-note">איורים נוספים: <a href="assets/Twemoji-LICENSE.txt" target="_blank" rel="noopener">Twemoji · רישיון ושמות היוצרים</a>. כל התמונות שמורות בתוך המשחק.</p>
     <p class="save-notice" ${storageAvailable ? 'hidden' : ''}>הדפדפן לא מאפשר שמירה כרגע. אפשר לשחק, אבל ההתקדמות עלולה להיעלם בסגירה.</p>
@@ -642,14 +665,14 @@ function renderSettings() {
   dialog.querySelector('[data-dialog="reset"]').onclick = () => {
     openDialog(`<h2 id="parent-title">לאפס את המכשיר הזה?</h2><p>המדבקות וההתקדמות בדפדפן הזה יימחקו. הגדרות המשחק יישמרו.${album.linked ? ' החיבור לאלבום המשפחתי יוסר. האלבום שכבר סונכרן יישמר עבור המכשירים האחרים.' : ''}</p><div class="dialog-actions"><button class="secondary-button" data-dialog="cancel-reset">ביטול</button><button class="primary-button" data-dialog="confirm-reset">איפוס ההתקדמות</button></div>`);
     dialog.querySelector('[data-dialog="cancel-reset"]').onclick = renderSettings;
-    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
+    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
   };
 }
 
 function updateParentProgress() {
   const summary = dialog.querySelector('#parent-progress-summary');
   if (summary) summary.textContent = `${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות`;
-  for (const mission of Object.keys(MISSIONS)) {
+  for (const mission of MISSION_IDS) {
     const independent = dialog.querySelector(`[data-independent="${mission}"]`);
     const assisted = dialog.querySelector(`[data-assisted="${mission}"]`);
     if (independent) independent.textContent = progress.skills[mission].correct - progress.skills[mission].assisted;
@@ -673,6 +696,13 @@ app.addEventListener('click', event => {
     case 'reading-levels': if (view === 'game') leaveTo('reading-levels'); else openReadingLevels(); break;
     case 'reading-level': if (Object.hasOwn(READING_LEVELS, button.dataset.level)) { settings.reading = button.dataset.level; save(); startMission('hebrew', true); } break;
     case 'reading-stage-sound': if (Object.hasOwn(READING_LEVELS, button.dataset.level)) clockSpeak(READING_LEVELS[button.dataset.level].clip); break;
+    case 'characters-menu': if (view === 'game') leaveTo('characters-menu'); else openCharacters(); break;
+    case 'character-mode': if (Object.hasOwn(CHARACTER_MODES, button.dataset.mode)) { settings.characterMode = button.dataset.mode; save(); render(); document.querySelector(`[data-action="character-mode"][data-mode="${settings.characterMode}"]`)?.focus({ preventScroll: true }); announcements.say(settings.characterMode === 'mixed' ? 'characters-intro' : `characters-${settings.characterMode}`); } break;
+    case 'character-level': if (Object.hasOwn(CHARACTER_LEVELS, button.dataset.level)) { settings.characterLevel = button.dataset.level; save(); render(); document.querySelector(`[data-action="character-level"][data-level="${settings.characterLevel}"]`)?.focus({ preventScroll: true }); announcements.say(CHARACTER_LEVELS[settings.characterLevel].clip); } break;
+    case 'character-start': startMission('characters', true); break;
+    case 'character-sound': { const character = CHARACTERS.find(c => c.id === button.dataset.character); if (character) clockSpeak(character.clip); break; }
+    case 'character-advance': if (Object.hasOwn(CHARACTER_LEVELS, button.dataset.level)) { settings.characterLevel = button.dataset.level; settings.characterMode = round.characterMode; save(); startMission('characters', true); } break;
+    case 'character-repeat': settings.characterLevel = round.characterLevel; settings.characterMode = round.characterMode; save(); startMission('characters', true); break;
     case 'recommended': recommended(); break;
     case 'welcome': welcome(); break;
     case 'replay': replay(); break;

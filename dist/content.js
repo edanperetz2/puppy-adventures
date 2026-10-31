@@ -5,6 +5,7 @@ import { LETTERS } from './letters.js';
 import { WORDS } from './reading.js';
 import { CLOCK_SCHOOL_SCRIPTS } from './clock-school-content.js';
 import { LETTER_WRITING_SCRIPTS } from './letter-writing-content.js';
+import { CHARACTER_SCRIPTS } from './characters-content.js';
 export { WORDS, READING_LEVELS } from './reading.js';
 
 export const ANIMALS = [
@@ -32,13 +33,16 @@ export const NUMBERS = ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'S
 
 export const MISSIONS = {
   hebrew: { id: 'hebrew', name: 'גינת המילים', subtitle: 'קוראות ומגלות', description: 'עוזרות ללולי למצוא את התמונות', pup: 'luli', icon: 'flower', subject: 'עברית', color: 'peach', intro: 'intro-hebrew', sticker: 'flower' },
+  characters: { id: 'characters', name: 'חברים מהמסך', subtitle: 'מזהות תמונות וקוראות שמות', description: 'פוגשות את ראבל והחברים וקוראות את השמות שלהם', pup: 'luli', icon: 'paw', subject: 'שמות וחברים', color: 'peach', intro: 'characters-intro', sticker: 'dog', progressMission: 'hebrew' },
   letters: { id: 'letters', name: 'סטודיו האותיות', subtitle: 'מכירות, כותבות ומחברות', description: 'מגלות עם לולי דפוס, כתב יד, אותיות גדולות וקטנות', pup: 'luli', icon: 'letters', subject: 'אותיות', color: 'lavender', intro: 'letter-match-hebrew', sticker: 'butterfly' },
   english: { id: 'english', name: 'מפרץ האנגלית', subtitle: 'מקשיבות ומגלות', description: 'מגלות עם בובי מילים באנגלית', pup: 'bobi', icon: 'boat', subject: 'ENGLISH', color: 'blue', intro: 'intro-english', sticker: 'boat' },
   math: { id: 'math', name: 'סדנת המספרים', subtitle: 'סופרות ומחברות', description: 'עוזרות לטופי להכין את הפיקניק', pup: 'tofi', icon: 'apple', subject: 'חשבון', color: 'yellow', intro: 'intro-math', sticker: 'star' },
   clock: { id: 'clock', name: 'גן השעונים', subtitle: 'מגלות מה השעה', description: 'לומדות עם בובי לקרוא שעון', pup: 'bobi', icon: 'clock', subject: 'מה השעה?', color: 'lavender', intro: 'clock-read', sticker: 'clock' },
 };
 
-export const MISSION_IDS = Object.keys(MISSIONS);
+// Character names practice Hebrew reading. Keep the established shared subject
+// counters so a device on an older game version still sees every earned sticker.
+export const MISSION_IDS = [...new Set(Object.values(MISSIONS).map(m => m.progressMission || m.id))];
 
 export { STICKERS } from './stickers.js';
 
@@ -121,6 +125,7 @@ for (let hour = 1; hour <= 12; hour++) for (const minute of [0, 15, 30, 45]) {
 
 for (const [key, text] of Object.entries(CLOCK_SCHOOL_SCRIPTS)) CLIPS[key] = { lang: 'he-IL', text, speech: text };
 for (const [key, text] of Object.entries(LETTER_WRITING_SCRIPTS)) CLIPS[key] = { lang: 'he-IL', text, speech: text };
+for (const [key, text] of Object.entries(CHARACTER_SCRIPTS)) CLIPS[key] = { lang: 'he-IL', text, speech: text };
 for (const clip of Object.values(CLIPS)) if (clip.lang === 'he-IL') clip.speech = hebrewSpeech(clip.speech);
 
 for (const letter of LETTERS.hebrew) CLIPS[letter.clip] = { lang: 'he-IL', text: `האות ${letter.name}`, speech: hebrewSpeech(`הָאוֹת ${letter.spoken}`) };

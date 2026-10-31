@@ -28,7 +28,10 @@ for (const [key, clip] of Object.entries(CLIPS)) {
 }
 for (const word of WORDS) if (!CLIPS[`he-${word.id}`]) throw new Error(`Missing reading audio: ${word.id}`);
 for (const word of [...ANIMALS, ...COLORS]) if (!CLIPS[`en-${word.id}`]) throw new Error(`Missing English audio: ${word.id}`);
-for (const mission of MISSION_IDS) createSession(mission, DEFAULT_SETTINGS);
+for (const mission of [...MISSION_IDS, 'characters']) createSession(mission, DEFAULT_SETTINGS);
+const characterSource = JSON.parse(await readFile(new URL('../scripts/character-art-source.json', root), 'utf8'));
+const characterArt = await readFile(new URL('assets/crew-family.webp', root));
+if (characterArt.subarray(0, 4).toString() !== 'RIFF' || characterArt.subarray(8, 12).toString() !== 'WEBP' || createHash('sha256').update(characterArt).digest('hex') !== characterSource.sha256) throw new Error('Character artwork must match its credited source');
 JSON.parse(await readFile(new URL('manifest.webmanifest', root), 'utf8'));
 JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
 for (const asset of JSON.parse(await readFile(new URL('offline.json', root), 'utf8'))) {

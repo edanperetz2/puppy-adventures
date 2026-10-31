@@ -60,6 +60,21 @@ function server() {
 
 const config = { url: 'https://test.example', key: 'public-test-key' };
 
+test('A character adventure earns one shared sticker and ten Hebrew answers, including offline reopening on another device', async () => {
+  const api = server(), code = newCode(), saved = storage();
+  const safari = new SharedAlbum({ config, storage: storage(), fetcher: api.fetcher });
+  let tablet = new SharedAlbum({ config, storage: saved, fetcher: api.fetcher });
+  await safari.link(code, legacyProgress(26), { create: true }); await tablet.link(code, freshProgress());
+  api.online(false); tablet.complete('characters', 2); await tablet.flush();
+  tablet = new SharedAlbum({ config, storage: saved, fetcher: api.fetcher });
+  assert.equal(tablet.progress.stickers.length, 27); assert.equal(tablet.progress.stars, 166);
+  api.online(true); await tablet.flush(); await safari.flush(); await tablet.flush();
+  assert.equal(safari.progress.sessions, 27); assert.equal(safari.progress.stickers.length, 27);
+  assert.equal(safari.progress.skills.hebrew.correct, 166); assert.equal(safari.progress.skills.hebrew.assisted, 2);
+  assert.equal(safari.progress.missions.characters, undefined, 'Older clients need only the existing Hebrew subject');
+  await tablet.flush(); await safari.flush(); assert.equal(safari.progress.sessions, 27);
+});
+
 test('Print and capitals sync independently of handwriting and lowercase, retain offline practice and preserve the album', async () => {
   const api = server(), saved = storage(), code = newCode();
   const first = new SharedAlbum({ config, storage: storage(), fetcher: api.fetcher });
