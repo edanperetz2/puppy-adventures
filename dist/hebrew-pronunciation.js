@@ -1,6 +1,7 @@
 import { VOCABULARY_LEXICON } from './vocabulary.js';
 import { EXTRA_READING_LEXICON } from './vocabulary-phrases.js';
 import { CLOCK_SCHOOL_LEXICON } from './clock-school-content.js';
+import { LETTER_WRITING_LEXICON } from './letter-writing-content.js';
 
 // Reviewed pronunciation dictionary for the complete Hebrew curriculum.
 // Values are explicit IPA: consonants, vowels, stress and feminine endings.
@@ -11,6 +12,7 @@ export const HEBREW_LEXICON = Object.freeze({
   ...VOCABULARY_LEXICON,
   ...EXTRA_READING_LEXICON,
   ...CLOCK_SCHOOL_LEXICON,
+  ...LETTER_WRITING_LEXICON,
   "מַסְלוּל": "maslˈul",
   "לְשַׂחֵק": "lesaχˈek",
   "וּלְזַהוֹת": "ulezahˈot",

@@ -5,7 +5,7 @@ import { finishSession, freshProgress } from '../dist/engine.js';
 import { MISSION_IDS } from '../dist/content.js';
 import { STICKERS, LEGACY_STICKERS } from '../dist/stickers.js';
 import { LETTERS } from '../dist/letters.js';
-import { sanitizeLetterPractice, suggestedLetters } from '../dist/letter-progress.js';
+import { LETTER_MODES, sanitizeLetterPractice, suggestedLetters } from '../dist/letter-progress.js';
 
 function storage() {
   const values = new Map();
@@ -36,7 +36,7 @@ function server() {
     const letters = sanitizeLetterPractice(next.letterPractice);
     for (const language of Object.keys(LETTERS)) {
       old.letterPractice[language].start = Math.max(old.letterPractice[language].start, letters[language].start);
-      for (const mode of ['recognition', 'writing']) old.letterPractice[language][mode] = old.letterPractice[language][mode].map((n, i) => Math.max(n, letters[language][mode][i]));
+      for (const mode of LETTER_MODES) old.letterPractice[language][mode] = old.letterPractice[language][mode].map((n, i) => Math.max(n, letters[language][mode][i]));
     }
     devices.set(request.device_key, old);
     const combined = freshProgress();
@@ -48,7 +48,7 @@ function server() {
     }
     for (const value of devices.values()) for (const language of Object.keys(LETTERS)) {
       combined.letterPractice[language].start = Math.max(combined.letterPractice[language].start, value.letterPractice[language].start);
-      for (const mode of ['recognition', 'writing']) combined.letterPractice[language][mode] = combined.letterPractice[language][mode].map((n, i) => n + value.letterPractice[language][mode][i]);
+      for (const mode of LETTER_MODES) combined.letterPractice[language][mode] = combined.letterPractice[language][mode].map((n, i) => n + value.letterPractice[language][mode][i]);
     }
     const response = withPending(combined, freshProgress(), freshProgress());
     // The deployed RPC returns the original twelve IDs plus uncapped totals.
@@ -59,6 +59,35 @@ function server() {
 }
 
 const config = { url: 'https://test.example', key: 'public-test-key' };
+
+test('Print and capitals sync independently of handwriting and lowercase, retain offline practice and preserve the album', async () => {
+  const api = server(), saved = storage(), code = newCode();
+  const first = new SharedAlbum({ config, storage: storage(), fetcher: api.fetcher });
+  let second = new SharedAlbum({ config, storage: saved, fetcher: api.fetcher });
+  const old = legacyProgress(26); old.clockLessons = 35; old.letterPractice.hebrew.writing[5] = 3;
+  await first.link(code, old, { create: true }); await second.link(code, freshProgress());
+  first.recordWriting('hebrew', 'he-vav', 'writingMain'); await first.flush();
+  api.online(false);
+  second.recordWriting('english', 'en-l', 'writingMain');
+  second.recordWriting('english', 'en-l');
+  second.recordWriting('hebrew', 'he-vav', 'writingMain');
+  await second.flush();
+  second = new SharedAlbum({ config, storage: saved, fetcher: api.fetcher });
+  assert.equal(second.progress.letterPractice.english.writingMain[11], 1);
+  assert.equal(second.progress.letterPractice.english.writing[11], 1);
+  api.online(true); await second.flush(); await first.flush(); await second.flush();
+  for (const device of [first, second]) {
+    assert.equal(device.progress.letterPractice.hebrew.writingMain[5], 2);
+    assert.equal(device.progress.letterPractice.hebrew.writing[5], 3);
+    assert.equal(device.progress.letterPractice.english.writingMain[11], 1);
+    assert.equal(device.progress.letterPractice.english.writing[11], 1);
+    assert.ok(device.progress.letterPractice.english.recognition.every(n => n === 0));
+    assert.equal(device.progress.stickers.length, 26); assert.equal(device.progress.stars, 156);
+    assert.equal(device.progress.clockLessons, 35);
+  }
+  assert.equal(suggestedLetters(second.progress.letterPractice, 'english', 'writingMain', 1, 11)[0].familiar, 'M');
+  assert.throws(() => first.recordWriting('english', 'en-l', 'recognition'), /invalid_writing_mode/);
+});
 
 test('A Safari album with 26 stickers pairs to an empty Home Screen app and survives reopening', async () => {
   const api = server(), safariStore = storage(), homeStore = storage();
@@ -91,7 +120,7 @@ test('A Safari album with 26 stickers pairs to an empty Home Screen app and surv
 test('Full albums send compact counters within the real RPC payload limit', () => {
   const progress = legacyProgress(1000);
   progress.stickers = [...STICKERS];
-  for (const language of Object.keys(LETTERS)) for (const mode of ['recognition', 'writing']) progress.letterPractice[language][mode].fill(1000000);
+  for (const language of Object.keys(LETTERS)) for (const mode of LETTER_MODES) progress.letterPractice[language][mode].fill(1000000);
   const body = compactContribution(progress);
   assert.ok(Buffer.byteLength(JSON.stringify(body)) < 4096);
   assert.equal(body.stickers, undefined);

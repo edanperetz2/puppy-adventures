@@ -10,7 +10,7 @@ import { mountFamilyPanel, updateFamilyStatus } from './family-ui.js';
 import { analogClock, CLOCK_LEVELS } from './clock.js';
 import { mountClockSchool } from './clock-school.js';
 import { sanitizeClockPosition, recordClockLesson } from './clock-learning.js';
-import { LETTERS, letterGroup, letterShape } from './letters.js';
+import { LETTERS, WRITING_FORMS, writingLetter, writingMode, writingPositionKey, letterGroup, letterShape } from './letters.js';
 import { mountLetterPad } from './letter-pad.js';
 import { nextReadingStage, sanitizeReadingPractice, finishReadingPractice } from './reading.js';
 import { stickerPage, stickerDefinition } from './stickers.js';
@@ -29,7 +29,7 @@ let dialogOpener = null;
 let clockSchool = null;
 let clockSchoolPosition = sanitizeClockPosition(null);
 let clockReturn = false;
-let letterDemo = { language: 'hebrew', index: 0, recorded: false };
+let letterDemo = { language: 'hebrew', form: 'alternate', index: 0, recorded: false };
 let recognitionChoice = null;
 let letterPad = null;
 let lastTraceHint = 0;
@@ -53,7 +53,7 @@ const album = new SharedAlbum({ config: SYNC_CONFIG, onChange: source => {
   updateParentProgress();
   const reset = dialog.querySelector('[data-dialog="reset"]');
   if (reset) reset.textContent = 'ניתוק מהאלבום ואיפוס המכשיר הזה';
-  if (changed && !dialog.open && ['home', 'album', 'letters-menu', 'letters-recognition'].includes(view)) render();
+  if (changed && !dialog.open && ['home', 'album', 'letters-menu', 'letters-writing', 'letters-recognition'].includes(view)) render();
   if (view === 'letters-lesson') updateWritingStatus();
   if (changed && view === 'clock-school') clockSchool?.updateProgress();
 } });
@@ -107,10 +107,16 @@ function footer() {
   return `<footer class="footer"><span>${art('paw')} הרפתקה קטנה. גילוי גדול.</span><span>משחקות בקצב שלך ♡</span></footer>`;
 }
 
-function demoLetter() { return LETTERS[letterDemo.language][letterDemo.index]; }
+function demoLetter() { return writingLetter(letterDemo.language, letterDemo.index, letterDemo.form); }
 function letterNarration() {
   const letter = demoLetter();
-  return [`letters-intro-${letterDemo.language}`, letter.clip, ...(letter.final ? ['letters-final'] : [])];
+  return [`letters-intro-${letterDemo.language}${letterDemo.form === 'main' ? '-main' : ''}`, letter.clip, ...(letter.final ? ['letters-final'] : [])];
+}
+
+function letterFormName(language, form) { return language === 'hebrew' ? form === 'main' ? 'דפוס' : 'כתב יד' : form === 'main' ? 'אותיות גדולות' : 'אותיות קטנות'; }
+
+function letterFormTabs() {
+  return `<div class="letter-language-tabs letter-form-tabs" role="group" aria-label="צורת האותיות לכתיבה">${WRITING_FORMS.map(form => `<button data-action="letter-form" data-form="${form}" aria-pressed="${letterDemo.form === form}">${letterFormName(letterDemo.language, form)}${letterDemo.language === 'english' ? ` · <bdi dir="ltr">${form === 'main' ? 'ABC' : 'abc'}</bdi>` : ''}</button>`).join('')}</div>`;
 }
 
 function recognitionGroup() {
@@ -124,12 +130,13 @@ function letterGroupPreview(group, language) {
 
 function letterNavigation(mode = null) {
   const language = settings.letterLanguage;
-  return `<div class="letter-lesson-topline"><button class="text-button" data-action="${mode ? 'letters-menu' : 'home'}">${uiIcon('home')} ${mode ? 'למסלולי האותיות' : 'לבית החברים'}</button><div class="letter-language-tabs" role="group" aria-label="שפת האותיות"><button data-action="letter-language" data-language="hebrew" aria-pressed="${language === 'hebrew'}">עברית · כתב יד</button><button data-action="letter-language" data-language="english" aria-pressed="${language === 'english'}"><bdi>English · A → a</bdi></button></div></div>${mode ? `<div class="letter-language-tabs letter-mode-tabs" role="group" aria-label="דרך הלמידה"><button data-action="letter-mode" data-mode="recognition" aria-pressed="${mode === 'recognition'}">מזהות אותיות</button><button data-action="letter-mode" data-mode="writing" aria-pressed="${mode === 'writing'}">כותבות אותיות</button></div>` : ''}`;
+  return `<div class="letter-lesson-topline"><button class="text-button" data-action="${mode ? 'letters-menu' : 'home'}">${uiIcon('home')} ${mode ? 'למסלולי האותיות' : 'לבית החברים'}</button><div class="letter-language-tabs" role="group" aria-label="שפת האותיות"><button data-action="letter-language" data-language="hebrew" aria-pressed="${language === 'hebrew'}">עברית · א</button><button data-action="letter-language" data-language="english" aria-pressed="${language === 'english'}"><bdi>English · A a</bdi></button></div></div>${mode ? `<div class="letter-language-tabs letter-mode-tabs" role="group" aria-label="דרך הלמידה"><button data-action="letter-mode" data-mode="recognition" aria-pressed="${mode === 'recognition'}">מזהות אותיות</button><button data-action="letter-mode" data-mode="writing" aria-pressed="${mode === 'writing'}">כותבות אותיות</button></div>` : ''}`;
 }
 
 function letterLibrary(language, mode) {
   const visits = progress.letterPractice[language][mode];
-  return `<details class="letter-library"><summary>כל האותיות · בוחרות מה לתרגל</summary><div class="letter-library-grid" dir="${language === 'hebrew' ? 'rtl' : 'ltr'}">${LETTERS[language].map((item, index) => `<button data-action="letter-select" data-index="${index}" data-mode="${mode}" class="${visits[index] ? 'practiced' : ''}" aria-pressed="${mode === 'writing' ? index === letterDemo.index : recognitionChoice?.[0] === item.id}" aria-label="תרגול ${mode === 'writing' ? 'כתיבת' : 'זיהוי'} האות ${item.name}${visits[index] ? ' · כבר תרגלת' : ''}">${item.familiar}${visits[index] ? '<span class="letter-practiced" aria-hidden="true">✓</span>' : ''}${item.final ? '<small>סופית</small>' : ''}</button>`).join('')}</div></details>`;
+  const writing = mode !== 'recognition';
+  return `<details class="letter-library"><summary>כל האותיות · בוחרות מה לתרגל</summary><div class="letter-library-grid" dir="${language === 'hebrew' ? 'rtl' : 'ltr'}">${LETTERS[language].map((item, index) => `<button data-action="letter-select" data-index="${index}" data-mode="${mode}" class="${visits[index] ? 'practiced' : ''}" aria-pressed="${writing ? index === letterDemo.index : recognitionChoice?.[0] === item.id}" aria-label="תרגול ${writing ? 'כתיבת' : 'זיהוי'} האות ${item.name}${visits[index] ? ' · כבר תרגלת' : ''}">${item.familiar}${visits[index] ? '<span class="letter-practiced" aria-hidden="true">✓</span>' : ''}${item.final ? '<small>סופית</small>' : ''}</button>`).join('')}</div></details>`;
 }
 
 function openLetterMenu() {
@@ -138,7 +145,7 @@ function openLetterMenu() {
 
 function openLetterMode(mode) {
   narrator.stop(); round = null; recognitionChoice = null;
-  if (mode === 'writing') { openLetterLesson(); return; }
+  if (mode === 'writing') { view = 'letters-writing'; render(); focusTitle(); announcements.say(`letters-writing-forms-${settings.letterLanguage}`); return; }
   view = 'letters-recognition'; render(); focusTitle(); announcements.say('letters-recognition');
 }
 
@@ -146,11 +153,24 @@ function renderLetterMenu() {
   const language = settings.letterLanguage, letters = LETTERS[language];
   const next = suggestedLetters(progress.letterPractice, language);
   const writing = suggestedLetters(progress.letterPractice, language, 'writing', 1, settings.letterWriting[language])[0];
+  const mainWriting = writingLetter(language, LETTERS[language].indexOf(suggestedLetters(progress.letterPractice, language, 'writingMain', 1, settings.letterMainWriting[language])[0]), 'main');
   app.innerHTML = `${header()}<main id="main" class="letter-lesson-page letter-menu-page" dir="rtl" lang="he">${letterNavigation()}
-    <section class="letter-path-heading"><span class="section-kicker">סטודיו האותיות · לולי לומדת איתך</span><h1 tabindex="-1">מה נרצה לגלות?</h1><p>אותיות בכתב יד בעברית, ואותיות קטנות באנגלית.</p></section>
+    <section class="letter-path-heading"><span class="section-kicker">סטודיו האותיות · לולי לומדת איתך</span><h1 tabindex="-1">מה נרצה לגלות?</h1><p>${language === 'hebrew' ? 'דפוס וכתב יד · מזהות וגם כותבות' : 'אותיות גדולות וקטנות · מזהות וגם כותבות'}</p></section>
     <div class="letter-path-grid"><button class="letter-path-card recognition-path" data-action="letter-mode" data-mode="recognition"><div class="letter-path-picture" dir="${language === 'hebrew' ? 'rtl' : 'ltr'}"><bdi>${next[0].familiar}</bdi><span aria-hidden="true">${language === 'hebrew' ? '←' : '→'}</span>${letterShape(next[0])}</div><h2>מזהות אותיות</h2><p>מוצאות את הצורה שמתאימה לאות המוכרת</p><small>תרגלת ${practicedLetterCount(progress.letterPractice, language, 'recognition')} מתוך ${letters.length} אותיות</small><span class="letter-path-go">בואי נשחק ${uiIcon('arrow')}</span></button>
-    <button class="letter-path-card writing-path" data-action="letter-mode" data-mode="writing"><div class="letter-path-picture">${letterShape(writing)}${uiIcon('pencil')}</div><h2>כותבות אותיות</h2><p>רואות איך כותבים, ומנסות באצבע או בעיפרון</p><small>כתבת ${practicedLetterCount(progress.letterPractice, language, 'writing')} מתוך ${letters.length} אותיות</small><span class="letter-path-go">בואי נכתוב ${uiIcon('arrow')}</span></button></div>
+    <button class="letter-path-card writing-path" data-action="letter-mode" data-mode="writing"><div class="letter-path-picture letter-writing-preview">${letterShape(mainWriting)}${letterShape(writing)}${uiIcon('pencil')}</div><h2>כותבות אותיות</h2><p>${language === 'hebrew' ? 'בוחרות דפוס או כתב יד, ורואות איך כותבים' : 'בוחרות אותיות גדולות או קטנות, ורואות איך כותבים'}</p><small>כתבת ${practicedLetterCount(progress.letterPractice, language, 'writing') + practicedLetterCount(progress.letterPractice, language, 'writingMain')} מתוך ${letters.length * 2} צורות של אותיות</small><span class="letter-path-go">בואי נכתוב ${uiIcon('arrow')}</span></button></div>
     <p class="letter-path-note">כל מסלול זוכר את ההתקדמות שלך ♡</p></main>${footer()}`;
+}
+
+function renderLetterWriting() {
+  const language = settings.letterLanguage, letters = LETTERS[language];
+  app.innerHTML = `${header()}<main id="main" class="letter-lesson-page letter-writing-menu" dir="rtl" lang="he">${letterNavigation('writing')}
+    <section class="letter-path-heading"><span class="section-kicker">העיפרון של לולי מחכה לך</span><h1 tabindex="-1">מה נרצה לכתוב?</h1><p>${language === 'hebrew' ? 'גם את אותיות הדפוס שאת מכירה אפשר ללמוד לכתוב!' : 'גם את האותיות הגדולות שאת מכירה אפשר ללמוד לכתוב!'}</p></section>
+    <div class="letter-path-grid">${WRITING_FORMS.map(form => {
+      const mode = writingMode(form), position = settings[writingPositionKey(form)][language];
+      const next = suggestedLetters(progress.letterPractice, language, mode, 1, position)[0];
+      const model = writingLetter(language, letters.indexOf(next), form);
+      return `<button class="letter-path-card writing-form-card ${form === 'main' ? 'writing-path' : ''}" data-action="letter-form" data-form="${form}"><div class="letter-path-picture">${letterShape(model)}${uiIcon('pencil')}</div><h2>${letterFormName(language, form)}</h2><p>${language === 'english' ? `<bdi class="letter-form-example" dir="ltr" lang="en">${form === 'main' ? 'A B C' : 'a b c'}</bdi>` : form === 'main' ? 'האותיות המוכרות מהספרים' : 'אותן אותיות בצורה של כתב יד'}</p><small>כתבת ${practicedLetterCount(progress.letterPractice, language, mode)} מתוך ${letters.length} אותיות</small><span class="letter-path-go">בואי נכתוב ${uiIcon('arrow')}</span></button>`;
+    }).join('')}</div><p class="letter-path-note">לכל צורה יש התקדמות משלה ♡</p><p id="audio-notice" class="audio-notice" role="status" hidden></p></main>${footer()}`;
 }
 
 function renderLetterRecognition() {
@@ -164,38 +184,42 @@ function renderLetterRecognition() {
     ${letterLibrary(language, 'recognition')}<p id="audio-notice" class="audio-notice" role="status" hidden></p></section></main>${footer()}`;
 }
 
-function openLetterLesson() {
+function openLetterLesson(form = settings.letterWritingForm[settings.letterLanguage]) {
   narrator.stop(); round = null;
   const language = settings.letterLanguage;
-  const next = suggestedLetters(progress.letterPractice, language, 'writing', 1, settings.letterWriting[language])[0];
-  letterDemo = { language, index: LETTERS[language].indexOf(next), recorded: false };
-  settings.letterWriting[language] = letterDemo.index; save();
+  if (!WRITING_FORMS.includes(form)) form = 'alternate';
+  const positionKey = writingPositionKey(form);
+  const next = suggestedLetters(progress.letterPractice, language, writingMode(form), 1, settings[positionKey][language])[0];
+  letterDemo = { language, form, index: LETTERS[language].indexOf(next), recorded: false };
+  settings.letterWritingForm[language] = form;
+  settings[positionKey][language] = letterDemo.index; save();
   view = 'letters-lesson'; render(); focusTitle(); announcements.say(letterNarration());
 }
 
 function renderLetterLesson() {
   const letter = demoLetter(), language = letterDemo.language, letters = LETTERS[language];
+  const mode = writingMode(letterDemo.form), main = letterDemo.form === 'main';
   const direction = language === 'hebrew' ? 'rtl' : 'ltr';
-  app.innerHTML = `${header()}<main id="main" class="letter-lesson-page" dir="rtl" lang="he" data-letter-language="${language}">${letterNavigation('writing')}
-    <section class="letter-lesson-card"><div class="question-heading"><div><span class="section-kicker">לולי מגלה איתך איך כותבים</span><h1 tabindex="-1">כותבות אותיות</h1></div><button class="circle-button" data-action="replay" aria-label="שמיעת ההסבר שוב">${uiIcon('sound')}</button></div>
-      <p class="letter-route-progress" id="letter-writing-progress">כתבת ${practicedLetterCount(progress.letterPractice, language, 'writing')} מתוך ${letters.length} אותיות</p>
-      <div class="letter-lesson-layout" dir="rtl"><div><div class="letter-pair" dir="${direction}"><div class="letter-form-card"><small dir="rtl">${language === 'hebrew' ? 'האות שאת מכירה · דפוס' : 'האות שאת מכירה · גדולה'}</small><bdi class="letter-familiar" dir="${direction}" lang="${language === 'hebrew' ? 'he' : 'en'}">${letter.familiar}</bdi></div><span class="letter-pair-arrow" dir="ltr" aria-hidden="true">${language === 'hebrew' ? '←' : '→'}</span><div class="letter-form-card new-form"><small dir="rtl">${language === 'hebrew' ? 'אותה אות · כתב יד' : 'אותה אות · קטנה'}</small>${letterShape(letter)}</div></div>
+  app.innerHTML = `${header()}<main id="main" class="letter-lesson-page" dir="rtl" lang="he" data-letter-language="${language}" data-writing-form="${letterDemo.form}">${letterNavigation('writing')}${letterFormTabs()}
+    <section class="letter-lesson-card"><div class="question-heading"><div><span class="section-kicker">לולי מגלה איתך איך כותבים</span><h1 tabindex="-1">${language === 'hebrew' ? `כותבות ${main ? 'בדפוס' : 'בכתב יד'}` : `כותבות אותיות ${main ? 'גדולות' : 'קטנות'}`}</h1></div><button class="circle-button" data-action="replay" aria-label="שמיעת ההסבר שוב">${uiIcon('sound')}</button></div>
+      <p class="letter-route-progress" id="letter-writing-progress">כתבת ${practicedLetterCount(progress.letterPractice, language, mode)} מתוך ${letters.length} אותיות</p>
+      <div class="letter-lesson-layout" dir="rtl"><div><div class="letter-pair" dir="${direction}"><div class="letter-form-card"><small dir="rtl">${language === 'hebrew' ? 'האות שאת מכירה · דפוס' : 'האות שאת מכירה · גדולה'}</small><bdi class="letter-familiar" dir="${direction}" lang="${language === 'hebrew' ? 'he' : 'en'}">${letter.familiar}</bdi></div><span class="letter-pair-arrow" dir="ltr" aria-hidden="true">${language === 'hebrew' ? '←' : '→'}</span><div class="letter-form-card new-form"><small dir="rtl">${main ? language === 'hebrew' ? 'כך כותבים · דפוס' : 'כך כותבים · גדולה' : language === 'hebrew' ? 'אותה אות · כתב יד' : 'אותה אות · קטנה'}</small>${letterShape(letter)}</div></div>
       <div class="letter-name-row"><span>${language === 'hebrew' ? letter.name : `<bdi>${letter.familiar}</bdi>`}</span><button class="circle-button" data-action="letter-sound" aria-label="שמיעת שם האות">${uiIcon('sound')}</button></div>
-      ${language === 'english' && ['a', 'g'].includes(letter.small) ? `<p class="letter-book-note">בספרים אפשר לראות גם כך: <bdi class="letter-book-form">${letter.small}</bdi></p>` : ''}
+      ${!main && language === 'english' && ['a', 'g'].includes(letter.small) ? `<p class="letter-book-note">בספרים אפשר לראות גם כך: <bdi class="letter-book-form">${letter.small}</bdi></p>` : ''}
       ${letter.final ? '<p class="letter-final-note">אות סופית · מופיעה בסוף מילה</p>' : ''}
       <p class="letter-copy">לחצי על העיפרון כדי לראות איך כותבים, ואז נסי בעצמך.<br>ההתקדמות נשמרת אחרי שאת מסיימת לכתוב את האות.</p>
       <div class="letter-navigate" dir="${direction}"><button data-action="letter-previous" aria-label="האות הקודמת"><span aria-hidden="true">${language === 'hebrew' ? '→' : '←'}</span><span dir="rtl">הקודמת</span></button><span dir="ltr">${letterDemo.index + 1} / ${letters.length}</span><button data-action="letter-next" aria-label="האות הבאה"><span dir="rtl">הבאה</span><span aria-hidden="true">${language === 'hebrew' ? '←' : '→'}</span></button></div>
       </div><section class="letter-pad-card"><h2>מגלות איך כותבים</h2><div id="letter-writing-pad">${letterShape(letter, { guide: true, pad: true })}<p class="letter-pad-caption" role="status" aria-live="polite"></p></div><div class="letter-pad-controls"><button data-action="letter-demo">${uiIcon('pencil')} הראי לי איך</button><button data-action="letter-step">קו־קו</button><button data-action="letter-reset">${uiIcon('again')} מנסה בעצמי</button></div></section></div>
       <div class="letter-writing-continue"><button class="primary-button" data-action="letter-writing-continue" ${letterDemo.recorded ? '' : 'disabled'}>ממשיכות לאות הבאה ${uiIcon('arrow')}</button><small>אפשר גם לבחור כל אות מהאלפבית</small></div>
-      ${letterLibrary(language, 'writing')}<p id="audio-notice" class="audio-notice" role="status" hidden></p>
+      ${letterLibrary(language, mode)}<p id="audio-notice" class="audio-notice" role="status" hidden></p>
     </section></main>${footer()}`;
   letterPad = mountLetterPad(document.querySelector('#letter-writing-pad'), {
     motion: settings.motion && !matchMedia('(prefers-reduced-motion: reduce)').matches,
     onComplete: () => {
       if (!letterDemo.recorded) {
         letterDemo.recorded = true;
-        if (album.linked) progress = album.recordWriting(language, letter.id);
-        else progress.letterPractice = recordLetters(progress.letterPractice, language, 'writing', [letter.id]);
+        if (album.linked) progress = album.recordWriting(language, letter.id, mode);
+        else progress.letterPractice = recordLetters(progress.letterPractice, language, mode, [letter.id]);
         save(); updateWritingStatus();
       }
       announcements.say('letters-trace-done'); narrator.chime(); celebrate(12);
@@ -205,13 +229,13 @@ function renderLetterLesson() {
 }
 
 function updateWritingStatus() {
-  const language = letterDemo.language;
+  const language = letterDemo.language, mode = writingMode(letterDemo.form);
   const status = document.querySelector('#letter-writing-progress');
-  if (status) status.textContent = `כתבת ${practicedLetterCount(progress.letterPractice, language, 'writing')} מתוך ${LETTERS[language].length} אותיות`;
+  if (status) status.textContent = `כתבת ${practicedLetterCount(progress.letterPractice, language, mode)} מתוך ${LETTERS[language].length} אותיות`;
   const next = document.querySelector('[data-action="letter-writing-continue"]');
   if (next) next.disabled = !letterDemo.recorded;
-  for (const button of document.querySelectorAll('[data-action="letter-select"][data-mode="writing"]')) {
-    const practiced = progress.letterPractice[language].writing[Number(button.dataset.index)] > 0;
+  for (const button of document.querySelectorAll(`[data-action="letter-select"][data-mode="${mode}"]`)) {
+    const practiced = progress.letterPractice[language][mode][Number(button.dataset.index)] > 0;
     button.classList.toggle('practiced', practiced);
     if (practiced && !button.querySelector('.letter-practiced')) button.insertAdjacentHTML('beforeend', '<span class="letter-practiced" aria-hidden="true">✓</span>');
   }
@@ -222,8 +246,8 @@ function selectLetter(index) {
   if (view === 'letters-recognition') {
     recognitionChoice = letterGroup(language, index).map(letter => letter.id); render(); focusTitle(); return;
   }
-  letterDemo = { language, index: (index + length) % length, recorded: false };
-  settings.letterWriting[language] = letterDemo.index; save(); render();
+  letterDemo = { language, form: letterDemo.form, index: (index + length) % length, recorded: false };
+  settings[writingPositionKey(letterDemo.form)][language] = letterDemo.index; save(); render();
   document.querySelector('[data-action="letter-sound"]')?.focus({ preventScroll: true });
   announcements.say([demoLetter().clip, ...(demoLetter().final ? ['letters-final'] : [])]);
 }
@@ -408,6 +432,7 @@ function render() {
   else if (view === 'clock-school') renderClockSchool();
   else if (view === 'letters-lesson') renderLetterLesson();
   else if (view === 'letters-menu') renderLetterMenu();
+  else if (view === 'letters-writing') renderLetterWriting();
   else if (view === 'letters-recognition') renderLetterRecognition();
   else if (view === 'reading-levels') renderReadingLevels();
   else if (view === 'complete') renderComplete();
@@ -455,7 +480,7 @@ function replay() {
   if (view === 'game') {
     const q = current();
     announcements.say([q.prompt, ...(q.targetClip ? [q.targetClip] : [])]);
-  } else announcements.say(view === 'reading-levels' ? 'reading-levels' : view === 'letters-menu' ? 'letters-paths' : view === 'letters-recognition' ? 'letters-recognition' : view === 'letters-lesson' ? letterNarration() : view === 'clock-lesson' ? 'intro-clock' : view === 'album' ? 'stickers' : 'welcome');
+  } else announcements.say(view === 'reading-levels' ? 'reading-levels' : view === 'letters-menu' ? 'letters-paths' : view === 'letters-writing' ? `letters-writing-forms-${settings.letterLanguage}` : view === 'letters-recognition' ? 'letters-recognition' : view === 'letters-lesson' ? letterNarration() : view === 'clock-lesson' ? 'intro-clock' : view === 'album' ? 'stickers' : 'welcome');
 }
 
 function renderSoundButton() {
@@ -657,7 +682,8 @@ app.addEventListener('click', event => {
     case 'clock-option-audio': clockSpeak(button.dataset.clips.split(' ')); break;
     case 'letters-menu': if (view === 'game') leaveTo('letters-menu'); else openLetterMenu(); break;
     case 'letter-mode': openLetterMode(button.dataset.mode); break;
-    case 'letter-language': if (Object.hasOwn(LETTERS, button.dataset.language)) { settings.letterLanguage = button.dataset.language; recognitionChoice = null; save(); if (view === 'letters-lesson') openLetterLesson(); else { render(); announcements.say(view === 'letters-recognition' ? 'letters-recognition' : 'letters-paths'); } } break;
+    case 'letter-language': if (Object.hasOwn(LETTERS, button.dataset.language)) { settings.letterLanguage = button.dataset.language; recognitionChoice = null; save(); if (view === 'letters-lesson') openLetterLesson(); else { render(); announcements.say(view === 'letters-writing' ? `letters-writing-forms-${settings.letterLanguage}` : view === 'letters-recognition' ? 'letters-recognition' : 'letters-paths'); } } break;
+    case 'letter-form': if (WRITING_FORMS.includes(button.dataset.form)) openLetterLesson(button.dataset.form); break;
     case 'letter-select': selectLetter(Number(button.dataset.index)); break;
     case 'letter-previous': selectLetter(letterDemo.index - 1); break;
     case 'letter-next': selectLetter(letterDemo.index + 1); break;
@@ -669,7 +695,7 @@ app.addEventListener('click', event => {
     case 'letter-recognition-auto': recognitionChoice = null; render(); focusTitle(); break;
     case 'letter-recognition-next': settings.letterLanguage = round.letterLanguage; recognitionChoice = null; startMission('letters', true); break;
     case 'letter-recognition-repeat': settings.letterLanguage = round.letterLanguage; recognitionChoice = [...round.letterIds]; startMission('letters', true); break;
-    case 'letter-writing-continue': { const letter = suggestedLetters(progress.letterPractice, letterDemo.language, 'writing', 1, (letterDemo.index + 1) % LETTERS[letterDemo.language].length)[0]; selectLetter(LETTERS[letterDemo.language].indexOf(letter)); break; }
+    case 'letter-writing-continue': { const letter = suggestedLetters(progress.letterPractice, letterDemo.language, writingMode(letterDemo.form), 1, (letterDemo.index + 1) % LETTERS[letterDemo.language].length)[0]; selectLetter(LETTERS[letterDemo.language].indexOf(letter)); break; }
     case 'hint': hint(); break;
     case 'answer': answer(button); break;
     case 'tally': tally(button); break;

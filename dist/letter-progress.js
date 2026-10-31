@@ -1,6 +1,8 @@
 import { LETTERS } from './letters.js';
 
-export const LETTER_MODES = Object.freeze(['recognition', 'writing']);
+// The existing writing counters remain handwriting/lowercase; print/capitals
+// get their own counters, so an older save never claims the new skill is done.
+export const LETTER_MODES = Object.freeze(['recognition', 'writing', 'writingMain']);
 const validCount = n => Number.isSafeInteger(n) && n >= 0 && n <= 32000000 ? n : 0;
 
 export function sanitizeLetterPractice(input, legacy = false) {

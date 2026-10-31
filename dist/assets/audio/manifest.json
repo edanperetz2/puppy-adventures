@@ -10232,6 +10232,66 @@
       "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
       "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
       "sha256": "dc4e8c62278f963acfa79eb80c86b4f3826cf2d7a901f39b1fd8d2eb10607b48"
+    },
+    "letters-writing-forms-hebrew": {
+      "lang": "he-IL",
+      "speech": "mˈa niʁtsˈe liχtˈov? baχaʁˈi ʔotijˈot bidfˈus, ʔˈo ʔotijˈot biχtˈav jˈad.",
+      "segments": [
+        "mˈa niʁtsˈe liχtˈov? baχaʁˈi ʔotijˈot bidfˈus, ʔˈo ʔotijˈot biχtˈav jˈad."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "498b373e302b22379d94218f2c00f451e9c5d4f56e1fac6204d0192aaceb0be8"
+    },
+    "letters-writing-forms-english": {
+      "lang": "he-IL",
+      "speech": "mˈa niʁtsˈe liχtˈov? baχaʁˈi ʔotijˈot ɡdolˈot, ʔˈo ʔotijˈot ktanˈot beʔanɡlˈit.",
+      "segments": [
+        "mˈa niʁtsˈe liχtˈov? baχaʁˈi ʔotijˈot ɡdolˈot, ʔˈo ʔotijˈot ktanˈot beʔanɡlˈit."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "7889494d8d87d0cfe877173471622374062fbcffe72980d4ab18fff78a07423b"
+    },
+    "letters-intro-hebrew-main": {
+      "lang": "he-IL",
+      "speech": "bˈoʔi niχtˈov ʔotijˈot bidfˈus. nistakˈel ʔˈejχ kotvˈim, veʔˈaz nenasˈe baʔˈetsbaʔ.",
+      "segments": [
+        "bˈoʔi niχtˈov ʔotijˈot bidfˈus. nistakˈel ʔˈejχ kotvˈim, veʔˈaz nenasˈe baʔˈetsbaʔ."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "cc75f0787d028b622264608283fbf04690d03271d6db83c57488feaaacc41b72"
+    },
+    "letters-intro-english-main": {
+      "lang": "he-IL",
+      "speech": "bˈoʔi niχtˈov ʔˈet haʔotijˈot haɡdolˈot beʔanɡlˈit. nistakˈel ʔˈejχ kotvˈim, veʔˈaz nenasˈe baʔˈetsbaʔ.",
+      "segments": [
+        "bˈoʔi niχtˈov ʔˈet haʔotijˈot haɡdolˈot beʔanɡlˈit. nistakˈel ʔˈejχ kotvˈim, veʔˈaz nenasˈe baʔˈetsbaʔ."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "6fed62c0cdfec62f1fe8085a2f66574780e4b17be188567c901ac10f46777c58"
     }
   }
 }

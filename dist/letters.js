@@ -1,4 +1,5 @@
 import { HEBREW_HANDWRITING } from './hebrew-handwriting.js';
+import { MAIN_LETTER_STROKES } from './letter-main-forms.js';
 
 // Each path is one ordered pen stroke. Models, demonstrations and tracing all
 // use these same paths, so the pencil never follows a different font outline.
@@ -67,6 +68,19 @@ export const LETTERS = Object.freeze({
   hebrew: HE.map(([id, familiar, spoken, name, strokes]) => Object.freeze({ id: `he-${id}`, familiar, small: familiar, spoken, name, clip: `letter-he-${id}`, language: 'hebrew', final: id.endsWith('-final'), outline: HEBREW_HANDWRITING[familiar], strokes })),
 });
 
+export const WRITING_FORMS = Object.freeze(['main', 'alternate']);
+export const writingMode = form => form === 'main' ? 'writingMain' : 'writing';
+export const writingPositionKey = form => form === 'main' ? 'letterMainWriting' : 'letterWriting';
+const MAIN_LETTERS = Object.freeze(Object.fromEntries(Object.entries(LETTERS).map(([language, letters]) => [language,
+  Object.freeze(letters.map((letter, index) => Object.freeze({ ...letter, form: 'main', strokes: MAIN_LETTER_STROKES[language][index] }))),
+])));
+
+export function writingLetter(language, index, form = 'alternate') {
+  if (!Object.hasOwn(LETTERS, language)) language = 'hebrew';
+  if (!Number.isInteger(index) || index < 0 || index >= LETTERS[language].length) index = 0;
+  return (form === 'main' ? MAIN_LETTERS : LETTERS)[language][index];
+}
+
 export function letterGroup(language, start = 0) {
   const letters = Object.hasOwn(LETTERS, language) ? LETTERS[language] : LETTERS.hebrew;
   const index = Number.isInteger(start) && start >= 0 && start < letters.length ? start : 0;
@@ -75,8 +89,9 @@ export function letterGroup(language, start = 0) {
 
 export function letterShape(letter, { guide = false, pad = false } = {}) {
   const hebrew = letter.language === 'hebrew';
-  return `<svg class="letter-shape ${pad ? 'letter-pad' : ''} ${hebrew ? 'hebrew-handwriting' : ''}" lang="${hebrew ? 'he' : 'en'}" dir="${hebrew ? 'rtl' : 'ltr'}" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${hebrew ? `האות ${letter.name} בכתב יד` : `האות ${letter.familiar} הקטנה`}">
-    ${guide ? '<g class="writing-lines" aria-hidden="true"><path d="M15 46H225M15 104H225M15 190H225M15 225H225"/></g>' : ''}
+  const main = letter.form === 'main';
+  return `<svg class="letter-shape ${pad ? 'letter-pad' : ''} ${hebrew ? main ? 'hebrew-print' : 'hebrew-handwriting' : main ? 'english-capital' : ''}" data-letter-form="${main ? 'main' : 'alternate'}" lang="${hebrew ? 'he' : 'en'}" dir="${hebrew ? 'rtl' : 'ltr'}" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${hebrew ? `האות ${letter.name} ${main ? 'בדפוס' : 'בכתב יד'}` : `האות ${letter.familiar} ${main ? 'הגדולה' : 'הקטנה'}`}">
+    ${guide ? `<g class="writing-lines" aria-hidden="true"><path d="M15 46H225M15 ${hebrew && main ? 96 : 104}H225M15 190H225M15 225H225"/></g>` : ''}
     <g class="letter-guide" fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">${letter.strokes.map((d, i) => `<path d="${d}" ${pad ? `data-stroke="${i}"` : ''}/>`).join('')}</g>
     ${pad ? '<g class="letter-ink" fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"></g><g class="letter-direction" aria-hidden="true"><path class="letter-direction-line"/><path class="letter-direction-tip"/></g><g class="letter-start" aria-hidden="true"><circle r="13"/><text text-anchor="middle" dy="4"></text></g><circle class="writing-pencil" r="8" hidden aria-hidden="true"/>' : ''}
   </svg>`;

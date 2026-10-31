@@ -137,9 +137,10 @@ export class SharedAlbum {
     return { progress, sticker };
   }
 
-  recordWriting(language, id) {
+  recordWriting(language, id, mode = 'writing') {
     if (!this.linked) throw new Error('not_linked');
-    this.state.own.letterPractice = recordLetters(this.state.own.letterPractice, language, 'writing', [id]);
+    if (!['writing', 'writingMain'].includes(mode)) throw new Error('invalid_writing_mode');
+    this.state.own.letterPractice = recordLetters(this.state.own.letterPractice, language, mode, [id]);
     this.status = 'pending';
     try { this.persist(); } catch { this.status = 'storage-error'; }
     this.notify(); void this.flush();

@@ -4560,6 +4560,34 @@
       "detected_ipa": "ʔaχʃˈav naʁɡˈiʃ dakˈa ʔamitˈit. namtˈin ʃiʃˈim ʃnijˈot bejˈaχad. ʔefʃˈaʁ laʔatsˈoʁ beχˈol ʁˈeɡa.",
       "phoneme_edit_ratio": 0.0,
       "seconds": 5.41
+    },
+    "letters-writing-forms-hebrew": {
+      "sha256": "498b373e302b22379d94218f2c00f451e9c5d4f56e1fac6204d0192aaceb0be8",
+      "expected_ipa": "mˈa niʁtsˈe liχtˈov? baχaʁˈi ʔotijˈot bidfˈus, ʔˈo ʔotijˈot biχtˈav jˈad.",
+      "detected_ipa": "mˈa niʁtsˈe liχtˈov, baχaʁˈi ʔotijˈot bedfˈus ʔˈo ʔotijˈot beχtˈav jˈad?",
+      "phoneme_edit_ratio": 0.0351,
+      "seconds": 4.91
+    },
+    "letters-writing-forms-english": {
+      "sha256": "7889494d8d87d0cfe877173471622374062fbcffe72980d4ab18fff78a07423b",
+      "expected_ipa": "mˈa niʁtsˈe liχtˈov? baχaʁˈi ʔotijˈot ɡdolˈot, ʔˈo ʔotijˈot ktanˈot beʔanɡlˈit.",
+      "detected_ipa": "mˈa niʁtsˈe liχtˈov, baχaʁˈi ʔotijˈot ɡdolˈot ʔˈo ʔotijˈot ktanˈot beʔanɡlˈit?",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.73
+    },
+    "letters-intro-hebrew-main": {
+      "sha256": "cc75f0787d028b622264608283fbf04690d03271d6db83c57488feaaacc41b72",
+      "expected_ipa": "bˈoʔi niχtˈov ʔotijˈot bidfˈus. nistakˈel ʔˈejχ kotvˈim, veʔˈaz nenasˈe baʔˈetsbaʔ.",
+      "detected_ipa": "bˈoʔi niχtˈov ʔotijˈot bedfˈus, nistakˈel ʔˈejχ kotvˈim, veʔˈaz nenasˈe baʔetsbˈa.",
+      "phoneme_edit_ratio": 0.0156,
+      "seconds": 4.78
+    },
+    "letters-intro-english-main": {
+      "sha256": "6fed62c0cdfec62f1fe8085a2f66574780e4b17be188567c901ac10f46777c58",
+      "expected_ipa": "bˈoʔi niχtˈov ʔˈet haʔotijˈot haɡdolˈot beʔanɡlˈit. nistakˈel ʔˈejχ kotvˈim, veʔˈaz nenasˈe baʔˈetsbaʔ.",
+      "detected_ipa": "bˈoʔi niχtˈov ʔˈet haʔotijˈot haɡdolˈot beʔanɡlˈit, nistakˈel ʔˈejχ kotvˈim, veʔˈaz nenasˈe baʔetsbˈa.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 4.91
     }
   }
 }
