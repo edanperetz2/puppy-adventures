@@ -67,7 +67,7 @@ export class SharedAlbum {
       this.storage ||= globalThis.localStorage;
       const saved = JSON.parse(this.storage.getItem(KEY) || 'null');
       if (normalizeCode(saved?.code) && /^[0-9a-f-]{36}$/i.test(saved.device)) {
-        this.state = { code: normalizeCode(saved.code), device: saved.device, own: sanitizeProgress(saved.own), confirmed: sanitizeProgress(saved.confirmed), remote: sanitizeProgress(saved.remote) };
+        this.state = { code: normalizeCode(saved.code), device: saved.device, own: sanitizeProgress(saved.own), confirmed: sanitizeProgress(saved.confirmed), remote: sanitizeProgress(saved.remote), completedIds: (Array.isArray(saved.completedIds) ? saved.completedIds : []).filter(id => /^[0-9a-f-]{36}$/i.test(id)).slice(-10000) };
         this.status = this.pending ? 'pending' : 'synced';
       }
     } catch { /* Browser restrictions must never block the local game. */ }
@@ -124,8 +124,11 @@ export class SharedAlbum {
     return this.progress;
   }
 
-  complete(mission, assisted, letterRound = null) {
+  complete(mission, assisted, letterRound = null, roundId = null) {
     if (!this.linked) throw new Error('not_linked');
+    this.state.completedIds ||= [];
+    if (roundId && this.state.completedIds.includes(roundId)) return { progress: this.progress, sticker: null };
+    if (roundId) this.state.completedIds = [...this.state.completedIds, roundId].slice(-10000);
     const before = this.progress;
     this.state.own = finishSession(this.state.own, mission, assisted, letterRound).progress;
     this.status = 'pending';

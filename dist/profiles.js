@@ -5,7 +5,7 @@ export const GAME_KEY = 'puppy-adventures-v1';
 export const FAMILY_KEY = 'puppy-adventures-family-v1';
 export const LEGACY_PROFILE_ID = 'ariel-legacy';
 const allowedId = id => id === LEGACY_PROFILE_ID || /^[0-9a-f]{8}-[0-9a-f-]{27}$/u.test(id || '');
-const allowedKey = key => [GAME_KEY, FAMILY_KEY, `${FAMILY_KEY}-check`, 'name-recording'].includes(key);
+const allowedKey = key => [GAME_KEY, FAMILY_KEY, `${FAMILY_KEY}-check`, 'name-recording', 'learning-state'].includes(key);
 
 function profileId() {
   if (crypto.randomUUID) return crypto.randomUUID();

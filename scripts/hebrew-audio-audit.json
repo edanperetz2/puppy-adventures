@@ -5729,6 +5729,902 @@
       "detected_ipa": "ʃalˈom ʁˈon, baʁˈuχ habˈa lamisχˈak ʃelχˈa.",
       "phoneme_edit_ratio": 0,
       "seconds": 5.12
+    },
+    "journey-workshop-intro": {
+      "sha256": "708239fd8aa819995c79a3ac01c6f0600a6fc3705eb2b3a42e3cdeb784855060",
+      "expected_ipa": "nivnˈe milˈim meχalakˈim, bekˈetsev naʔˈim.",
+      "detected_ipa": "nivnˈe milˈim meχalakˈim, bekˈetsev naʔˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.23
+    },
+    "journey-workshop-build": {
+      "sha256": "14d318b6be3f20129536227675e84f917647c3f8f0d65daf519ed02a5ca414b6",
+      "expected_ipa": "nakʃˈiv laχalakˈim venaχbˈeʁ milˈa.",
+      "detected_ipa": "nakʃˈiv laχalakˈim venaχbˈeʁ milˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.89
+    },
+    "journey-workshop-missing": {
+      "sha256": "ddf345caa6b3a2d499377f4b16cb6f51d4ef083977a98fa71d573ec72ea19438",
+      "expected_ipa": "χasˈeʁ χˈelek ʔeχˈad. nivχˈaʁ ʔˈet haχˈelek hamatʔˈim.",
+      "detected_ipa": "χasˈeʁ χˈelek ʔeχˈad, nivχˈaʁ ʔˈet haχˈelek hamatʔˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.22
+    },
+    "journey-workshop-listen": {
+      "sha256": "d532c12a000d3ec7b50fe16c6aec6c2e49c40a9d70b1f800578e90a621a3d055",
+      "expected_ipa": "nakʃˈiv leχˈol χˈelek benifʁˈad, veʔˈaz lamilˈa haʃlemˈa.",
+      "detected_ipa": "nakʃˈiv leχˈol χˈelek benifʁˈad, veʔˈaz lamilˈa haʃlemˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2
+    },
+    "journey-workshop-word": {
+      "sha256": "ff6906f9ec29768c9876918d92d2e66fa6270e70ddec20958ecb5a0a79c8d516",
+      "expected_ipa": "nakʃˈiv lamilˈa haʃlemˈa.",
+      "detected_ipa": "nakʃˈiv lamilˈa haʃlemˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.81
+    },
+    "journey-workshop-complete": {
+      "sha256": "81018dbedf9889f05b1986f65cb0935691f84772520e330a7eca4dff65f1f89a",
+      "expected_ipa": "χibˈaʁnu ʔˈet kˈol haχalakˈim lemilˈa ʔaχˈat.",
+      "detected_ipa": "χibˈaʁnu ʔˈet kˈol haχalakˈim lemilˈa ʔaχˈat.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.02
+    },
+    "journey-story-intro": {
+      "sha256": "99d5e3ee980251652a23a1a1ebb319c8824e12003bf0b18603f6e56acc757c9d",
+      "expected_ipa": "nikʁˈa sipˈuʁ katsˈaʁ, venaʔazˈoʁ laχaveʁˈim beχˈol ʔamˈud.",
+      "detected_ipa": "nikʁˈa sipˈuʁ katsˈaʁ venaʔazˈoʁ laχaveʁˈim beχˈol ʔamˈud.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.25
+    },
+    "journey-story-next": {
+      "sha256": "39b716a6555a3e0f0e18a8b967516992d2df97f7de7581fc6afc79310af815bc",
+      "expected_ipa": "namʃˈiχ laʔamˈud habˈa.",
+      "detected_ipa": "namʃˈiχ laʔamˈud habˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.94
+    },
+    "journey-story-place": {
+      "sha256": "2d41404ebbfcfafe160904abc35a75d62b2c8188695d2296a28ab7d0121d405f",
+      "expected_ipa": "nikʁˈa ʔˈefo haχˈefets tsaʁˈiχ lihjˈot, venasˈim ʔotˈo ʃˈam.",
+      "detected_ipa": "nikʁˈa ʔejfˈo haχˈefets tsaʁˈiχ lihjˈot venasˈim ʔotˈo ʃˈam.",
+      "phoneme_edit_ratio": 0.0204,
+      "seconds": 2.11
+    },
+    "journey-story-placed": {
+      "sha256": "fe8e51d0e8564dbce22bf9cc39534bff55183fdf350e8cb15f94bb1fd64b3ad1",
+      "expected_ipa": "haχˈefets bamakˈom hamatʔˈim.",
+      "detected_ipa": "haχˈefets bamakˈom hamatʔˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.84
+    },
+    "journey-story-count": {
+      "sha256": "a1e8a18b234e444c449e3d489017cd545ed2447f508272213a1df2836bf7907f",
+      "expected_ipa": "nispˈoʁ ʔˈet haχafatsˈim ʃebasipˈuʁ.",
+      "detected_ipa": "nispˈoʁ ʔˈet haχafatsˈim ʃebasipˈuʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.94
+    },
+    "journey-story-choose": {
+      "sha256": "fd41103c9d7fb899f1991b57a43d596e104929ea5c2b02c088473a35ea7faae6",
+      "expected_ipa": "nikʁˈa venivχˈaʁ ʔˈet hatmunˈa hamatʔimˈa.",
+      "detected_ipa": "nikʁˈa venivχˈaʁ ʔˈet hatmunˈa hamatʔimˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2
+    },
+    "journey-count-all": {
+      "sha256": "36bfb39b4a84d7b0c79a036310a4652dfa50e4c01158a44f0c63eb73c221b02d",
+      "expected_ipa": "niɡˈa beχˈol χˈefets pˈaʔam ʔaχˈat venispˈoʁ.",
+      "detected_ipa": "niɡˈa beχˈol χˈefets pˈaʔam ʔaχˈat venispˈoʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.05
+    },
+    "journey-missing-quantity": {
+      "sha256": "1f3f91f9181801eb177442e1c6e16a4f82b4d1c3ee1cb2351e6a222c99e67d18",
+      "expected_ipa": "nivdˈok kˈama jˈeʃ veχˈama ʔˈod χasˈeʁ.",
+      "detected_ipa": "nivdˈok kˈama jˈeʃ vekˈama ʔˈod χasˈeʁ.",
+      "phoneme_edit_ratio": 0.0312,
+      "seconds": 2.09
+    },
+    "journey-take-away": {
+      "sha256": "605176ceb5ade54f6c3f75da66a1ee2227c8bbcc31c9b7642ba0f56136be2a8e",
+      "expected_ipa": "nasˈiʁ ʔˈet hakamˈut haktuvˈa venispˈoʁ mˈa niʃʔˈaʁ.",
+      "detected_ipa": "nasˈiʁ ʔˈet hakamˈut haktuvˈa venispˈoʁ mˈa niʃʔˈaʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.52
+    },
+    "journey-tens": {
+      "sha256": "5fc18f4018e681e5d49ceddf09cc6b9782bc4ca3b85d6150543bfcb8823fde96",
+      "expected_ipa": "neʔesˈof ʔˈeseʁ jeχidˈot likvutsˈa ʔaχˈat.",
+      "detected_ipa": "neʔesˈof ʔˈeseʁ jeχidˈot likvutsˈa ʔaχˈat.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.28
+    },
+    "journey-tens-and-ones": {
+      "sha256": "f9ac97ea23322b9ea93f9ae6f563881c0b9721adf933326712b84bf50f6ba5a3",
+      "expected_ipa": "nispˈoʁ kvutsˈot ʃˈel ʔˈeseʁ, veʔˈaz ʔˈet hajeχidˈot.",
+      "detected_ipa": "nispˈoʁ kvutsˈot ʃˈel ʔˈeseʁ, veʔˈaz ʔˈet hajeχidˈot.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.7
+    },
+    "journey-english-one": {
+      "sha256": "4bd737fe3d3fd0e081cbd39381cfdd4ef44b3a8991c1f92c51cbe06b4b57e369",
+      "expected_ipa": "nakʃˈiv lemilˈa ʔaχˈat beʔanɡlˈit venivχˈaʁ tmunˈa.",
+      "detected_ipa": "nakʃˈiv lemilˈa ʔaχˈat beʔanɡlˈit venivχˈaʁ tmunˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.47
+    },
+    "journey-english-two": {
+      "sha256": "2a1f49f304e6ddbe39dc33e425ad57a0bf782a1a34a6724a05ea65edff6dd9c0",
+      "expected_ipa": "natχˈil bemilˈa ʔaχˈat. ʔˈaχaʁ kˈaχ neχabˈeʁ ʃtˈej milˈim mukaʁˈot.",
+      "detected_ipa": "natχˈil bemilˈa ʔaχˈat, ʔaχˈaʁ kˈaχ neχabˈeʁ ʃtˈej milˈim mukaʁˈot.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.5
+    },
+    "journey-english-listen-again": {
+      "sha256": "9eb4e1adf492bee307a7d2b3c29d73d4bb7c5258cc9e8179c9fe2ed984b202a7",
+      "expected_ipa": "nakʃˈiv ʃˈuv, bekˈetsev naʔˈim.",
+      "detected_ipa": "nakʃˈiv ʃˈuv, bekˈetsev naʔˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.08
+    },
+    "journey-success": {
+      "sha256": "ea2352d2dbac9a1b99f7944b7d7795c9499a7852050966d064f1996969d791a6",
+      "expected_ipa": "matsˈanu. ʔefʃˈaʁ lehamʃˈiχ.",
+      "detected_ipa": "matsˈanu, ʔefʃˈaʁ lehamʃˈiχ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.7
+    },
+    "journey-practice": {
+      "sha256": "19fcba749b879bcd7960f705c4f44e1f2b8f9eb9c55dbb3eb8e1b585c1de5c40",
+      "expected_ipa": "netaʁɡˈel ʔˈod pˈaʔam. ʔefʃˈaʁ lehakʃˈiv velivdˈok.",
+      "detected_ipa": "netaʁɡˈel ʔˈod pˈaʔam, ʔefʃˈaʁ lehakʃˈiv velivdˈok.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.95
+    },
+    "journey-copy-letters": {
+      "sha256": "278b142343a2da166e3b3059e43042b5e176566ab33b16858ea114767b13dabf",
+      "expected_ipa": "nabˈit baʔˈot veniχtˈov ʔotˈa lejadˈa.",
+      "detected_ipa": "nabˈit baʔˈot veniχtˈov ʔotˈa lejadˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.8
+    },
+    "journey-memory-letters": {
+      "sha256": "a0b0c3ef27b17bf193002fab5583728477a0334245374c5e5e1582e7440b9635",
+      "expected_ipa": "nabˈit baʔˈot, nastˈiʁ ʔotˈa, veniχtˈov mehazikaʁˈon.",
+      "detected_ipa": "nabˈit baʔˈot, nastˈiʁ ʔotˈa veniχtˈov mehazikaʁˈon.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.95
+    },
+    "journey-paper": {
+      "sha256": "3a0462d58e57ac68c5812180004aefe58b7bf251f750bb0f87eb3a584ea4e412",
+      "expected_ipa": "ʔefʃˈaʁ lehadpˈis ʔˈet hadˈaf uletaʁɡˈel beʔipaʁˈon.",
+      "detected_ipa": "ʔefʃˈaʁ lehadpˈis ʔˈet hadˈaf veletaʁɡˈel beʔipaʁˈon.",
+      "phoneme_edit_ratio": 0.0465,
+      "seconds": 2.94
+    },
+    "journey-park-intro": {
+      "sha256": "dffb4793d51960947d6ea3d48d47984170ebf5e56189fe9d93dfc94e53e82005",
+      "expected_ipa": "nesadˈeʁ ʔˈet haɡinˈa ʔˈim haχaveʁˈim.",
+      "detected_ipa": "nesadˈeʁ ʔˈet haɡinˈa ʔˈim haχaveʁˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.72
+    },
+    "journey-park-place": {
+      "sha256": "e14de81e237111008c7b279a1db2249444e04a8a558b49bc1c165d4a580560ea",
+      "expected_ipa": "nivχˈaʁ χˈefets, veʔˈaz nivχˈaʁ lˈo makˈom.",
+      "detected_ipa": "nivχˈaʁ χˈefets, veʔˈaz nivχˈaʁ lˈo makˈom.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.7
+    },
+    "journey-park-check": {
+      "sha256": "10b04ced814f780309f23bf7e01c7e94ef4efa9aaf2fd6c985f7d6abc7db4db3",
+      "expected_ipa": "nivdˈok ʔˈim haɡinˈa matʔimˈa lamesimˈa.",
+      "detected_ipa": "nivdˈok ʔˈim haɡinˈa matʔimˈa lamesimˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.61
+    },
+    "journey-park-clear": {
+      "sha256": "a0e98197d87510b9a7ec767afbc556000b29018367345115a0a5b76d6d79d63e",
+      "expected_ipa": "ʔefʃˈaʁ lefanˈot ʔˈet haɡinˈa ulehatχˈil meχadˈaʃ.",
+      "detected_ipa": "ʔefʃˈaʁ lefanˈot ʔˈet haɡinˈa ulehatχˈil meχadˈaʃ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.8
+    },
+    "journey-park-again": {
+      "sha256": "b0c2bdb5174e33d03da048b96bf7691792da4f38d13bb064d314b999255bb8a0",
+      "expected_ipa": "neʃanˈe ʔˈet hamakˈom venivdˈok ʃˈuv.",
+      "detected_ipa": "neʃanˈe ʔˈet hamakˈom venivdˈok ʃˈuv.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.55
+    },
+    "journey-chunk-dog-1": {
+      "sha256": "91ea840538a3391ae69fac013bb1be9aa767746516315b3098a92349f31eebae",
+      "expected_ipa": "lˈev, lˈev. hamilˈa hˈi: kˈelev",
+      "detected_ipa": "lˈev, lˈev, hamilˈa hˈi kˈelev.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.94
+    },
+    "journey-chunk-sun-0": {
+      "sha256": "2062920f942a92bc9a06724ebaaab43cfcc083120bf48bcf7de8f3541cd5b703",
+      "expected_ipa": "ʃˈe, ʃˈe. hamilˈa hˈi: ʃˈemeʃ",
+      "detected_ipa": "ʃe, ʃe, hamilˈa hˈi ʃˈemeʃ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2
+    },
+    "journey-chunk-sun-1": {
+      "sha256": "d99c65683ba053e4238b0d2e7e6e742da4b31955cb86b0219387ba01bc0ba3a3",
+      "expected_ipa": "mˈeʃ, mˈeʃ. hamilˈa hˈi: ʃˈemeʃ",
+      "detected_ipa": "mˈeʃ, mˈeʃ, hamilˈa hˈi ʃˈemeʃ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.97
+    },
+    "journey-chunk-cat-0": {
+      "sha256": "aefb601245faeb9f8f0830988f6dd5dd2149b32e53e5ed16d7118beb2d433db5",
+      "expected_ipa": "χˈa, χˈa. hamilˈa hˈi: χatˈul",
+      "detected_ipa": "χˈa, χˈa, hamilˈa hˈi χatˈul.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.95
+    },
+    "journey-chunk-cat-1": {
+      "sha256": "1e7106312206665a040e5550abe8bbaf05350d39df6cc7dd153d1b6aba676e7b",
+      "expected_ipa": "tˈul, tˈul. hamilˈa hˈi: χatˈul",
+      "detected_ipa": "tˈul, tˈul, hamilˈa hˈi χatˈul",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2
+    },
+    "journey-chunk-ball-0": {
+      "sha256": "dba2640178adf782ffdf81c1517da105909de732c1aed63fec5cf49d99f45903",
+      "expected_ipa": "kˈa, kˈa. hamilˈa hˈi: kadˈuʁ",
+      "detected_ipa": "kˈa, kˈa, hamilˈa hˈi kadˈuʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.97
+    },
+    "journey-chunk-ball-1": {
+      "sha256": "e6bf2e8f541c2966b4d71a519dddd78992b37c2a16bd132c0fb68ba2728aae5d",
+      "expected_ipa": "dˈuʁ, dˈuʁ. hamilˈa hˈi: kadˈuʁ",
+      "detected_ipa": "dˈuʁ, dˈuʁ, hamilˈa hˈi kadˈuʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.08
+    },
+    "journey-chunk-butterfly-0": {
+      "sha256": "96dc459f5041b100b47a630eaf730ee0082876c830c87b991dfaa6c9608eb3b2",
+      "expected_ipa": "pˈaʁ, pˈaʁ. hamilˈa hˈi: paʁpˈaʁ",
+      "detected_ipa": "pˈaʁ, pˈaʁ, hamilˈa hˈi paʁpˈaʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.09
+    },
+    "journey-chunk-butterfly-1": {
+      "sha256": "0c691bc731e45d33e0f0cb1ea4eb0b9233ac547a129b4a0cdd524546fa0d246d",
+      "expected_ipa": "pˈaʁ, pˈaʁ. hamilˈa hˈi: paʁpˈaʁ",
+      "detected_ipa": "pˈaʁ, pˈaʁ, hamilˈa hˈi paʁpˈaʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.02
+    },
+    "journey-chunk-rabbit-0": {
+      "sha256": "ec99836b8774b4f5cf7c1e8ac239b6317a6bbee4c0824763f4dfe5476096f8b8",
+      "expected_ipa": "ʔˈaʁ, ʔˈaʁ. hamilˈa hˈi: ʔaʁnˈav",
+      "detected_ipa": "ʔˈaʁ, ʔˈaʁ, hamilˈa hˈi ʔaʁnˈav.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.11
+    },
+    "journey-chunk-rabbit-1": {
+      "sha256": "8eea73f978a7dc233973694f6c1347246976ac650045853e35a2d5407bbd88b5",
+      "expected_ipa": "nˈav, nˈav. hamilˈa hˈi: ʔaʁnˈav",
+      "detected_ipa": "nˈav, nˈav, hamilˈa hˈi ʔaʁnˈav.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.08
+    },
+    "journey-chunk-window-0": {
+      "sha256": "1ed535bb30da8614d26287d979fcfe82d09ce36a02fc327805769ede54e3571d",
+      "expected_ipa": "χˈa, χˈa. hamilˈa hˈi: χalˈon",
+      "detected_ipa": "χˈa, χˈa, hamilˈa hˈi χalˈon.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.02
+    },
+    "journey-chunk-window-1": {
+      "sha256": "c9d6c8a57799c2f31b450075c57f35b8d356733813f6a63e0fddb1b5722da6a0",
+      "expected_ipa": "lˈon, lˈon. hamilˈa hˈi: χalˈon",
+      "detected_ipa": "lˈon, lˈon, hamilˈa hˈi χalˈon.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.97
+    },
+    "journey-chunk-airplane-0": {
+      "sha256": "125931a7ca5cc51b959a4427ae5a67c53b1395bd2963e65edc536956e2680b96",
+      "expected_ipa": "mˈa, mˈa. hamilˈa hˈi: matˈos",
+      "detected_ipa": "mˈa, mˈa? hamilˈa hˈi matˈos.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.03
+    },
+    "journey-chunk-airplane-1": {
+      "sha256": "a2d33bc1db953a20e1a0449b4a419b5b5f4327e01f1f76232ed6e0f7d0b886e5",
+      "expected_ipa": "tˈos, tˈos. hamilˈa hˈi: matˈos",
+      "detected_ipa": "tˈos, tˈos, hamilˈa hˈi, matˈos",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.05
+    },
+    "journey-chunk-table-0": {
+      "sha256": "ab62127c4b0a35100c4ea20b1a0ebac6c3c9b8b8fb23392cb38f789cf8f19de0",
+      "expected_ipa": "ʃˈul, ʃˈul. hamilˈa hˈi: ʃulχˈan",
+      "detected_ipa": "ʃˈul, ʃˈul, hamilˈa hˈi ʃulχˈan.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.14
+    },
+    "journey-chunk-table-1": {
+      "sha256": "40552b0fe38b848d1bd577721f4dde5bd3ad3caaec2cf5db694f43ad24b474d6",
+      "expected_ipa": "χˈan, χˈan. hamilˈa hˈi: ʃulχˈan",
+      "detected_ipa": "χˈan, χˈan, hamilˈa hˈi ʃulχˈan.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.3
+    },
+    "journey-chunk-snail-1": {
+      "sha256": "e5743ab5dfb6fcd2785ab1bfc5fb31e8ec75995c8472d1b85e24e05e536b1799",
+      "expected_ipa": "lˈul, lˈul. hamilˈa hˈi: ʃablˈul",
+      "detected_ipa": "lˈul, lˈul, hamilˈa hˈi ʃablˈul.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.36
+    },
+    "journey-chunk-guitar-0": {
+      "sha256": "0e2cf3c4d5080229da3a0119ac9b989d5ae5ac054f7668410f534ea220575e79",
+      "expected_ipa": "ɡˈi, ɡˈi. hamilˈa hˈi: ɡitˈaʁa",
+      "detected_ipa": "ɡˈi ɡˈi, hamilˈa hˈi ɡitˈaʁa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.38
+    },
+    "journey-chunk-guitar-1": {
+      "sha256": "64f4c16436d5b882d814944af55b3cb50b2e0983edefe10f2979e6eb8aa22b9b",
+      "expected_ipa": "tˈa, tˈa. hamilˈa hˈi: ɡitˈaʁa",
+      "detected_ipa": "tˈa, tˈa, hamilˈa hˈi ɡitˈaʁa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.41
+    },
+    "journey-chunk-guitar-2": {
+      "sha256": "0cb4625bc992a2f591ef913baf3244b49b17bf648cc179ae4df14e22fc85c7fd",
+      "expected_ipa": "ʁˈa, ʁˈa. hamilˈa hˈi: ɡitˈaʁa",
+      "detected_ipa": "ʁˈa, ʁˈa, hamilˈa hˈi ɡitˈaʁa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.39
+    },
+    "journey-chunk-banana-0": {
+      "sha256": "89d7c4572583f2a8946b19b58ab7d18acdbb1182be0749689f34a0c41c6813ff",
+      "expected_ipa": "bˈa, bˈa. hamilˈa hˈi: banˈana.",
+      "detected_ipa": "bˈa bˈa, hamilˈa hˈi banˈana.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.94
+    },
+    "journey-chunk-banana-1": {
+      "sha256": "c5294af1f6ad2fe625280a982cda842c313fa9b3be9933a138426adc97681752",
+      "expected_ipa": "nˈa, nˈa. hamilˈa hˈi: banˈana.",
+      "detected_ipa": "nˈa, nˈa, hamilˈa hˈi banˈana.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.33
+    },
+    "journey-chunk-banana-2": {
+      "sha256": "f692b43c8fc5f0d0cfb766df2a8066d62bc4b034fa61d9b764cca26a0daa9397",
+      "expected_ipa": "nˈa, nˈa. hamilˈa hˈi: banˈana.",
+      "detected_ipa": "nˈa, nˈa, hamilˈa hˈi bananˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.38
+    },
+    "journey-chunk-car-0": {
+      "sha256": "81c30a398134f2d666f1716bbb77c8ecad16ef71d881251b3517810be1c6c5bc",
+      "expected_ipa": "mˈe, mˈe. hamilˈa hˈi: meχonˈit",
+      "detected_ipa": "mˈe, mˈe, hamilˈa hˈi meχonˈit.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.31
+    },
+    "journey-chunk-car-1": {
+      "sha256": "c27d18ceeb36e78a3d22b64d6c9099bb17b36e8702365d6ee16896eeaaf58f90",
+      "expected_ipa": "χˈo, χˈo. hamilˈa hˈi: meχonˈit",
+      "detected_ipa": "χˈo, χˈo, hamilˈa hˈi meχonˈit.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.25
+    },
+    "journey-chunk-car-2": {
+      "sha256": "2283e43ee9fc8267679b4eba871cc21e188e4b6c006cd7a6b5775545103db12b",
+      "expected_ipa": "nˈit, nˈit. hamilˈa hˈi: meχonˈit",
+      "detected_ipa": "nˈit, nˈit, hamilˈa hˈi meχonˈit.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.25
+    },
+    "journey-chunk-chocolate-0": {
+      "sha256": "97d7f5421b5afc51c391994e180510b1d18e31691c1023516f6b447b43ca6e4c",
+      "expected_ipa": "ʃˈo, ʃˈo. hamilˈa hˈi: ʃokolˈad",
+      "detected_ipa": "ʃˈo, ʃˈo, hamilˈa hˈi ʃokolˈad.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.41
+    },
+    "journey-chunk-chocolate-1": {
+      "sha256": "6031be6653e46faca67a3f2022166506f33b50318f9e0ccd8dfaa470eecf60dc",
+      "expected_ipa": "kˈo, kˈo. hamilˈa hˈi: ʃokolˈad",
+      "detected_ipa": "kˈo kˈo, hamilˈa hˈi ʃokolˈad.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.28
+    },
+    "journey-chunk-chocolate-2": {
+      "sha256": "684a57f7471a273e76baa4d420f00b015fbafb27c2ca481ecb1efd33a659e914",
+      "expected_ipa": "lˈad, lˈad. hamilˈa hˈi: ʃokolˈad",
+      "detected_ipa": "lˈad, lˈad, hamilˈa hˈi ʃokolˈad.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.36
+    },
+    "journey-chunk-bicycle-0": {
+      "sha256": "e02d95cdbe917eb79435fa797b637259bab5f41107f07dfedf1119c29064998a",
+      "expected_ipa": "ʔˈo, ʔˈo. hamilˈa hˈi: ʔofanˈajim",
+      "detected_ipa": "ʔˈo ʔˈo, hamilˈa hˈi ʔofanˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.31
+    },
+    "journey-chunk-bicycle-1": {
+      "sha256": "ae9f088cb336ac6b058ee52b0bf248fc128981462f66dc28e5bbaacb07568806",
+      "expected_ipa": "fˈa, fˈa. hamilˈa hˈi: ʔofanˈajim",
+      "detected_ipa": "fˈa, fˈa, hamilˈa hˈi ʔofanˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.38
+    },
+    "journey-chunk-bicycle-2": {
+      "sha256": "25ee14a4233c37b476690d4aa1267cd22ee0e9ed9cd8763c8b1ac748f6550049",
+      "expected_ipa": "nˈa, nˈa. hamilˈa hˈi: ʔofanˈajim",
+      "detected_ipa": "nˈa, nˈa, hamilˈa hˈi ʔofanˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.31
+    },
+    "journey-chunk-bicycle-3": {
+      "sha256": "cbbad9a3b0532f5b7f5ba3a78a9f573b95efb9f917152b0356c47b83a257af78",
+      "expected_ipa": "jˈim, jˈim. hamilˈa hˈi: ʔofanˈajim",
+      "detected_ipa": "jˈim, jˈim, hamilˈa hˈi ʔofanˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.28
+    },
+    "journey-chunk-glasses-0": {
+      "sha256": "6369d78e4ea00a7458e9ee85e0ea063b51b25d58ddd22c0172869431ad9bc591",
+      "expected_ipa": "mˈiʃ, mˈiʃ. hamilˈa hˈi: miʃkafˈajim",
+      "detected_ipa": "mˈiʃ, mˈiʃ, hamilˈa hˈi miʃkafˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.34
+    },
+    "journey-chunk-glasses-1": {
+      "sha256": "f849dae4dc7042ad2f818994734ed0c64910bfaf3880c21507f5f201133a1d8b",
+      "expected_ipa": "kˈa, kˈa. hamilˈa hˈi: miʃkafˈajim",
+      "detected_ipa": "kˈa, kˈa, hamilˈa hˈi miʃkafˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.98
+    },
+    "journey-chunk-glasses-2": {
+      "sha256": "42d4cb4a9d3082967cd0351854179a460777b5c71d3411b81d4944437ccea4ff",
+      "expected_ipa": "fˈa, fˈa. hamilˈa hˈi: miʃkafˈajim",
+      "detected_ipa": "fˈa, fˈa, hamilˈa hˈi miʃkafˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.31
+    },
+    "journey-chunk-glasses-3": {
+      "sha256": "7a1c0e68a38f543eafd454e0a15ef22af8956a79c628eb0b2cee90ab93d6b416",
+      "expected_ipa": "jˈim, jˈim. hamilˈa hˈi: miʃkafˈajim",
+      "detected_ipa": "jˈim, jˈim, hamilˈa hˈi miʃkafˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.34
+    },
+    "journey-story-picnic-0": {
+      "sha256": "19af0788be832a2375f6b84080017d8df8b721989ae243ecaebe6b60adb188c7",
+      "expected_ipa": "letˈofi jˈeʃ ʃulχˈan.",
+      "detected_ipa": "latˈofi jˈeʃ ʃulχˈan.",
+      "phoneme_edit_ratio": 0.0526,
+      "seconds": 2.17
+    },
+    "journey-story-picnic-0-prompt": {
+      "sha256": "97f4baad3976776cff26660e95f7dc95008932d36cb6eb4ef50a6a57421403b0",
+      "expected_ipa": "nikʁˈa venivχˈaʁ ʔˈet haʃulχˈan.",
+      "detected_ipa": "nikʁˈa venivχˈaʁ ʔˈet haʃulχˈan.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.25
+    },
+    "journey-story-picnic-1": {
+      "sha256": "4f4c5b9ada8e09b58b50693f15831b0653191abe63d6781eaa369d6bcb01127c",
+      "expected_ipa": "ʔˈal haʃulχˈan jˈeʃ tapˈuaχ.",
+      "detected_ipa": "ʔˈal haʃulχˈan jˈeʃ tapˈuaχ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.2
+    },
+    "journey-story-picnic-1-prompt": {
+      "sha256": "2df35c2a53e9c40b313a2acec1a5a0c94ad72eee3c3aa34111e37cc39c62a17b",
+      "expected_ipa": "nasˈim ʔˈet hatapˈuaχ ʔˈal haʃulχˈan.",
+      "detected_ipa": "nasˈim ʔˈet hatapˈuaχ ʔˈal haʃulχˈan.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.33
+    },
+    "journey-story-picnic-2": {
+      "sha256": "bfc17ddcf89c26268f8f9107cd8731e9040c85131f549f66bf1632ea67b1dbc5",
+      "expected_ipa": "ʔaχʃˈav jˈeʃ ʃnˈej tapuχˈim.",
+      "detected_ipa": "ʔaχʃˈav jˈeʃ ʃnˈej tapuχˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.31
+    },
+    "journey-story-picnic-2-prompt": {
+      "sha256": "9475ae47bbe989352167ef868045e47ed67f70dc6e09b086a2cee9991f3b0723",
+      "expected_ipa": "nispˈoʁ ʔˈet hatapuχˈim.",
+      "detected_ipa": "nispˈoʁ ʔˈet hatapuχˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.12
+    },
+    "journey-story-picnic-3": {
+      "sha256": "a54bf1ff0160e3e788c7478d5539ceaddac2c981e44fcd0dfb6f9e5f26daae9f",
+      "expected_ipa": "lˈuli meviʔˈa lˈeχem lapˈiknik.",
+      "detected_ipa": "lˈuli meviʔˈa lˈeχem lapiknˈik.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.19
+    },
+    "journey-story-picnic-3-prompt": {
+      "sha256": "eaeae6f7838a719eefe94d0c04565e8885fddade716a8007a8d7e39ecda18a27",
+      "expected_ipa": "nivχˈaʁ mˈa lˈuli heviʔˈa.",
+      "detected_ipa": "nivχˈaʁ mˈa lˈuli hevˈiʔa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.2
+    },
+    "journey-story-picnic-4": {
+      "sha256": "ca8e63296586f352e29be10f676b86a4f061a963b294a502afc7a5abe9780d0e",
+      "expected_ipa": "bˈobi ʁoʔˈe χatˈul lejˈad haʔˈets.",
+      "detected_ipa": "bˈobi ʁoʔˈe χatˈul lejˈad haʔˈets.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.31
+    },
+    "journey-story-picnic-4-prompt": {
+      "sha256": "f041d22a8f75176368656312a4fd91c25427ca785d4dda7f1a1a48685ed94994",
+      "expected_ipa": "nakʃˈiv lemilˈa ʔaχˈat beʔanɡlˈit.",
+      "detected_ipa": "nakʃˈiv lemilˈa ʔaχˈat beʔanɡlˈit.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.61
+    },
+    "journey-story-picnic-5": {
+      "sha256": "db9762b6583cc61d3f603a5a0634e5054ced36f1df806bb1e85e0275559da288",
+      "expected_ipa": "hakadˈuʁ mitˈaχat laʃulχˈan, jˈeʃ makˈom laʔˈoχel.",
+      "detected_ipa": "hakadˈuʁ mitˈaχat laʃulχˈan, jˈeʃ makˈom laʔˈoχel.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.36
+    },
+    "journey-story-picnic-5-prompt": {
+      "sha256": "2aa3bca7d49b3964a15a46e289d9e16159e13e3b4d97172544b0bcabc5a18f04",
+      "expected_ipa": "nasˈim ʔˈet hakadˈuʁ mitˈaχat laʃulχˈan.",
+      "detected_ipa": "nasˈim ʔˈet hakadˈuʁ mitˈaχat laʃulχˈan.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.48
+    },
+    "journey-story-picnic-6": {
+      "sha256": "e1297fdb724c132221badd9986b583169db0442c87aba0f1affb2df5a02f5bfd",
+      "expected_ipa": "lˈuli mosifˈa tapˈuaχ laχaveʁˈim.",
+      "detected_ipa": "lˈuli mosifˈa tapˈuaχ laχaveʁˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.22
+    },
+    "journey-story-picnic-6-prompt": {
+      "sha256": "677a0c0cadfb4f26a3042e531d37b2756de6394fb254f24f935cc974e584baf7",
+      "expected_ipa": "nispˈoʁ kˈama tapuχˈim jˈeʃ ʔaχʃˈav.",
+      "detected_ipa": "nispˈoʁ kˈama tapuχˈim jˈeʃ ʔaχʃˈav.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.31
+    },
+    "journey-story-picnic-7": {
+      "sha256": "17db09d3136952705b0d2a0a5e277d9e83a1ad221bae4338e26a2f0b7a601127",
+      "expected_ipa": "bˈobi ʃomˈeʁ kadˈuʁ kaχˈol lamisχˈak.",
+      "detected_ipa": "bˈobi ʃomˈeʁ kadˈuʁ kaχˈol lamisχˈak.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.28
+    },
+    "journey-story-picnic-7-prompt": {
+      "sha256": "3d28f2f39cd0db40467dd2619980d445e8e85f113c3a15c02a8d1f2d5b62778a",
+      "expected_ipa": "nivχˈaʁ ʔˈet hakadˈuʁ ʃebasipˈuʁ.",
+      "detected_ipa": "nivχˈaʁ ʔˈet hakadˈuʁ ʃebasipˈuʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.27
+    },
+    "journey-story-picnic-8": {
+      "sha256": "bc96a267b00ffb03d851a34549bb01084aec3f5b90fa3dbf4a07fdf48724582e",
+      "expected_ipa": "tˈofi mosˈif tapˈuaχ ʁeviʔˈi laʃulχˈan.",
+      "detected_ipa": "tˈofi mosˈif tapˈuaχ ʁeviʔˈi laʃulχˈan.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.26
+    },
+    "journey-story-picnic-8-prompt": {
+      "sha256": "1b4684f52a51d9d1cb598f6f5fc3d6d7b4b2d72ae6d27acbabb376358e3244de",
+      "expected_ipa": "nispˈoʁ ʔˈet kˈol hatapuχˈim ʃeheχˈanu.",
+      "detected_ipa": "nispˈoʁ ʔˈet kˈol hatapuχˈim ʃeheχˈanu.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.31
+    },
+    "journey-story-picnic-9": {
+      "sha256": "e7c00b5eab93dd332691fb1a9caab0d54123923611c14c5ac33685cc2e1e2e31",
+      "expected_ipa": "hapˈiknik muχˈan, hakadˈuʁ lejˈad haʃulχˈan.",
+      "detected_ipa": "hapˈiknik muχˈan, hakadˈuʁ lejˈad haʃulχˈan.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.34
+    },
+    "journey-story-picnic-9-prompt": {
+      "sha256": "a9a2aa58498d7bc60433d18184b4a623f253da455940f29528683caf64968cc0",
+      "expected_ipa": "nasˈim ʔˈet hakadˈuʁ bamakˈom ʃekatˈuv.",
+      "detected_ipa": "nasˈim ʔˈet hakadˈuʁ bamakˈom ʃekatˈuv.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.25
+    },
+    "journey-story-lost-ball-0": {
+      "sha256": "eb9fd86cf668ec73dc7cd558c00487149bc6f585bb43e5a62e0572ef59bafb53",
+      "expected_ipa": "lelˈuli jˈeʃ kadˈuʁ.",
+      "detected_ipa": "lelˈuli jˈeʃ kadˈuʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.14
+    },
+    "journey-story-lost-ball-0-prompt": {
+      "sha256": "971c8cccdfb39402133e4b5cb8de5563b3757e1f460b2c55ef82ec9ca160b1cf",
+      "expected_ipa": "nikʁˈa venivχˈaʁ ʔˈet hakadˈuʁ.",
+      "detected_ipa": "nikʁˈa venivχˈaʁ ʔˈet hakadˈuʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.25
+    },
+    "journey-story-lost-ball-1": {
+      "sha256": "339c75ed0ce45b01868b2b342602f9b4f0264d28600fa2ce6a0fe341d77eb3ec",
+      "expected_ipa": "hakadˈuʁ nˈaχ ʔˈal haʃulχˈan.",
+      "detected_ipa": "hakadˈuʁ nˈaχ ʔˈal haʃulχˈan.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.22
+    },
+    "journey-story-lost-ball-1-prompt": {
+      "sha256": "0d8c6aefc6196222f5c656f7f4e7f2840e69f6e0e3fb0d91f594e5f084e5a724",
+      "expected_ipa": "nasˈim ʔˈet hakadˈuʁ ʔˈal haʃulχˈan.",
+      "detected_ipa": "nasˈim ʔˈet hakadˈuʁ ʔˈal haʃulχˈan.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.23
+    },
+    "journey-story-lost-ball-2": {
+      "sha256": "6ea00a2086b01891da63b19c960273da96dc88b978f70062b0c0f88fbd410060",
+      "expected_ipa": "lˈuli ʁoʔˈa kˈelev.",
+      "detected_ipa": "lˈuli ʁoʔˈa kˈelev",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.12
+    },
+    "journey-story-lost-ball-2-prompt": {
+      "sha256": "f1f8e80f14e4fc6939939559db99133a4f8c78c7a44ed9eb7a653177316d1b2a",
+      "expected_ipa": "nakʃˈiv lemilˈa ʔaχˈat beʔanɡlˈit.",
+      "detected_ipa": "nakʃˈiv lemilˈa ʔaχˈat beʔanɡlˈit.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.3
+    },
+    "journey-story-lost-ball-3": {
+      "sha256": "9e7758a486c1879d5fc5171532ca31ebafdef70359a4fc339b83e91259775f49",
+      "expected_ipa": "hakadˈuʁ nafˈal, velˈuli meχapˈeset ʔotˈo.",
+      "detected_ipa": "hakadˈuʁ nafˈal, velulˈi meχapˈeset ʔotˈo.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.28
+    },
+    "journey-story-lost-ball-3-prompt": {
+      "sha256": "32fdb81b85c9ac4dba77f6b46bbca7c2e1cd5aaa4cbb4500a887545d370aed7c",
+      "expected_ipa": "nivχˈaʁ mˈa lˈuli meχapˈeset.",
+      "detected_ipa": "nivχˈaʁ mˈa lulˈi meχapˈeset.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.19
+    },
+    "journey-story-lost-ball-4": {
+      "sha256": "dc596176ac75046f840ce198b8dd330c33164295833aef12db8321d627a9f8e1",
+      "expected_ipa": "bˈobi motsˈe pˈeʁaχ lejˈad haʔˈets.",
+      "detected_ipa": "bˈobi motsˈe pˈeʁaχ lejˈad haʔˈets.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.19
+    },
+    "journey-story-lost-ball-4-prompt": {
+      "sha256": "be59b168b85ab807c63a2839a39cc5524503efc4ad36b5a2d671544f43e67e4f",
+      "expected_ipa": "nivχˈaʁ mˈa bˈobi motsˈe.",
+      "detected_ipa": "nivχˈaʁ mˈa bˈobi motsˈe.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.12
+    },
+    "journey-story-lost-ball-5": {
+      "sha256": "9d8c094a43a3f5e1a44556669b03c5c2c5fd11142e11e3efbb9024075508e6fb",
+      "expected_ipa": "tˈofi ʁoʔˈe ʃnˈej kaduʁˈim.",
+      "detected_ipa": "tˈofi ʁoʔˈe ʃnˈej kaduʁˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.2
+    },
+    "journey-story-lost-ball-5-prompt": {
+      "sha256": "2c1d980bc36877ff2d88485793fd653749dc48c6a6f615b1a97e7cc27fd69e1f",
+      "expected_ipa": "nispˈoʁ ʔˈet hakaduʁˈim.",
+      "detected_ipa": "nispˈoʁ ʔˈet hakaduʁˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.22
+    },
+    "journey-story-lost-ball-6": {
+      "sha256": "3ad1144f661b6cdea52a13c60fad7c1f29e248b70283204fad7fab8e7d2ade1e",
+      "expected_ipa": "ʔeχˈad ʔadˈom, veʔeχˈad kaχˈol.",
+      "detected_ipa": "ʔeχˈad ʔadˈom veʔeχˈad kaχˈol.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.2
+    },
+    "journey-story-lost-ball-6-prompt": {
+      "sha256": "de794aeea05075090b33b3a6cee5e280778caa1b00d88bab14e75339a1f47b79",
+      "expected_ipa": "nakʃˈiv lemilˈa ʔaχˈat beʔanɡlˈit.",
+      "detected_ipa": "nakʃˈiv lemilˈa ʔaχˈat beʔanɡlˈit.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.16
+    },
+    "journey-story-lost-ball-7": {
+      "sha256": "55bb370b4a0da9920917099677ba7f4b80ffbe28b6fdd4cf7742142078ac7ba0",
+      "expected_ipa": "hakadˈuʁ ʃˈel lˈuli kaχˈol, lˈo ʔadˈom.",
+      "detected_ipa": "hakadˈuʁ ʃˈel lulˈi kaχˈol, lˈo ʔadˈom.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.28
+    },
+    "journey-story-lost-ball-7-prompt": {
+      "sha256": "7f607a72049022c635683eddd9cbac1087c45b21bd536d512eb09c6dd6a5253c",
+      "expected_ipa": "nivχˈaʁ ʔˈet hakadˈuʁ ʃˈel lˈuli.",
+      "detected_ipa": "nivχˈaʁ ʔˈet hakadˈuʁ ʃˈel lˈuli.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.27
+    },
+    "journey-story-lost-ball-8": {
+      "sha256": "df08e7fc8000bec4539b10ca638421ddc145718892a3acac4ffcfadef50ce4c3",
+      "expected_ipa": "lˈuli motsˈet ʔotˈo mitˈaχat laʃulχˈan.",
+      "detected_ipa": "lˈuli motsˈet ʔotˈo mitˈaχat laʃulχˈan.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.23
+    },
+    "journey-story-lost-ball-8-prompt": {
+      "sha256": "f016f83ac3a299d12f1864686375dd84650edbc63f3d60250732411cc6b56f9c",
+      "expected_ipa": "nasˈim ʔˈet hakadˈuʁ bamakˈom ʃekatˈuv.",
+      "detected_ipa": "nasˈim ʔˈet hakadˈuʁ bamakˈom ʃekatˈuv.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.19
+    },
+    "journey-story-lost-ball-9": {
+      "sha256": "4190327c9fc29e0397915d5181032619d4a08b4d1453c4b7377134f62061688f",
+      "expected_ipa": "hakadˈuʁ lejˈad haʃulχˈan, veχulˈam χozʁˈim lesaχˈek.",
+      "detected_ipa": "hakadˈuʁ lejˈad haʃulχˈan, vekulˈam χozʁˈim lesaχˈek.",
+      "phoneme_edit_ratio": 0.0217,
+      "seconds": 2.3
+    },
+    "journey-story-lost-ball-9-prompt": {
+      "sha256": "06d8452dabd3ced6fdb9174b044c5aec02b49b3f1234df441267417dc51d4e00",
+      "expected_ipa": "nasˈim ʔˈet hakadˈuʁ bamakˈom ʃekatˈuv.",
+      "detected_ipa": "nasˈim ʔˈet hakadˈuʁ bamakˈom ʃekatˈuv.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.25
+    },
+    "journey-phonics-intro": {
+      "sha256": "5c82dbab73dce46ebe5aa8730935c7570199d218533ee5c18d7f91e6e545e38b",
+      "expected_ipa": "nakʃˈiv latslˈil haʁiʃˈon betˈoχ hamilˈa. natχˈil leʔˈat uvejˈaχad.",
+      "detected_ipa": "nakʃˈiv latslˈil haʁiʃˈon betˈoχ hamilˈa, natχˈil leʔˈat uvejˈaχad.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.42
+    },
+    "journey-context-dog": {
+      "sha256": "e31de00c9d1ce2c1cca7de1ae5156fe2d59dcc74241fac8920f067522b0a5239",
+      "expected_ipa": "hinˈe kˈelev jaʃˈen.",
+      "detected_ipa": "hinˈe kˈelev jaʃˈen.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.92
+    },
+    "journey-context-sun": {
+      "sha256": "73e09c8f53ce52f65cc3d1cb03b239e4a917184f2317a25328d102231ad5849c",
+      "expected_ipa": "baʃamˈajim jˈeʃ ʃˈemeʃ.",
+      "detected_ipa": "baʃamˈajim jˈeʃ ʃˈemeʃ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.94
+    },
+    "journey-context-cat": {
+      "sha256": "88ee0b1ba74dac323841c6f6b9c613e67a34d0e8726d4ccd853e4ca7c9bbc8c9",
+      "expected_ipa": "χatˈul jaʃˈen.",
+      "detected_ipa": "χatˈul jaʃˈen",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.92
+    },
+    "journey-context-ball": {
+      "sha256": "542d501d0a72feb3a0ba25e960edd7f9017018f1fe182e6f4507bb9516b2ff2c",
+      "expected_ipa": "zˈe kadˈuʁ lamisχˈak.",
+      "detected_ipa": "zˈe kadˈuʁ lemisχˈak.",
+      "phoneme_edit_ratio": 0.0588,
+      "seconds": 1.84
+    },
+    "journey-context-butterfly": {
+      "sha256": "8426977388b9e0258649523b56aee0a68f2dca0cad07be40328ba0b9bc243ffc",
+      "expected_ipa": "paʁpˈaʁ ʔˈaf.",
+      "detected_ipa": "paʁpˈaʁ ʔˈaf",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.08
+    },
+    "journey-context-rabbit": {
+      "sha256": "0c664e110544f5fa102e7260db5e24acc35d059937518e9cb670ea45d503458d",
+      "expected_ipa": "ʔaʁnˈav ʔoχˈel.",
+      "detected_ipa": "ʔaʁnˈav ʔoχˈel",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.16
+    },
+    "journey-context-window": {
+      "sha256": "497df233bb476f2a529ca19ceb9c3fed0764cad151b19970b518343b5d723bdb",
+      "expected_ipa": "baχˈedeʁ jˈeʃ χalˈon.",
+      "detected_ipa": "baχˈedeʁ jˈeʃ χalˈon.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.19
+    },
+    "journey-context-airplane": {
+      "sha256": "cbdf41911437f722555685f3b33aeb98312fd65ee140e42c8b8cdae86fc19b55",
+      "expected_ipa": "matˈos tˈas baʃamˈajim.",
+      "detected_ipa": "matˈos tˈas baʃamˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.94
+    },
+    "journey-context-table": {
+      "sha256": "a6cb2d36722b59f34070154f36847038ca6fd3769977950bb0b21bf010fe27b5",
+      "expected_ipa": "babˈajit jˈeʃ ʃulχˈan.",
+      "detected_ipa": "babˈajit jˈeʃ ʃulχˈan.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.41
+    },
+    "journey-context-snail": {
+      "sha256": "d40a5d390dede5fa8f89020f9878791ca5f4503464150448fca47e0ca63cb13f",
+      "expected_ipa": "ʃablˈul zoχˈel leʔˈat.",
+      "detected_ipa": "ʃablˈul zoχˈe leʔˈat.",
+      "phoneme_edit_ratio": 0.0556,
+      "seconds": 2.27
+    },
+    "journey-context-guitar": {
+      "sha256": "c2f7d8ae1867c6a150c73e46ff8a061bf596346911a5c118d0a6266de608eb67",
+      "expected_ipa": "nenaɡˈen ʔˈal ɡitˈaʁa.",
+      "detected_ipa": "nenaɡˈen ʔˈal ɡitˈaʁa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.28
+    },
+    "journey-context-banana": {
+      "sha256": "4afa8d6c06b2a1c51b82f104e95dfa20fddabdab3ce5a2af0e9f9e77cb5d9848",
+      "expected_ipa": "banˈana hˈi pʁˈi.",
+      "detected_ipa": "banˈana hˈi pʁˈi.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.17
+    },
+    "journey-context-car": {
+      "sha256": "0771ebb4090637e7b56b80f410f02cf4360aebbcd0ae6e770b7c236f920b73be",
+      "expected_ipa": "meχonˈit nosˈaʔat.",
+      "detected_ipa": "meχonˈit nosˈaʔat",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.38
+    },
+    "journey-context-chocolate": {
+      "sha256": "5e45872b4226e582f1594c782350f768d88211a3e6c8afc7669559e5a6c7d472",
+      "expected_ipa": "taʔˈamnu ʃokolˈad.",
+      "detected_ipa": "taʔˈamnu ʃokolˈad.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.17
+    },
+    "journey-context-bicycle": {
+      "sha256": "c735b57171e6b92adef7408b671dc526461fdff80a44b81090d3294f0f57228b",
+      "expected_ipa": "ʁoχvˈim ʔˈal ʔofanˈajim.",
+      "detected_ipa": "ʁoχvˈim ʔˈal ʔofanˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.22
+    },
+    "journey-context-glasses": {
+      "sha256": "b60a1c9a2527cbc406e840454eeabd22be9a7fac6a42303e5901101e94e60eb3",
+      "expected_ipa": "maʁkivˈim miʃkafˈajim.",
+      "detected_ipa": "maʁkivˈim miʃkafˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.12
+    },
+    "journey-build-quantity": {
+      "sha256": "e18c9aa39b60c1537d661143722cfcda2cf8dedf2aa6995622030996855d9410",
+      "expected_ipa": "nivnˈe kamˈut kmˈo ʃemaʁʔˈe hamispˈaʁ.",
+      "detected_ipa": "nivnˈe kamˈut kmˈo ʃemaʁʔˈe hamispˈaʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.22
+    },
+    "journey-ten-model": {
+      "sha256": "2cd533aa3a11460a6540fa7c4198660d61582025216f884c652576d5aafc1a59",
+      "expected_ipa": "beχˈol mˈot jˈeʃ ʔˈeseʁ jeχidˈot. nispˈoʁ ʔˈet haʔasaʁˈot veʔˈet hajeχidˈot.",
+      "detected_ipa": "beχˈol mˈot jˈeʃ ʔˈeseʁ jeχidˈot. nispˈoʁ ʔˈet haʔasaʁˈot veʔˈet hajeχidˈot.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.33
+    },
+    "journey-context-intro": {
+      "sha256": "03c64cae4e154d64bce73271df6a08ac9b168ca7a0790122598d29f823eaebf2",
+      "expected_ipa": "nikʁˈa miʃpˈat katˈan. ʔˈejzo milˈa χaseʁˈa?",
+      "detected_ipa": "nikʁˈa miʃpˈat katˈan, ʔˈejzo milˈa χaseʁˈa?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.05
     }
   }
 }

@@ -61,7 +61,7 @@ export function addressText(text, address = 'female') {
     .replace(/[\u0590-\u05ff]+/gu, word => {
       if (word === 'אַתְּ') return 'אַתָּה';
       const plain = word.normalize('NFD').replace(/[\u0591-\u05c7]/gu, '');
-      return WORDS[plain] || word;
+      return WORDS[plain] || (plain.startsWith('ו') && WORDS[plain.slice(1)] ? `ו${WORDS[plain.slice(1)]}` : word);
     });
 }
 

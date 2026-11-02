@@ -26,6 +26,7 @@ for (const [key, clip] of Object.entries(CLIPS)) {
   if (clip.lang === 'he-IL' && recording.take !== (reviewedTakes[key] || 0)) throw new Error(`Hebrew recording needs its reviewed take: ${key}`);
   if (clip.lang === 'he-IL' && JSON.stringify(recording.segments) !== JSON.stringify(clip.speech.length > 140 ? clip.speech.split(/(?<=[.!?])\s+/u) : [clip.speech])) throw new Error(`Hebrew recording needs updated sentence breaks: ${key}`);
   if (clip.lang === 'he-IL' && (phoneticAudit[key]?.sha256 !== recording.sha256 || phoneticAudit[key]?.expected_ipa !== clip.speech)) throw new Error(`Hebrew recording needs an updated phonetic audit: ${key}`);
+  if (key.startsWith('journey-chunk-') && phoneticAudit[key].phoneme_edit_ratio !== 0) throw new Error(`Word-part recording failed phonetic review: ${key}`);
 }
 for (const word of WORDS) if (!CLIPS[`he-${word.id}`]) throw new Error(`Missing reading audio: ${word.id}`);
 for (const word of [...ANIMALS, ...COLORS]) if (!CLIPS[`en-${word.id}`]) throw new Error(`Missing English audio: ${word.id}`);

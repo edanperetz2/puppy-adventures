@@ -1,3 +1,12 @@
+import { LearningStore } from './learning-sync.js';
+import { questionLearning, learningSummary } from './learning.js';
+import { packRound, unpackRound, cleanDrafts, roundKey } from './session-state.js';
+import { JOURNEYS, newJourney, cleanJourney, englishPairsReady } from './journey.js';
+import { STORIES } from './journey-content.js';
+import { mountJourney } from './journey-view.js';
+import { mountPark } from './park.js';
+import { mountFreeWriting, WRITING_STEPS } from './free-writing.js';
+import { parentLearning, learningStatus } from './learning-parent.js';
 import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js';
 import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js';
 import { ADVENTURE_PHASES } from './adventure.js';
@@ -14,7 +23,7 @@ import { LETTERS, WRITING_FORMS, writingLetter, writingMode, writingPositionKey,
 import { mountLetterPad } from './letter-pad.js';
 import { nextReadingStage, sanitizeReadingPractice, finishReadingPractice } from './reading.js';
 import { stickerPage, stickerDefinition } from './stickers.js';
-import { suggestedLetters, practicedLetterCount, recordLetters } from './letter-progress.js';
+import { suggestedLetters, practicedLetterCount, recordLetters, recognitionTargets } from './letter-progress.js';
 import { CHARACTERS, CHARACTER_COLLECTIONS, CHARACTER_LEVELS, CHARACTER_MODES, characterCollection, selectCharacterLevel, sanitizeCharacterPractice, finishCharacterPractice, nextCharacterLevel } from './characters.js';
 import { characterMenu, characterQuestion, characterAnswer, characterAnswerLabel, characterMissionArt, characterName } from './characters-view.js';
 import { ChildProfiles, readInvitation, invitationNeedsNewProfile, escapeHtml, GAME_KEY } from './profiles.js';
@@ -55,13 +64,24 @@ let lastTraceHint = 0;
 let readingPractice = sanitizeReadingPractice(null);
 let albumPageIndex = null;
 let characterPractice = sanitizeCharacterPractice(null);
+let drafts = {}, journeyDrafts = {}, awardedRounds = [], writingPractice = { mode:'trace', drafts:{} };
+let learner = null, journeyController = null, journeyPlan = null, parkController = null, freeWriting = null, hub = 'hebrew';
 
 try {
   const saved = JSON.parse(gameStorage.getItem(STORAGE_KEY) || 'null');
-    if (saved) { settings = sanitizeSettings(saved.settings); progress = sanitizeProgress(saved.progress); readingPractice = sanitizeReadingPractice(saved.readingPractice); clockSchoolPosition = sanitizeClockPosition(saved.clockSchoolPosition); characterPractice = sanitizeCharacterPractice(saved.characterPractice); }
+  if (saved) {
+    // Restore the established album before any optional adventure draft.
+    settings=sanitizeSettings(saved.settings);progress=sanitizeProgress(saved.progress);
+    readingPractice=sanitizeReadingPractice(saved.readingPractice);clockSchoolPosition=sanitizeClockPosition(saved.clockSchoolPosition);characterPractice=sanitizeCharacterPractice(saved.characterPractice);
+    drafts=cleanDrafts(saved.drafts);
+    journeyDrafts=Object.fromEntries(Object.values(saved.journeyDrafts||{}).slice(0,40).map(cleanJourney).filter(Boolean).map(p=>[`${p.mode}:${p.level}`,p]));
+    awardedRounds=(Array.isArray(saved.awardedRounds)?saved.awardedRounds:[]).filter(id=>/^[0-9a-f-]{36}$/i.test(id)).slice(-10000);
+    if(Object.hasOwn(WRITING_STEPS,saved.writingPractice?.mode))writingPractice={mode:saved.writingPractice.mode,drafts:saved.writingPractice.drafts&&typeof saved.writingPractice.drafts==='object'&&!Array.isArray(saved.writingPractice.drafts)?saved.writingPractice.drafts:{}};
+  }
 } catch { /* A corrupt or unavailable save must never prevent play. */ }
 
 const album = new SharedAlbum({ config: SYNC_CONFIG, storage: gameStorage, onChange: source => {
+  void learner?.flush();
   if (!source.linked) return;
   if (child.pendingAlbum) {
     try { profiles.update(child.id, { pendingAlbum: null }); child.pendingAlbum = null; } catch { /* Progress sync is independent of profile labels. */ }
@@ -79,6 +99,11 @@ const album = new SharedAlbum({ config: SYNC_CONFIG, storage: gameStorage, onCha
   if (changed && view === 'clock-school') clockSchool?.updateProgress();
 } });
 if (album.linked) progress = album.progress;
+learner = new LearningStore({ storage:gameStorage, config:SYNC_CONFIG, getCode:()=>album.code, onChange:()=>{
+  const status=dialog.querySelector('.learning-sync-status');if(status)status.textContent=learningStatus(learner);
+  if(view==='park')parkController?.update();
+  if(view==='letters-lesson')updateWritingStatus();
+} });
 
 const narrator = new Narrator(status => {
   audioStatus = status;
@@ -106,12 +131,13 @@ function welcome() {
 
 function save() {
   try {
-    gameStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition, characterPractice }));
+    gameStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition, characterPractice, drafts, journeyDrafts, awardedRounds, writingPractice }));
     storageAvailable = true;
   } catch { storageAvailable = false; }
 }
 
 function openChild(profile, invite = null) {
+  checkpoint();
   narrator.stop();
   profiles.select(profile.id);
   if (invite) {
@@ -172,7 +198,7 @@ function letterFormTabs() {
 
 function recognitionGroup() {
   const language = settings.letterLanguage;
-  return recognitionChoice ? recognitionChoice.map(id => LETTERS[language].find(letter => letter.id === id)) : suggestedLetters(progress.letterPractice, language);
+  return recognitionChoice ? recognitionChoice.map(id => LETTERS[language].find(letter => letter.id === id)) : recognitionTargets(progress.letterPractice, language, learner.items);
 }
 
 function letterGroupPreview(group, language) {
@@ -185,8 +211,9 @@ function letterNavigation(mode = null) {
 }
 
 function letterLibrary(language, mode) {
-  const visits = progress.letterPractice[language][mode];
+  let visits = progress.letterPractice[language][mode];
   const writing = mode !== 'recognition';
+  if(writing)visits=writingVisits(language,mode==='writingMain'?'main':'alternate');
   return `<details class="letter-library"><summary>כל האותיות · בוחרות מה לתרגל</summary><div class="letter-library-grid" dir="${language === 'hebrew' ? 'rtl' : 'ltr'}">${LETTERS[language].map((item, index) => `<button data-action="letter-select" data-index="${index}" data-mode="${mode}" class="${visits[index] ? 'practiced' : ''}" aria-pressed="${writing ? index === letterDemo.index : recognitionChoice?.[0] === item.id}" aria-label="תרגול ${writing ? 'כתיבת' : 'זיהוי'} האות ${item.name}${visits[index] ? ' · כבר תרגלת' : ''}">${item.familiar}${visits[index] ? '<span class="letter-practiced" aria-hidden="true">✓</span>' : ''}${item.final ? '<small>סופית</small>' : ''}</button>`).join('')}</div></details>`;
 }
 
@@ -208,7 +235,7 @@ function renderLetterMenu() {
   app.innerHTML = `${header()}<main id="main" class="letter-lesson-page letter-menu-page" dir="rtl" lang="he">${letterNavigation()}
     <section class="letter-path-heading"><span class="section-kicker">סטודיו האותיות · לולי לומדת איתך</span><h1 tabindex="-1">מה נרצה לגלות?</h1><p>${language === 'hebrew' ? 'דפוס וכתב יד · מזהות וגם כותבות' : 'אותיות גדולות וקטנות · מזהות וגם כותבות'}</p></section>
     <div class="letter-path-grid"><button class="letter-path-card recognition-path" data-action="letter-mode" data-mode="recognition"><div class="letter-path-picture" dir="${language === 'hebrew' ? 'rtl' : 'ltr'}"><bdi>${next[0].familiar}</bdi><span aria-hidden="true">${language === 'hebrew' ? '←' : '→'}</span>${letterShape(next[0])}</div><h2>מזהות אותיות</h2><p>מוצאות את הצורה שמתאימה לאות המוכרת</p><small>תרגלת ${practicedLetterCount(progress.letterPractice, language, 'recognition')} מתוך ${letters.length} אותיות</small><span class="letter-path-go">בואי נשחק ${uiIcon('arrow')}</span></button>
-    <button class="letter-path-card writing-path" data-action="letter-mode" data-mode="writing"><div class="letter-path-picture letter-writing-preview">${letterShape(mainWriting)}${letterShape(writing)}${uiIcon('pencil')}</div><h2>כותבות אותיות</h2><p>${language === 'hebrew' ? 'בוחרות דפוס או כתב יד, ורואות איך כותבים' : 'בוחרות אותיות גדולות או קטנות, ורואות איך כותבים'}</p><small>כתבת ${practicedLetterCount(progress.letterPractice, language, 'writing') + practicedLetterCount(progress.letterPractice, language, 'writingMain')} מתוך ${letters.length * 2} צורות של אותיות</small><span class="letter-path-go">בואי נכתוב ${uiIcon('arrow')}</span></button></div>
+    <button class="letter-path-card writing-path" data-action="letter-mode" data-mode="writing"><div class="letter-path-picture letter-writing-preview">${letterShape(mainWriting)}${letterShape(writing)}${uiIcon('pencil')}</div><h2>כותבות אותיות</h2><p>${language === 'hebrew' ? 'בוחרות דפוס או כתב יד, ורואות איך כותבים' : 'בוחרות אותיות גדולות או קטנות, ורואות איך כותבים'}</p><small>כתבת ${writingCount(language,'alternate','all') + writingCount(language,'main','all')} מתוך ${letters.length * 2} צורות של אותיות</small><span class="letter-path-go">בואי נכתוב ${uiIcon('arrow')}</span></button></div>
     <p class="letter-path-note">כל מסלול זוכר את ההתקדמות שלך ♡</p></main>${footer()}`;
 }
 
@@ -218,9 +245,9 @@ function renderLetterWriting() {
     <section class="letter-path-heading"><span class="section-kicker">העיפרון של לולי מחכה לך</span><h1 tabindex="-1">מה נרצה לכתוב?</h1><p>${language === 'hebrew' ? 'גם את אותיות הדפוס שאת מכירה אפשר ללמוד לכתוב!' : 'גם את האותיות הגדולות שאת מכירה אפשר ללמוד לכתוב!'}</p></section>
     <div class="letter-path-grid">${WRITING_FORMS.map(form => {
       const mode = writingMode(form), position = settings[writingPositionKey(form)][language];
-      const next = suggestedLetters(progress.letterPractice, language, mode, 1, position)[0];
+      const next = nextWriting(language,form,position);
       const model = writingLetter(language, letters.indexOf(next), form);
-      return `<button class="letter-path-card writing-form-card ${form === 'main' ? 'writing-path' : ''}" data-action="letter-form" data-form="${form}"><div class="letter-path-picture">${letterShape(model)}${uiIcon('pencil')}</div><h2>${letterFormName(language, form)}</h2><p>${language === 'english' ? `<bdi class="letter-form-example" dir="ltr" lang="en">${form === 'main' ? 'A B C' : 'a b c'}</bdi>` : form === 'main' ? 'האותיות המוכרות מהספרים' : 'אותן אותיות בצורה של כתב יד'}</p><small>כתבת ${practicedLetterCount(progress.letterPractice, language, mode)} מתוך ${letters.length} אותיות</small><span class="letter-path-go">בואי נכתוב ${uiIcon('arrow')}</span></button>`;
+      return `<button class="letter-path-card writing-form-card ${form === 'main' ? 'writing-path' : ''}" data-action="letter-form" data-form="${form}"><div class="letter-path-picture">${letterShape(model)}${uiIcon('pencil')}</div><h2>${letterFormName(language, form)}</h2><p>${language === 'english' ? `<bdi class="letter-form-example" dir="ltr" lang="en">${form === 'main' ? 'A B C' : 'a b c'}</bdi>` : form === 'main' ? 'האותיות המוכרות מהספרים' : 'אותן אותיות בצורה של כתב יד'}</p><small>תרגלנו ${writingCount(language,form,'all')} מתוך ${letters.length} אותיות</small><span class="letter-path-go">בואי נכתוב ${uiIcon('arrow')}</span></button>`;
     }).join('')}</div><p class="letter-path-note">לכל צורה יש התקדמות משלה ♡</p><p id="audio-notice" class="audio-notice" role="status" hidden></p></main>${footer()}`;
 }
 
@@ -240,7 +267,7 @@ function openLetterLesson(form = settings.letterWritingForm[settings.letterLangu
   const language = settings.letterLanguage;
   if (!WRITING_FORMS.includes(form)) form = 'alternate';
   const positionKey = writingPositionKey(form);
-  const next = suggestedLetters(progress.letterPractice, language, writingMode(form), 1, settings[positionKey][language])[0];
+  const next = nextWriting(language,form,settings[positionKey][language]);
   letterDemo = { language, form, index: LETTERS[language].indexOf(next), recorded: false };
   settings.letterWritingForm[language] = form;
   settings[positionKey][language] = letterDemo.index; save();
@@ -251,24 +278,35 @@ function renderLetterLesson() {
   const letter = demoLetter(), language = letterDemo.language, letters = LETTERS[language];
   const mode = writingMode(letterDemo.form), main = letterDemo.form === 'main';
   const direction = language === 'hebrew' ? 'rtl' : 'ltr';
-  app.innerHTML = `${header()}<main id="main" class="letter-lesson-page" dir="rtl" lang="he" data-letter-language="${language}" data-writing-form="${letterDemo.form}">${letterNavigation('writing')}${letterFormTabs()}
+  app.innerHTML = `${header()}<main id="main" class="letter-lesson-page" dir="rtl" lang="he" data-letter-language="${language}" data-writing-form="${letterDemo.form}">${letterNavigation('writing')}${letterFormTabs()}<div class="writing-steps" role="group" aria-label="דרך תרגול הכתיבה">${Object.entries(WRITING_STEPS).map(([id,label])=>`<button data-action="writing-step" data-step="${id}" aria-pressed="${writingPractice.mode===id}">${label}</button>`).join('')}</div><div class="name-writing"><span>אוֹתִיּוֹת הַשֵּׁם שֶׁלִּי:</span>${nameLetterButtons(language)}</div>
     <section class="letter-lesson-card"><div class="question-heading"><div><span class="section-kicker">לולי מגלה איתך איך כותבים</span><h1 tabindex="-1">${language === 'hebrew' ? `כותבות ${main ? 'בדפוס' : 'בכתב יד'}` : `כותבות אותיות ${main ? 'גדולות' : 'קטנות'}`}</h1></div><button class="circle-button" data-action="replay" aria-label="שמיעת ההסבר שוב">${uiIcon('sound')}</button></div>
-      <p class="letter-route-progress" id="letter-writing-progress">כתבת ${practicedLetterCount(progress.letterPractice, language, mode)} מתוך ${letters.length} אותיות</p>
+      <p class="letter-route-progress" id="letter-writing-progress">כתבת ${writingCount(language,letterDemo.form)} מתוך ${letters.length} אותיות</p>
       <div class="letter-lesson-layout" dir="rtl"><div><div class="letter-pair" dir="${direction}"><div class="letter-form-card"><small dir="rtl">${language === 'hebrew' ? 'האות שאת מכירה · דפוס' : 'האות שאת מכירה · גדולה'}</small><bdi class="letter-familiar" dir="${direction}" lang="${language === 'hebrew' ? 'he' : 'en'}">${letter.familiar}</bdi></div><span class="letter-pair-arrow" dir="ltr" aria-hidden="true">${language === 'hebrew' ? '←' : '→'}</span><div class="letter-form-card new-form"><small dir="rtl">${main ? language === 'hebrew' ? 'כך כותבים · דפוס' : 'כך כותבים · גדולה' : language === 'hebrew' ? 'אותה אות · כתב יד' : 'אותה אות · קטנה'}</small>${letterShape(letter)}</div></div>
       <div class="letter-name-row"><span>${language === 'hebrew' ? letter.name : `<bdi>${letter.familiar}</bdi>`}</span><button class="circle-button" data-action="letter-sound" aria-label="שמיעת שם האות">${uiIcon('sound')}</button></div>
       ${!main && language === 'english' && ['a', 'g'].includes(letter.small) ? `<p class="letter-book-note">בספרים אפשר לראות גם כך: <bdi class="letter-book-form">${letter.small}</bdi></p>` : ''}
       ${letter.final ? '<p class="letter-final-note">אות סופית · מופיעה בסוף מילה</p>' : ''}
-      <p class="letter-copy">לחצי על העיפרון כדי לראות איך כותבים, ואז נסי בעצמך.<br>ההתקדמות נשמרת אחרי שאת מסיימת לכתוב את האות.</p>
+      <p class="letter-copy">${writingPractice.mode==='trace'?'לחצי על העיפרון כדי לראות איך כותבים, ואז נסי בעצמך.':'נכתוב בקצב שלנו. בסיום נבחר סיימנו לתרגל.'}<br>לכל דרך תרגול יש התקדמות משלה.</p>
       <div class="letter-navigate" dir="${direction}"><button data-action="letter-previous" aria-label="האות הקודמת"><span aria-hidden="true">${language === 'hebrew' ? '→' : '←'}</span><span dir="rtl">הקודמת</span></button><span dir="ltr">${letterDemo.index + 1} / ${letters.length}</span><button data-action="letter-next" aria-label="האות הבאה"><span dir="rtl">הבאה</span><span aria-hidden="true">${language === 'hebrew' ? '←' : '→'}</span></button></div>
       </div><section class="letter-pad-card"><h2>מגלות איך כותבים</h2><div id="letter-writing-pad">${letterShape(letter, { guide: true, pad: true })}<p class="letter-pad-caption" role="status" aria-live="polite"></p></div><div class="letter-pad-controls"><button data-action="letter-demo">${uiIcon('pencil')} הראי לי איך</button><button data-action="letter-step">קו־קו</button><button data-action="letter-reset">${uiIcon('again')} מנסה בעצמי</button></div></section></div>
       <div class="letter-writing-continue"><button class="primary-button" data-action="letter-writing-continue" ${letterDemo.recorded ? '' : 'disabled'}>ממשיכות לאות הבאה ${uiIcon('arrow')}</button><small>אפשר גם לבחור כל אות מהאלפבית</small></div>
       ${letterLibrary(language, mode)}<p id="audio-notice" class="audio-notice" role="status" hidden></p>
     </section></main>${footer()}`;
+  if (writingPractice.mode !== 'trace') {
+    const host=document.querySelector('#letter-writing-pad'), key=writingKey();
+    if(writingPractice.drafts[key]?.done)letterDemo.recorded=true;
+    document.querySelector('.letter-pad-controls').hidden=true;
+    freeWriting=mountFreeWriting(host,{letter,mode:writingPractice.mode,saved:writingPractice.drafts[key],speak:keys=>announcements.say(keys),
+      onSave:draft=>{writingPractice.drafts[key]={...draft,at:Date.now()};const inks=Object.entries(writingPractice.drafts).filter(([,v])=>v.lines?.length).sort((a,b)=>(b[1].at||0)-(a[1].at||0));for(const [oldKey]of inks.slice(8))writingPractice.drafts[oldKey].lines=[];save();},
+      onComplete:method=>{letterDemo.recorded=true;learner.record({item:`letter:${language}:${letter.id}:${letterDemo.form}:${method}`,domain:'letters',eventId:`write:${key}:${Date.now()}`},'practice',method);save();updateWritingStatus();}
+    });
+    updateWritingStatus();return;
+  }
   letterPad = mountLetterPad(document.querySelector('#letter-writing-pad'), {
     motion: settings.motion && !matchMedia('(prefers-reduced-motion: reduce)').matches,
     onComplete: () => {
       if (!letterDemo.recorded) {
         letterDemo.recorded = true;
+        learner.record({item:`letter:${language}:${letter.id}:${letterDemo.form}:trace`,domain:'letters'},'practice','trace');
         if (album.linked) progress = album.recordWriting(language, letter.id, mode);
         else progress.letterPractice = recordLetters(progress.letterPractice, language, mode, [letter.id]);
         save(); updateWritingStatus();
@@ -279,14 +317,24 @@ function renderLetterLesson() {
   });
 }
 
+function writingVisits(language,form,step=writingPractice.mode){
+ const legacy=progress.letterPractice[language][writingMode(form)];
+ const items=learner.items;
+ return LETTERS[language].map((letter,i)=>step==='trace'?legacy[i]:step==='all'?legacy[i]+['copy','memory','paper'].reduce((sum,method)=>sum+(items[`letter:${language}:${letter.id}:${form}:${method}`]?.practice||0),0):items[`letter:${language}:${letter.id}:${form}:${step}`]?.practice||0);
+}
+function writingCount(language,form,step=writingPractice.mode){return writingVisits(language,form,step).filter(n=>n>0).length;}
+function nextWriting(language,form,start=0){const visits=writingVisits(language,form),letters=LETTERS[language];return letters.map((letter,i)=>({letter,count:visits[i],order:(i-start+letters.length)%letters.length})).sort((a,b)=>a.count-b.count||a.order-b.order)[0].letter;}
+
+function writingKey(){return `${letterDemo.language}:${letterDemo.form}:${letterDemo.index}:${writingPractice.mode}`;}
+function nameLetterButtons(language){return [...new Set([...(language==='english'&&!/[A-Za-z]/u.test(child.name)&&child.voice?child.voice:child.name).normalize('NFD').replace(/[\u0591-\u05c7]/gu,'')])].map(char=>LETTERS[language].findIndex(letter=>letter.familiar===char.toUpperCase())).filter(index=>index>=0).map(index=>`<button data-action="name-letter" data-index="${index}">${LETTERS[language][index].familiar}</button>`).join('') || '<small>בוחרים אות מהאלפבית למטה</small>';}
 function updateWritingStatus() {
   const language = letterDemo.language, mode = writingMode(letterDemo.form);
   const status = document.querySelector('#letter-writing-progress');
-  if (status) status.textContent = `כתבת ${practicedLetterCount(progress.letterPractice, language, mode)} מתוך ${LETTERS[language].length} אותיות`;
+  if (status) status.textContent = `${WRITING_STEPS[writingPractice.mode]} · תרגלנו ${writingCount(language,letterDemo.form)} מתוך ${LETTERS[language].length} אותיות`;
   const next = document.querySelector('[data-action="letter-writing-continue"]');
   if (next) next.disabled = !letterDemo.recorded;
   for (const button of document.querySelectorAll(`[data-action="letter-select"][data-mode="${mode}"]`)) {
-    const practiced = progress.letterPractice[language][mode][Number(button.dataset.index)] > 0;
+    const practiced = writingVisits(language,letterDemo.form)[Number(button.dataset.index)] > 0;
     button.classList.toggle('practiced', practiced);
     if (practiced && !button.querySelector('.letter-practiced')) button.insertAdjacentHTML('beforeend', '<span class="letter-practiced" aria-hidden="true">✓</span>');
   }
@@ -326,7 +374,7 @@ function renderClockSchool() {
 
 function openClockLesson(returnToGame = false) {
   narrator.stop(); clockReturn = returnToGame;
-  if (returnToGame) round.helped.add(round.index);
+  if (returnToGame) { round.helped.add(round.index);checkpoint(); }
   else round = null;
   view = 'clock-school'; render(); focusTitle(); clockSchool.replay();
 }
@@ -344,7 +392,7 @@ function characterMenuClip() { return CHARACTER_COLLECTIONS[characterCollection(
 function activityCount(id) { return id === 'characters' ? Object.values(characterPractice.completed).reduce((sum, count) => sum + count, 0) : progress.missions[id]; }
 
 function renderHome() {
-  app.innerHTML = `${header()}<main id="main" class="home-page">
+  app.innerHTML = `${header()}<main id="main" class="home-page">${resumeCard()}
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy"><div class="eyebrow"><span class="tiny-sun">✦</span><span>שלום <bdi data-learning-text>${escapeHtml(child.name)}</bdi>!</span></div>
         <h1 id="hero-title" tabindex="-1">הרפתקה קטנה,<br><span>מגלות עולם!</span></h1>
@@ -361,6 +409,7 @@ function renderHome() {
         ${activityCount(m.id) ? `<span class="mission-done" aria-label="כבר סיימת ${activityCount(m.id)} הרפתקאות">${uiIcon('check')}</span>` : ''}
       </button>`).join('')}</div>
     </section>
+    <section class="park-teaser"><div>${pup('tofi')}</div><span><h3>הַפָּארְק שֶׁלִּי</h3><p>קִשּׁוּטִים, חֲבֵרִים וּמָקוֹם לַדִּמְיוֹן</p></span><button class="primary-button" data-action="park">בּוֹנִים וּמְשַׂחֲקִים ${uiIcon('arrow')}</button></section>
     <section class="album-teaser"><span class="teaser-art">${art(progress.stickers.at(-1) || 'star')}</span><div><h3>${progress.stickers.length ? 'האלבום שלך כבר מתמלא!' : 'כל הרפתקה מתחילה בחיוך'}</h3><p>${progress.stickers.length ? `${progress.stickers.length} מדבקות מחכות לך באלבום` : 'בכל הרפתקה שלמה מגלות מדבקה חדשה'}</p></div><button class="text-button" data-action="album">לאלבום שלי ${uiIcon('arrow')}</button></section>
   </main>${footer()}`;
 }
@@ -403,6 +452,7 @@ function answerLabel(q, option) {
 function renderGame() {
   const mission = MISSIONS[round.mission];
   const q = current();
+  learner.record({...questionLearning(q),eventId:`${round.id}:seen:${round.index}`},'seen');
   const title = q.type === 'character' ? q.direction === 'picture-name' ? 'מה השם של הדמות?' : 'איזו דמות מתאימה לשם?' : q.type === 'letter' ? 'איזו אות מתאימה?' : q.type === 'clock' ? 'מה השעה בשעון?' : q.type === 'read' ? q.word.scene ? 'איזו תמונה מתאימה למה שכתוב?' : 'איזו תמונה מתאימה למילה?' : q.type === 'listen' ? 'מה שמעת באנגלית?' : q.type === 'add' ? 'כמה יש ביחד?' : 'כמה יש בסל?';
   const stage = q.type === 'read' ? round.reading === 'all' ? Object.values(READING_LEVELS).find(level => level.level === q.word.level) : READING_LEVELS[round.reading] : null;
   app.innerHTML = `${header()}<main id="main" class="game-page ${mission.color} ${q.type === 'character' ? 'character-game' : q.type === 'clock' ? 'clock-game' : q.type === 'letter' ? 'letter-game' : q.type === 'read' ? 'reading-game' : ''}">
@@ -491,11 +541,18 @@ function turnAlbumPage(index) {
 function render() {
   if (!child) { renderChildSetup(); return; }
   if (view === 'child-invitation') { renderChildInvitation(); return; }
+  freeWriting?.destroy(); freeWriting=null;
+  journeyController?.destroy(); journeyController=null;
+  parkController?.destroy(); parkController=null;
   letterPad?.destroy(); letterPad = null;
   clockSchool?.destroy(); clockSchool = null;
   applyPreferences();
   document.body.classList.toggle('playing', view === 'game');
-  if (view === 'game') renderGame();
+  if (view === 'journey') renderJourney();
+  else if (view === 'learning-hub') renderLearningHub();
+  else if (view === 'park') renderPark();
+  else if (view === 'journey-complete') renderJourneyComplete();
+  else if (view === 'game') { renderGame(); restoreQuestionState(); }
   else if (view === 'clock-school') renderClockSchool();
   else if (view === 'letters-lesson') renderLetterLesson();
   else if (view === 'letters-menu') renderLetterMenu();
@@ -515,14 +572,17 @@ function focusTitle() {
 
 function startMission(mission, skipLesson = false) {
   if (mission === 'characters' && !skipLesson) { openCharacters(); return; }
-  if (mission === 'hebrew' && !skipLesson) { openReadingLevels(); return; }
+  if (['hebrew','english','math'].includes(mission) && !skipLesson) { openLearningHub(mission); return; }
   if (mission === 'clock' && !skipLesson) { openClockLesson(); return; }
   if (mission === 'letters' && !skipLesson) { openLetterMenu(); return; }
   narrator.stop();
+  checkpoint();
+  const key=roundKey(mission,settings), restored=unpackRound(drafts[key]);
+  if(restored){round=restored;view='game';render();focusTitle();return;}
   const letterIds = mission === 'letters' ? recognitionGroup().map(letter => letter.id) : null;
-  const questions = createSession(mission, { ...settings, readingRecent: readingPractice.recent[settings.reading], letterPractice: progress.letterPractice, letterIds, characterPractice });
-  round = { mission, questions, letterIds, letterLanguage: settings.letterLanguage, reading: settings.reading, clockLevel: settings.clockLevel, characterLevel: settings.characterLevel, characterMode: settings.characterMode, index: 0, resolved: false, attempted: new Set(), counted: new Set(), helped: new Set(questions.flatMap((q, i) => q.showModel ? [i] : [])), sticker: null, awarded: false };
-  view = 'game';
+  const questions = createSession(mission, { ...settings, learning:learner.items, readingRecent: readingPractice.recent[settings.reading], letterPractice: progress.letterPractice, letterIds, characterPractice });
+  round = { id:crypto.randomUUID(), key, observed:new Set(), mission, questions, letterIds, letterLanguage: settings.letterLanguage, reading: settings.reading, clockLevel: settings.clockLevel, characterLevel: settings.characterLevel, characterMode: settings.characterMode, index: 0, resolved: false, attempted: new Set(), counted: new Set(), helped: new Set(questions.flatMap((q, i) => q.showModel ? [i] : [])), sticker: null, awarded: false };
+  view = 'game'; checkpoint();
   render();
   focusTitle();
   const q = current();
@@ -530,21 +590,26 @@ function startMission(mission, skipLesson = false) {
 }
 
 function recommended() {
+  const due=learningSummary(learner.items).review[0];
+  if(due){if(due.startsWith('workshop:')){openLearningHub('hebrew');return;}if(due.startsWith('english:')){openLearningHub('english');return;}if(due.startsWith('objects:')){openLearningHub('math');return;}}
   const next = Object.keys(MISSIONS).reduce((a, b) => activityCount(a) <= activityCount(b) ? a : b);
   startMission(next);
 }
 
 function leaveTo(destination) {
   narrator.stop();
-  const leave = () => { round = null; recognitionChoice = null; view = destination; render(); focusTitle(); announcements.say(destination === 'characters-menu' ? characterMenuClip() : destination === 'letters-menu' ? 'letters-paths' : destination === 'reading-levels' ? 'reading-levels' : destination === 'home' ? 'choose-activity' : 'stickers'); };
+  checkpoint();
+  const leave = () => { journeyPlan=null; round = null; recognitionChoice = null; view = destination; render(); focusTitle(); announcements.say(destination === 'characters-menu' ? characterMenuClip() : destination === 'letters-menu' ? 'letters-paths' : destination === 'reading-levels' ? 'reading-levels' : destination === 'home' ? 'choose-activity' : 'stickers'); };
   if (view !== 'game') { leave(); return; }
-  openDialog(`<h2 id="parent-title">${destination === 'characters-menu' ? 'נחזור לבחירת החברים?' : destination === 'letters-menu' ? 'נחזור למסלולי האותיות?' : destination === 'reading-levels' ? 'נבחר שלב אחר?' : 'נחזור לבית החברים?'}</h2><p>אפשר להתחיל הרפתקה חדשה מתי שתרצי.</p><div class="dialog-actions"><button class="primary-button" data-dialog="stay">ממשיכות לשחק</button><button class="secondary-button" data-dialog="leave">${destination === 'characters-menu' ? 'לבחירת החברים' : destination === 'letters-menu' ? 'למסלולי האותיות' : destination === 'reading-levels' ? 'בוחרות שלב' : 'חוזרות הביתה'}</button></div>`);
+  openDialog(`<h2 id="parent-title">${destination === 'characters-menu' ? 'נחזור לבחירת החברים?' : destination === 'letters-menu' ? 'נחזור למסלולי האותיות?' : destination === 'reading-levels' ? 'נבחר שלב אחר?' : 'נחזור לבית החברים?'}</h2><p>ההרפתקה נשמרת. אפשר להמשיך מאותו צעד כשחוזרים, או לבחור משחק אחר.</p><div class="dialog-actions"><button class="primary-button" data-dialog="stay">ממשיכות לשחק</button><button class="secondary-button" data-dialog="leave">${destination === 'characters-menu' ? 'לבחירת החברים' : destination === 'letters-menu' ? 'למסלולי האותיות' : destination === 'reading-levels' ? 'בוחרות שלב' : 'חוזרות הביתה'}</button></div>`);
   dialog.querySelector('[data-dialog="stay"]').onclick = closeDialog;
   dialog.querySelector('[data-dialog="leave"]').onclick = () => { closeDialog(); leave(); };
 }
 
 function replay() {
   if (!settings.sound) { settings.sound = true; save(); narrator.enabled = true; renderSoundButton(); }
+  if(view==='journey'){journeyController?.replay();return;}
+  if(view==='park'){clockSpeak('journey-park-intro');return;}
   if (view === 'clock-school') { clockSchool.replay(true); return; }
   if (view === 'game') {
     const q = current();
@@ -560,7 +625,7 @@ function renderSoundButton() {
 function hint() {
   if (round.resolved) return;
   const q = current();
-  round.helped.add(round.index);
+  round.helped.add(round.index); checkpoint();
   if (q.type === 'character') {
     document.querySelector('#feedback').textContent = 'נשמע את השם ביחד, ונמשיך לנסות ♡';
     announcements.say([q.hint, q.character.clip]); return;
@@ -587,6 +652,7 @@ function tally(button) {
   button.querySelector('.count-bubble').textContent = round.counted.size;
   button.setAttribute('aria-label', `נספר: ${round.counted.size}`);
   button.setAttribute('aria-disabled', 'true');
+  checkpoint();
   announcements.say(`number-${round.counted.size}`);
 }
 
@@ -600,10 +666,12 @@ function answer(button) {
     button.classList.add('try-again');
     button.disabled = true;
     feedback.textContent = 'נסי שוב, אריאל. אני כאן איתך ♡';
-    announcements.say('try-again');
+    checkpoint(); announcements.say('try-again');
     return;
   }
   round.resolved = true;
+  if (!round.observed.has(round.index)) { learner.record({...questionLearning(q),eventId:`${round.id}:${round.index}`},round.helped.has(round.index)?'helped':'independent'); round.observed.add(round.index); }
+  checkpoint();
   button.classList.add('correct');
   for (const option of document.querySelectorAll('.answer-button')) option.disabled = true;
   document.querySelector('.hint-button').hidden = true;
@@ -628,10 +696,11 @@ function nextQuestion() {
   if (round.index === SESSION_LENGTH - 1) {
     if (!round.awarded) {
       const letterRound = round.mission === 'letters' ? { language: round.letterLanguage, ids: round.letterIds } : null;
-      const result = album.linked ? album.complete(round.mission, round.helped.size, letterRound) : finishSession(progress, round.mission, round.helped.size, letterRound);
+      const result = album.linked ? album.complete(round.mission, round.helped.size, letterRound, round.id) : awardLocal(round.mission, round.helped.size, letterRound, round.id);
       progress = result.progress;
       round.sticker = result.sticker;
       round.awarded = true;
+      delete drafts[round.key];
       if (round.mission === 'hebrew') readingPractice = finishReadingPractice(readingPractice, round.reading, round.questions.map(q => q.word));
       if (round.mission === 'characters') characterPractice = finishCharacterPractice(characterPractice, round.characterLevel, round.questions);
       if (round.mission === 'letters') recognitionChoice = null;
@@ -643,7 +712,7 @@ function nextQuestion() {
   round.resolved = false;
   round.attempted = new Set();
   round.counted = new Set();
-  render(); focusTitle();
+  checkpoint(); render(); focusTitle();
   const q = current();
   announcements.say([q.prompt, ...(q.showModel ? ['letters-recognition-hint'] : []), ...(q.targetClip ? [q.targetClip] : [])]);
 }
@@ -701,11 +770,14 @@ function renderSettings() {
     <p class="parent-note">ההגדרות ייכנסו לתוקף בהרפתקה הבאה. האנגלית מבוססת על הקשבה ותמונות. מילים כתובות מוצגות באותיות גדולות בלבד.</p>
     <button class="primary-button" type="submit">שמירת ההגדרות ${uiIcon('check')}</button></form>
     <section class="parent-progress"><h3>מה כבר גילינו?</h3><p id="parent-progress-summary">${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות</p><table><thead><tr><th>תחום</th><th>תשובות ללא עזרה</th><th>עם הדגמה, רמז או ניסיון נוסף</th></tr></thead><tbody>${MISSION_IDS.map(id => MISSIONS[id]).map(m => `<tr><th>${m.id === 'hebrew' ? 'עברית · מילים ושמות' : m.subject}</th><td data-independent="${m.id}">${progress.skills[m.id].correct - progress.skills[m.id].assisted}</td><td data-assisted="${m.id}">${progress.skills[m.id].assisted}</td></tr>`).join('')}</tbody></table><p class="parent-note">מוצגות רק הרפתקאות שהושלמו. זהו תיעוד משחק, ולא מבחן או הערכת יכולת.</p></section>
+    <div id="learning-parent">${parentLearning(learner)}</div>
     <section id="family-panel"></section><p class="parent-note character-art-credit">איורי הדמויות: PAW Patrol / Rubble &amp; Crew © Spin Master Ltd. · <a href="https://dev.pawpatrol.com/character-guide" target="_blank" rel="noopener noreferrer">מדריך הדמויות הרשמי של מפרץ ההרפתקאות</a> · <a href="https://images.squarespace-cdn.com/content/v1/5595e2eee4b0b03840079b28/1685761053151-FY46DCUKCA43ODFF4MKK/image-asset.jpeg" target="_blank" rel="noopener noreferrer">McCown Design Agency</a>. משחק השמות נכלל בתחום עברית.</p>
-    <p class="privacy-note">אפשר לשחק ללא חיבור לאלבום. לכל ילד וילדה יש אלבום נפרד. בחיבור נשמרים מספר ההרפתקאות, העזרה בכל תחום והאותיות שתורגלו. השם והקלטת השם נשמרים במכשיר הזה; קישור לחיבור מכשיר נוסף כולל את השם, בלי ההקלטה. ציורי הכתיבה אינם נשמרים. לא צריך אימייל או חשבון לילדים. אין פרסומות או מעקב. המיקרופון נפתח רק כשהורה בוחר להקליט שם. שמרו את הקוד כדי לחבר מכשיר נוסף לאותו אלבום.</p>
+    <p class="privacy-note">אפשר לשחק ללא חיבור לאלבום. לכל ילד וילדה יש אלבום נפרד. בחיבור נשמרים מספר ההרפתקאות, העזרה בכל תחום והאותיות שתורגלו. השם והקלטת השם נשמרים במכשיר הזה; קישור לחיבור מכשיר נוסף כולל את השם, בלי ההקלטה. היסטוריית פריטי הלמידה והפארק נשמרים גם באלבום המחובר. הרפתקאות פתוחות וציורי תרגול נשמרים רק במכשיר, בלי לשלוח ציורים לאלבום. לא צריך אימייל או חשבון לילדים. אין פרסומות או מעקב. המיקרופון נפתח רק כשהורה בוחר להקליט שם. שמרו את הקוד כדי לחבר מכשיר נוסף לאותו אלבום.</p>
     <p class="parent-note">איורים נוספים: <a href="assets/Twemoji-LICENSE.txt" target="_blank" rel="noopener">Twemoji · רישיון ושמות היוצרים</a>. כל התמונות שמורות בתוך המשחק.</p>
     <p class="save-notice" ${storageAvailable ? 'hidden' : ''}>הדפדפן לא מאפשר שמירה כרגע. אפשר לשחק, אבל ההתקדמות עלולה להיעלם בסגירה.</p>
     <button class="text-button reset-button" data-dialog="reset">${album.linked ? 'ניתוק מהאלבום ואיפוס המכשיר הזה' : 'איפוס ההתקדמות במכשיר הזה'}</button>`);
+  function refreshLearning(){void Promise.all([album.flush(),learner.flush()]).then(()=>{const panel=dialog.querySelector('#learning-parent');if(panel){panel.innerHTML=parentLearning(learner);panel.querySelector('[data-learning-refresh]').onclick=refreshLearning;}});}
+  dialog.querySelector('[data-learning-refresh]').onclick=refreshLearning;
   dialog.querySelector('#settings-form').insertAdjacentHTML('beforebegin', profilePanel(profiles));
   dialog.querySelector('[data-child-add]').onclick = () => editChild();
   dialog.querySelector('[data-child-edit]').onclick = () => editChild(child);
@@ -717,7 +789,7 @@ function renderSettings() {
   dialog.querySelector('#settings-form').onsubmit = event => {
     event.preventDefault();
     const form = new FormData(event.target);
-    settings = sanitizeSettings({ nikud: form.has('nikud'), sound: form.has('sound'), motion: form.has('motion'), reading: form.get('reading'), mathMax: Number(form.get('mathMax')), englishMax: Number(form.get('englishMax')), clockLevel: form.get('clockLevel'), letterLanguage: settings.letterLanguage, letterWriting: settings.letterWriting });
+    settings = sanitizeSettings({ ...settings, nikud: form.has('nikud'), sound: form.has('sound'), motion: form.has('motion'), reading: form.get('reading'), mathMax: Number(form.get('mathMax')), englishMax: Number(form.get('englishMax')), clockLevel: form.get('clockLevel'), letterLanguage: settings.letterLanguage, letterWriting: settings.letterWriting });
     save(); narrator.stop(); applyPreferences(); closeDialog();
     // Keep a running question and its answer state intact until the next round.
     if (view === 'game') renderSoundButton(); else render();
@@ -725,7 +797,7 @@ function renderSettings() {
   dialog.querySelector('[data-dialog="reset"]').onclick = () => {
     openDialog(`<h2 id="parent-title">לאפס את המכשיר הזה?</h2><p>המדבקות וההתקדמות בדפדפן הזה יימחקו. הגדרות המשחק יישמרו.${album.linked ? ' החיבור לאלבום המשפחתי יוסר. האלבום שכבר סונכרן יישמר עבור המכשירים האחרים.' : ''}</p><div class="dialog-actions"><button class="secondary-button" data-dialog="cancel-reset">ביטול</button><button class="primary-button" data-dialog="confirm-reset">איפוס ההתקדמות</button></div>`);
     dialog.querySelector('[data-dialog="cancel-reset"]').onclick = renderSettings;
-    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
+    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); learner.reset(); drafts={};journeyDrafts={};awardedRounds=[];writingPractice={mode:'trace',drafts:{}}; progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
   };
 }
 
@@ -740,6 +812,96 @@ function updateParentProgress() {
   }
 }
 
+function checkpoint(){
+  if(view==='game'&&round&&!round.awarded){round.at=Date.now();drafts[round.key]=packRound(round);}
+  if(view==='journey'&&journeyPlan)journeyDrafts[`${journeyPlan.mode}:${journeyPlan.level}`]=journeyPlan;
+  save();
+}
+function awardLocal(mission,helped,letters,id){
+  if(awardedRounds.includes(id))return {progress,sticker:null};
+  const result=finishSession(progress,mission,helped,letters);awardedRounds=[...awardedRounds,id].slice(-10000);return result;
+}
+function latestDraft(){return [...Object.values(drafts).map(d=>({kind:'classic',value:d,at:d.at})),...Object.values(journeyDrafts).map(d=>({kind:'journey',value:d,at:d.at}))].sort((a,b)=>b.at-a.at)[0];}
+function resumeCard(){
+  const draft=latestDraft();if(!draft)return '';
+  const name=draft.kind==='journey'?JOURNEYS[draft.value.mode].title:MISSIONS[draft.value.mission].name;
+  return `<section class="resume-card"><span>${uiIcon('again')}</span><div><strong>מַמְשִׁיכִים מֵאֵיפֹה שֶׁעָצַרְנוּ?</strong><small>${name} · צַעַד ${draft.value.index+1} מִתּוֹךְ 10</small></div><button class="primary-button" data-action="resume">מַמְשִׁיכִים ${uiIcon('arrow')}</button></section>`;
+}
+function resumeLatest(){
+  const draft=latestDraft();if(!draft)return;
+  narrator.stop();
+  if(draft.kind==='classic'){const restored=unpackRound(draft.value);if(!restored)return;round=restored;view='game';}
+  else {journeyPlan=cleanJourney(draft.value);if(!journeyPlan)return;round=null;view='journey';}
+  render();focusTitle();
+}
+function restoreQuestionState(){
+  if(!round)return;
+  const q=current();
+  for(const b of document.querySelectorAll('[data-action="tally"]')){
+    if(round.counted.has(b.dataset.token)){b.classList.add('counted');b.setAttribute('aria-disabled','true');b.querySelector('.count-bubble').textContent=[...round.counted].indexOf(b.dataset.token)+1;}
+  }
+  if(round.helped.has(round.index)&&q.type==='letter')document.querySelector('#letter-recognition-model').hidden=false;
+  if(!round.resolved)return;
+  for(const b of document.querySelectorAll('.answer-button')){b.disabled=true;if(b.dataset.answer===q.answer)b.classList.add('correct');}
+  document.querySelector('.hint-button').hidden=true;
+  const next=document.querySelector('.next-button');next.hidden=false;if(round.index===9)next.innerHTML=`למדבקה שלי ${uiIcon('arrow')}`;
+  const feedback=document.querySelector('#feedback');feedback.classList.add('success');feedback.textContent='כָּל הַכָּבוֹד! הַצַּעַד הַזֶּה כְּבָר הֻשְׁלַם.';
+  const clockLink=document.querySelector('[data-action="clock-learn"]');if(clockLink)clockLink.disabled=true;
+}
+function openLearningHub(subject){checkpoint();narrator.stop();round=null;journeyPlan=null;hub=['hebrew','english','math'].includes(subject)?subject:'hebrew';view='learning-hub';render();focusTitle();announcements.say(hub==='english'?'journey-english-one':hub==='math'?'journey-count-all':'journey-workshop-intro');}
+function journeyChoice(mode,level,label,description,icon,tag=''){
+  const saved=journeyDrafts[`${mode}:${level}`];
+  return `<button class="learning-path-card" data-action="journey-start" data-journey="${mode}" data-level="${level}"><span class="learning-path-art">${art(icon)}</span>${tag?`<small class="learning-path-tag">${tag}</small>`:''}<h2>${label}</h2><p>${description}</p><strong>${saved?`מַמְשִׁיכִים מִצַּעַד ${saved.index+1}`:'10 צְעָדִים · בַּקֶּצֶב שֶׁלָּנוּ'} ${uiIcon('arrow')}</strong></button>`;
+}
+function renderLearningHub(){
+  const names={hebrew:'מַגְלִים מִלִּים וְסִפּוּרִים',english:'מִלָּה קְטַנָּה, הַצְלָחָה גְּדוֹלָה',math:'מַעְבֶּדֶת הַמִּסְפָּרִים'};
+  let cards='';
+  if(hub==='hebrew')cards=`<button class="learning-path-card" data-action="garden"><span class="learning-path-art">${art('flower')}</span><h2>גִּנַּת הַמִּלִּים</h2><p>כָּל שִׁלְבֵי הַקְּרִיאָה הַמֻּכָּרִים</p><strong>בּוֹחֲרִים שָׁלָב ${uiIcon('arrow')}</strong></button>`+
+    [1,2,3,4].map(level=>journeyChoice('workshop',level,`סַדְנַת מִלִּים · ${level}`,['חֲלָקִים קְטַנִּים וּמִלִּים מֻכָּרוֹת','מִלִּים אֲרֻכּוֹת יוֹתֵר','עוֹד אוֹתִיּוֹת וְצֵרוּפִים','אֶתְגָּר לְבוֹנֵי מִלִּים'][level-1],'pencil',level===1?'מַתְחִילִים כָּאן':'')).join('')+
+    STORIES.map(story=>journeyChoice('stories',story.id,story.title,story.description,'house','סִפּוּר שֶׁמְּשַׂחֲקִים')).join('');
+  if(hub==='english'){
+    const ready=englishPairsReady(learner.items);
+    cards=journeyChoice('english','single','מִלָּה אַחַת בְּכָל פַּעַם','תְּמוּנוֹת מֻכָּרוֹת, שְׁתֵּי אֶפְשָׁרֻיּוֹת, וּמִלָּה חֲדָשָׁה אַחַת.','dog','הַמַּסְלוּל הַמֻּמְלָץ עַכְשָׁו')+
+      journeyChoice('english','pairs','צֶבַע וְכַדּוּר','קֹדֶם נַכִּיר אֶת הַמִּלָּה כַּדּוּר. נְחַבֵּר לְצֶבַע מֻכָּר בִּצְעָדִים קְטַנִּים.','ball',ready?'מוּכָנִים לְצַעַד הַבָּא':'לְאַחַר הַרְבֵּה הַצְלָחוֹת בְּמִלָּה אַחַת')+
+      `<button class="learning-path-card" data-action="mission-direct" data-mission="english"><span class="learning-path-art">${art('star')}</span><h2>מִלִּים, צְבָעִים וּמִסְפָּרִים</h2><p>הַמִּשְׂחָק הַמֻּכָּר שֶׁל הַקְשָׁבָה לְמִלָּה אַחַת</p></button>`+
+      journeyChoice('english','cars','צֶבַע וּמְכוֹנִית','עוֹד חֵפֶץ אֶחָד. קֹדֶם מַכִּירִים אוֹתוֹ לְבַד, וְאָז מְחַבְּרִים לְצֶבַע.','car','אַחֲרֵי הַכַּדּוּר · רַק כְּשֶׁמוּכָנִים')+
+      journeyChoice('sounds','sounds','מַגְלִים צְלִילִים','אוֹת גְּדוֹלָה, אוֹת קְטַנָּה וְצָלִיל בְּתוֹךְ מִלָּה.','bird','מַסְלוּל בְּחִירָה · בְּעֶזְרַת הוֹרֶה')+
+      journeyChoice('sounds','blend','מְחַבְּרִים צְלִילִים','רַק כְּשֶׁמוּכָנִים: מִלִּים קְצָרוֹת מִצְּלִילִים מֻכָּרִים.','fish','לְאַחַר מַסְלוּל הַצְּלִילִים');
+  }
+  if(hub==='math')cards=journeyChoice('objects','quantity','בּוֹנִים כַּמּוּיוֹת','תַּפּוּחַ אַחַד לְכָל מָקוֹם. מַגְלִים עֶשֶׂרֶת.','apple','מַתְחִילִים בַּמֻּכָּר')+
+    journeyChoice('objects','bonds','כַּמָּה חֲסֵרִים?','מַשְׁלִימִים קְבוּצָה וּמְגַלִּים חִבּוּר.','flower')+
+    journeyChoice('objects','tens','עֲשָׂרוֹת וִיחִידוֹת','כָּל מוֹט הוּא עֶשֶׂר יְחִידוֹת. בּוֹנִים עַד 100.','house')+
+    journeyChoice('objects','takeaway','נוֹתְנִים לַחֲבֵרִים','חִסּוּר רִאשׁוֹן בִּתְמוּנוֹת: כַּמָּה נִשְׁאַר?','berry','מַסְלוּל בְּחִירָה · אֶפְשָׁר לְנַסּוֹת יַחַד')+
+    `<button class="learning-path-card" data-action="mission-direct" data-mission="math"><span class="learning-path-art">${art('star')}</span><h2>סוֹפְרִים וּמְחַבְּרִים</h2><p>מַמְשִׁיכִים בַּמִּשְׂחָק הַמֻּכָּר</p></button>`;
+  app.innerHTML=`${header()}<main id="main" class="learning-hub"><button class="text-button" data-action="home">${uiIcon('home')} לְבֵית הַחֲבֵרִים</button><section class="learning-hub-heading"><div><span class="section-kicker">בּוֹחֲרִים אֵיךְ לְגַלּוֹת הַיּוֹם</span><h1 tabindex="-1">${names[hub]}</h1><p>${hub==='english'?'לֹא צָרִיךְ לָדַעַת לִקְרֹא בְּאַנְגְּלִית. מַקְשִׁיבִים, נוֹגְעִים וּמַצְלִיחִים.':'כָּל הַדְּרָכִים פְּתוּחוֹת. מַתְחִילִים יַחַד, וּמַמְשִׁיכִים בַּקֶּצֶב שֶׁלָּנוּ.'}</p></div>${pup(hub==='math'?'tofi':hub==='english'?'bobi':'luli')}</section><div class="learning-paths">${cards}</div></main>${footer()}`;
+}
+function startJourney(mode,level){
+  if(!JOURNEYS[mode])return;checkpoint();narrator.stop();round=null;
+  const key=`${mode}:${level}`;journeyPlan=cleanJourney(journeyDrafts[key])||newJourney(mode,level,learner.items,{mathMax:settings.mathMax});view='journey';checkpoint();render();focusTitle();
+  if(mode!=='stories'||journeyPlan.index<3)journeyController.replay();
+}
+function renderJourney(){
+  app.innerHTML=`${header()}<main id="main" class="journey-page"><div id="journey-root"></div></main>${footer()}`;
+  journeyController=mountJourney(document.querySelector('#journey-root'),{plan:journeyPlan,nikud:settings.nikud,speak:(keys,explicit=false)=>explicit?clockSpeak(keys):announcements.say(keys),
+    onSave:plan=>{journeyDrafts[`${plan.mode}:${plan.level}`]=plan;save();},
+    onObservation:(info,kind)=>learner.record({...info,eventId:`${journeyPlan.id}:${info.exposure?'seen:':''}${journeyPlan.index}`},kind),
+    onHome:()=>{checkpoint();view='home';journeyPlan=null;render();focusTitle();},
+    onComplete:plan=>{
+      const result=album.linked?album.complete(JOURNEYS[plan.mode].domain,plan.helped.length,null,plan.id):awardLocal(JOURNEYS[plan.mode].domain,plan.helped.length,null,plan.id);
+      progress=result.progress;plan.sticker=result.sticker;delete journeyDrafts[`${plan.mode}:${plan.level}`];view='journey-complete';save();render();focusTitle();celebrate(32);announcements.say('complete');
+    }
+  });
+}
+function renderJourneyComplete(){
+  const plan=journeyPlan;
+  app.innerHTML=`${header()}<main id="main" class="journey-complete"><div class="journey-complete-art">${pup('luli')}${art(plan?.sticker||'star')}</div><span class="section-kicker">עֲשָׂרָה צְעָדִים שֶׁל גִּלּוּי</span><h1 tabindex="-1">כָּל הַכָּבוֹד! עוֹד הַרְפַּתְקָה שְׁלֵמָה!</h1><p>הַמַּדְבֵּקָה וְהַלְּמִידָה שְׁמוּרוֹת. אֶפְשָׁר לָצֵאת לְהַפְסָקָה אוֹ לְשַׂחֵק בַּפָּארְק.</p><div class="journey-controls"><button class="primary-button" data-action="park">לַפָּארְק שֶׁלִּי ${uiIcon('arrow')}</button><button class="secondary-button" data-action="learning-hub" data-hub="${plan?JOURNEYS[plan.mode].domain:'hebrew'}">עוֹד גִּלּוּי קָטָן</button><button class="text-button" data-action="home">לְבֵית הַחֲבֵרִים</button></div></main>${footer()}`;
+}
+function renderPark(){
+  app.innerHTML=`${header()}<main id="main" class="park-page"><div id="park-root"></div></main>${footer()}`;
+  parkController=mountPark(document.querySelector('#park-root'),{learner,stickers:progress.stickers.length,name:child.name,speak:keys=>announcements.say(keys),onHome:()=>{view='home';render();focusTitle();}});
+}
+
+
 app.addEventListener('click', event => {
   const button = event.target.closest('button[data-action]');
   if (!button) {
@@ -751,6 +913,14 @@ app.addEventListener('click', event => {
     case 'accept-child-invitation': parentGate(() => editChild(null, invitation)); break;
     case 'keep-current-child': view = 'home'; render(); startOpeningWelcome(); break;
     case 'home': leaveTo('home'); break;
+    case 'learning-hub': openLearningHub(button.dataset.hub); break;
+    case 'garden': openReadingLevels(); break;
+    case 'mission-direct': startMission(button.dataset.mission,true); break;
+    case 'journey-start': startJourney(button.dataset.journey,button.dataset.level); break;
+    case 'resume': resumeLatest(); break;
+    case 'park': checkpoint();round=null;journeyPlan=null;view='park';render();focusTitle();break;
+    case 'writing-step': if(Object.hasOwn(WRITING_STEPS,button.dataset.step)){writingPractice.mode=button.dataset.step;letterDemo.recorded=false;save();render();if(writingPractice.mode!=='trace')announcements.say(writingPractice.mode==='paper'?'journey-paper':writingPractice.mode==='copy'?'journey-copy-letters':'journey-memory-letters');}break;
+    case 'name-letter': selectLetter(Number(button.dataset.index));break;
     case 'album': albumPageIndex = null; if (view === 'game') leaveTo('album'); else { narrator.stop(); view = 'album'; render(); focusTitle(); announcements.say('stickers'); } break;
     case 'album-page': turnAlbumPage(Number(button.dataset.page)); break;
     case 'album-latest': turnAlbumPage(null); break;
@@ -788,14 +958,14 @@ app.addEventListener('click', event => {
     case 'letter-recognition-auto': recognitionChoice = null; render(); focusTitle(); break;
     case 'letter-recognition-next': settings.letterLanguage = round.letterLanguage; recognitionChoice = null; startMission('letters', true); break;
     case 'letter-recognition-repeat': settings.letterLanguage = round.letterLanguage; recognitionChoice = [...round.letterIds]; startMission('letters', true); break;
-    case 'letter-writing-continue': { const letter = suggestedLetters(progress.letterPractice, letterDemo.language, writingMode(letterDemo.form), 1, (letterDemo.index + 1) % LETTERS[letterDemo.language].length)[0]; selectLetter(LETTERS[letterDemo.language].indexOf(letter)); break; }
+    case 'letter-writing-continue': { const letter = nextWriting(letterDemo.language,letterDemo.form,(letterDemo.index+1)%LETTERS[letterDemo.language].length); selectLetter(LETTERS[letterDemo.language].indexOf(letter)); break; }
     case 'hint': hint(); break;
     case 'answer': answer(button); break;
     case 'tally': tally(button); break;
     case 'next': nextQuestion(); break;
     case 'parents': parentGate(); break;
     case 'sound': settings.sound = !settings.sound; narrator.stop(); narrator.enabled = settings.sound; save(); renderSoundButton(); if (settings.sound) replay(); break;
-    case 'break': narrator.stop(); round = null; view = 'home'; render(); focusTitle(); announcements.say('break'); break;
+    case 'break': checkpoint(); narrator.stop(); round = null; view = 'home'; render(); focusTitle(); announcements.say('break'); break;
   }
 });
 
@@ -804,12 +974,12 @@ app.addEventListener('change', event => {
 });
 
 dialog.addEventListener('click', event => { if (event.target === dialog && event.offsetX >= 0 && event.offsetX <= dialog.clientWidth && event.offsetY >= 0 && event.offsetY <= dialog.clientHeight) return; if (event.target === dialog) closeDialog(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden) narrator.stop(); else { void album.flush(); startOpeningWelcome(); } });
-window.addEventListener('online', () => { void album.flush(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) narrator.stop(); else { void album.flush();void learner.flush(); startOpeningWelcome(); } });
+window.addEventListener('online', () => { void album.flush();void learner.flush(); });
 window.addEventListener('hashchange', () => { if (readInvitation(location.hash)) location.reload(); });
-window.addEventListener('focus', () => { void album.flush(); });
-setInterval(() => { if (!document.hidden && album.linked) void album.flush(); }, 15000);
-window.addEventListener('pagehide', () => { narrator.stop(); profileEditor?.destroy(); });
+window.addEventListener('focus', () => { void album.flush();void learner.flush(); });
+setInterval(() => { if (!document.hidden && album.linked) {void album.flush();void learner.flush();} }, 15000);
+window.addEventListener('pagehide', () => { checkpoint();narrator.stop(); profileEditor?.destroy(); });
 dialog.addEventListener('cancel', () => { profileEditor?.destroy(); profileEditor = null; });
 const addressObserver = new MutationObserver(() => {
   personalizeUi(app, child);
@@ -820,7 +990,7 @@ addressObserver.observe(dialog, { childList: true, characterData: true, subtree:
 render();
 if (pendingJoinCode && !album.linked) parentGate();
 else startOpeningWelcome();
-if (album.linked) void album.flush();
+if (album.linked) {void album.flush();void learner.flush();}
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   navigator.serviceWorker.register('./sw.js').catch(() => { /* Online play remains available. */ });

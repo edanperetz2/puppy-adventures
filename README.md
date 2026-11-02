@@ -1,8 +1,29 @@
 # חבורת ההרפתקאות · Puppy Adventures
 
-A gentle learning game for phones, tablets and computers. Original illustrated puppies guide ten-question adventures in Hebrew reading, spoken English, counting, addition, reading an analog clock, and letter recognition and writing. A separate character game practices reading the names of Rubble & Crew. Writing includes English capitals and lowercase, and Hebrew print and handwriting. Each scored adventure has three warm-up steps, four practice steps and three final challenges, within the parent's chosen difficulty bounds. Hebrew uses vowel marks by default. English reading is never required.
+A gentle learning game for phones, tablets and computers. Original illustrated puppies guide ten-question adventures in Hebrew reading, spoken English, counting, addition, reading an analog clock, and letter recognition and writing. A separate character game practices reading the names of Rubble & Crew. Writing includes English capitals and lowercase, and Hebrew print and handwriting. Each scored adventure has three warm-up steps, four practice steps and three final challenges, within the parent's chosen difficulty bounds. Hebrew uses vowel marks by default. The default spoken-English games require no reading; an optional later path introduces first sounds and word reading.
 
 **Play:** [puppy-adventures.vercel.app](https://puppy-adventures.vercel.app)
+
+## Version 2.0 · Learning journeys
+
+The original albums, 1,000 sticker IDs, five shared reward domains, family codes and separate child profiles remain stable. This update adds:
+
+- **Learning memory:** encounters, supported answers, independent answers and practice, with later-day success requiring separate dates and at least 20 hours. Old totals do not manufacture item-level knowledge. Reading, letter selection, spoken vocabulary and review suggestions use the history.
+- **Hebrew word workshop:** 16 starter words across four stages, with pointed RTL word-part tiles, spelling, missing letters and sentence completion. The existing 416 reading targets remain available.
+- **Playable stories:** two ten-page stories with reading, scene changes, dragging, tap alternatives, counting and familiar single-word English.
+- **Gentle English:** familiar single words and one new word per round. Optional next paths teach BALL or CAR alone before combining it with familiar RED and BLUE. First-sound lessons use complete Ava example words, with consonants before vowels. An optional later reading path uses FAN, MAN and FIN. The default listening path requires no reading.
+- **Hands-on maths:** ten-frames, quantities, missing parts, ten-unit rods up to 100, and optional small take-away stories before subtraction notation. Other maths paths retain the selected range.
+- **Writing progression:** tracing, copying, memory and paper, each with its own practice history and next-letter selection, for all four existing letter forms. Free drawings and paper confirmations record practice, never shape correctness. Name-letter shortcuts support meaningful writing. Eight recent drawings stay local; drawings are not uploaded.
+- **Puppy park:** forty saved places and twelve decoration types. Existing stickers unlock decorations and are never spent. Separate cell edits merge across paired devices, including removals.
+- **Continuity and parent insights:** a Continue card restores unfinished questions, order, step, help, mistakes, counting and completed answers on the same browser/device. Completion receipts prevent a restored final step awarding a second sticker. Learning history, completed albums and the park sync through the existing family code; partial adventures and drawings stay local. Parent status distinguishes local saves from a confirmed server receipt.
+
+Two additive migrations introduce `puppy_learning_state`, `puppy_learning_writers` and the code-checked `puppy_sync_learning` RPC. They do not replace the existing album tables or reward RPC. Bounded sequential batches are retry-safe. Cell changes use last-write ordering and tombstones. No names, voice recordings or drawings are sent to this API.
+
+Direct table privileges remain revoked and RLS has no direct-access policies. The two public SECURITY DEFINER RPCs intentionally require the random 120-bit family capability on every request and use an empty search path. The advisor's four INFO notices for tables with no policy and two WARN notices for these intentional capability RPCs are documented design decisions; clients receive no direct table access.
+
+There are 1,022 bundled recordings (946 Hebrew, 76 English) and 1,111 offline assets. All 880 earlier recordings and their raw manifest/audit records retain their original bytes and metadata. New Hebrew uses explicit IPA and the same local Ava-reference pipeline. Every new word-part recording must pass the phonetic check with zero normalized edit distance. Two unreliable isolated parts use the existing approved full-word recording as their sound model while retaining the visual word parts. English first sounds also use complete example words. Phonetic diagnostics do not certify perfect pronunciation.
+
+Validation includes 117 automated tests, syntax/audio/offline checks, and transactional database fixtures for retries, separate writers, later-day history, sequence gaps, park conflicts and denied direct access. Browser checks cover full English/story adventures, real pointer dragging, word building and reload/resume, free writing, separate child profiles and responsive layouts. A local 26-sticker upgrade fixture preserved its stickers, print-letter practice and clock lessons while a new Yuli profile started empty. Layout checks do not replace testing on every physical device.
 
 ## Play locally
 

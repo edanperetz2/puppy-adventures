@@ -115,7 +115,7 @@ export function mountProfileForm(root, { profiles, editing = null, invitation = 
   return { destroy };
 }
 
-const protectedText = '.target-word,.reading-stage-samples,.character-name,.character-word,.letter-familiar,.letter-book-form,[data-learning-text],.profile-editor,.child-panel,#family-panel h3';
+const protectedText = '.target-word,.reading-stage-samples,.character-name,.character-word,.letter-familiar,.letter-book-form,.story-reading p,.context-sentence,.context-choices,.word-tiles,.word-slots,[data-learning-text],.profile-editor,.child-panel,#family-panel h3';
 export function personalizeUi(root, profile) {
   if (!profile) return;
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);

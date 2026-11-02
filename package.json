@@ -1,6 +1,6 @@
 {
   "name": "puppy-adventures",
-  "version": "1.16.1",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "description": "A family learning game for phones, tablets and computers, with a shared sticker album.",
@@ -11,5 +11,7 @@
     "check": "node scripts/check.mjs",
     "prepare-offline": "node scripts/prepare-offline.mjs"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }

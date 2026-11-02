@@ -166,6 +166,7 @@ test('Ava names and all gendered instructions resolve without changing reading t
   assert.ok(Object.keys(MALE_CLIPS).length >= 55);
   assert.equal(addressText('בואי נשחק. בחרי אות. את כבר מכירה.', 'male'), 'בוא נשחק. בחר אות. אתה כבר מכיר.');
   assert.equal(addressText('לִחְצִי עַל הַכַּפְתּוֹר', 'male'), 'לחץ עַל הַכַּפְתּוֹר');
+  assert.equal(addressText('מקשיבות ומגלות, סופרות ומחברות, מתחילות ומתקדמות', 'male'),'מקשיבים ומגלים, סופרים ומחברים, מתחילים ומתקדמים');
 });
 
 test('A recorded name plays between Ava’s greeting parts and the welcome completes once', async () => {

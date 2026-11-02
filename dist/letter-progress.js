@@ -1,4 +1,5 @@
 import { LETTERS } from './letters.js';
+import { reviewPriority } from './learning.js';
 
 // The existing writing counters remain handwriting/lowercase; print/capitals
 // get their own counters, so an older save never claims the new skill is done.
@@ -34,6 +35,17 @@ export function suggestedLetters(input, language, mode = 'recognition', count = 
 export function practicedLetterCount(input, language, mode) {
   if (!Object.hasOwn(LETTERS, language) || !LETTER_MODES.includes(mode)) return 0;
   return sanitizeLetterPractice(input)[language][mode].filter(n => n > 0).length;
+}
+
+export function recognitionTargets(input,language,items={},now=Date.now()) {
+  if(!Object.hasOwn(LETTERS,language))language='hebrew';
+  const practice=sanitizeLetterPractice(input)[language];
+  const ordered=suggestedLetters(input,language,'recognition',LETTERS[language].length);
+  return ordered.map((letter,order)=>{
+    const observed=items?.[`letter:${language}:${letter.id}:recognition`];
+    const legacy=practice.recognition[LETTERS[language].indexOf(letter)];
+    return {letter,order,priority:observed?reviewPriority(observed,now):legacy?1:3};
+  }).sort((a,b)=>b.priority-a.priority||a.order-b.order).slice(0,3).map(x=>x.letter);
 }
 
 export function pendingLetterPractice(remote, own, confirmed) {

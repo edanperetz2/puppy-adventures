@@ -1,9 +1,10 @@
+import { choosePractice, reviewPriority } from './learning.js';
 import { ANIMALS, COLORS, NUMBERS, STICKERS, MISSIONS, MISSION_IDS } from './content.js';
 import { CLOCK_LEVELS, clockTime, clockConceptRank } from './clock.js';
 import { LETTERS, letterGroup } from './letters.js';
 import { READING_LEVELS, readingWords, readingTargets } from './reading.js';
 import { isSticker } from './stickers.js';
-import { sanitizeLetterPractice, recordLetters, suggestedLetters } from './letter-progress.js';
+import { sanitizeLetterPractice, recordLetters, suggestedLetters, recognitionTargets } from './letter-progress.js';
 import { distinctWordPictures } from './vocabulary.js';
 import { SESSION_LENGTH, adventurePhase, choiceCount } from './adventure.js';
 import { sanitizeClockLessons } from './clock-learning.js';
@@ -44,7 +45,7 @@ export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Mat
   if (mission === 'letters') {
     const language = Object.hasOwn(LETTERS, settings.letterLanguage) ? settings.letterLanguage : 'hebrew';
     const selected = Array.isArray(settings.letterIds) ? [...new Set(settings.letterIds)].map(id => LETTERS[language].find(letter => letter.id === id)).filter(Boolean) : [];
-    const group = selected.length === 3 ? selected : Number.isInteger(settings.letterStart) ? letterGroup(language, settings.letterStart) : suggestedLetters(settings.letterPractice, language);
+    const group = selected.length === 3 ? selected : Number.isInteger(settings.letterStart) ? letterGroup(language, settings.letterStart) : recognitionTargets(settings.letterPractice, language, settings.learning);
     const targets = [...shuffle(group, rng), ...shuffle([...group, group[Math.floor(rng() * group.length)]], rng), ...shuffle(group, rng)];
     return targets.map((letter, i) => ({ id: `letters-${i}`, type: 'letter', letter, answer: letter.id, phase: adventurePhase(i), showModel: i < 3, options: optionsFrom(group, letter, rng, i < 7 ? 2 : 3), prompt: `letter-match-${language}`, targetClip: letter.clip, hint: 'letters-recognition-hint' }));
   }
@@ -52,7 +53,7 @@ export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Mat
     const pool = readingWords(settings.reading);
     const targets = settings.reading === 'all'
       ? Object.values(READING_LEVELS).filter(stage => stage.number).sort((a, b) => a.number - b.number).flatMap(stage => readingTargets(pool.filter(word => word.level === stage.level), settings.readingRecent, 1, rng))
-      : readingTargets(pool, settings.readingRecent, SESSION_LENGTH, rng).sort(readingOrder);
+      : (settings.learning && Object.keys(settings.learning).length ? choosePractice(pool, settings.learning, word => `read:${word.id}`, SESSION_LENGTH, Date.now(), rng) : readingTargets(pool, settings.readingRecent, SESSION_LENGTH, rng)).sort(readingOrder);
     // Prefer unseen reading targets before reviewing the oldest practiced ones.
     return Array.from({ length: SESSION_LENGTH }, (_, i) => {
       const word = targets[i % targets.length];
@@ -80,7 +81,7 @@ export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Mat
     const additions = [];
     for (const total of [...new Set(sums)]) {
       const count = sums.filter(n => n === total).length;
-      const pairs = shuffle(Array.from({ length: total - 1 }, (_, i) => [i + 1, total - i - 1]), rng).sort((a, b) => Math.min(...a) - Math.min(...b));
+      const pairs = shuffle(Array.from({ length: total - 1 }, (_, i) => [i + 1, total - i - 1]), rng).sort((a, b) => Math.min(...a) - Math.min(...b) || reviewPriority(settings.learning?.[`math:add:${b[0]}:${b[1]}`]) - reviewPriority(settings.learning?.[`math:add:${a[0]}:${a[1]}`]));
       for (let i = 0; i < count; i++) {
         const fraction = count === 1 ? sums.indexOf(total) / (sums.length - 1) : i / (count - 1);
         const [a, b] = pairs[Math.round(fraction * (pairs.length - 1))];
@@ -100,7 +101,10 @@ export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Mat
     const minutes = settings.clockLevel === 'minutes'
       ? [0,30,15,45,...sample([5,10,20,25,35,40,50,55]),...sample([1,2,3,4,6,7,8,9]),...sample(Array.from({length:49},(_,i)=>i+11).filter(n=>n%5))]
       : level.minutes.length === 1 ? Array(SESSION_LENGTH).fill(0) : level.minutes.length === 2 ? [0, 0, 0, 0, 30, 30, 30, 30, 30, 30] : [0, 0, 30, 30, 15, 15, 15, 45, 45, 45];
-    return hours.map((hour, i) => {
+    const usedTimes=new Set();
+    return hours.map((sampledHour, i) => {
+      const hour=settings.learning&&Object.keys(settings.learning).length?choosePractice(Array.from({length:12},(_,h)=>h+1).filter(h=>!usedTimes.has(`${h}:${minutes[i]}`)),settings.learning,h=>`clock:${h}:${minutes[i]}`,1,Date.now(),rng)[0]:sampledHour;
+      usedTimes.add(`${hour}:${minutes[i]}`);
       const time = clockTime(hour, minutes[i]);
       const next = hour % 12 + 1;
       const alternatives = level.minutes.filter(n => n !== time.minute && clockConceptRank(n) <= clockConceptRank(time.minute));
