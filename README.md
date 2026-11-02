@@ -190,7 +190,7 @@ Five regression tests check Alef branch topology, narrow-head proportions and st
 
 Migration filenames use Supabase's applied version IDs. The local eight-entry history matches the deployed database; this reconciliation changes filenames and documentation only. Live rolled-back checks verify print/capital practice, repeated uploads, paired-device rewards and old-client preservation.
 
-## Separate child profiles and personal welcomes (1.16.0)
+## Separate child profiles and personal welcomes (1.16.1)
 
 New visitors enter a first name and choose feminine or masculine address. Parents can add or select another child, or edit the current name and voice, at the top of the existing parent settings. Names never identify an album: every new child has a random stable ID, an isolated save, independent practice/settings/reading history and a separate optional family-album connection. Two children with the same name remain separate.
 
