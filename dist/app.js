@@ -17,14 +17,31 @@ import { stickerPage, stickerDefinition } from './stickers.js';
 import { suggestedLetters, practicedLetterCount, recordLetters } from './letter-progress.js';
 import { CHARACTERS, CHARACTER_COLLECTIONS, CHARACTER_LEVELS, CHARACTER_MODES, characterCollection, selectCharacterLevel, sanitizeCharacterPractice, finishCharacterPractice, nextCharacterLevel } from './characters.js';
 import { characterMenu, characterQuestion, characterAnswer, characterAnswerLabel, characterMissionArt, characterName } from './characters-view.js';
+import { ChildProfiles, readInvitation, invitationNeedsNewProfile, escapeHtml, GAME_KEY } from './profiles.js';
+import { profileSpeech } from './profile-speech.js';
+import { profilePanel, mountProfileForm, personalizeUi } from './profiles-view.js';
+
+const profiles = new ChildProfiles();
+const invitation = readInvitation(location.hash);
+if (invitation) {
+  const match = profiles.findAlbum(invitation.code);
+  if (match) { try { profiles.select(match.id); } catch { /* Keep the current child if storage is unavailable. */ } }
+  history.replaceState(null, '', location.pathname + location.search);
+}
+const child = profiles.active;
+const incomingChild = invitationNeedsNewProfile(profiles, invitation);
+const pendingJoinCode = child && !incomingChild ? invitation?.code || child.pendingAlbum || null : null;
+const emptyStorage = new Map();
+const gameStorage = child ? profiles.storageFor(child.id) : { getItem: key => emptyStorage.get(key) || null, setItem: (key, value) => emptyStorage.set(key, value), removeItem: key => emptyStorage.delete(key) };
 
 const app = document.querySelector('#app');
 const dialog = document.querySelector('#parent-dialog');
-const STORAGE_KEY = 'puppy-adventures-v1';
+const STORAGE_KEY = GAME_KEY;
 let settings = sanitizeSettings(null);
 let progress = freshProgress();
 let storageAvailable = true;
-let view = 'home';
+let view = incomingChild ? 'child-invitation' : child ? 'home' : 'child-setup';
+let profileEditor = null;
 let round = null;
 let audioStatus = 'idle';
 let dialogOpener = null;
@@ -40,14 +57,15 @@ let albumPageIndex = null;
 let characterPractice = sanitizeCharacterPractice(null);
 
 try {
-  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+  const saved = JSON.parse(gameStorage.getItem(STORAGE_KEY) || 'null');
     if (saved) { settings = sanitizeSettings(saved.settings); progress = sanitizeProgress(saved.progress); readingPractice = sanitizeReadingPractice(saved.readingPractice); clockSchoolPosition = sanitizeClockPosition(saved.clockSchoolPosition); characterPractice = sanitizeCharacterPractice(saved.characterPractice); }
 } catch { /* A corrupt or unavailable save must never prevent play. */ }
 
-const pendingJoinCode = normalizeCode(new URLSearchParams(location.hash.slice(1)).get('album'));
-if (pendingJoinCode) history.replaceState(null, '', location.pathname + location.search);
-const album = new SharedAlbum({ config: SYNC_CONFIG, onChange: source => {
+const album = new SharedAlbum({ config: SYNC_CONFIG, storage: gameStorage, onChange: source => {
   if (!source.linked) return;
+  if (child.pendingAlbum) {
+    try { profiles.update(child.id, { pendingAlbum: null }); child.pendingAlbum = null; } catch { /* Progress sync is independent of profile labels. */ }
+  }
   const updated = source.progress;
   const changed = JSON.stringify(progress) !== JSON.stringify(updated);
   progress = updated;
@@ -69,11 +87,14 @@ const narrator = new Narrator(status => {
   if (notice) { notice.hidden = status !== 'unavailable'; notice.textContent = 'הקול לא נשמע? לחצי שוב על הרמקול. אפשר גם להיעזר בהורה.'; }
 });
 narrator.enabled = settings.sound;
+let recordedName = null;
+try { if (child) recordedName = gameStorage.getItem('name-recording'); } catch { /* A voice read failure must not block the saved game. */ }
+narrator.resolveKey = profileSpeech(child, recordedName);
 const announcements = new GameAnnouncements(narrator);
 let welcomeAttempted = false;
 
 function startOpeningWelcome() {
-  if (welcomeAttempted || document.hidden || dialog.open || view !== 'home') return;
+  if (!child || welcomeAttempted || document.hidden || dialog.open || view !== 'home') return;
   welcomeAttempted = true;
   void announcements.start();
 }
@@ -85,9 +106,36 @@ function welcome() {
 
 function save() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition, characterPractice }));
+    gameStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition, characterPractice }));
     storageAvailable = true;
   } catch { storageAvailable = false; }
+}
+
+function openChild(profile, invite = null) {
+  narrator.stop();
+  profiles.select(profile.id);
+  if (invite) {
+    const hash = new URLSearchParams({ album: invite.code, child: profile.name, address: profile.address });
+    if (profile.voice) hash.set('voice', profile.voice);
+    location.hash = hash.toString();
+  }
+  location.reload();
+}
+
+function renderChildSetup() {
+  if (profileEditor) return;
+  app.innerHTML = `<main id="main" class="profile-setup"><div class="profile-setup-brand">${art('paw')} חבורת ההרפתקאות</div><div id="first-child-form"></div></main>`;
+  profileEditor = mountProfileForm(app.querySelector('#first-child-form'), { profiles, invitation, onDone: profile => openChild(profile, invitation) });
+}
+
+function editChild(editing = null, invite = null) {
+  narrator.stop();
+  openDialog(`<h2 id="parent-title">${editing ? 'השם והקול במשחק' : 'הרפתקה חדשה ונפרדת'}</h2><div id="profile-form-host"></div>`);
+  profileEditor = mountProfileForm(dialog.querySelector('#profile-form-host'), { profiles, editing, invitation: invite, onDone: profile => openChild(profile, invite), onCancel: invite ? closeDialog : renderSettings });
+}
+
+function renderChildInvitation() {
+  app.innerHTML = `${header()}<main id="main" class="profile-setup profile-invitation">${pup('bobi')}<h1 tabindex="-1">קישור לאלבום ${invitation.name ? `של <span data-learning-text>${escapeHtml(invitation.name)}</span>` : 'נוסף'}</h1><p>האלבום שבקישור ייפתח בפרופיל נפרד.<br>ההרפתקה והמדבקות של <span data-learning-text>${escapeHtml(child.name)}</span> יישארו שמורות.</p><button class="primary-button" data-action="accept-child-invitation">הוספת פרופיל לחיבור האלבום</button><button class="text-button" data-action="keep-current-child">חזרה להרפתקה של <span data-learning-text>${escapeHtml(child.name)}</span></button></main>`;
 }
 
 function applyPreferences() {
@@ -298,7 +346,7 @@ function activityCount(id) { return id === 'characters' ? Object.values(characte
 function renderHome() {
   app.innerHTML = `${header()}<main id="main" class="home-page">
     <section class="hero" aria-labelledby="hero-title">
-      <div class="hero-copy"><div class="eyebrow"><span class="tiny-sun">✦</span> שלום אריאל!</div>
+      <div class="hero-copy"><div class="eyebrow"><span class="tiny-sun">✦</span><span>שלום <bdi data-learning-text>${escapeHtml(child.name)}</bdi>!</span></div>
         <h1 id="hero-title" tabindex="-1">הרפתקה קטנה,<br><span>מגלות עולם!</span></h1>
         <p class="hero-description">לולי, בובי וטופי מחכים לך.<br>בואי נשחק, נגלה ונלמד ביחד.</p>
         <button class="primary-button hero-start" data-action="recommended">יוצאות להרפתקה ${uiIcon('arrow')}</button>
@@ -441,6 +489,8 @@ function turnAlbumPage(index) {
 }
 
 function render() {
+  if (!child) { renderChildSetup(); return; }
+  if (view === 'child-invitation') { renderChildInvitation(); return; }
   letterPad?.destroy(); letterPad = null;
   clockSchool?.destroy(); clockSchool = null;
   applyPreferences();
@@ -611,6 +661,7 @@ function celebrate(amount) {
 }
 
 function openDialog(content) {
+  profileEditor?.destroy(); profileEditor = null;
   if (!dialog.open) dialogOpener = document.activeElement;
   dialog.innerHTML = `<button class="dialog-close circle-button" aria-label="סגירה" data-dialog="close">${uiIcon('close')}</button>${content}`;
   dialog.querySelector('[data-dialog="close"]').onclick = closeDialog;
@@ -618,6 +669,7 @@ function openDialog(content) {
 }
 
 function closeDialog() {
+  profileEditor?.destroy(); profileEditor = null;
   const action = dialogOpener?.dataset?.action;
   dialog.close();
   if (view !== 'game') {
@@ -626,12 +678,12 @@ function closeDialog() {
   } else dialogOpener?.focus?.();
 }
 
-function parentGate() {
+function parentGate(afterGate = renderSettings) {
   narrator.stop();
   openDialog(`<span class="section-kicker">רגע קטן להורים</span><h2 id="parent-title">פינת ההורים</h2><p>כדי לפתוח את ההגדרות, מה התוצאה?</p><form id="parent-gate"><label class="gate-label" for="gate-answer"><span dir="ltr">7 × 3 = ?</span></label><input id="gate-answer" name="answer" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="תשובה לחידה" required><p id="gate-error" role="status"></p><button class="primary-button" type="submit">כניסה</button></form>`);
   dialog.querySelector('form').onsubmit = event => {
     event.preventDefault();
-    if (dialog.querySelector('input').value.trim() === '21') renderSettings();
+    if (dialog.querySelector('input').value.trim() === '21') afterGate();
     else dialog.querySelector('#gate-error').textContent = 'נסו שוב, או בקשו עזרה מהורה.';
   };
   dialog.querySelector('input').focus();
@@ -650,11 +702,18 @@ function renderSettings() {
     <button class="primary-button" type="submit">שמירת ההגדרות ${uiIcon('check')}</button></form>
     <section class="parent-progress"><h3>מה כבר גילינו?</h3><p id="parent-progress-summary">${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות</p><table><thead><tr><th>תחום</th><th>תשובות ללא עזרה</th><th>עם הדגמה, רמז או ניסיון נוסף</th></tr></thead><tbody>${MISSION_IDS.map(id => MISSIONS[id]).map(m => `<tr><th>${m.id === 'hebrew' ? 'עברית · מילים ושמות' : m.subject}</th><td data-independent="${m.id}">${progress.skills[m.id].correct - progress.skills[m.id].assisted}</td><td data-assisted="${m.id}">${progress.skills[m.id].assisted}</td></tr>`).join('')}</tbody></table><p class="parent-note">מוצגות רק הרפתקאות שהושלמו. זהו תיעוד משחק, ולא מבחן או הערכת יכולת.</p></section>
     <section id="family-panel"></section><p class="parent-note character-art-credit">איורי הדמויות: PAW Patrol / Rubble &amp; Crew © Spin Master Ltd. · <a href="https://dev.pawpatrol.com/character-guide" target="_blank" rel="noopener noreferrer">מדריך הדמויות הרשמי של מפרץ ההרפתקאות</a> · <a href="https://images.squarespace-cdn.com/content/v1/5595e2eee4b0b03840079b28/1685761053151-FY46DCUKCA43ODFF4MKK/image-asset.jpeg" target="_blank" rel="noopener noreferrer">McCown Design Agency</a>. משחק השמות נכלל בתחום עברית.</p>
-    <p class="privacy-note">אפשר לשחק ללא חיבור לאלבום משפחתי. בחיבור לאלבום, נשמרים מספר ההרפתקאות והעזרה בכל תחום, והאותיות שתורגלו בכל מסלול. ציורי הכתיבה אינם נשמרים. לא צריך אימייל או חשבון לילדה. אין פרסומות, מעקב או בקשת מיקרופון. שמרו את הקוד המשפחתי כדי לחבר מכשיר חדש.</p>
+    <p class="privacy-note">אפשר לשחק ללא חיבור לאלבום. לכל ילד וילדה יש אלבום נפרד. בחיבור נשמרים מספר ההרפתקאות, העזרה בכל תחום והאותיות שתורגלו. השם והקלטת השם נשמרים במכשיר הזה; קישור לחיבור מכשיר נוסף כולל את השם, בלי ההקלטה. ציורי הכתיבה אינם נשמרים. לא צריך אימייל או חשבון לילדים. אין פרסומות או מעקב. המיקרופון נפתח רק כשהורה בוחר להקליט שם. שמרו את הקוד כדי לחבר מכשיר נוסף לאותו אלבום.</p>
     <p class="parent-note">איורים נוספים: <a href="assets/Twemoji-LICENSE.txt" target="_blank" rel="noopener">Twemoji · רישיון ושמות היוצרים</a>. כל התמונות שמורות בתוך המשחק.</p>
     <p class="save-notice" ${storageAvailable ? 'hidden' : ''}>הדפדפן לא מאפשר שמירה כרגע. אפשר לשחק, אבל ההתקדמות עלולה להיעלם בסגירה.</p>
     <button class="text-button reset-button" data-dialog="reset">${album.linked ? 'ניתוק מהאלבום ואיפוס המכשיר הזה' : 'איפוס ההתקדמות במכשיר הזה'}</button>`);
-  mountFamilyPanel(dialog.querySelector('#family-panel'), { album, getLocalProgress: () => progress, pendingCode: pendingJoinCode });
+  dialog.querySelector('#settings-form').insertAdjacentHTML('beforebegin', profilePanel(profiles));
+  dialog.querySelector('[data-child-add]').onclick = () => editChild();
+  dialog.querySelector('[data-child-edit]').onclick = () => editChild(child);
+  for (const button of dialog.querySelectorAll('[data-child-select]')) button.onclick = () => {
+    try { openChild(profiles.profiles.find(profile => profile.id === button.dataset.childSelect)); }
+    catch { button.textContent = 'לא הצלחנו לעבור כרגע. נסו שוב.'; }
+  };
+  mountFamilyPanel(dialog.querySelector('#family-panel'), { album, getLocalProgress: () => progress, pendingCode: pendingJoinCode, profile: child });
   dialog.querySelector('#settings-form').onsubmit = event => {
     event.preventDefault();
     const form = new FormData(event.target);
@@ -684,11 +743,13 @@ function updateParentProgress() {
 app.addEventListener('click', event => {
   const button = event.target.closest('button[data-action]');
   if (!button) {
-    if (view === 'home' && !dialog.open && announcements.welcomePending && audioStatus !== 'speaking') void announcements.say('welcome');
+    if (child && view === 'home' && !dialog.open && announcements.welcomePending && audioStatus !== 'speaking') void announcements.say('welcome');
     return;
   }
   if (button.disabled) return;
   switch (button.dataset.action) {
+    case 'accept-child-invitation': parentGate(() => editChild(null, invitation)); break;
+    case 'keep-current-child': view = 'home'; render(); startOpeningWelcome(); break;
     case 'home': leaveTo('home'); break;
     case 'album': albumPageIndex = null; if (view === 'game') leaveTo('album'); else { narrator.stop(); view = 'album'; render(); focusTitle(); announcements.say('stickers'); } break;
     case 'album-page': turnAlbumPage(Number(button.dataset.page)); break;
@@ -745,9 +806,17 @@ app.addEventListener('change', event => {
 dialog.addEventListener('click', event => { if (event.target === dialog && event.offsetX >= 0 && event.offsetX <= dialog.clientWidth && event.offsetY >= 0 && event.offsetY <= dialog.clientHeight) return; if (event.target === dialog) closeDialog(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) narrator.stop(); else { void album.flush(); startOpeningWelcome(); } });
 window.addEventListener('online', () => { void album.flush(); });
+window.addEventListener('hashchange', () => { if (readInvitation(location.hash)) location.reload(); });
 window.addEventListener('focus', () => { void album.flush(); });
 setInterval(() => { if (!document.hidden && album.linked) void album.flush(); }, 15000);
-window.addEventListener('pagehide', () => narrator.stop());
+window.addEventListener('pagehide', () => { narrator.stop(); profileEditor?.destroy(); });
+dialog.addEventListener('cancel', () => { profileEditor?.destroy(); profileEditor = null; });
+const addressObserver = new MutationObserver(() => {
+  personalizeUi(app, child);
+  if (dialog.open) personalizeUi(dialog, child);
+});
+addressObserver.observe(app, { childList: true, characterData: true, subtree: true });
+addressObserver.observe(dialog, { childList: true, characterData: true, subtree: true });
 render();
 if (pendingJoinCode && !album.linked) parentGate();
 else startOpeningWelcome();

@@ -76,6 +76,7 @@ export function uiIcon(name) {
     home: '<path d="M3 11L12 3L21 11M5 10V21H10V15H14V21H19V10"/>',
     hint: '<path d="M9 18H15M10 21H14M8 15Q1 7 8 4Q12 1 17 5Q22 10 16 15V17H8Z"/>',
     check: '<path d="M5 12L10 17L20 6"/>',
+    plus: '<path d="M12 5V19M5 12H19"/>',
     close: '<path d="M6 6L18 18M18 6L6 18"/>',
     settings: '<circle cx="12" cy="8" r="4"/><path d="M4 22V20Q4 14 12 14Q20 14 20 20V22"/>',
     album: '<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 3V21M12 9L14 7L16 9L18 7V14L14 17L11 14"/>',

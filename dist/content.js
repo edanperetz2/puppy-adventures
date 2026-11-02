@@ -6,6 +6,7 @@ import { WORDS } from './reading.js';
 import { CLOCK_SCHOOL_SCRIPTS } from './clock-school-content.js';
 import { LETTER_WRITING_SCRIPTS } from './letter-writing-content.js';
 import { CHARACTER_SCRIPTS } from './characters-content.js';
+import { installProfileClips } from './profile-content.js';
 export { WORDS, READING_LEVELS } from './reading.js';
 
 export const ANIMALS = [
@@ -130,3 +131,4 @@ for (const clip of Object.values(CLIPS)) if (clip.lang === 'he-IL') clip.speech 
 
 for (const letter of LETTERS.hebrew) CLIPS[letter.clip] = { lang: 'he-IL', text: `האות ${letter.name}`, speech: hebrewSpeech(`הָאוֹת ${letter.spoken}`) };
 for (const letter of LETTERS.english) CLIPS[letter.clip] = { lang: 'en-US', text: letter.spoken };
+installProfileClips(CLIPS);

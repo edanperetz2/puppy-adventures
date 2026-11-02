@@ -1,6 +1,7 @@
 import { readFile, stat, readdir } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 import { CLIPS, WORDS, ANIMALS, COLORS, MISSION_IDS } from '../dist/content.js';
 import { createSession, DEFAULT_SETTINGS } from '../dist/engine.js';
 
@@ -10,7 +11,7 @@ const voiceStyle = createHash('sha256').update(await readFile(new URL('../script
 const reviewedTakes = JSON.parse(await readFile(new URL('../scripts/hebrew-takes.json', root), 'utf8'));
 const phoneticAudit = JSON.parse(await readFile(new URL('../scripts/hebrew-audio-audit.json', root), 'utf8')).clips;
 for (const file of (await readdir(root)).filter(file => file.endsWith('.js'))) {
-  execFileSync(process.execPath, ['--check', new URL(file, root).pathname.replace(/^\/([A-Za-z]:)/, '$1')], { stdio: 'pipe' });
+  execFileSync(process.execPath, ['--check', fileURLToPath(new URL(file, root))], { stdio: 'pipe' });
 }
 for (const [key, clip] of Object.entries(CLIPS)) {
   const asset = new URL(`assets/audio/${key}.mp3`, root);

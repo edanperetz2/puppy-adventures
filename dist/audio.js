@@ -9,6 +9,7 @@ export class Narrator {
     this.onStatus = onStatus;
     this.release = null;
     this.context = null;
+    this.resolveKey = key => [key];
   }
 
   stop() {
@@ -27,16 +28,18 @@ export class Narrator {
     if (!this.enabled) return false;
     const sequence = this.sequence;
     this.onStatus('speaking');
-    for (const key of Array.isArray(keys) ? keys : [keys]) {
-      if (sequence !== this.sequence || !this.enabled) return false;
-      const ok = await this.play(key, slow, sequence);
-      if (sequence !== this.sequence) return false;
-      if (!ok) {
-        const fallback = await this.deviceVoice(key, slow, sequence);
+    for (const logicalKey of Array.isArray(keys) ? keys : [keys]) {
+      for (const key of this.resolveKey(logicalKey)) {
+        if (sequence !== this.sequence || !this.enabled) return false;
+        const ok = await this.play(key, slow, sequence);
         if (sequence !== this.sequence) return false;
-        if (!fallback) { this.onStatus(quietFailure ? 'idle' : 'unavailable'); return false; }
+        if (!ok) {
+          const fallback = await this.deviceVoice(key, slow, sequence);
+          if (sequence !== this.sequence) return false;
+          if (!fallback) { this.onStatus(quietFailure ? 'idle' : 'unavailable'); return false; }
+        }
       }
-      onClipEnd(key);
+      onClipEnd(logicalKey);
     }
     if (sequence !== this.sequence) return false;
     this.onStatus('idle');
@@ -44,7 +47,8 @@ export class Narrator {
   }
 
   play(key, slow, sequence) {
-    if (!CLIPS[key]) return Promise.resolve(false);
+    const clip = typeof key === 'string' ? CLIPS[key] : key?.recording ? key : null;
+    if (!clip) return Promise.resolve(false);
     return new Promise(resolve => {
       let finished = false;
       let watchdog;
@@ -58,8 +62,8 @@ export class Narrator {
       this.release = finish;
       this.audio.onended = () => finish(true);
       this.audio.onerror = () => finish(false);
-      this.audio.playbackRate = slow ? (CLIPS[key].lang === 'he-IL' ? 0.92 : 0.82) : 1;
-      this.audio.src = `./assets/audio/${key}.mp3`;
+      this.audio.playbackRate = slow ? (clip.lang === 'he-IL' ? 0.92 : 0.82) : 1;
+      this.audio.src = clip.recording || `./assets/audio/${key}.mp3`;
       watchdog = setTimeout(() => {
         if (sequence === this.sequence) this.audio.pause();
         finish(false);
