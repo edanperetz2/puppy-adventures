@@ -409,8 +409,8 @@ function renderHome() {
         ${activityCount(m.id) ? `<span class="mission-done" aria-label="כבר סיימת ${activityCount(m.id)} הרפתקאות">${uiIcon('check')}</span>` : ''}
       </button>`).join('')}</div>
     </section>
-    <section class="park-teaser"><div>${pup('tofi')}</div><span><h3>הַפָּארְק שֶׁלִּי</h3><p>קִשּׁוּטִים, חֲבֵרִים וּמָקוֹם לַדִּמְיוֹן</p></span><button class="primary-button" data-action="park">בּוֹנִים וּמְשַׂחֲקִים ${uiIcon('arrow')}</button></section>
-    <section class="album-teaser"><span class="teaser-art">${art(progress.stickers.at(-1) || 'star')}</span><div><h3>${progress.stickers.length ? 'האלבום שלך כבר מתמלא!' : 'כל הרפתקה מתחילה בחיוך'}</h3><p>${progress.stickers.length ? `${progress.stickers.length} מדבקות מחכות לך באלבום` : 'בכל הרפתקה שלמה מגלות מדבקה חדשה'}</p></div><button class="text-button" data-action="album">לאלבום שלי ${uiIcon('arrow')}</button></section>
+    <section class="home-feature-card park-feature"><div>${pup('tofi')}</div><span><h3>הַפָּארְק שֶׁלִּי</h3><p>קִשּׁוּטִים, חֲבֵרִים וּמָקוֹם לַדִּמְיוֹן</p></span><button class="primary-button" data-action="park">בּוֹנִים וּמְשַׂחֲקִים ${uiIcon('arrow')}</button></section>
+    <section class="home-feature-card album-feature"><div>${art(progress.stickers.at(-1) || 'star')}</div><span><h3>הָאַלְבּוֹם שֶׁלִּי</h3><p>${progress.stickers.length ? `${progress.stickers.length} מדבקות מחכות לך באלבום` : 'בכל הרפתקה שלמה מגלות מדבקה חדשה'}</p></span><button class="primary-button" data-action="album">לאלבום שלי ${uiIcon('arrow')}</button></section>
   </main>${footer()}`;
 }
 
