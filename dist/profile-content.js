@@ -85,7 +85,9 @@ export const MALE_CLIPS = {};
 export function installProfileClips(clips) {
   const extra = (key, text, speech) => { clips[key] = { lang: 'he-IL', text, speech }; };
   for (const [key, clip] of Object.entries(clips)) {
-    if (clip.lang !== 'he-IL' || /^(he-|letter-he-|number-|character-|clock-\d)/u.test(key)) continue;
+    if (clip.lang !== 'he-IL' || /^(he-|letter-he-|number-|character-|clock-\d|journey-story-|journey-context-|journey-chunk-)/u.test(key)) continue;
+    // Story narration and word models describe nouns and characters. Their
+    // grammatical gender does not depend on the child's form of address.
     // Word boundaries here are phonetic tokens, including punctuation. Do not
     // replace a feminine suffix inside an unrelated word.
     const speech = clip.speech.replace(/bʁuχˈa habaʔˈa/gu, 'baʁˈuχ habˈa').replace(/[^\s.,!?;:]+/gu, word => SOUNDS[word] || word);

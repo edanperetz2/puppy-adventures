@@ -1,0 +1,216 @@
+// Additional examples for the existing word workshop and letter lessons.
+// Chunk boundaries preserve graphemes and complete spoken syllables. In
+// particular, a consonant with silent sheva stays with its preceding vowel.
+export const EXPANDED_WORKSHOP_WORDS = [
+  { id: 'flower', level: 1, chunks: [{ text: 'פֶּ', speech: 'pˈe' }, { text: 'רַח', speech: 'ʁˈaχ' }] },
+  { id: 'house', level: 1, chunks: [{ text: 'בַּ', speech: 'bˈa' }, { text: 'יִת', speech: 'jˈit' }] },
+  { id: 'cow', level: 1, chunks: [{ text: 'פָּ', speech: 'pˈa' }, { text: 'רָה', speech: 'ʁˈa' }] },
+  { id: 'lion', level: 1, chunks: [{ text: 'אַרְ', speech: 'ʔˈaʁ' }, { text: 'יֵה', speech: 'jˈe' }] },
+  { id: 'camel', level: 1, chunks: [{ text: 'גָּ', speech: 'ɡˈa' }, { text: 'מָל', speech: 'mˈal' }] },
+  { id: 'leopard', level: 1, chunks: [{ text: 'נָ', speech: 'nˈa' }, { text: 'מֵר', speech: 'mˈeʁ' }] },
+  { id: 'snake', level: 1, chunks: [{ text: 'נָ', speech: 'nˈa' }, { text: 'חָשׁ', speech: 'χˈaʃ' }] },
+  { id: 'pear', level: 1, chunks: [{ text: 'אַ', speech: 'ʔˈa' }, { text: 'גָּס', speech: 'ɡˈas' }] },
+  { id: 'carrot', level: 1, chunks: [{ text: 'גֶּ', speech: 'ɡˈe' }, { text: 'זֶר', speech: 'zˈeʁ' }] },
+  { id: 'bread', level: 1, chunks: [{ text: 'לֶ', speech: 'lˈe' }, { text: 'חֶם', speech: 'χˈem' }] },
+  { id: 'bed', level: 1, chunks: [{ text: 'מִ', speech: 'mˈi' }, { text: 'טָּה', speech: 'tˈa' }] },
+  { id: 'door', level: 1, chunks: [{ text: 'דֶּ', speech: 'dˈe' }, { text: 'לֶת', speech: 'lˈet' }] },
+
+  { id: 'duck', level: 2, chunks: [{ text: 'בַּרְ', speech: 'bˈaʁ' }, { text: 'וָז', speech: 'vˈaz' }] },
+  { id: 'mouse', level: 2, chunks: [{ text: 'עַכְ', speech: 'ʔˈaχ' }, { text: 'בָּר', speech: 'bˈaʁ' }] },
+  { id: 'panda', level: 2, chunks: [{ text: 'פַּנְ', speech: 'pˈan' }, { text: 'דָּה', speech: 'dˈa' }] },
+  { id: 'eagle', level: 2, chunks: [{ text: 'נֶ', speech: 'nˈe' }, { text: 'שֶׁר', speech: 'ʃˈeʁ' }] },
+  { id: 'crocodile', level: 2, chunks: [{ text: 'תַּ', speech: 'tˈa' }, { text: 'נִּין', speech: 'nˈin' }] },
+  { id: 'parrot', level: 2, chunks: [{ text: 'תֻּ', speech: 'tˈu' }, { text: 'כִּי', speech: 'kˈi' }] },
+  { id: 'orange-fruit', level: 2, chunks: [{ text: 'תַּ', speech: 'tˈa' }, { text: 'פּוּז', speech: 'pˈuz' }] },
+  { id: 'lemon', level: 2, chunks: [{ text: 'לִי', speech: 'lˈi' }, { text: 'מוֹן', speech: 'mˈon' }] },
+  { id: 'melon', level: 2, chunks: [{ text: 'מֵ', speech: 'mˈe' }, { text: 'לוֹן', speech: 'lˈon' }] },
+  { id: 'onion', level: 2, chunks: [{ text: 'בָּ', speech: 'bˈa' }, { text: 'צָל', speech: 'tsˈal' }] },
+  { id: 'lettuce', level: 2, chunks: [{ text: 'חַ', speech: 'χˈa' }, { text: 'סָּה', speech: 'sˈa' }] },
+  { id: 'soap', level: 2, chunks: [{ text: 'סַ', speech: 'sˈa' }, { text: 'בּוֹן', speech: 'bˈon' }] },
+
+  { id: 'grapes', level: 3, chunks: [{ text: 'עֲ', speech: 'ʔˈa' }, { text: 'נָ', speech: 'nˈa' }, { text: 'בִים', speech: 'vˈim' }] },
+  { id: 'pineapple', level: 3, chunks: [{ text: 'אָ', speech: 'ʔˈa' }, { text: 'נָ', speech: 'nˈa' }, { text: 'נָס', speech: 'nˈas' }] },
+  { id: 'spider', level: 3, chunks: [{ text: 'עַ', speech: 'ʔˈa' }, { text: 'כָּ', speech: 'kˈa' }, { text: 'בִישׁ', speech: 'vˈiʃ' }] },
+  { id: 'bat', level: 3, chunks: [{ text: 'עֲ', speech: 'ʔˈa' }, { text: 'טַ', speech: 'tˈa' }, { text: 'לֵּף', speech: 'lˈef' }] },
+  { id: 'peach', level: 3, chunks: [{ text: 'אֲ', speech: 'ʔˈa' }, { text: 'פַרְ', speech: 'fˈaʁ' }, { text: 'סֵק', speech: 'sˈek' }] },
+  { id: 'bell', level: 3, chunks: [{ text: 'פַּ', speech: 'pˈa' }, { text: 'עֲ', speech: 'ʔˈa' }, { text: 'מוֹן', speech: 'mˈon' }] },
+  { id: 'plate', level: 3, chunks: [{ text: 'צַ', speech: 'tsˈa' }, { text: 'לַּ', speech: 'lˈa' }, { text: 'חַת', speech: 'χˈat' }] },
+  { id: 'pan', level: 3, chunks: [{ text: 'מַ', speech: 'mˈa' }, { text: 'חֲ', speech: 'χˈa' }, { text: 'בַת', speech: 'vˈat' }] },
+  { id: 'camera', level: 3, chunks: [{ text: 'מַצְ', speech: 'mˈats' }, { text: 'לֵ', speech: 'lˈe' }, { text: 'מָה', speech: 'mˈa' }] },
+  { id: 'train', level: 3, chunks: [{ text: 'רַ', speech: 'ʁˈa' }, { text: 'כֶּ', speech: 'kˈe' }, { text: 'בֶת', speech: 'vˈet' }] },
+  { id: 'gift', level: 3, chunks: [{ text: 'מַ', speech: 'mˈa' }, { text: 'תָּ', speech: 'tˈa' }, { text: 'נָה', speech: 'nˈa' }] },
+  { id: 'socks', level: 3, chunks: [{ text: 'גַּרְ', speech: 'ɡˈaʁ' }, { text: 'בַּ', speech: 'bˈa' }, { text: 'יִם', speech: 'jˈim' }] },
+
+  { id: 'avocado', level: 4, chunks: [{ text: 'אָ', speech: 'ʔˈa' }, { text: 'בוֹ', speech: 'vˈo' }, { text: 'קָ', speech: 'kˈa' }, { text: 'דוֹ', speech: 'dˈo' }] },
+  { id: 'scissors', level: 4, chunks: [{ text: 'מִסְ', speech: 'mˈis' }, { text: 'פָּ', speech: 'pˈa' }, { text: 'רַ', speech: 'ʁˈa' }, { text: 'יִם', speech: 'jˈim' }] },
+  { id: 'umbrella', level: 4, chunks: [{ text: 'מִטְ', speech: 'mˈit' }, { text: 'רִ', speech: 'ʁˈi' }, { text: 'יָּה', speech: 'jˈa' }] },
+  { id: 'dinosaur', level: 4, chunks: [{ text: 'דִּי', speech: 'dˈi' }, { text: 'נוֹ', speech: 'nˈo' }, { text: 'זָ', speech: 'zˈa' }, { text: 'אוּר', speech: 'ˈuʁ' }] },
+  { id: 'bulldozer', level: 4, chunks: [{ text: 'בּוּלְ', speech: 'bˈul' }, { text: 'דּוֹ', speech: 'dˈo' }, { text: 'זֶר', speech: 'zˈeʁ' }] },
+  { id: 'telescope', level: 4, chunks: [{ text: 'טֵ', speech: 'tˈe' }, { text: 'לֶסְ', speech: 'lˈes' }, { text: 'קוֹפּ', speech: 'kˈop' }] },
+  { id: 'pants', level: 4, chunks: [{ text: 'מִכְ', speech: 'mˈiχ' }, { text: 'נָ', speech: 'nˈa' }, { text: 'סַ', speech: 'sˈa' }, { text: 'יִם', speech: 'jˈim' }] },
+  { id: 'necklace', level: 4, chunks: [{ text: 'שַׁרְ', speech: 'ʃˈaʁ' }, { text: 'שֶׁ', speech: 'ʃˈe' }, { text: 'רֶת', speech: 'ʁˈet' }] },
+  { id: 'notebook', level: 4, chunks: [{ text: 'מַחְ', speech: 'mˈaχ' }, { text: 'בֶּ', speech: 'bˈe' }, { text: 'רֶת', speech: 'ʁˈet' }] },
+  { id: 'suitcase', level: 4, chunks: [{ text: 'מִזְ', speech: 'mˈiz' }, { text: 'וָ', speech: 'vˈa' }, { text: 'דָה', speech: 'dˈa' }] },
+  { id: 'spaceship', level: 4, chunks: [{ text: 'חֲ', speech: 'χˈa' }, { text: 'לָ', speech: 'lˈa' }, { text: 'לִית', speech: 'lˈit' }] },
+  // Vocal sheva is read inside a complete two-syllable chunk, never alone.
+  { id: 'refrigerator', level: 4, chunks: [{ text: 'מְקָ', speech: 'mekˈa' }, { text: 'רֵר', speech: 'ʁˈeʁ' }] },
+];
+
+const workshopText = Object.fromEntries(EXPANDED_WORKSHOP_WORDS.map(word => [word.id, word.chunks.map(chunk => chunk.text).join('').normalize('NFC')]));
+const context = (id, before, after, speech) => ({
+  before, after,
+  text: [before, workshopText[id], after].filter(Boolean).join(' ').replace(/ ([.,!?])/gu, '$1'),
+  speech,
+});
+
+// before/after keep the existing missing-word sentence mode intact. text is
+// also supplied for recording and for checking the complete pointed sentence.
+export const EXPANDED_WORD_CONTEXTS = {
+  flower: context('flower', '', 'צוֹמֵחַ בַּגִּנָּה.', 'pˈeʁaχ tsomˈeaχ baɡinˈa.'),
+  house: context('house', 'גָּרִים בְּתוֹךְ', '.', 'ɡaʁˈim betˈoχ bˈajit.'),
+  cow: context('cow', '', 'אוֹכֶלֶת עֵשֶׂב.', 'paʁˈa ʔoχˈelet ʔˈesev.'),
+  lion: context('lion', '', 'הוּא חַיַּת בַּר.', 'ʔaʁjˈe hˈu χajˈat bˈaʁ.'),
+  camel: context('camel', '', 'הוֹלֵךְ בַּמִּדְבָּר.', 'ɡamˈal holˈeχ bamidbˈaʁ.'),
+  leopard: context('leopard', '', 'הוּא חַיַּת בַּר.', 'namˈeʁ hˈu χajˈat bˈaʁ.'),
+  snake: context('snake', '', 'זוֹחֵל עַל הָאֲדָמָה.', 'naχˈaʃ zoχˈel ʔˈal haʔadamˈa.'),
+  pear: context('pear', '', 'הוּא פְּרִי.', 'ʔaɡˈas hˈu pʁˈi.'),
+  carrot: context('carrot', '', 'הוּא יָרָק.', 'ɡˈezeʁ hˈu jaʁˈak.'),
+  bread: context('bread', 'אוֹכְלִים', '.', 'ʔoχlˈim lˈeχem.'),
+  bed: context('bed', 'יְשֵׁנִים עַל', '.', 'jeʃenˈim ʔˈal mitˈa.'),
+  door: context('door', 'פּוֹתְחִים', 'וְנִכְנָסִים.', 'potχˈim dˈelet veniχnasˈim.'),
+  duck: context('duck', '', 'שׂוֹחֶה בַּמַּיִם.', 'baʁvˈaz soχˈe bamˈajim.'),
+  mouse: context('mouse', '', 'הוּא חַיָּה קְטַנָּה.', 'ʔaχbˈaʁ hˈu χajˈa ktanˈa.'),
+  panda: context('panda', '', 'הִיא חַיַּת בַּר.', 'pˈanda hˈi χajˈat bˈaʁ.'),
+  eagle: context('eagle', '', 'עָף בַּשָּׁמַיִם.', 'nˈeʃeʁ ʔˈaf baʃamˈajim.'),
+  crocodile: context('crocodile', '', 'שׂוֹחֶה בַּנָּהָר.', 'tanˈin soχˈe banahˈaʁ.'),
+  parrot: context('parrot', '', 'הוּא צִפּוֹר.', 'tˈuki hˈu tsipˈoʁ.'),
+  'orange-fruit': context('orange-fruit', '', 'הוּא פְּרִי.', 'tapˈuz hˈu pʁˈi.'),
+  lemon: context('lemon', '', 'הוּא פְּרִי חָמוּץ.', 'limˈon hˈu pʁˈi χamˈuts.'),
+  melon: context('melon', '', 'הוּא פְּרִי מָתוֹק.', 'melˈon hˈu pʁˈi matˈok.'),
+  onion: context('onion', '', 'הוּא יָרָק.', 'batsˈal hˈu jaʁˈak.'),
+  lettuce: context('lettuce', 'מְכִינִים סָלָט עִם', '.', 'meχinˈim salˈat ʔˈim χasˈa.'),
+  soap: context('soap', 'רוֹחֲצִים יָדַיִם עִם', '.', 'ʁoχatsˈim jadˈajim ʔˈim sabˈon.'),
+  grapes: context('grapes', '', 'הֵם פֵּרוֹת.', 'ʔanavˈim hˈem peʁˈot.'),
+  pineapple: context('pineapple', '', 'הוּא פְּרִי.', 'ʔananˈas hˈu pʁˈi.'),
+  spider: context('spider', '', 'בּוֹנֶה רֶשֶׁת.', 'ʔakavˈiʃ bonˈe ʁˈeʃet.'),
+  bat: context('bat', '', 'עָף בַּלַּיְלָה.', 'ʔatalˈef ʔˈaf balˈajla.'),
+  peach: context('peach', '', 'הוּא פְּרִי.', 'ʔafaʁsˈek hˈu pʁˈi.'),
+  bell: context('bell', '', 'מַשְׁמִיעַ קוֹל.', 'paʔamˈon maʃmˈia kˈol.'),
+  plate: context('plate', 'מַנִּיחִים אֹכֶל עַל', '.', 'maniχˈim ʔˈoχel ʔˈal tsalˈaχat.'),
+  pan: context('pan', 'מְבַשְּׁלִים בְּתוֹךְ', '.', 'mevaʃlˈim betˈoχ maχavˈat.'),
+  camera: context('camera', '', 'מְצַלֶּמֶת תְּמוּנוֹת.', 'matslemˈa metsalˈemet tmunˈot.'),
+  train: context('train', '', 'נוֹסַעַת עַל מְסִלָּה.', 'ʁakˈevet nosˈaʔat ʔˈal mesilˈa.'),
+  gift: context('gift', 'נוֹתְנִים', 'לְחָבֵר.', 'notnˈim matanˈa leχavˈeʁ.'),
+  socks: context('socks', 'לוֹבְשִׁים', 'עַל הָרַגְלַיִם.', 'lovʃˈim ɡaʁbˈajim ʔˈal haʁaɡlˈajim.'),
+  avocado: context('avocado', '', 'הוּא פְּרִי.', 'ʔavokˈado hˈu pʁˈi.'),
+  scissors: context('scissors', 'גוֹזְרִים נְיָר עִם', '.', 'ɡozʁˈim nejˈaʁ ʔˈim mispaʁˈajim.'),
+  umbrella: context('umbrella', '', 'מְגִנָּה מִן הַגֶּשֶׁם.', 'mitʁijˈa meɡinˈa mˈin haɡˈeʃem.'),
+  dinosaur: context('dinosaur', '', 'חַי לִפְנֵי זְמַן רַב.', 'dinozˈauʁ χˈaj lifnˈej zmˈan ʁˈav.'),
+  bulldozer: context('bulldozer', '', 'מֵזִיז אֲדָמָה.', 'buldˈozeʁ mezˈiz ʔadamˈa.'),
+  telescope: context('telescope', 'מַבִּיטִים בַּשָּׁמַיִם עִם', '.', 'mabitˈim baʃamˈajim ʔˈim teleskˈop.'),
+  pants: context('pants', 'לוֹבְשִׁים', '.', 'lovʃˈim miχnasˈajim.'),
+  necklace: context('necklace', '', 'הִיא תַּכְשִׁיט.', 'ʃaʁʃˈeʁet hˈi taχʃˈit.'),
+  notebook: context('notebook', 'בְּתוֹךְ', 'יֵשׁ דַּפִּים.', 'betˈoχ maχbˈeʁet jˈeʃ dapˈim.'),
+  suitcase: context('suitcase', 'אוֹרְזִים בְּגָדִים בְּתוֹךְ', '.', 'ʔoʁzˈim bɡadˈim betˈoχ mizvadˈa.'),
+  spaceship: context('spaceship', '', 'טָסָה רָחוֹק.', 'χalalˈit tˈasa ʁaχˈok.'),
+  refrigerator: context('refrigerator', 'שׁוֹמְרִים אֹכֶל בְּתוֹךְ', '.', 'ʃomʁˈim ʔˈoχel betˈoχ mekaʁˈeʁ.'),
+};
+
+// A few initials lack two concrete pictures in the established word bank.
+// These nouns receive dedicated pictures; no unrelated picture is relabeled.
+export const SUPPLEMENTAL_LETTER_WORDS = [
+  { id: 'rose', he: 'ורד', pointed: 'וֶרֶד', ipa: 'vˈeʁed', en: 'ROSE', level: 1, theme: 'nature' },
+  { id: 'curtain', he: 'וילון', pointed: 'וִילוֹן', ipa: 'vilˈon', en: 'CURTAIN', level: 3, theme: 'home' },
+  { id: 'king', he: 'מלך', pointed: 'מֶלֶךְ', ipa: 'mˈeleχ', en: 'KING', level: 1, theme: 'hobbies' },
+  { id: 'arrow', he: 'חץ', pointed: 'חֵץ', ipa: 'χˈets', en: 'ARROW', level: 1, theme: 'hobbies' },
+  { id: 'queen', he: 'מלכה', pointed: 'מַלְכָּה', ipa: 'malkˈa', en: 'QUEEN', level: 2, theme: 'hobbies' },
+  { id: 'quilt', he: 'שמיכת טלאים', pointed: 'שְׂמִיכַת טְלָאִים', ipa: 'smiχˈat tlaʔˈim', en: 'QUILT', level: 5, theme: 'home' },
+  { id: 'unicorn', he: 'חד-קרן', pointed: 'חַד־קֶרֶן', ipa: 'χˈad kˈeʁen', en: 'UNICORN', level: 4, theme: 'animals' },
+  { id: 'vase', he: 'אגרטל', pointed: 'אֲגַרְטָל', ipa: 'ʔaɡaʁtˈal', en: 'VASE', level: 3, theme: 'home' },
+  { id: 'xylophone', he: 'קסילופון', pointed: 'קְסִילוֹפוֹן', ipa: 'ksilofˈon', en: 'XYLOPHONE', level: 4, theme: 'hobbies' },
+  { id: 'xray', he: 'צילום רנטגן', pointed: 'צִלּוּם רֶנְטְגֶן', ipa: 'tsilˈum ʁˈentɡen', en: 'X-RAY', level: 5, theme: 'body' },
+  { id: 'jellyfish', he: 'מדוזה', pointed: 'מֶדוּזָה', ipa: 'medˈuza', en: 'JELLYFISH', level: 3, theme: 'animals' },
+  { id: 'jar', he: 'צנצנת', pointed: 'צִנְצֶנֶת', ipa: 'tsintsˈenet', en: 'JAR', level: 3, theme: 'home' },
+  { id: 'zipper', he: 'רוכסן', pointed: 'רוֹכְסָן', ipa: 'ʁoχsˈan', en: 'ZIPPER', level: 3, theme: 'clothing' },
+];
+
+const he = (id, text, position = 'start') => ({ id, text, clip: `he-${id}`, position });
+const existingEnglish = new Set([
+  'dog', 'cat', 'fish', 'bird', 'rabbit', 'horse', 'bear', 'duck',
+  'lion', 'elephant', 'giraffe', 'monkey', 'mouse', 'fox', 'tiger', 'cow', 'pig',
+  'sheep', 'goat', 'camel', 'zebra', 'owl', 'penguin', 'parrot', 'chick',
+  'turtle', 'frog', 'snake', 'whale', 'dolphin', 'bee', 'ant', 'spider',
+  'apple', 'banana', 'orange-fruit', 'pear', 'bread', 'egg', 'milk', 'book',
+  'pencil', 'chair', 'bed', 'house', 'flower', 'tree', 'sun', 'moon', 'star',
+  'ball', 'car', 'bus', 'train', 'kite', 'hat', 'shoe',
+]);
+const en = (id, text, clip = existingEnglish.has(id) ? `en-${id}` : `letter-example-en-${id}`) => ({ id, text, clip, position: 'start' });
+
+// All examples begin with their letter, except Hebrew final forms, which end
+// with it. Each picture is the named object. The yellow butterfly already has
+// its own color scene, so Y can use a truthful second illustrated example.
+export const LETTER_EXAMPLES = {
+  'he-alef': [he('rabbit', 'אַרְנָב'), he('lion', 'אַרְיֵה'), he('pineapple', 'אָנָנָס'), he('pear', 'אַגָּס')],
+  'he-bet': [he('house', 'בַּיִת'), he('duck', 'בַּרְוָז'), he('banana', 'בָּנָנָה'), he('egg', 'בֵּיצָה')],
+  'he-gimel': [he('guitar', 'גִּיטָרָה'), he('camel', 'גָּמָל'), he('carrot', 'גֶּזֶר'), he('bridge', 'גֶּשֶׁר')],
+  'he-dalet': [he('fish', 'דָּג'), he('bear', 'דֹּב'), he('door', 'דֶּלֶת'), he('glue', 'דֶּבֶק')],
+  'he-he': [he('mountain', 'הַר'), he('burger', 'הַמְבּוּרְגֶּר')],
+  'he-vav': [he('rose', 'וֶרֶד'), he('curtain', 'וִילוֹן')],
+  'he-zayin': [he('zebra', 'זֶבְּרָה'), he('fly', 'זְבוּב'), he('olive', 'זַיִת')],
+  'he-het': [he('cat', 'חָתוּל'), he('window', 'חַלּוֹן'), he('lettuce', 'חַסָּה'), he('milk', 'חָלָב')],
+  'he-tet': [he('peacock', 'טַוָּס'), he('ring', 'טַבַּעַת'), he('phone', 'טֵלֵפוֹן'), he('tractor', 'טְרַקְטוֹר')],
+  'he-yud': [he('sea', 'יָם'), he('hand', 'יָד'), he('moon', 'יָרֵחַ'), he('owl', 'יַנְשׁוּף')],
+  'he-kaf': [he('dog', 'כֶּלֶב'), he('ball', 'כַּדּוּר'), he('hat', 'כּוֹבַע'), he('crown', 'כֶּתֶר')],
+  'he-lamed': [he('bread', 'לֶחֶם'), he('heart', 'לֵב'), he('lemon', 'לִימוֹן'), he('tongue', 'לָשׁוֹן')],
+  'he-mem': [he('bed', 'מִטָּה'), he('soup', 'מָרָק'), he('airplane', 'מָטוֹס'), he('key', 'מַפְתֵּחַ')],
+  'he-nun': [he('snake', 'נָחָשׁ'), he('leopard', 'נָמֵר'), he('shoe', 'נַעַל'), he('candle', 'נֵר')],
+  'he-samekh': [he('horse', 'סוּס'), he('basket', 'סַל'), he('book', 'סֵפֶר'), he('soap', 'סַבּוֹן')],
+  'he-ayin': [he('tree', 'עֵץ'), he('goat', 'עֵז'), he('grapes', 'עֲנָבִים'), he('cloud', 'עָנָן')],
+  'he-pe': [he('flower', 'פֶּרַח'), he('butterfly', 'פַּרְפַּר'), he('elephant', 'פִּיל'), he('cow', 'פָּרָה')],
+  'he-tsadi': [he('turtle', 'צָב'), he('bird', 'צִפּוֹר'), he('shell', 'צֶדֶף'), he('plate', 'צַלַּחַת')],
+  'he-kof': [he('monkey', 'קוֹף'), he('kiwi', 'קִיוִי'), he('rainbow', 'קֶשֶׁת'), he('hedgehog', 'קִפּוֹד')],
+  'he-resh': [he('foot', 'רֶגֶל'), he('train', 'רַכֶּבֶת'), he('robot', 'רוֹבּוֹט'), he('wind', 'רוּחַ')],
+  'he-shin': [he('sun', 'שֶׁמֶשׁ'), he('table', 'שֻׁלְחָן'), he('garlic', 'שׁוּם'), he('snow', 'שֶׁלֶג')],
+  'he-tav': [he('apple', 'תַּפּוּחַ'), he('strawberry', 'תּוּת'), he('parrot', 'תֻּכִּי'), he('corn', 'תִּירָס')],
+  'he-kaf-final': [he('pretzel', 'כַּעַךְ', 'end'), he('king', 'מֶלֶךְ', 'end')],
+  'he-mem-final': [he('sea', 'יָם', 'end'), he('grapes', 'עֲנָבִים', 'end'), he('socks', 'גַּרְבַּיִם', 'end'), he('garlic', 'שׁוּם', 'end')],
+  'he-nun-final': [he('window', 'חַלּוֹן', 'end'), he('lemon', 'לִימוֹן', 'end'), he('balloon', 'בַּלּוֹן', 'end'), he('table', 'שֻׁלְחָן', 'end')],
+  'he-pe-final': [he('monkey', 'קוֹף', 'end'), he('nose', 'אַף', 'end'), he('spoon', 'כַּף', 'end'), he('drum', 'תֹּף', 'end')],
+  'he-tsadi-final': [he('tree', 'עֵץ', 'end'), he('arrow', 'חֵץ', 'end')],
+
+  'en-a': [en('apple', 'APPLE'), en('ant', 'ANT'), en('airplane', 'AIRPLANE'), en('anchor', 'ANCHOR')],
+  'en-b': [en('ball', 'BALL'), en('bear', 'BEAR'), en('banana', 'BANANA'), en('bird', 'BIRD')],
+  'en-c': [en('cat', 'CAT'), en('cow', 'COW'), en('car', 'CAR'), en('cake', 'CAKE')],
+  'en-d': [en('dog', 'DOG'), en('duck', 'DUCK'), en('door', 'DOOR'), en('drum', 'DRUM')],
+  'en-e': [en('elephant', 'ELEPHANT'), en('egg', 'EGG'), en('bald-eagle', 'EAGLE', 'letter-example-en-eagle'), en('eye', 'EYE')],
+  'en-f': [en('fish', 'FISH'), en('flower', 'FLOWER'), en('frog', 'FROG'), en('fox', 'FOX')],
+  'en-g': [en('giraffe', 'GIRAFFE'), en('goat', 'GOAT'), en('grapes', 'GRAPES'), en('guitar', 'GUITAR')],
+  'en-h': [en('horse', 'HORSE'), en('house', 'HOUSE'), en('hat', 'HAT'), en('heart', 'HEART')],
+  'en-i': [en('ice-cream', 'ICE CREAM'), en('ant', 'INSECT', 'journey-en-insect')],
+  'en-j': [en('jellyfish', 'JELLYFISH'), en('jar', 'JAR')],
+  'en-k': [en('kite', 'KITE'), en('kangaroo', 'KANGAROO'), en('key', 'KEY'), en('kiwi', 'KIWI')],
+  'en-l': [en('lion', 'LION'), en('leaf', 'LEAF'), en('lamp', 'LAMP'), en('lemon', 'LEMON')],
+  'en-m': [en('mouse', 'MOUSE'), en('monkey', 'MONKEY'), en('moon', 'MOON'), en('milk', 'MILK')],
+  'en-n': [en('nose', 'NOSE', 'journey-en-nose'), en('notebook', 'NOTEBOOK'), en('necklace', 'NECKLACE')],
+  'en-o': [en('owl', 'OWL'), en('orange-fruit', 'ORANGE'), en('octopus', 'OCTOPUS', 'journey-en-octopus'), en('onion', 'ONION')],
+  'en-p': [en('panda', 'PANDA'), en('penguin', 'PENGUIN'), en('pig', 'PIG'), en('pizza', 'PIZZA')],
+  'en-q': [en('queen', 'QUEEN'), en('quilt', 'QUILT')],
+  'en-r': [en('rabbit', 'RABBIT'), en('rainbow', 'RAINBOW'), en('robot', 'ROBOT'), en('rose', 'ROSE')],
+  'en-s': [en('sun', 'SUN'), en('star', 'STAR'), en('snail', 'SNAIL'), en('snake', 'SNAKE')],
+  'en-t': [en('tiger', 'TIGER'), en('turtle', 'TURTLE'), en('train', 'TRAIN'), en('tree', 'TREE')],
+  'en-u': [en('umbrella', 'UMBRELLA', 'journey-en-umbrella'), en('unicorn', 'UNICORN')],
+  'en-v': [en('violin', 'VIOLIN', 'journey-en-violin'), en('vase', 'VASE')],
+  'en-w': [en('whale', 'WHALE'), en('watermelon', 'WATERMELON'), en('window', 'WINDOW'), en('worm', 'WORM')],
+  'en-x': [en('xylophone', 'XYLOPHONE'), en('xray', 'X-RAY')],
+  'en-y': [en('yoyo', 'YO-YO'), en('color-butterfly-yellow', 'YELLOW BUTTERFLY')],
+  'en-z': [en('zebra', 'ZEBRA'), en('zipper', 'ZIPPER')],
+};
+
+// Explicit recording input for newly needed example audio. The existing
+// en-* and journey-en-* clips are reused above whenever their wording matches.
+export const LETTER_EXAMPLE_CLIPS = Object.fromEntries([
+  ...SUPPLEMENTAL_LETTER_WORDS.map(word => [`he-${word.id}`, { lang: 'he-IL', text: word.pointed, speech: `hamilˈa hˈi ${word.ipa}.` }]),
+  ...Object.entries(LETTER_EXAMPLES).filter(([letter]) => letter.startsWith('en-')).flatMap(([, examples]) => examples)
+    .filter(example => example.clip.startsWith('letter-example-en-'))
+    .map(example => [example.clip, { lang: 'en-US', text: example.text.toLowerCase() }]),
+]);

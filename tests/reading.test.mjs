@@ -11,8 +11,8 @@ function seeded(seed) { seed = Math.imul(seed + 1, 0x9e3779b1) >>> 0; return () 
 const lettersIn = text => [...text.matchAll(/[א-ת]/gu)].length;
 
 test('Ten reading stages have illustrated words, phrases and sentences with complete Hebrew pronunciation', () => {
-  assert.equal(WORDS.length, 416);
-  assert.equal(WORDS.filter(word => !word.scene).length, 276);
+  assert.equal(WORDS.length, 1098);
+  assert.equal(WORDS.filter(word => !word.scene).length, 389);
   assert.equal(new Set(WORDS.map(word => word.he)).size, WORDS.length, 'Repeated spellings must not inflate the vocabulary');
   assert.equal(new Set(WORDS.map(word => word.id)).size, WORDS.length);
   assert.deepEqual(Object.values(READING_LEVELS).filter(stage => stage.number).map(stage => stage.number), Array.from({ length: 10 }, (_, i) => i + 1));
@@ -111,7 +111,8 @@ test('Chosen stages keep targets and distractors at that stage, with ten varied 
   for (const [key, stage] of Object.entries(READING_LEVELS)) {
     const pool = readingWords(key), seen = new Set();
     let practice = sanitizeReadingPractice(null);
-    for (let seed = 0; seed < 120; seed++) {
+    const rounds=stage.level===null?Math.max(...Array.from({length:10},(_,i)=>WORDS.filter(w=>w.level===i+1).length))+2:Math.ceil(pool.length/10)+2;
+    for (let seed = 0; seed < rounds; seed++) {
       const questions = createSession('hebrew', { ...DEFAULT_SETTINGS, reading: key, readingRecent: practice.recent[key] }, seeded(seed));
       assert.equal(questions.length, SESSION_LENGTH);
       assert.equal(new Set(questions.map(q => q.answer)).size, Math.min(SESSION_LENGTH, pool.length));

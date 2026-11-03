@@ -49,13 +49,13 @@ test('English progresses from familiar animals, basic colors and small numbers w
     const questions = createSession('english', { englishMax: max }, seeded(seed));
     const animals = questions.filter(q => q.kind === 'animal').map(q => q.answer);
     assert.ok(['dog', 'cat', 'fish'].includes(animals[0]));
-    assert.ok(animals.slice(1, 3).every(id => ['bird', 'duck', 'bear'].includes(id)));
-    assert.ok(['horse', 'rabbit'].includes(animals[3]));
+    assert.ok(animals.slice(1, 3).every(id => ['bird', 'duck', 'bear','horse','rabbit'].includes(id)));
+    assert.equal(animals[3],'lion','The classic round adds only one animal beyond its original familiar set');
     assert.equal(new Set(animals).size, 4);
     const colors = questions.filter(q => q.kind === 'color').map(q => q.answer);
     assert.ok(['red', 'blue', 'yellow'].includes(colors[0]));
-    assert.ok(['green', 'pink'].includes(colors[1]));
-    assert.ok(['purple', 'orange'].includes(colors[2]));
+    assert.ok(colors.slice(1).every(id=>['green','pink','purple','orange'].includes(id)));
+    assert.equal(new Set(colors).size,3);
     const numbers = questions.filter(q => q.kind === 'number').map(q => q.target.number);
     assert.ok(numbers[0] >= 1 && numbers[0] <= 3);
     assert.ok(numbers[1] >= 4 && numbers[1] <= 6);
@@ -66,7 +66,8 @@ test('English progresses from familiar animals, basic colors and small numbers w
 test('Arithmetic never drops back to easier sums, reaches the chosen cap and avoids duplicate additions', () => {
   for (const max of [5, 10, 20]) for (let seed = 0; seed < 80; seed++) {
     const questions = createSession('math', { mathMax: max }, seeded(seed));
-    assert.deepEqual(questions.slice(0, 3).map(q => [q.type, q.total]), [['count', 2], ['count', 3], ['count', 4]]);
+    assert.ok(questions.slice(0,3).every(q=>q.type==='count'&&q.total>=1&&q.total<=4));
+    assert.equal(new Set(questions.slice(0,3).map(q=>q.total)).size,3);
     const additions = questions.slice(3);
     assert.equal(new Set(additions.map(q => `${q.a}+${q.b}`)).size, 7);
     assert.ok(additions.every(q => q.type === 'add' && q.a + q.b === q.total && q.total <= max));

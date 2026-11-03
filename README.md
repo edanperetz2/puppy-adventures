@@ -4,6 +4,16 @@ A gentle learning game for phones, tablets and computers. Original illustrated p
 
 **Play:** [puppy-adventures.vercel.app](https://puppy-adventures.vercel.app)
 
+## Version 2.1 · A larger practice library
+
+The existing paths now contain 1,098 illustrated Hebrew targets (389 words and 709 phrases/sentences), 64 workshop words, eight playable ten-page stories, 67 single spoken English words, 20 color/object pairs, 20 initial-sound examples, and 30 optional short English reading words. The 53 real letters have 186 picture/word examples across their existing recognition and writing paths. Their original letter forms and character identities remain intact.
+
+Maths now varies its counting pictures and addition splits. Object activities cover 190 missing-part combinations up to 20 and 91 tens-and-units targets from 10 to 100, while respecting the existing parent limits on other paths. Clock teaching draws from 142 exercises; a visit uses at most ten, keeps the initial explanations, and saves its exact chosen examples. Character rounds rotate through all eligible distractor pairs instead of repeatedly using the same two names.
+
+Supported English still introduces one fresh word per round, with a model before independent practice. Adventures retain their ten steps and increasing difficulty. Of the 1,022 original recordings, 1,020 stay byte-identical; parrot and pineapple receive reviewed pronunciation scripts and a complete word model. Newly added standalone Hebrew words use a short explicit-phoneme carrier so their complete pronunciation is heard. New pictures are pinned, credited Twemoji SVGs or original SVG drawings, available offline. The language review also corrects pineapple and jellyfish pointing and gives Hebrew נשר a vulture picture, keeping the bald eagle separate for English EAGLE. Primary review sources are recorded in scripts/curriculum-expansion-review.json.
+
+Existing family codes, profiles, achievements and the 1,000-sticker album remain stable. Learning-history capacity increases from 2,048 to 8,192 entries through an additive migration; the album RPC and reward rules are unchanged. Compatibility fixtures check original scripts, recording metadata, all prior journey types and the original clock exercises. Database capacity, retry safety, previous entries and park data are checked with an isolated rolled-back fixture.
+
 ## Version 2.0 · Learning journeys
 
 The original albums, 1,000 sticker IDs, five shared reward domains, family codes and separate child profiles remain stable. This update adds:

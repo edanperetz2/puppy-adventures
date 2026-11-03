@@ -1,4 +1,5 @@
 import { EXTRA_READING_WORDS } from './vocabulary-phrases.js';
+import { EXPANDED_READING_WORDS } from './reading-expansion.js';
 
 // Curated language and scene facts stay together so every picture has one meaning.
 const entry = (id, he, pointed, level, family, scene) => ({ id, he, pointed, level, ...(family ? { family, scene } : {}) });
@@ -79,4 +80,4 @@ for (const [id, he, pointed, family, scene] of [
 
 ADVANCED_WORDS.push(...EXTRA_READING_WORDS);
 
-export const READING_SCENES = Object.freeze(Object.fromEntries(ADVANCED_WORDS.filter(word => word.scene).map(word => [word.id, Object.freeze(word.scene)])));
+export const READING_SCENES = Object.freeze(Object.fromEntries([...ADVANCED_WORDS,...EXPANDED_READING_WORDS].filter(word => word.scene).map(word => [word.id, Object.freeze(word.scene)])));

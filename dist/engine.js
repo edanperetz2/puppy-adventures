@@ -64,34 +64,40 @@ export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Mat
   if (mission === 'english') {
     const max = [10, 20].includes(settings.englishMax) ? settings.englishMax : 10;
     const select = (pool, ids) => shuffle(pool.filter(item => ids.includes(item.id)), rng);
-    const animals = [...select(ANIMALS, ['dog', 'cat', 'fish']).slice(0, 1), ...select(ANIMALS, ['bird', 'duck', 'bear']).slice(0, 2), ...select(ANIMALS, ['horse', 'rabbit']).slice(0, 1)];
-    const colors = [select(COLORS, ['red', 'blue', 'yellow'])[0], select(COLORS, ['green', 'pink'])[0], select(COLORS, ['purple', 'orange'])[0]];
+    const knownAnimals=ANIMALS.filter((a,index)=>index<8||settings.learning?.[`english:single:${a.id}`]?.independent>0);
+    const newAnimal=ANIMALS.find(a=>!knownAnimals.includes(a));
+    const animals = [...select(ANIMALS, ['dog', 'cat', 'fish']).slice(0, 1), ...choosePractice(knownAnimals.filter(a=>!['dog','cat','fish'].includes(a.id)),settings.learning||{},a=>`english:single:${a.id}`,2,Date.now(),rng)];
+    animals.push(newAnimal||choosePractice(knownAnimals.filter(a=>!animals.includes(a)),settings.learning||{},a=>`english:single:${a.id}`,1,Date.now(),rng)[0]);
+    const reviewColors=COLORS.filter((c,index)=>index<7||settings.learning?.[`english:single:${c.id}`]?.independent>0);
+    const colors = [select(COLORS, ['red', 'blue', 'yellow'])[0], ...choosePractice(reviewColors.filter(c=>!['red','blue','yellow'].includes(c.id)),settings.learning||{},c=>`english:single:${c.id}`,2,Date.now(),rng)];
     const numbers = [1 + Math.floor(rng() * 3), 4 + Math.floor(rng() * 3), 7 + Math.floor(rng() * (max - 6))];
     let animal = 0, color = 0, number = 0;
     return ['animal', 'color', 'number', 'animal', 'color', 'number', 'animal', 'animal', 'color', 'number'].map((kind, i) => {
       const n = kind === 'number' ? numbers[number++] : null;
       const target = kind === 'animal' ? animals[animal++] : kind === 'color' ? colors[color++] : { id: String(n), number: n, en: NUMBERS[n] };
-      const options = kind === 'number' ? numberOptions(n, max, rng, choiceCount(i)) : optionsFrom(kind === 'animal' ? ANIMALS : COLORS, target, rng, choiceCount(i));
+      const options = kind === 'number' ? numberOptions(n, max, rng, choiceCount(i)) : optionsFrom((kind === 'animal' ? ANIMALS : COLORS).filter(other=>other.id===target.id||distinctWordPictures(target,other)), target, rng, choiceCount(i));
       return { id: `en-${i}`, type: 'listen', kind, target, answer: target.id, options, phase: adventurePhase(i), prompt: 'listen', targetClip: `en-${target.id}`, hint: 'english-hint' };
     });
   }
   if (mission === 'math') {
     const max = [5, 10, 20].includes(settings.mathMax) ? settings.mathMax : 10;
-    const sums = Array.from({ length: SESSION_LENGTH - 3 }, (_, i) => Math.round(4 + (max - 4) * i / (SESSION_LENGTH - 4)));
+    const counts=shuffle(Array.from({length:Math.min(4,max-1)},(_,i)=>i+1),rng).slice(0,3).sort((a,b)=>a-b);
+    const first=Math.max(3,counts.at(-1));
+    const sums = Array.from({ length: SESSION_LENGTH - 3 }, (_, i) => i===6?max:Math.min(max,Math.round(first+(max-first)*(i+rng()*.7)/6)));
     const additions = [];
     for (const total of [...new Set(sums)]) {
       const count = sums.filter(n => n === total).length;
-      const pairs = shuffle(Array.from({ length: total - 1 }, (_, i) => [i + 1, total - i - 1]), rng).sort((a, b) => Math.min(...a) - Math.min(...b) || reviewPriority(settings.learning?.[`math:add:${b[0]}:${b[1]}`]) - reviewPriority(settings.learning?.[`math:add:${a[0]}:${a[1]}`]));
+      const pairs = choosePractice(Array.from({ length: total - 1 }, (_, i) => [i + 1, total - i - 1]),settings.learning||{},p=>`math:add:${p[0]}:${p[1]}`,Math.min(count,total-1),Date.now(),rng).sort((a,b)=>Math.min(...a)-Math.min(...b));
       for (let i = 0; i < count; i++) {
-        const fraction = count === 1 ? sums.indexOf(total) / (sums.length - 1) : i / (count - 1);
-        const [a, b] = pairs[Math.round(fraction * (pairs.length - 1))];
+        const [a, b] = pairs[i % pairs.length];
         additions.push({ total, a, b });
       }
     }
     return Array.from({ length: SESSION_LENGTH }, (_, i) => {
       const add = i >= 3;
-      const { total, a, b } = add ? additions[i - 3] : { total: i + 2, a: i + 2, b: 0 };
-      return { id: `math-${i}`, type: add ? 'add' : 'count', a, b, answer: String(total), total, phase: adventurePhase(i), item: i % 3 === 0 ? 'apple' : i % 3 === 1 ? 'flower' : 'berry', options: numberOptions(total, max, rng, choiceCount(i)), prompt: add ? 'add' : 'count', hint: add ? 'add-hint' : 'count-hint' };
+      const { total, a, b } = add ? additions[i - 3] : { total: counts[i], a: counts[i], b: 0 };
+      const item=['apple','flower','berry','ball','star','heart'][Math.floor(rng()*6)];
+      return { id: `math-${i}`, type: add ? 'add' : 'count', a, b, answer: String(total), total, phase: adventurePhase(i), item, options: numberOptions(total, max, rng, choiceCount(i)), prompt: add ? 'add' : 'count', hint: add ? 'add-hint' : 'count-hint' };
     });
   }
   if (mission === 'clock') {

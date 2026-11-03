@@ -22,7 +22,7 @@ zebra|זברה|זֶבְּרָה|zˈebʁa|1f993|animals
 deer|אייל|אַיָּל|ʔajˈal|1f98c|animals
 owl|ינשוף|יַנְשׁוּף|janʃˈuf|1f989|animals
 penguin|פינגווין|פִּינְגְּוִין|pinɡvˈin|1f427|animals|5
-parrot|תוכי|תֻּכִּי|tukˈi|1f99c|animals
+parrot|תוכי|תֻּכִּי|tˈuki|1f99c|animals
 flamingo|פלמינגו|פְלָמִינְגּוֹ|flamˈinɡo|1f9a9|animals|5
 eagle|נשר|נֶשֶׁר|nˈeʃeʁ|1f985|animals
 peacock|טווס|טַוָּס|tavˈas|1f99a|animals
@@ -241,7 +241,7 @@ export const VOCABULARY = Object.freeze(source.split('\n').map(line => {
 
 // Audio review found these isolated words lose sounds. A brief, grammatical
 // carrier keeps Ava's complete pronunciation; the reading prompt stays unchanged.
-const contextualWords = new Set(['panda', 'banana', 'strawberry', 'pretzel', 'shoe', 'drum', 'yoyo']);
+const contextualWords = new Set(['panda', 'banana', 'strawberry', 'pretzel', 'shoe', 'drum', 'yoyo','parrot']);
 export const VOCABULARY_WORDS = Object.freeze(VOCABULARY.map(({ id, he, pointed, level, theme }) => Object.freeze({ id, he, pointed, level, theme, ...(contextualWords.has(id) ? { spoken: `הַמִּלָּה הִיא ${pointed}.` } : {}) })));
 export const VOCABULARY_LEXICON = Object.freeze(Object.fromEntries(VOCABULARY.map(word => [word.pointed.normalize('NFC'), word.ipa])));
 
@@ -254,8 +254,15 @@ const overlappingPictures = [
   ['fish', 'shark'], ['truck', 'firetruck'], ['tree', 'seedling'],
   ['hen', 'rooster'], ['mouth', 'tongue'], ['hand', 'muscle'],
   ['cloud', 'rain', 'wind'], ['wind', 'leaf'], ['bowl', 'soup', 'rice', 'salad', 'ice-cream'],
+  ['pig','boar'], ['flower','rose','tulip','sunflower','bouquet'], ['tree','palm'],
+  ['bread','baguette','sandwich'], ['mug','cup','milk','coffee','juice'],
+  ['mouse','hamster','computer-mouse'], ['chair','wheelchair'], ['key','wrench'],
+  ['wheel','gear'], ['mountain','volcano'], ['sea','island'], ['box','gift'],
+  ['thread','yarn','knot'], ['meat','chicken-leg'], ['amphora','vase'],
+  ['crown','king','queen'], ['book','scroll','newspaper'], ['shell','oyster'],
+  ['necklace','link'], ['cube','ice'],
 ];
-const birdPictures = ['duck', 'hen', 'rooster', 'chick', 'parrot', 'owl', 'eagle', 'peacock', 'swan', 'flamingo', 'penguin'];
+const birdPictures = ['duck', 'hen', 'rooster', 'chick', 'parrot', 'owl', 'eagle', 'peacock', 'swan', 'flamingo', 'penguin','goose','turkey'];
 export function distinctWordPictures(left, right) {
   if ((left.id === 'bird' && birdPictures.includes(right.id)) || (right.id === 'bird' && birdPictures.includes(left.id))) return false;
   return !overlappingPictures.some(group => group.includes(left.id) && group.includes(right.id));

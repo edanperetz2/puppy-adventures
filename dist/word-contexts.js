@@ -1,5 +1,7 @@
 // Pictures identify meaning; the missing noun stays uninflected.
+import { EXPANDED_WORD_CONTEXTS } from './word-practice-expansion.js';
 export const WORD_CONTEXTS = {
+ ...EXPANDED_WORD_CONTEXTS,
  dog:{before:'הִנֵּה',after:'יָשֵׁן.',speech:'hinˈe kˈelev jaʃˈen.'},
  sun:{before:'בַּשָּׁמַיִם יֵשׁ',after:'.',speech:'baʃamˈajim jˈeʃ ʃˈemeʃ.'},
  cat:{before:'',after:'יָשֵׁן.',speech:'χatˈul jaʃˈen.'},

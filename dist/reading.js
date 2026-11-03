@@ -1,6 +1,8 @@
 import { ADVANCED_WORDS } from './reading-advanced.js';
 import { VOCABULARY_WORDS } from './vocabulary.js';
 import { MAX_ASSISTED_TO_ADVANCE } from './adventure.js';
+import { EXPANDED_READING_WORDS } from './reading-expansion.js';
+import { SUPPLEMENTAL_LETTER_WORDS } from './word-practice-expansion.js';
 
 // Reading stages are independent choices, never locked behind a score.
 export const READING_LEVELS = Object.freeze({
@@ -35,7 +37,7 @@ export const WORDS = [
   { id: 'apple', he: 'תפוח', pointed: 'תַּפּוּחַ', level: 3 },
   { id: 'grapes', he: 'ענבים', pointed: 'עֲנָבִים', level: 3 },
   { id: 'watermelon', he: 'אבטיח', pointed: 'אַבְטִיחַ', level: 3 },
-  { id: 'pineapple', he: 'אננס', pointed: 'אֲנָנָס', level: 3 },
+  { id: 'pineapple', he: 'אננס', pointed: 'אָנָנָס', spoken: 'hamilˈa hˈi ʔananˈas.', level: 3 },
   { id: 'airplane', he: 'מטוס', pointed: 'מָטוֹס', level: 3 },
   { id: 'helicopter', he: 'מסוק', pointed: 'מַסּוֹק', level: 3 },
   { id: 'window', he: 'חלון', pointed: 'חַלּוֹן', level: 3 },
@@ -56,6 +58,8 @@ export const WORDS = [
   { id: 'cucumber', he: 'מלפפון', pointed: 'מְלָפְפוֹן', level: 4 },
   ...VOCABULARY_WORDS,
   ...ADVANCED_WORDS,
+  ...EXPANDED_READING_WORDS.map(word=>word.scene?word:{...word,spoken:`hamilˈa hˈi ${word.spoken}.`}),
+  ...SUPPLEMENTAL_LETTER_WORDS.map(({ipa,...word})=>({...word,spoken:`hamilˈa hˈi ${ipa}.`})),
 ];
 
 export function readingWords(key = 'short') {

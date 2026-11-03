@@ -1,6 +1,8 @@
 import { READING_ART } from './reading-art.js';
 import { MORE_READING_ART } from './reading-more-art.js';
 import { VOCABULARY_ART } from './vocabulary-art.js';
+import { EXPANDED_ART } from './expanded-art.js';
+import { PRACTICE_EXTRA_ART } from './practice-extra-art.js';
 import { readingScene, hasReadingScene } from './reading-scenes.js';
 import { stickerScene } from './sticker-art.js';
 import { stickerDefinition } from './stickers.js';
@@ -29,6 +31,8 @@ const drawings = {
   ...READING_ART,
   ...MORE_READING_ART,
   ...VOCABULARY_ART,
+  ...EXPANDED_ART,
+  ...PRACTICE_EXTRA_ART,
   clock: '<circle cx="100" cy="105" r="81" fill="#e4d8e9"/><circle cx="100" cy="100" r="80" fill="#bda3d0"/><circle cx="100" cy="100" r="70" fill="#fffcf4"/><g fill="#8e7898"><circle cx="100" cy="43" r="4"/><circle cx="157" cy="100" r="4"/><circle cx="100" cy="157" r="4"/><circle cx="43" cy="100" r="4"/></g><path d="M100 109V57" stroke="#368b7d" stroke-width="7" stroke-linecap="round"/><path d="M94 100H131" stroke="#9066b1" stroke-width="10" stroke-linecap="round"/><circle cx="100" cy="100" r="7" fill="#d0badc"/>',
   star: '<path d="M100 20L122 69L177 75L136 113L147 169L100 141L52 169L63 113L22 75L77 69Z" fill="#f3c65c" stroke="#e5aa3b" stroke-width="5" stroke-linejoin="round"/><path d="M73 73L89 46" stroke="#ffedaa" stroke-width="8" stroke-linecap="round"/>',
   heart: '<path d="M100 166Q7 107 28 57Q51 15 100 57Q149 14 174 57Q196 107 100 166" fill="#ec859c"/><path d="M51 64Q62 44 78 62" stroke="#ffc0ce" stroke-width="9" stroke-linecap="round"/>',

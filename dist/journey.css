@@ -24,3 +24,4 @@
 .phonics-example{margin:10px auto;width:130px}.phonics-example svg{width:110px;height:100px}.phonics-example bdi{display:block;font-size:24px;letter-spacing:3px;color:#7f638f}
 
 .home-feature-card.album-feature{background:#f0e9f6;border-color:#dfd3e8}.home-feature-card>div>svg{display:block;width:100%;height:auto}
+.story-counted{left:50%;right:auto;top:18%;width:max-content;transform:translateX(-50%);display:grid;grid-template-columns:repeat(var(--count-columns,4),48px);gap:6px;justify-content:center}.story-counted button{flex:none;width:48px;max-width:48px;min-width:48px;height:48px;min-height:48px;padding:3px}.story-counted button svg{width:42px;height:42px}.story-counted b{top:-5px;left:-4px;width:22px;height:22px;font-size:14px;line-height:22px}

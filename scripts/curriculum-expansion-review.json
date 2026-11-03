@@ -1,0 +1,16 @@
+{
+  "reviewed": "2026-11-03",
+  "corrections": [
+    {"id":"pineapple","pointed":"אָנָנָס","ipa":"ʔananˈas","sources":["https://terms.hebrew-academy.org.il/munnah/1207_1/אָנָנָס","https://www.pealim.com/dict/7428-ananas/"],"note":"Academy pointing; Pealim marks final stress anan<b>a</b>s. Existing achievement ID retained."},
+    {"id":"parrot","pointed":"תֻּכִּי","ipa":"tˈuki","sources":["https://www.pealim.com/he/dict/6864-tuki/"],"note":"Initial stress TU-ki, including the new workshop context."},
+    {"id":"jellyfish","pointed":"מֶדוּזָה","ipa":"medˈuza","sources":["https://www.pealim.com/dict/8597-meduza/","https://www.milononline.net/מדוזה"],"note":"Pealim's modern pronunciation selected; final stress also appears in Avnion. Initial sheva removed."},
+    {"id":"eagle","he":"נשר","sources":["https://www.pealim.com/dict/5690-ayit/"],"note":"Retain the established Hebrew word and audio with an original vulture SVG. The original bald-eagle picture is separately used for the English EAGLE example."}
+  ],
+  "additional_checks": [
+    "https://hebrew-academy.org.il/wp-content/uploads/2024/11/meeting314.pdf",
+    "https://terms.hebrew-academy.org.il/munnah/18_1",
+    "https://terms.hebrew-academy.org.il/munnah/66884_1/מַסְכֵּת",
+    "https://terms.hebrew-academy.org.il/munnah/13117_2/link",
+    "https://terms.hebrew-academy.org.il/Millonim/ShowMillon?KodMillon=49"
+  ]
+}

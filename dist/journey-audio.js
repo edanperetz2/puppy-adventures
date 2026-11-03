@@ -1,8 +1,9 @@
 import { WORKSHOP_WORDS, STORIES, JOURNEY_HEBREW_CLIPS } from './journey-content.js';
 import { WORD_CONTEXTS } from './word-contexts.js';
+import { MORE_PHONICS, BLEND_GROUPS } from './english-expansion.js';
 // These isolated renders failed phonetic review. Their approved whole-word
 // recording supplies the sound model while the visual tile keeps the word part.
-export const WHOLE_WORD_CHUNKS = new Set(['dog:0','snail:0']);
+export const WHOLE_WORD_CHUNKS = new Set(["dog:0","snail:0","bat:0","bed:1","crocodile:0","dinosaur:0","dinosaur:1","dinosaur:2","dinosaur:3","duck:1","gift:1","leopard:0","notebook:2","pan:2","pants:2","parrot:1","peach:0","pear:0","pineapple:0","scissors:1","socks:1","spider:0","spider:1","spider:2","suitcase:1","telescope:0"]);
 export const chunkClip = (id,index) => WHOLE_WORD_CHUNKS.has(`${id}:${index}`)?`he-${id}`:`journey-chunk-${id}-${index}`;
 export function installJourneyClips(clips) {
   for(const [id,clip] of Object.entries(JOURNEY_HEBREW_CLIPS))clips[id]={lang:'he-IL',...clip};
@@ -19,4 +20,8 @@ export function installJourneyClips(clips) {
   });
   clips['journey-phonics-intro']={lang:'he-IL',text:'נַקְשִׁיב לַצְּלִיל הָרִאשׁוֹן בְּתוֹךְ הַמִּלָּה. נַתְחִיל לְאַט וּבְיַחַד.',speech:'nakʃˈiv latslˈil haʁiʃˈon betˈoχ hamilˈa. natχˈil leʔˈat uvejˈaχad.'};
   for(const text of ['red ball','blue ball','red car','blue car','ball','car','fan','man','fin','sun','mouse','apple','nose','insect'])clips[`journey-en-${text.replaceAll(' ','-')}`]={lang:'en-US',text};
+  for(const text of [...MORE_PHONICS.map(p=>p.word),...BLEND_GROUPS.flat(),...['yellow','green','pink','purple','orange','white','black','brown'].flatMap(color=>['ball','car'].map(object=>`${color} ${object}`))]) {
+    const key=`journey-en-${text.replaceAll(' ','-')}`;
+    if(!clips[key])clips[key]={lang:'en-US',text};
+  }
 }

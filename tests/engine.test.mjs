@@ -22,7 +22,7 @@ test('Every activity has ten solvable questions, with two warm-up choices before
           assert.ok(CLIPS[q.hint]);
           if (q.type === 'listen') { assert.ok(CLIPS[q.targetClip]); assert.equal(q.target.en, q.target.en.toUpperCase()); }
           if (q.type === 'add') { assert.equal(q.a + q.b, Number(q.answer)); assert.ok(q.a >= 1 && q.b >= 1); }
-          if (mission === 'math') { assert.ok(q.total <= max); assert.ok(q.total >= 2); assert.ok(q.options.every(o => o.number >= 0 && o.number <= max)); }
+          if (mission === 'math') { assert.ok(q.total <= max); assert.ok(q.total >= 1); assert.ok(q.options.every(o => o.number >= 0 && o.number <= max)); }
           if (q.type === 'read' && settings.reading === 'short') assert.equal(q.word.level, 1);
         }
       }
@@ -40,7 +40,7 @@ test('English includes four animals, three colors and three increasingly large s
 test('Math builds from three small counts to seven additions without subtraction', () => {
   const questions = createSession('math');
   assert.deepEqual(questions.map(q => q.type), ['count', 'count', 'count', 'add', 'add', 'add', 'add', 'add', 'add', 'add']);
-  assert.deepEqual(questions.slice(0, 3).map(q => q.total), [2, 3, 4]);
+  const warm=questions.slice(0,3).map(q=>q.total);assert.equal(new Set(warm).size,3);assert.ok(warm.every(n=>n>=1&&n<=4));assert.deepEqual(warm,[...warm].sort((a,b)=>a-b));
   assert.equal(questions.at(-1).total, 10);
 });
 

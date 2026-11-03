@@ -121,7 +121,14 @@ export function createCharacterSession(settings = {}, rng = Math.random) {
     const character = ordered[0];
     total[character.id]++; recent[direction][character.id]++; last = character.id;
     const alternatives = shuffle(pool.filter(c => c.id !== character.id && tierOf(c) <= tier), rng);
-    if (index >= 7) alternatives.sort((a, b) => similarity(character, b) - similarity(character, a));
+    if (index >= 7) {
+      alternatives.sort((a, b) => similarity(character, b) - similarity(character, a));
+      // Cycle the full set of distractor pairs. A hard round used to always
+      // pick the same two similar names, even after many completed visits.
+      const pairs=alternatives.flatMap((a,i)=>alternatives.slice(i+1).map(b=>[a,b]));
+      const offset=(practice.completed[level]+recent[direction][character.id]+Math.floor(rng()*pairs.length))%pairs.length;
+      alternatives.splice(0,alternatives.length,...pairs[offset]);
+    }
     const options = shuffle([character, ...alternatives.slice(0, choiceCount(index) - 1)], rng);
     return { id: `characters-${index}`, type: 'character', collection, direction, character, answer: character.id, options, phase: adventurePhase(index), tier,
       prompt: `characters-${direction}`, hint: 'characters-hint' };

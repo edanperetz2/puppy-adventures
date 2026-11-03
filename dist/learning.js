@@ -1,5 +1,6 @@
 // Practice history is evidence of an activity, never a diagnosis or a score.
 export const LEARNING_KEY = 'learning-state';
+export const MAX_LEARNING_ITEMS = 8192;
 export const DAY = 86400000;
 export const PARK_TYPES = ['tree','flower','bench','ball','pond','house','flag','slide','picnic','rainbow','rocket','sign'];
 export const itemId = value => typeof value === 'string' && /^[a-z0-9:._-]{1,96}$/.test(value);
@@ -10,11 +11,11 @@ export function cleanItem(value) {
 }
 const nTime = n => Number.isSafeInteger(n) && n > 0 && n < 9999999999999 ? n : 0;
 export function cleanItems(input) {
-  return Object.fromEntries(Object.entries(input && typeof input === 'object' ? input : {}).filter(([id])=>itemId(id)).slice(0,2048).map(([id,value])=>[id,cleanItem(value)]));
+  return Object.fromEntries(Object.entries(input && typeof input === 'object' ? input : {}).filter(([id])=>itemId(id)).slice(0,MAX_LEARNING_ITEMS).map(([id,value])=>[id,cleanItem(value)]));
 }
 export function applyObservation(items, event) {
   if (!itemId(event?.item) || !domains.includes(event.domain) || !['seen','helped','independent','practice'].includes(event.kind) || !nTime(event.at)) return items;
-  if (!items[event.item] && Object.keys(items).length >= 2048) return items;
+  if (!items[event.item] && Object.keys(items).length >= MAX_LEARNING_ITEMS) return items;
   const old = cleanItem(items[event.item]), at = event.at;
   const next = { ...old, domain:event.domain, ...(event.kind==='seen'?{}:{[event.kind]:Math.min(1000000,old[event.kind]+1)}), seen:Math.min(1000000,old.seen+(event.kind==='seen'||event.kind==='practice'||!old.seen?1:0)), first:old.first ? Math.min(old.first,at) : at, last:Math.max(old.last,at), mode:event.mode || old.mode };
   if (event.kind === 'independent') {

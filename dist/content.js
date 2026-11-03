@@ -8,6 +8,9 @@ import { LETTER_WRITING_SCRIPTS } from './letter-writing-content.js';
 import { CHARACTER_SCRIPTS } from './characters-content.js';
 import { installJourneyClips } from './journey-audio.js';
 import { installProfileClips } from './profile-content.js';
+import { MORE_ANIMALS, MORE_COLORS, ENGLISH_OBJECTS } from './english-expansion.js';
+import { LETTER_EXAMPLE_CLIPS } from './word-practice-expansion.js';
+export { ENGLISH_OBJECTS } from './english-expansion.js';
 export { WORDS, READING_LEVELS } from './reading.js';
 
 export const ANIMALS = [
@@ -19,6 +22,7 @@ export const ANIMALS = [
   { id: 'horse', en: 'HORSE', he: 'סוס' },
   { id: 'bear', en: 'BEAR', he: 'דוב' },
   { id: 'duck', en: 'DUCK', he: 'ברווז' },
+  ...MORE_ANIMALS,
 ];
 
 export const COLORS = [
@@ -29,6 +33,7 @@ export const COLORS = [
   { id: 'purple', en: 'PURPLE', he: 'סגול', hex: '#9c7bce' },
   { id: 'orange', en: 'ORANGE', he: 'כתום', hex: '#ef984d' },
   { id: 'pink', en: 'PINK', he: 'ורוד', hex: '#e88eb2' },
+  ...MORE_COLORS,
 ];
 
 export const NUMBERS = ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE', 'TEN', 'ELEVEN', 'TWELVE', 'THIRTEEN', 'FOURTEEN', 'FIFTEEN', 'SIXTEEN', 'SEVENTEEN', 'EIGHTEEN', 'NINETEEN', 'TWENTY'];
@@ -114,6 +119,7 @@ export const CLIPS = {
 for (const [key, speech] of Object.entries(HEBREW_NARRATION)) CLIPS[key].speech = speech;
 for (const w of WORDS) CLIPS[`he-${w.id}`] = { lang: 'he-IL', text: w.pointed, speech: w.spoken || w.pointed };
 for (const a of ANIMALS) CLIPS[`en-${a.id}`] = { lang: 'en-US', text: a.en.toLowerCase() };
+for (const word of ENGLISH_OBJECTS) CLIPS[`en-${word.id}`] = { lang: 'en-US', text: word.en.toLowerCase() };
 for (const c of COLORS) CLIPS[`en-${c.id}`] = { lang: 'en-US', text: c.en.toLowerCase() };
 for (let n = 0; n <= 20; n++) {
   CLIPS[`en-${n}`] = { lang: 'en-US', text: NUMBERS[n].toLowerCase() };
@@ -133,4 +139,5 @@ for (const clip of Object.values(CLIPS)) if (clip.lang === 'he-IL') clip.speech 
 for (const letter of LETTERS.hebrew) CLIPS[letter.clip] = { lang: 'he-IL', text: `האות ${letter.name}`, speech: hebrewSpeech(`הָאוֹת ${letter.spoken}`) };
 for (const letter of LETTERS.english) CLIPS[letter.clip] = { lang: 'en-US', text: letter.spoken };
 installJourneyClips(CLIPS);
+Object.assign(CLIPS, LETTER_EXAMPLE_CLIPS);
 installProfileClips(CLIPS);
