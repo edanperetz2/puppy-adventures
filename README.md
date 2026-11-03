@@ -4,6 +4,12 @@ A gentle learning game for phones, tablets and computers. Original illustrated p
 
 **Play:** [puppy-adventures.vercel.app](https://puppy-adventures.vercel.app)
 
+## Version 2.1.1 · More short Hebrew picture stories
+
+The existing **סיפורים קטנים** reading stage grows from 287 to 647 short picture-matching passages. The 360 additions keep the same four-to-five-word length, pointed Hebrew, and level: 180 colored-object placements, 72 travel scenes, and 108 counted-object scenes in or beside an open basket/box. Every new passage has its own picture facts and an explicit-phoneme Ava recording. There are now 1,458 Hebrew reading targets overall.
+
+Existing reading history, unfinished adventures, recordings, profiles, family codes and album rewards stay intact. The current unseen-first practice selection includes the new passages automatically. Open-container pictures keep all two, three or four objects visible, and distractors retain the same subject so the child must read the distinguishing details.
+
 ## Version 2.1 · A larger practice library
 
 The existing paths now contain 1,098 illustrated Hebrew targets (389 words and 709 phrases/sentences), 64 workshop words, eight playable ten-page stories, 67 single spoken English words, 20 color/object pairs, 20 initial-sound examples, and 30 optional short English reading words. The 53 real letters have 186 picture/word examples across their existing recognition and writing paths. Their original letter forms and character identities remain intact.

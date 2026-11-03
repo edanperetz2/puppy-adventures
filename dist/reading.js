@@ -3,6 +3,8 @@ import { VOCABULARY_WORDS } from './vocabulary.js';
 import { MAX_ASSISTED_TO_ADVANCE } from './adventure.js';
 import { EXPANDED_READING_WORDS } from './reading-expansion.js';
 import { SUPPLEMENTAL_LETTER_WORDS } from './word-practice-expansion.js';
+import { PICTURE_PLACE_PASSAGES } from './reading-picture-places.js';
+import { PICTURE_SCENE_PASSAGES } from './reading-picture-scenes.js';
 
 // Reading stages are independent choices, never locked behind a score.
 export const READING_LEVELS = Object.freeze({
@@ -60,6 +62,8 @@ export const WORDS = [
   ...ADVANCED_WORDS,
   ...EXPANDED_READING_WORDS.map(word=>word.scene?word:{...word,spoken:`hamilˈa hˈi ${word.spoken}.`}),
   ...SUPPLEMENTAL_LETTER_WORDS.map(({ipa,...word})=>({...word,spoken:`hamilˈa hˈi ${ipa}.`})),
+  ...PICTURE_PLACE_PASSAGES,
+  ...PICTURE_SCENE_PASSAGES,
 ];
 
 export function readingWords(key = 'short') {

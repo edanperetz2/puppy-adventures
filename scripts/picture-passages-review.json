@@ -1,0 +1,24 @@
+{
+  "release": "2.1.1",
+  "stage": "sentences",
+  "previous_passages": 287,
+  "added_passages": 360,
+  "total_passages": 647,
+  "word_length": [4, 5],
+  "language_review": [
+    "Independent checks of pointed spelling, explicit IPA, feminine bird/color agreement, and feminine banana/egg/cookie quantities found no substantive corrections.",
+    "New forms reuse the existing reviewed vocabulary and pronunciation pipeline. Reading targets remain lexical content and are not rewritten for a child's address gender.",
+    "Pealim lists both final-stressed and initial-stressed feminine four; the existing initial-stressed form remains supported."
+  ],
+  "sources": [
+    {"word": "קוֹרְקִינֵט", "url": "https://www.milononline.net/קורקינט"},
+    {"word": "נַיֶּדֶת", "url": "https://www.pealim.com/dict/3872-nayedet/"},
+    {"word": "אַרְבַּע", "url": "https://www.pealim.com/dict/7122-arba/"}
+  ],
+  "picture_review": [
+    "Reviewed all ten placement families and twelve new travel anchors.",
+    "Reviewed in/beside basket and box arrangements with two, three and four items; the open containers keep each item countable.",
+    "Existing matching questions keep all choices in the same subject family, without a noun-only shortcut."
+  ],
+  "compatibility": "The release-2.1-reading fixture preserves every previous target, script and voice record. Profiles, family pairing, progress and album storage are unchanged."
+}

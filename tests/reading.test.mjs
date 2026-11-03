@@ -11,7 +11,7 @@ function seeded(seed) { seed = Math.imul(seed + 1, 0x9e3779b1) >>> 0; return () 
 const lettersIn = text => [...text.matchAll(/[א-ת]/gu)].length;
 
 test('Ten reading stages have illustrated words, phrases and sentences with complete Hebrew pronunciation', () => {
-  assert.equal(WORDS.length, 1098);
+  assert.equal(WORDS.length, 1458);
   assert.equal(WORDS.filter(word => !word.scene).length, 389);
   assert.equal(new Set(WORDS.map(word => word.he)).size, WORDS.length, 'Repeated spellings must not inflate the vocabulary');
   assert.equal(new Set(WORDS.map(word => word.id)).size, WORDS.length);

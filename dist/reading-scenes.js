@@ -75,6 +75,19 @@ export function readingScene(id, baseArt) {
       body = at('plate', 66, 55, 130);
       const positions = spec.position === 'near' ? [[2, 55], [3, 105], [10, 151]] : spec.count === 2 ? [[87, 89], [134, 89]] : [[111, 72], [88, 111], [136, 111]];
       body += positions.map(([x, y]) => at(spec.object, x, y, 37)).join('');
+    } else if (spec.anchor === 'basket' || spec.anchor === 'box') {
+      // An open container leaves every counted object visible. Matching choices
+      // vary its contents and position, so a child must read both details.
+      const basket = spec.anchor === 'basket';
+      body = ground;
+      if (basket) body += '<path d="M94 118Q91 31 141 31Q192 31 190 118" fill="none" stroke="#a47a51" stroke-width="10"/><path d="M84 111H194L181 181H97Z" fill="#e7c48d" stroke="#b58c59" stroke-width="3"/><ellipse cx="139" cy="110" rx="55" ry="37" fill="#aa8057" stroke="#d6b17b" stroke-width="4"/>';
+      else body += '<path d="M86 92L102 65H180L195 92V181H86Z" fill="#c69c6c"/><path d="M93 89L105 75H177L188 89V153H93Z" fill="#96714d"/><path d="M86 92L76 74L112 64L125 79M195 92L198 75L165 63L153 78" fill="#e4c293"/>';
+      const inside = { 2: [[99, 101], [147, 101]], 3: [[123, 68], [99, 109], [147, 109]], 4: [[99, 68], [147, 68], [99, 109], [147, 109]] };
+      const beside = { 2: [[10, 91], [38, 139]], 3: [[10, 59], [37, 108], [7, 153]], 4: [[5, 68], [45, 68], [5, 135], [45, 135]] };
+      const positions = (spec.position === 'in' ? inside : beside)[spec.count];
+      body += positions.map(([x, y]) => at(spec.object, x, y, 38)).join('');
+      if (basket) body += '<path d="M89 147Q139 160 189 147L181 181H97Z" fill="#e0b982" stroke="#b58c59" stroke-width="3"/><path d="M94 159Q139 169 186 159M96 170Q139 180 183 170M109 151L113 181M126 155L128 181M143 156V181M160 155L158 181M177 151L174 181" fill="none" stroke="#be965e" stroke-width="2"/>';
+      else body += '<path d="M86 147H195V181H86Z" fill="#d6af7d"/><path d="M139 149V181" stroke="#bd915f" stroke-width="3"/>';
     }
   }
   if (spec.kind === 'travel') {
