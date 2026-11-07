@@ -1,4 +1,4 @@
-import { newCode, normalizeCode, formatCode } from './sync.js';
+import { newCode, normalizeCode, formatCode } from './sync.js?v=2.1.3-sync';
 import { invitationLink, escapeHtml } from './profiles.js';
 
 const STATUS = {
@@ -7,6 +7,7 @@ const STATUS = {
   syncing: 'מעדכנים את האלבום…',
   pending: 'ההתקדמות שמורה כאן ותתעדכן כשיהיה חיבור',
   offline: 'מוצג האלבום האחרון שנשמר. נעדכן כשיהיה חיבור',
+  throttled: 'ההתקדמות שמורה במכשיר. ננסה לעדכן את האלבום שוב אוטומטית בעוד מעט',
   'storage-error': 'הדפדפן לא מאפשר שמירה. השאירו את המשחק פתוח עד לסנכרון',
 };
 
@@ -14,7 +15,7 @@ export function updateFamilyStatus(album) {
   const element = document.querySelector('#sync-status');
   if (!element) return;
   element.textContent = STATUS[album.status] || STATUS.pending;
-  element.classList.toggle('pending', ['pending', 'offline', 'storage-error'].includes(album.status));
+  element.classList.toggle('pending', ['pending', 'offline', 'throttled', 'storage-error'].includes(album.status));
 }
 
 export function mountFamilyPanel(element, { album, getLocalProgress, pendingCode, profile }) {
@@ -40,6 +41,7 @@ export function mountFamilyPanel(element, { album, getLocalProgress, pendingCode
       console.warn('Family album connection:', error.name, error.message);
       message.classList.add('pair-error');
       message.textContent = error.message === 'invalid_code' ? 'הקוד לא שלם. העתיקו את כל הקוד מהמכשיר הראשון.' : error.message === 'album_not_found' ? 'לא מצאנו את האלבום. בדקו שהקוד הועתק נכון.' : error.message === 'storage_unavailable' ? 'הדפדפן לא מאפשר שמירה. נסו לפתוח את המשחק בחלון רגיל.' : 'לא הצלחנו להתחבר כרגע. ההתקדמות כאן שמורה, ואפשר לנסות שוב כשיהיה חיבור.';
+      if(error.retryAfterMs)message.textContent='יש כרגע הרבה בקשות לאלבום. ההתקדמות שמורה במכשיר ואפשר להמשיך לשחק. אפשר לנסות להתחבר שוב מאוחר יותר.';
       buttons.forEach(button => { button.disabled = false; });
     }
   }

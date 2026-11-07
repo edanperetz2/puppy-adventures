@@ -2,6 +2,7 @@ import { finishSession, freshProgress, sanitizeProgress } from './engine.js';
 import { STICKERS, MISSION_IDS } from './content.js';
 import { recordLetters, pendingLetterPractice } from './letter-progress.js';
 import { recordClockLesson } from './clock-learning.js';
+import { SyncRetry, rateLimitError } from './sync-retry.js';
 
 const KEY = 'puppy-adventures-family-v1';
 const ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
@@ -53,7 +54,7 @@ export function compactContribution(progress) {
 }
 
 export class SharedAlbum {
-  constructor({ config, storage, fetcher = globalThis.fetch.bind(globalThis), onChange = () => {} }) {
+  constructor({ config, storage, fetcher = globalThis.fetch.bind(globalThis), onChange = () => {}, retryOptions = {} }) {
     this.config = config;
     this.fetcher = fetcher;
     this.onChange = onChange;
@@ -71,6 +72,8 @@ export class SharedAlbum {
         this.status = this.pending ? 'pending' : 'synced';
       }
     } catch { /* Browser restrictions must never block the local game. */ }
+    this.retry = new SyncRetry({ ...retryOptions, storage: this.storage, key: `${KEY}-retry` });
+    this.creationRetry = new SyncRetry({ ...retryOptions, storage: this.storage, key: `${KEY}-creation-retry` });
   }
 
   get linked() { return Boolean(this.state); }
@@ -96,9 +99,11 @@ export class SharedAlbum {
         body: JSON.stringify({ access_code: state.code, device_key: state.device, device_totals: compactContribution(own), create_album: create }),
         signal: controller.signal,
       });
-      const value = await response.json();
+      const value = await response.json().catch(() => null);
+      const limited = rateLimitError(response, value, this.retry.now());
+      if (limited) throw limited;
       if (!response.ok) {
-        const message = value.message === 'album_not_found' ? 'album_not_found' : 'sync_unavailable';
+        const message = value?.message === 'album_not_found' ? 'album_not_found' : 'sync_unavailable';
         throw new Error(message);
       }
       if (value?.version !== 1 || !Number.isSafeInteger(value.sessions)) throw new Error('sync_unavailable');
@@ -110,15 +115,26 @@ export class SharedAlbum {
     const valid = normalizeCode(code);
     if (!valid) throw new Error('invalid_code');
     if (this.linked) throw new Error('already_linked');
+    if (create && this.creationRetry.blocked) throw this.creationRetry.error('album_creation_limited');
+    if (this.retry.blocked) throw this.retry.error();
     const candidate = { code: valid, device: deviceId(), own: sanitizeProgress(local), confirmed: freshProgress(), remote: freshProgress() };
     // Verify that the pairing can survive closing the browser before joining.
     try { this.storage.setItem(`${KEY}-check`, '1'); this.storage.removeItem(`${KEY}-check`); }
     catch { throw new Error('storage_unavailable'); }
-    candidate.remote = await this.request(candidate, candidate.own, create);
+    const generation = this.generation;
+    try { candidate.remote = await this.request(candidate, candidate.own, create); }
+    catch (error) {
+      if (generation === this.generation && error.retryAfterMs) {
+        (error.message === 'album_creation_limited' ? this.creationRetry : this.retry).pause(error);
+      }
+      throw error;
+    }
+    if (generation !== this.generation) throw new Error('sync_unavailable');
     candidate.confirmed = sanitizeProgress(candidate.own);
     this.state = candidate;
     this.generation++;
     this.status = 'synced';
+    this.retry.clear();
     this.persist();
     this.notify();
     return this.progress;
@@ -164,6 +180,13 @@ export class SharedAlbum {
   flush() {
     if (!this.linked) return Promise.resolve();
     if (this.inflight) { this.again = true; return this.inflight; }
+    if (this.retry.blocked) {
+      this.status = 'throttled';
+      const generation = this.generation;
+      this.retry.schedule(() => { if (generation === this.generation) void this.flush(); });
+      this.notify();
+      return Promise.resolve();
+    }
     this.inflight = this.performFlush().finally(() => {
       this.inflight = null;
       if (this.again && this.linked) { this.again = false; void this.flush(); }
@@ -182,11 +205,17 @@ export class SharedAlbum {
       if (generation !== this.generation) return;
       this.state.remote = remote;
       this.state.confirmed = captured;
+      this.retry.clear();
       this.status = this.pending ? 'pending' : 'synced';
       try { this.persist(); } catch { this.status = 'storage-error'; }
-    } catch {
+    } catch (error) {
       if (generation !== this.generation) return;
-      this.status = this.pending ? 'pending' : 'offline';
+      this.again = false;
+      if (error.retryAfterMs) {
+        this.retry.pause(error);
+        this.retry.schedule(() => { if (generation === this.generation) void this.flush(); });
+        this.status = 'throttled';
+      } else this.status = this.pending ? 'pending' : 'offline';
     }
     this.notify();
   }
@@ -195,6 +224,7 @@ export class SharedAlbum {
     this.generation++;
     this.state = null;
     this.again = false;
+    this.retry.clear();
     this.status = 'local';
     this.persist();
     this.notify();

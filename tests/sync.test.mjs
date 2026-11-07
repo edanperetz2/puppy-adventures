@@ -6,6 +6,7 @@ import { MISSION_IDS } from '../dist/content.js';
 import { STICKERS, LEGACY_STICKERS } from '../dist/stickers.js';
 import { LETTERS } from '../dist/letters.js';
 import { LETTER_MODES, sanitizeLetterPractice, suggestedLetters } from '../dist/letter-progress.js';
+import { syncClock } from './helpers/sync-clock.mjs';
 
 function storage() {
   const values = new Map();
@@ -59,6 +60,73 @@ function server() {
 }
 
 const config = { url: 'https://test.example', key: 'public-test-key' };
+
+test('A throttled album keeps old and new stickers and writing after reopening, then retries automatically once', async () => {
+  const api = server(), clock = syncClock(), saved = storage(), code = newCode();
+  let limited = false, calls = 0;
+  const fetcher = (...args) => {
+    calls++;
+    return limited ? Promise.resolve(new Response('Busy', { status: 429, headers: { 'Retry-After': '60' } })) : api.fetcher(...args);
+  };
+  let album = new SharedAlbum({ config, storage: saved, fetcher, retryOptions: clock.options });
+  await album.link(code, legacyProgress(26), { create: true });
+  limited = true;
+  album.complete('math', 0); album.recordWriting('hebrew', 'he-vav', 'writingMain'); album.recordClockLesson(6);
+  await album.flush();
+  assert.equal(album.status, 'throttled');
+  const before = calls;
+  album.complete('english', 0);
+  await Promise.all(Array.from({ length: 20 }, () => album.flush()));
+  assert.equal(calls, before, 'Focus, polling and continued play cannot bypass Retry-After');
+  clock.close(); // Closing the browser removes timers, but retains its saved state.
+  album = new SharedAlbum({ config, storage: saved, fetcher, retryOptions: clock.options });
+  assert.equal(album.progress.stickers.length, 28);
+  assert.equal(album.progress.letterPractice.hebrew.writingMain[5], 1);
+  assert.equal(album.progress.clockLessons & 64, 64);
+  await album.flush(); await clock.advance(60000);
+  assert.equal(calls, before, 'Reopening also respects the stored wait');
+  limited = false; await clock.advance(251);
+  assert.equal(calls, before + 1);
+  assert.equal(album.pending, false); assert.equal(album.status, 'synced');
+  const other = new SharedAlbum({ config, storage: storage(), fetcher: api.fetcher });
+  await other.link(code, freshProgress());
+  assert.equal(other.progress.stickers.length, 28);
+  assert.equal(other.progress.letterPractice.hebrew.writingMain[5], 1);
+  assert.equal(other.progress.clockLessons & 64, 64);
+});
+
+test('Repeated creation attempts wait without changing the local game or creating an accidental album', async () => {
+  const api = server(), clock = syncClock(), saved = storage(), local = legacyProgress(26);
+  const before = structuredClone(local);
+  const existing = newCode(), other = new SharedAlbum({config,storage:storage(),fetcher:api.fetcher});
+  await other.link(existing,freshProgress(),{create:true});
+  let limited = true, calls = 0;
+  const album = new SharedAlbum({ config, storage: saved, retryOptions: clock.options, fetcher: (...args) => {
+    calls++;
+    return limited && JSON.parse(args[1].body).create_album ? Promise.resolve(Response.json({message:'album_creation_limited'}, { status: 429, headers: { 'Retry-After': '120' } })) : api.fetcher(...args);
+  } });
+  await assert.rejects(album.link(newCode(), local, { create: true }), /album_creation_limited/);
+  await assert.rejects(album.link(newCode(), local, { create: true }), /album_creation_limited/);
+  assert.equal(calls, 1); assert.equal(album.linked, false); assert.deepEqual(local, before);
+  await album.link(existing,local);
+  assert.equal(album.progress.stickers.length,26,'An existing album can be joined during a creation cooldown');
+  album.disconnect();
+  await assert.rejects(album.link(newCode(),local,{create:true}),/album_creation_limited/);
+  assert.equal(calls,2);
+  await clock.advance(120251); limited = false;
+  await album.link(newCode(), local, { create: true });
+  assert.equal(album.progress.stickers.length, 26);
+});
+
+test('A late throttled response from a disconnected album cannot delay a different child', async () => {
+  const api = server(), clock = syncClock();
+  let release, delay = false;
+  const album = new SharedAlbum({ config, storage: storage(), retryOptions: clock.options, fetcher: (...args) => delay ? new Promise(resolve => { release = () => resolve(Response.json({}, { status: 429 })); }) : api.fetcher(...args) });
+  await album.link(newCode(), legacyProgress(26), { create: true });
+  delay = true; const request = album.flush(); album.disconnect(); release(); await request;
+  delay = false; await album.link(newCode(), freshProgress(), { create: true });
+  assert.equal(album.progress.stickers.length, 0); assert.equal(album.status, 'synced');
+});
 
 test('A character adventure earns one shared sticker and ten Hebrew answers, including offline reopening on another device', async () => {
   const api = server(), code = newCode(), saved = storage();

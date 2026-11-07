@@ -19,6 +19,7 @@ export function itemLabel(id){
 export function learningStatus(learner){
   if(learner.status==='storage-error')return 'השמירה במכשיר לא הצליחה. השאירו את המשחק פתוח ונסו שוב.';
   if(!learner.getCode())return 'היסטוריית הלמידה והפארק שמורים במכשיר הזה. חברו אלבום לשיתוף בין המכשירים.';
+  if(learner.status==='throttled')return 'הלמידה והפארק שמורים במכשיר. ננסה לשתף את העדכונים שוב אוטומטית בעוד מעט.';
   const receipt=learner.state.receipt?new Date(learner.state.receipt).toLocaleString('he-IL',{day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'}):'';
   return learner.pending?`${learner.pending} עדכוני למידה / פארק שמורים כאן ומחכים לאישור האלבום.${receipt?` אישור אחרון: ${receipt}.`:''}`:learner.status==='syncing'?'בודקים עדכונים באלבום…':receipt?`האלבום אישר את השמירה ב־${receipt}. מכשירים נוספים יקבלו אותה בחיבור הבא.`:'ההיסטוריה שמורה כאן. ממתינים לחיבור לאלבום.';
 }

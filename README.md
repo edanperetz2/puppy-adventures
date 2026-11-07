@@ -4,6 +4,10 @@ A gentle learning game for phones, tablets and computers. Original illustrated p
 
 **Play:** [puppy-adventures.vercel.app](https://puppy-adventures.vercel.app)
 
+## Version 2.1.3 · Lightweight protection for shared albums
+
+The server now limits new-album creation to 30 per hour and 100 per day, and each family's combined album/learning sync to 360 requests per minute. Existing albums remain available when creation reaches its limit. Limits apply to older installed clients too. Devices honor a temporary sync pause, continue saving locally, and automatically retry without losing or duplicating stickers, practice, learning history or park changes. No new account, CAPTCHA or paid service is required. [Security and maintenance details](SECURITY.md) explain the access model, limits and validation.
+
 ## Version 2.1.2 · Bilingual game guide
 
 The **מדריך** button opens one illustrated overview with Hebrew on the right and English on the left. The English half has a pale blue page background; the Hebrew half keeps warm cream. Every Hebrew heading, caption, number and RTL reading sequence was reviewed against the current activities. The guide covers all eleven learning activities, the sticker album, puppy park, profiles, parent controls and saving/sync behavior.

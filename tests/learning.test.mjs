@@ -12,6 +12,7 @@ import { createSession,DEFAULT_SETTINGS,freshProgress } from '../dist/engine.js'
 import { SharedAlbum } from '../dist/sync.js';
 import { ChildProfiles,GAME_KEY } from '../dist/profiles.js';
 import { cleanInk } from '../dist/free-writing.js';
+import { syncClock } from './helpers/sync-clock.mjs';
 
 const memory=()=>{const m=new Map();return {getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,String(v)),removeItem:k=>m.delete(k)};};
 const time=Date.UTC(2026,10,1,12);
@@ -30,6 +31,28 @@ test('Review favours an overdue supported item and never infers knowledge from a
 });
 function service(){const albums=new Map();return async(_url,init)=>{const b=JSON.parse(init.body);let a=albums.get(b.access_code);if(!a){a={items:{},park:{},acks:{}};albums.set(b.access_code,a);}let ack=a.acks[b.writer_key]||0;for(const e of b.observations){if(e.seq<=ack)continue;if(e.seq!==ack+1)return {ok:false,json:async()=>({})};a.items=applyObservation(a.items,e);ack=e.seq;}a.acks[b.writer_key]=ack;a.park=mergePark(a.park,b.park_changes);return {ok:true,json:async()=>({version:1,ack,items:structuredClone(a.items),park:structuredClone(a.park)})};};}
 const code='2AB3CD4EF5GH6JK7MN8PQ9RS';
+
+test('Throttled learning preserves a multi-batch backlog and park after reopening, with automatic catch-up and no duplicates',async()=>{
+ const api=service(),clock=syncClock(),storage=memory();let limited=true,calls=0;
+ const fetcher=(...args)=>{calls++;return limited?Promise.resolve(Response.json({message:'sync_rate_limited',details:'{"retry_after":60}'},{status:429})):api(...args);};
+ let store=new LearningStore({storage,config:{url:'https://example.test',key:'public'},getCode:()=>code,fetcher,now:()=>time,retryOptions:clock.options});
+ for(let i=0;i<75;i++)store.record({item:`read:word-${i}`,domain:'hebrew'},'independent');
+ store.decorate(4,'tree');await store.flush();assert.equal(store.status,'throttled');assert.equal(store.pending,76);
+ const before=calls;await Promise.all(Array.from({length:20},()=>store.flush()));assert.equal(calls,before);
+ clock.close();store=new LearningStore({storage,config:{url:'https://example.test',key:'public'},getCode:()=>code,fetcher,now:()=>time,retryOptions:clock.options});
+ assert.equal(store.items['read:word-74'].independent,1);assert.equal(store.park[4].type,'tree');await store.flush();
+ limited=false;await clock.advance(60251);assert.equal(calls,before+3);assert.equal(store.pending,0);assert.equal(store.status,'synced');
+ await store.flush();const other=new LearningStore({storage:memory(),config:{url:'https://example.test',key:'public'},getCode:()=>code,fetcher:api,now:()=>time});await other.flush();
+ assert.equal(Object.keys(other.items).length,75);assert.equal(other.items['read:word-74'].independent,1);assert.equal(other.park[4].type,'tree');
+});
+
+test('Changing family during a cooldown cancels its retry and keeps the next family independent',async()=>{
+ const api=service(),clock=syncClock();let link=code,limited=true;
+ const store=new LearningStore({storage:memory(),config:{url:'https://example.test',key:'public'},getCode:()=>link,now:()=>time,retryOptions:clock.options,fetcher:(...args)=>limited?Promise.resolve(Response.json({},{status:429})):api(...args)});
+ store.record({item:'read:dog',domain:'hebrew'},'independent');await store.flush();assert.equal(store.status,'throttled');
+ link='9AB3CD4EF5GH6JK7MN8PQ9RS';limited=false;await store.flush();await clock.advance(60251);
+ assert.deepEqual(store.items,{});assert.equal(store.pending,0);assert.equal(store.status,'synced');
+});
 test('Two devices share learning and park changes, retries and duplicate observations count once',async()=>{
  const fetcher=service(),config={url:'https://example.test',key:'public'},one=memory(),two=memory();
  let link=null;
