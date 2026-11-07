@@ -10,6 +10,8 @@ The **מדריך** button opens one illustrated overview with Hebrew on the righ
 
 The viewer supports language jumps, zoom controls, scrolling, a full-image view and download. Phones open at readable size on the Hebrew side. It uses a separate modal, so closing it returns to the same game without changing the current question, album or practice. It is also available before creating a child profile. The guide image, viewer and stylesheet are included in offline caching.
 
+The HTML uses a versioned entry URL so an already-installed game can show the new guide while its older cache is still present. The offline preparation and validation scripts include and verify that exact entry URL. No local saves or caches need to be cleared to receive the update.
+
 The two reviewed source posters live in `docs/guide/`. `scripts/prepare-game-guide.ps1` joins them without resizing or redrawing, and verifies that every pixel in each half matches its source. `scripts/game-guide-image-review.json` records the image dimensions and hashes.
 
 ## Version 2.1.1 · More short Hebrew picture stories

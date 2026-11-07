@@ -72,7 +72,6 @@ export function hasArt(name) { return name === 'dog' || Object.hasOwn(drawings, 
 
 export function uiIcon(name) {
   const paths = {
-    guide: '<path d="M12 6Q7 2 2 5V20Q7 17 12 21Q17 17 22 20V5Q17 2 12 6ZM12 6V21M5 8Q7 7 9 9M15 9Q17 7 19 8M5 12Q7 11 9 13M15 13Q17 11 19 12"/>',
     pencil: '<path d="M4 16L16 4L20 8L8 20L3 21ZM13 7L17 11"/>',
     again: '<path d="M20 8A8 8 0 1 0 20 16M20 3V9H14"/>',
     sound: '<path d="M11 5L6 9H3V15H6L11 19Z"/><path d="M15 8Q19 12 15 16M18 5Q25 12 18 19"/>',

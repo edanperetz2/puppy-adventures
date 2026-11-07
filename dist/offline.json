@@ -79,6 +79,8 @@
   "./vocabulary.js",
   "./word-contexts.js",
   "./word-practice-expansion.js",
+  "./app.js?v=2.1.2-guide",
+  "./guide.js?v=2.1.2-guide",
   "./assets/apple-touch-icon.png",
   "./assets/crew-family.webp",
   "./assets/FONT-LICENSE.txt",
