@@ -4,6 +4,14 @@ A gentle learning game for phones, tablets and computers. Original illustrated p
 
 **Play:** [puppy-adventures.vercel.app](https://puppy-adventures.vercel.app)
 
+## Version 2.1.2 · Bilingual game guide
+
+The **מדריך** button opens one illustrated overview with Hebrew on the right and English on the left. The English half has a pale blue page background; the Hebrew half keeps warm cream. Every Hebrew heading, caption, number and RTL reading sequence was reviewed against the current activities. The guide covers all eleven learning activities, the sticker album, puppy park, profiles, parent controls and saving/sync behavior.
+
+The viewer supports language jumps, zoom controls, scrolling, a full-image view and download. Phones open at readable size on the Hebrew side. It uses a separate modal, so closing it returns to the same game without changing the current question, album or practice. It is also available before creating a child profile. The guide image, viewer and stylesheet are included in offline caching.
+
+The two reviewed source posters live in `docs/guide/`. `scripts/prepare-game-guide.ps1` joins them without resizing or redrawing, and verifies that every pixel in each half matches its source. `scripts/game-guide-image-review.json` records the image dimensions and hashes.
+
 ## Version 2.1.1 · More short Hebrew picture stories
 
 The existing **סיפורים קטנים** reading stage grows from 287 to 647 short picture-matching passages. The 360 additions keep the same four-to-five-word length, pointed Hebrew, and level: 180 colored-object placements, 72 travel scenes, and 108 counted-object scenes in or beside an open basket/box. Every new passage has its own picture facts and an explicit-phoneme Ava recording. There are now 1,458 Hebrew reading targets overall.

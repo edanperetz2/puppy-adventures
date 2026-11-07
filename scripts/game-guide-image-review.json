@@ -1,0 +1,12 @@
+{
+  "file": "dist/assets/game-guide.png",
+  "width": 2172,
+  "height": 1448,
+  "composition": "English left, Hebrew right; original size; no resampling",
+  "leftSource": "docs/guide/guide-en.png",
+  "rightSource": "docs/guide/guide-he.png",
+  "leftPixelsSha256": "190aacbed292b13bc9a2459aa5a4731dca5c86ba44fd2da12af88276003727a1",
+  "rightPixelsSha256": "66451d19bb7c96ecc8e7630acf2d6ad5cedcadb5b793aeff7ba18ed27039c5b7",
+  "everySourcePixelPreserved": true,
+  "imageSha256": "f2c4c80ac3265c3ccee5113955ea998c4f10b21c30720cc1c685fb72289c2dda"
+}

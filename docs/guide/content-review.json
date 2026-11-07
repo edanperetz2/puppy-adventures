@@ -1,0 +1,66 @@
+{
+  "checkedOn": "2026-11-08",
+  "app": "https://puppy-adventures.vercel.app/",
+  "appVersion": "2.1.1",
+  "sourceCommit": "a8c440e",
+  "reviewedImage": "puppy-adventures-feature-map.png (second version)",
+  "correctedImage": "puppy-adventures-feature-map-verified.png",
+  "imageCreationMode": "Built-in image generation",
+  "generationBrief": "puppy-adventures-feature-map-brief.txt",
+  "correctionPrompt": "puppy-adventures-feature-map-verification-prompt.txt",
+  "verification": {
+    "liveSourceFilesChecked": 21,
+    "liveSourceFilesMatchingLocalContent": 21,
+    "comparison": "Content comparison; seven files differ only in CRLF versus LF line endings.",
+    "mainActivities": 11,
+    "hebrewReadingTargets": 1458,
+    "hebrewReadingLevels": 10,
+    "shortPictureMatchingPassages": 647,
+    "workshopWords": 64,
+    "interactiveStories": 8,
+    "pagesInEachStory": 10,
+    "englishFirstSoundExamples": 20,
+    "optionalEnglishReadingWords": 30,
+    "letterForms": [
+      "Hebrew print",
+      "Hebrew handwriting",
+      "English uppercase",
+      "English lowercase"
+    ],
+    "writingModes": [
+      "Animated stroke demonstration",
+      "Tracing",
+      "Copying",
+      "Memory",
+      "Paper"
+    ],
+    "clockLessons": 10,
+    "stickerCapacity": 1000,
+    "parkSpaces": 40,
+    "parkDecorationTypes": 12
+  },
+  "capabilitiesChecked": [
+    "Separate letter recognition and writing routes",
+    "Name-letter writing shortcuts",
+    "English listening without reading; gradual single words before colour-object pairs",
+    "Optional first-sound and short-word English reading routes",
+    "Counting, addition to the parent's selected limit, missing quantities, tens and ones to 100, optional take-away stories",
+    "Hebrew clock explanations, both draggable hands, individual minutes, free clock, quiz and optional real-minute activity",
+    "Rubble & Crew and PAW Patrol Hebrew name-picture matching, two collections and three levels per collection",
+    "Completed scored ten-question adventures award stickers; decorations unlock without spending stickers",
+    "Separate child profiles, prepared or parent-recorded name welcomes, feminine or masculine address",
+    "Parent difficulty, Hebrew vowel marks, sound, animation and learning/review records",
+    "Family-code sharing of completed album, learning history and park",
+    "Unfinished rounds, drawings and parent-recorded names remain device-local",
+    "Offline play requires the initial service-worker asset download to complete"
+  ],
+  "changesAfterReview": [
+    "Changed 647 short picture stories to 647 picture-matching passages, distinguishing them from the eight complete interactive stories.",
+    "Replaced the ambiguous yellow segmented rod with a single block labelled 10, beside a ten-frame with ten dots and three unit cubes.",
+    "Clarified that offline play starts after the initial download completes.",
+    "Removed the decorative green arrow below the clock.",
+    "Preserved the corrected four Hebrew tiles spelling כדור."
+  ],
+  "visualReview": "Read all headings and captions in the generated final image; confirmed the three wording/number-art corrections, removed clock arrow, intact Hebrew labels and full footer.",
+  "scope": "Read-only app and deployment inspection; only diagram artifacts were created."
+}

@@ -30,6 +30,7 @@ import { letterExampleCards } from './letter-examples.js';
 import { ChildProfiles, readInvitation, invitationNeedsNewProfile, escapeHtml, GAME_KEY } from './profiles.js';
 import { profileSpeech } from './profile-speech.js';
 import { profilePanel, mountProfileForm, personalizeUi } from './profiles-view.js';
+import { openGameGuide } from './guide.js';
 
 const profiles = new ChildProfiles();
 const invitation = readInvitation(location.hash);
@@ -151,7 +152,7 @@ function openChild(profile, invite = null) {
 
 function renderChildSetup() {
   if (profileEditor) return;
-  app.innerHTML = `<main id="main" class="profile-setup"><div class="profile-setup-brand">${art('paw')} חבורת ההרפתקאות</div><div id="first-child-form"></div></main>`;
+  app.innerHTML = `<main id="main" class="profile-setup"><div class="profile-setup-brand">${art('paw')} חבורת ההרפתקאות</div><div id="first-child-form"></div><button class="profile-guide" data-action="guide">${uiIcon('guide')} מדריך המשחק</button></main>`;
   profileEditor = mountProfileForm(app.querySelector('#first-child-form'), { profiles, invitation, onDone: profile => openChild(profile, invitation) });
 }
 
@@ -174,6 +175,7 @@ function header() {
   return `<header class="topbar">
     <button class="brand" data-action="home" aria-label="חבורת ההרפתקאות — הביתה"><span class="brand-mark">${art('paw')}</span><span>חבורת<br><strong>ההרפתקאות</strong></span></button>
     <nav class="top-actions" aria-label="ניווט ראשי">
+      <button class="nav-button guide-nav" data-action="guide" aria-label="מדריך המשחק בעברית ובאנגלית">${uiIcon('guide')}<span>מדריך</span></button>
       <button class="nav-button album-nav" data-action="album" aria-label="המדבקות שלי${progress.stickers.length ? ` ${progress.stickers.length}` : ''}">${uiIcon('album')}<span>המדבקות שלי</span>${progress.stickers.length ? `<b class="nav-count">${progress.stickers.length}</b>` : ''}</button>
       <button class="circle-button sound-toggle" data-action="sound" aria-label="${settings.sound ? 'כיבוי הקול' : 'הפעלת הקול'}" aria-pressed="${settings.sound}">${uiIcon(settings.sound ? 'sound' : 'muted')}</button>
       <button class="parent-button" data-action="parents" aria-label="להורים">${uiIcon('settings')}<span>להורים</span></button>
@@ -915,6 +917,7 @@ app.addEventListener('click', event => {
     case 'accept-child-invitation': parentGate(() => editChild(null, invitation)); break;
     case 'keep-current-child': view = 'home'; render(); startOpeningWelcome(); break;
     case 'home': leaveTo('home'); break;
+    case 'guide': narrator.stop(); openGameGuide(button); break;
     case 'learning-hub': openLearningHub(button.dataset.hub); break;
     case 'garden': openReadingLevels(); break;
     case 'mission-direct': startMission(button.dataset.mission,true); break;

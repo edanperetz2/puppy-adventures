@@ -1,0 +1,6 @@
+Mode: built-in image generation; subtle background tint for the English half.
+
+Use case: lighting-weather / precise-object-edit.
+Input image is the finished VERIFIED ENGLISH infographic for Puppy Adventures. The user wants the English edition's page background subtly different from the warm cream Hebrew edition, so the two will be easier to distinguish when joined side by side.
+Change ONLY the outer page/paper BACKGROUND of this English infographic from warm ivory to a very pale cool blue-grey, approximately #edf5fa. Keep the cards themselves cream/near-white for readable contrast. Retain the pastel peach, teal, lavender and yellow headers, the puppy illustrations, all subject pictures, the exact layout, text, Hebrew spelling, numbers and footer. Do not add any label or title, do not rearrange anything, do not redraw or retype any letters. All words and counts must stay exactly as supplied. Keep the whole portrait canvas, no cropping, same proportions and high text legibility. This is a subtle page-background tint only, not a colour or design overhaul.
+English must remain left-to-right; Hebrew titles and כדור tiles must remain correctly right-to-left. Preserve every verified feature, the corrected simple 10 block, two rows of five dots and three unit cubes, offline-after-download wording and all 11 cards, reward spaces and parent blocks.

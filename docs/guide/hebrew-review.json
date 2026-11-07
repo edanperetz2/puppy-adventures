@@ -1,0 +1,22 @@
+{
+  "createdOn": "2026-11-08",
+  "image": "puppy-adventures-feature-map-hebrew.png",
+  "language": "Hebrew",
+  "readingDirection": "RTL; Hebrew/stories on right, letters/English in middle, numbers/time on left",
+  "creationMode": "Built-in image generation, localization of the verified English image",
+  "prompt": "puppy-adventures-feature-map-hebrew-prompt.txt",
+  "sourceImage": "puppy-adventures-feature-map-verified.png",
+  "sourceVerification": "puppy-adventures-feature-map-verification.json",
+  "visualReview": [
+    "All 11 activity cards are present with their correct Hebrew names.",
+    "The primary masthead and all feature explanations are in Hebrew.",
+    "Reading order is right-to-left; English learning examples and arithmetic remain left-to-right.",
+    "Confirmed reading totals 1,458 and 647, ten reading stages, 64 workshop words, eight stories with ten pages, twenty initial-sound examples and thirty optional reading words.",
+    "Confirmed ten clock lessons, sixty minutes per hour, addition totals up to twenty, tens and ones up to one hundred.",
+    "Confirmed 1,000 stickers, forty park spaces and twelve decoration types.",
+    "Confirmed correct four-letter RTL tiles spelling כדור and a yellow block marked 10 beside two rows of five purple dots and three unit cubes.",
+    "Confirmed correct right-to-left reward sequence and accurate offline/sync wording.",
+    "Confirmed complete profile, parent settings and device-continuity footer with the game URL."
+  ],
+  "scope": "Only the diagram and supporting brief/audit files were created."
+}

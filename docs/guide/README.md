@@ -1,0 +1,11 @@
+# Bilingual game guide
+
+The app serves `dist/assets/game-guide.png`: **English on the left with a pale blue background; Hebrew on the right with warm cream**. The two source PNGs are `guide-en.png` and `guide-he.png`. Their text was checked against the app and the Hebrew poster was read for spelling, right-to-left ordering, number order and matching descriptions. English letters, words and arithmetic keep their natural left-to-right order.
+
+The current content has eleven main activities, ten Hebrew reading stages with 1,458 targets including 647 short picture-matching passages, 64 workshop words, eight ten-page interactive stories, twenty first-sound examples, thirty optional short English reading words, ten clock lessons, 1,000 sticker slots and a forty-space park with twelve decoration types. Short passages and complete playable stories are distinct activities. Writing forms cover Hebrew print/handwriting and English uppercase/lowercase. Completed scored ten-question adventures award stickers; writing practice and guided clock lessons save their own progress.
+
+The original overview was generated with the built-in image tool; the English background was tinted with the prompt in `english-background-prompt.txt`. The final combined image is a **lossless assembly**, rather than the lower-resolution generated composition: `scripts/prepare-game-guide.ps1` copies both original-size posters onto one 2172 × 1448 canvas and compares the decoded pixel hashes of both halves with the sources. `scripts/game-guide-image-review.json` records those checks.
+
+The content and Hebrew review JSON files retain the export filenames of the previously reviewed standalone diagrams. `guide-he.png` is that reviewed Hebrew export; `guide-en.png` is the reviewed English export with the subsequent background tint. The listed counts and features remain the same in app version 2.1.2.
+
+Validation: all 129 existing tests and the curriculum/audio/syntax checks pass. An isolated profile on a protected Vercel preview verified first-visit access, 320/390/820-pixel layouts, Hebrew and English jumps, zoom, full-image view, Escape/focus return and preservation of an in-progress counting question including the counted object. The guide, image and stylesheet are included in the offline manifest. No album or database schema is changed.
