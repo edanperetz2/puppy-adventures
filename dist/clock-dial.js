@@ -1,5 +1,5 @@
 import { analogClock } from './clock.js';
-import { clockParts, pointAngle, angleDelta, dragMinute, dragHour, setClockHour, learningTime } from './clock-learning.js';
+import { clockParts, pointAngle, angleDelta, dragMinute, dragHour, setClockHour, learningTime } from './clock-learning.js?v=2.2.4-practice';
 
 // A single time drives both hands. Pointer capture keeps a finger attached to
 // its hand outside the circle; only the handles suppress page scrolling.

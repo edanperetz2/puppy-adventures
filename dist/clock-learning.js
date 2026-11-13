@@ -62,7 +62,7 @@ CLOCK_LESSONS[8].tasks.push(...[11,12,13,14,16,17,18,19,21,22,23,24,26,27,28,29,
 CLOCK_LESSONS[9].tasks.push(...[23,24,26,27,28,29,31,32,34,36,37,38,41,43,46,48,51,56,59].map((minute,i)=>task(i%12+1,minute,(i+3)%12+1,15)));
 
 // A saved lesson keeps the examples selected by its original seed and length.
-export function clockLessonTasks(index,seed=1,shufflePractice=false,length=SESSION_LENGTH) {
+export function clockLessonTasks(index,seed=1,shufflePractice=false,length=SESSION_LENGTH,variedPractice=false) {
   const bank=CLOCK_LESSONS[index].tasks,first=originalTaskCounts[index];
   let n=(seed+index*65537)>>>0;
   function draw() {
@@ -70,6 +70,27 @@ export function clockLessonTasks(index,seed=1,shufflePractice=false,length=SESSI
     let t=Math.imul(n^(n>>>15),n|1);
     t^=t+Math.imul(t^(t>>>7),t|61);
     return (t^(t>>>14))>>>0;
+  }
+  if (variedPractice && CLOCK_LESSONS[index].journey) {
+    const sample = durations => durations[draw() % durations.length];
+    const durations = [1, sample([2, 3, 4]), sample([5, 10, 12]), sample([20, 25, 28]), sample([35, 40, 50, 55]), 60];
+    return durations.map(duration => {
+      const start = 60 * (draw() % 11);
+      return { start, total: start + duration, duration };
+    });
+  }
+  if (variedPractice && CLOCK_LESSONS[index].turn) {
+    const turn = bank[draw() % bank.length];
+    const hours = Array.from({ length: 12 }, (_, i) => i + 1).filter(hour => clockTotal(hour) !== turn.total);
+    const examples = shuffle(hours, () => draw() / 0x100000000).slice(0, length - 1).map((hour, i) => ({
+      ...task(hour, 0, (hour + 11 - (i % 3)) % 12 + 1, [5, 10, 15, 20, 35][i]),
+      hand: 'both',
+    }));
+    return [turn, ...examples];
+  }
+  if (variedPractice && index === 3) {
+    const examples = shuffle(bank.slice(2), () => draw() / 0x100000000).slice(0, length - 1);
+    return [bank[draw() % 2], ...examples];
   }
   // These lessons practice the same skill at different hours or numerals.
   if (shufflePractice && [1, 2, 5, 6, 7].includes(index)) return shuffle(bank, () => draw() / 0x100000000).slice(0, length);
@@ -79,19 +100,25 @@ export function clockLessonTasks(index,seed=1,shufflePractice=false,length=SESSI
 }
 
 export function taskClips(lesson, task) {
-  if (lesson.journey) return [task.duration===1?'school-minute-task':'school-duration-task'];
+  if (lesson.journey) {
+    if (task.duration === 1) return ['school-minute-task'];
+    if (task.duration === 60) return ['school-duration-task'];
+    return [`school-minutes-${task.duration}`];
+  }
   const hand = task.hand || lesson.hand;
   if (hand === 'face') return ['school-find-number', `number-${task.number}`];
-  if (lesson.turn) return ['school-turn-task'];
+  if (isFullTurn(lesson,task)) return ['school-turn-task'];
   if (hand === 'hour') return ['school-drag-hour', `number-${clockParts(task.total).hour}`];
   if (hand === 'minute' && !lesson.minutes) return ['school-drag-minute','number-12'];
   return ['school-set-time', ...learningTime(task.total).clips];
 }
 
+export const isFullTurn = (lesson, task) => Boolean(lesson.turn && task.total === task.start + 60);
+
 export function taskSucceeded(lesson, task, total, moved) {
   if (!moved || !Number.isFinite(total)) return false;
   if (lesson.journey) return Math.abs(total - task.start - task.duration) < .5;
-  if (lesson.turn) return Math.abs(total - task.start - 60) < 1;
+  if (isFullTurn(lesson,task)) return Math.abs(total - task.start - 60) < 1;
   return clockTotal(clockParts(total).hour, clockParts(total).minute) === task.total;
 }
 
@@ -100,8 +127,9 @@ export function sanitizeClockPosition(value) {
   const seed=Number.isInteger(value?.seed)&&value.seed>0&&value.seed<=0xffffffff?value.seed:0;
   const shufflePractice=Boolean(seed)&&value?.shufflePractice===true;
   const length = seed && value?.length === SESSION_LENGTH ? SESSION_LENGTH : LEGACY_SESSION_LENGTH;
-  const tasks=seed?clockLessonTasks(lesson,seed,shufflePractice,length):CLOCK_LESSONS[lesson].tasks;
+  const variedPractice = length === SESSION_LENGTH && value?.variedPractice === true;
+  const tasks=seed?clockLessonTasks(lesson,seed,shufflePractice,length,variedPractice):CLOCK_LESSONS[lesson].tasks;
   const index = Number.isInteger(value?.index) && value.index >= 0 && value.index < tasks.length ? value.index : 0;
   const total = Number.isInteger(value?.total) && value.total >= 0 && value.total < 720 ? value.total : tasks[index].start;
-  return { lesson, index, total,...(seed?{seed}:{}),...(shufflePractice?{shufflePractice}:{}),...(length === SESSION_LENGTH ? {length} : {}) };
+  return { lesson, index, total,...(seed?{seed}:{}),...(shufflePractice?{shufflePractice}:{}),...(length === SESSION_LENGTH ? {length} : {}),...(variedPractice ? {variedPractice} : {}) };
 }

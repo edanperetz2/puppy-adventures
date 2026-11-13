@@ -7,7 +7,7 @@ import { isSticker } from './stickers.js';
 import { sanitizeLetterPractice, recordLetters, recognitionTargets } from './letter-progress.js';
 import { distinctWordPictures } from './vocabulary.js';
 import { SESSION_LENGTH, adventurePhase, choiceCount } from './adventure.js?v=2.2.2-six';
-import { sanitizeClockLessons } from './clock-learning.js?v=2.2.2-six';
+import { sanitizeClockLessons } from './clock-learning.js?v=2.2.4-practice';
 import { CHARACTER_MODES, createCharacterSession, sanitizeCharacterSelection } from './characters.js?v=2.2.2-six';
 import { answerShuffler, shuffle } from './answer-order.js';
 export { SESSION_LENGTH } from './adventure.js?v=2.2.2-six';
@@ -47,7 +47,13 @@ function buildSession(mission, rawSettings, rng) {
     const language = Object.hasOwn(LETTERS, settings.letterLanguage) ? settings.letterLanguage : 'hebrew';
     const selected = Array.isArray(settings.letterIds) ? [...new Set(settings.letterIds)].map(id => LETTERS[language].find(letter => letter.id === id)).filter(Boolean) : [];
     const group = selected.length === 3 ? selected : Number.isInteger(settings.letterStart) ? letterGroup(language, settings.letterStart) : recognitionTargets(settings.letterPractice, language, settings.learning);
-    const targets = [...shuffle(group, rng), ...shuffle(group, rng)];
+    const guided = shuffle(group, rng);
+    const recall = shuffle(group, rng);
+    if (recall[0] === guided.at(-1)) {
+      const swap = 1 + Math.floor(rng() * (recall.length - 1));
+      [recall[0], recall[swap]] = [recall[swap], recall[0]];
+    }
+    const targets = [...guided, ...recall];
     return targets.map((letter, i) => ({ id: `letters-${i}`, type: 'letter', letter, answer: letter.id, phase: adventurePhase(i), showModel: i < group.length, options: optionsFrom(group, letter, rng, adventurePhase(i) === 'challenge' ? 3 : 2), prompt: `letter-match-${language}`, targetClip: letter.clip, hint: 'letters-recognition-hint' }));
   }
   if (mission === 'hebrew') {
@@ -88,15 +94,21 @@ function buildSession(mission, rawSettings, rng) {
     const counts = shuffle([1, 2, 3, 4], rng).slice(0, 2).sort((a, b) => a - b);
     const first = Math.max(3, counts.at(-1));
     const sumCount = SESSION_LENGTH - counts.length;
-    const sums = Array.from({ length: sumCount }, (_, i) => i === sumCount - 1 ? max : first + Math.floor((max - first) * (i + rng()) / (sumCount - 1)));
+    const sums = max === 5
+      ? [first, 4, 5, 5]
+      : Array.from({ length: sumCount }, (_, i) => i === sumCount - 1 ? max : first + Math.floor((max - first) * (i + rng()) / (sumCount - 1)));
     const additions = [];
     for (const total of [...new Set(sums)]) {
       const count = sums.filter(n => n === total).length;
-      const pairs = choosePractice(Array.from({ length: total - 1 }, (_, i) => [i + 1, total - i - 1]),settings.learning||{},p=>`math:add:${p[0]}:${p[1]}`,Math.min(count,total-1),Date.now(),rng).sort((a,b)=>Math.min(...a)-Math.min(...b));
-      for (let i = 0; i < count; i++) {
-        const [a, b] = pairs[i % pairs.length];
-        additions.push({ total, a, b });
+      const facts = Array.from({ length: total - 1 }, (_, i) => [i + 1, total - i - 1]);
+      const ranked = choosePractice(facts, settings.learning || {}, ([a, b]) => `math:add:${a}:${b}`, facts.length, Date.now(), rng);
+      const distinct = new Map();
+      for (const pair of ranked) {
+        const smaller = Math.min(...pair);
+        if (!distinct.has(smaller)) distinct.set(smaller, pair);
       }
+      const pairs = [...distinct].slice(0, count).sort(([a], [b]) => a - b).map(([, pair]) => pair);
+      for (const [a, b] of pairs) additions.push({ total, a, b });
     }
     return Array.from({ length: SESSION_LENGTH }, (_, i) => {
       const add = i >= counts.length;

@@ -1,6 +1,6 @@
 import { art, pup, uiIcon } from './art.js';
 import { WORDS, ANIMALS, COLORS } from './content.js?v=2.2.0-voices';
-import { JOURNEYS, PHONICS, STORY_RELATIONS, journeyQuestions, soundExample } from './journey.js?v=2.2.2-six';
+import { JOURNEYS, PHONICS, STORY_RELATIONS, journeyQuestions, soundExample } from './journey.js?v=2.2.4-practice';
 import { adventurePhase } from './adventure.js?v=2.2.2-six';
 import { escapeHtml as esc } from './profiles.js?v=2.2.0-voices';
 import { chunkClip, GIVING_CLIPS } from './journey-audio.js?v=2.2.0-voices';
@@ -133,8 +133,10 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
   }
   function englishView(task){
     if(task.kind==='sound'||task.kind==='blend') {
+      const picture = task.example?.id || (task.phoneme.word === 'insect' ? 'butterfly' : task.phoneme.word);
+      const exampleText = task.example?.text || task.phoneme.word.toUpperCase();
       const letters=task.kind==='sound'?`<bdi class="sound-letters" dir="ltr">${task.phoneme.capital} <span>${task.phoneme.small}</span></bdi>`:`<div class="blend-pieces" dir="ltr">${task.word.split('').map(l=>`<button data-j="phoneme" data-phoneme="${l}" aria-label="דוגמה למילה שמתחילה בצליל ${l.toUpperCase()}">${l.toUpperCase()}<small>${l}</small>${uiIcon('sound')}</button>`).join('')}</div>`;
-      return `<p class="journey-instruction">${task.kind==='sound'?'מַקְשִׁיבִים לַמִּלָּה וּמְחַפְּשִׂים אֶת הַצְּלִיל הָרִאשׁוֹן.':'מַקְשִׁיבִים לַמִּלָּה וּבוֹחֲרִים אֵיךְ הִיא כְּתוּבָה. בִּנְגִיעָה בָּאוֹת נִשְׁמַע מִלַּת דֻּגְמָה.'}</p>${(task.model||s().showModel)?letters:''}${task.kind==='sound'?`<div class="phonics-example">${learningPicture(task.phoneme.word==='insect'?'butterfly':task.phoneme.word)}${task.model||s().showModel?`<bdi dir="ltr" lang="en">${task.phoneme.word.toUpperCase()}</bdi>`:''}</div>`:''}<button class="listen-orb" data-j="listen" aria-label="שמיעת מילת הדוגמה">${uiIcon('sound')}</button><div class="journey-choices">${task.choices.map(c=>`<button data-j="answer" data-answer="${task.kind==='sound'?c.id:c}" ${s().resolved?'disabled':''} dir="ltr">${task.kind==='sound'?`<b class="sound-choice">${c.capital}<small>${c.small}</small></b>`:`<b class="sound-choice">${c.toUpperCase()}</b>`}</button>`).join('')}</div><p class="parent-note">${task.kind==='sound'?'מקשיבים לצליל בתחילת מילת דוגמה שלמה. אין צורך לקרוא את המילה.':'אפשר לחזור למסלול הצלילים בכל זמן.'}</p>`;
+      return `<p class="journey-instruction">${task.kind==='sound'?'מַקְשִׁיבִים לַמִּלָּה וּמְחַפְּשִׂים אֶת הַצְּלִיל הָרִאשׁוֹן.':'מַקְשִׁיבִים לַמִּלָּה וּבוֹחֲרִים אֵיךְ הִיא כְּתוּבָה. בִּנְגִיעָה בָּאוֹת נִשְׁמַע מִלַּת דֻּגְמָה.'}</p>${(task.model||s().showModel)?letters:''}${task.kind==='sound'?`<div class="phonics-example">${learningPicture(picture)}${task.model||s().showModel?`<bdi dir="ltr" lang="en">${exampleText}</bdi>`:''}</div>`:''}<button class="listen-orb" data-j="listen" aria-label="שמיעת מילת הדוגמה">${uiIcon('sound')}</button><div class="journey-choices">${task.choices.map(c=>`<button data-j="answer" data-answer="${task.kind==='sound'?c.id:c}" ${s().resolved?'disabled':''} dir="ltr">${task.kind==='sound'?`<b class="sound-choice">${c.capital}<small>${c.small}</small></b>`:`<b class="sound-choice">${c.toUpperCase()}</b>`}</button>`).join('')}</div><p class="parent-note">${task.kind==='sound'?'מקשיבים לצליל בתחילת מילת דוגמה שלמה. אין צורך לקרוא את המילה.':'אפשר לחזור למסלול הצלילים בכל זמן.'}</p>`;
     }
     const pair=task.kind==='pair';
     return `<p class="journey-instruction">${task.newWord?'מִלָּה חֲדָשָׁה אַחַת! נַכִּיר אוֹתָה יַחַד.':pair?'כְּבָר מַכִּירִים אֶת הַצֶּבַע וְאֶת הַחֵפֶץ. נַקְשִׁיב לִשְׁתֵּי מִלִּים.':'מַקְשִׁיבִים לְמִלָּה אַחַת וּבוֹחֲרִים תְּמוּנָה.'}</p>

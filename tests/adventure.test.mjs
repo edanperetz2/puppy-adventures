@@ -70,7 +70,7 @@ test('Arithmetic never drops back to easier sums, reaches the chosen cap and avo
     assert.ok(questions.slice(0,2).every(q=>q.type==='count'&&q.total>=1&&q.total<=4));
     assert.equal(new Set(questions.slice(0,2).map(q=>q.total)).size,2);
     const additions = questions.slice(2);
-    assert.equal(new Set(additions.map(q => `${q.a}+${q.b}`)).size, 4);
+    assert.equal(new Set(additions.map(q => `${Math.min(q.a, q.b)}+${Math.max(q.a, q.b)}`)).size, 4);
     assert.ok(additions.every(q => q.type === 'add' && q.a + q.b === q.total && q.total <= max));
     assert.equal(additions.at(-1).total, max);
     for (let i = 1; i < questions.length; i++) assert.ok(questions[i].total >= questions[i - 1].total);

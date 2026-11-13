@@ -1,14 +1,14 @@
 import { LearningStore } from './learning-sync.js?v=2.2.2-six';
 import { questionLearning, learningSummary } from './learning.js';
 import { packRound, unpackRound, cleanDrafts, roundKey } from './session-state.js?v=2.2.2-six';
-import { JOURNEYS, newJourney, cleanJourney, englishPairsReady, journeyLength } from './journey.js?v=2.2.2-six';
+import { JOURNEYS, newJourney, cleanJourney, resumeJourney, englishPairsReady, journeyLength } from './journey.js?v=2.2.4-practice';
 import { STORIES } from './journey-content.js';
-import { mountJourney } from './journey-view.js?v=2.2.2-six';
+import { mountJourney } from './journey-view.js?v=2.2.4-practice';
 import { mountPark } from './park.js';
 import { mountFreeWriting, WRITING_STEPS } from './free-writing.js';
 import { parentLearning, learningStatus } from './learning-parent.js?v=2.1.3-sync';
 import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.2.0-voices';
-import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.2.2-six';
+import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.2.4-practice';
 import { ADVENTURE_PHASES, adventurePhase } from './adventure.js?v=2.2.2-six';
 import { art, pup, scene, uiIcon } from './art.js';
 import { Narrator } from './audio.js?v=2.2.0-voices';
@@ -17,8 +17,8 @@ import { SharedAlbum, normalizeCode } from './sync.js?v=2.2.2-six';
 import { SYNC_CONFIG } from './sync-config.js';
 import { mountFamilyPanel, updateFamilyStatus } from './family-ui.js?v=2.2.3-ariel';
 import { analogClock, CLOCK_LEVELS } from './clock.js';
-import { mountClockSchool } from './clock-school.js?v=2.2.2-six';
-import { sanitizeClockPosition, recordClockLesson } from './clock-learning.js?v=2.2.2-six';
+import { mountClockSchool } from './clock-school.js?v=2.2.4-practice';
+import { sanitizeClockPosition, recordClockLesson } from './clock-learning.js?v=2.2.4-practice';
 import { LETTERS, WRITING_FORMS, writingLetter, writingMode, writingPositionKey, letterGroup, letterShape } from './letters.js';
 import { mountLetterPad } from './letter-pad.js';
 import { nextReadingStage, sanitizeReadingPractice, finishReadingPractice } from './reading.js?v=2.2.2-six';
@@ -292,7 +292,11 @@ function writingVisits(language,form,step=writingPractice.mode){
  return LETTERS[language].map((letter,i)=>step==='trace'?legacy[i]:step==='all'?legacy[i]+['copy','memory','paper'].reduce((sum,method)=>sum+(items[`letter:${language}:${letter.id}:${form}:${method}`]?.practice||0),0):items[`letter:${language}:${letter.id}:${form}:${step}`]?.practice||0);
 }
 function writingCount(language,form,step=writingPractice.mode){return writingVisits(language,form,step).filter(n=>n>0).length;}
-function nextWriting(language,form,start=0){const visits=writingVisits(language,form),letters=LETTERS[language];return letters.map((letter,i)=>({letter,count:visits[i],order:(i-start+letters.length)%letters.length})).sort((a,b)=>a.count-b.count||a.order-b.order)[0].letter;}
+function nextWriting(language, form, start = 0, skip = -1) {
+  const visits = writingVisits(language, form), letters = LETTERS[language];
+  return letters.map((letter, index) => ({ letter, index, count: visits[index], order: (index - start + letters.length) % letters.length }))
+    .filter(item => item.index !== skip).sort((a, b) => a.count - b.count || a.order - b.order)[0].letter;
+}
 
 function writingKey(){return `${letterDemo.language}:${letterDemo.form}:${letterDemo.index}:${writingPractice.mode}`;}
 function nameLetterButtons(language) {
@@ -804,7 +808,7 @@ function resumeLatest(){
   const draft=latestDraft();if(!draft)return;
   narrator.stop();
   if(draft.kind==='classic'){const restored=unpackRound(draft.value);if(!restored)return;round=restored;view='game';}
-  else {journeyPlan=cleanJourney(draft.value);if(!journeyPlan)return;round=null;view='journey';}
+  else {journeyPlan=resumeJourney(draft.value);if(!journeyPlan)return;round=null;view='journey';}
   render();focusTitle();
 }
 function restoreQuestionState(){
@@ -850,7 +854,7 @@ function renderLearningHub(){
 }
 function startJourney(mode,level){
   if(!JOURNEYS[mode])return;checkpoint();narrator.stop();round=null;
-  const key=`${mode}:${level}`;journeyPlan=cleanJourney(journeyDrafts[key])||newJourney(mode,level,learner.items,{mathMax:settings.mathMax});view='journey';checkpoint();render();focusTitle();
+  const key=`${mode}:${level}`;journeyPlan=resumeJourney(journeyDrafts[key])||newJourney(mode,level,learner.items,{mathMax:settings.mathMax});view='journey';checkpoint();render();focusTitle();
   if(mode!=='stories'||adventurePhase(journeyPlan.index, journeyLength(journeyPlan))==='warmup')journeyController.replay(false, journeyPlan.index === 0);
 }
 function renderJourney(){
@@ -931,7 +935,7 @@ app.addEventListener('click', event => {
     case 'letter-recognition-auto': recognitionChoice = null; render(); focusTitle(); break;
     case 'letter-recognition-next': settings.letterLanguage = round.letterLanguage; recognitionChoice = null; startMission('letters', true); break;
     case 'letter-recognition-repeat': settings.letterLanguage = round.letterLanguage; recognitionChoice = [...round.letterIds]; startMission('letters', true); break;
-    case 'letter-writing-continue': { const letter = nextWriting(letterDemo.language,letterDemo.form,(letterDemo.index+1)%LETTERS[letterDemo.language].length); selectLetter(LETTERS[letterDemo.language].indexOf(letter)); break; }
+    case 'letter-writing-continue': { const letter = nextWriting(letterDemo.language, letterDemo.form, letterDemo.index + 1, letterDemo.index); selectLetter(LETTERS[letterDemo.language].indexOf(letter)); break; }
     case 'hint': hint(); break;
     case 'answer': answer(button); break;
     case 'tally': tally(button); break;
