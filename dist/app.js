@@ -13,9 +13,9 @@ import { ADVENTURE_PHASES, adventurePhase } from './adventure.js?v=2.2.2-six';
 import { art, pup, scene, uiIcon } from './art.js';
 import { Narrator } from './audio.js?v=2.2.0-voices';
 import { GameAnnouncements } from './announcements.js';
-import { SharedAlbum, normalizeCode } from './sync.js?v=2.2.2-six';
+import { SharedAlbum, normalizeCode } from './sync.js?v=2.2.6-album';
 import { SYNC_CONFIG } from './sync-config.js';
-import { mountFamilyPanel, updateFamilyStatus } from './family-ui.js?v=2.2.3-ariel';
+import { mountFamilyPanel, updateFamilyStatus } from './family-ui.js?v=2.2.6-album';
 import { analogClock, CLOCK_LEVELS } from './clock.js';
 import { mountClockSchool } from './clock-school.js?v=2.2.4-practice';
 import { sanitizeClockPosition, recordClockLesson } from './clock-learning.js?v=2.2.4-practice';
@@ -70,7 +70,7 @@ try {
   }
 } catch { /* A corrupt or unavailable save must never prevent play. */ }
 
-const album = new SharedAlbum({ config: SYNC_CONFIG, storage: gameStorage, onChange: source => {
+const album = new SharedAlbum({ config: SYNC_CONFIG, storage: gameStorage, localProgress: progress, onChange: source => {
   void learner?.flush();
   if (!source.linked) return;
   const updated = source.progress;
@@ -505,7 +505,7 @@ function renderAlbum() {
   const nextButton = `<button class="secondary-button" data-action="album-page" data-page="${page.index + 1}" ${page.index === page.pageCount - 1 ? 'disabled' : ''}>לעמוד הבא</button>`;
   app.innerHTML = `${header()}<main id="main" class="album-page"><button class="text-button back-button" data-action="home">${uiIcon('home')} לבית החברים</button>
     <div class="album-heading"><span class="eyebrow">מזכרות מההרפתקאות שלנו</span><h1 tabindex="-1">המדבקות שלי</h1><p>כבר גילית <b>${page.collected}</b> מתוך <b>${STICKERS.length.toLocaleString('en-US')}</b> מדבקות!</p><progress class="album-progress" value="${page.collected}" max="${STICKERS.length}" aria-label="${page.collected} מתוך ${STICKERS.length} מדבקות נאספו"></progress><p class="album-next-reward">${page.collected === STICKERS.length ? 'כל המדבקות באלבום שלך! אפשר להמשיך לגלות ולשחק ♡' : 'בכל הרפתקה שלמה מגלות מדבקה חדשה ♡'}</p></div>
-    ${!album.linked ? `<aside class="album-connect-note"><p>האלבום שמור כאן במכשיר. כדי לראות את אותן המדבקות גם ב-Safari וגם ממסך הבית, מחברים את שניהם לאותו אלבום משפחתי.</p><button class="text-button" data-action="parents">חיבור האלבום עם הורה ${uiIcon('settings')}</button></aside>` : ''}
+    ${!album.linked ? `<aside class="album-connect-note"><p>המדבקות שמורות בדפדפן הזה. כדי לראות את אותו האלבום בדפדפן או במכשיר נוסף, מחברים אותם לאותו קוד משפחתי.</p><button class="text-button" data-action="parents">חיבור האלבום עם הורה ${uiIcon('settings')}</button></aside>` : ''}
     <nav class="album-pagination" aria-label="דפדוף בראש האלבום">${previousButton}<label class="album-page-select"><span>עמוד ${page.index + 1} מתוך ${page.pageCount}</span><select data-album-page aria-label="בחירת עמוד באלבום">${Array.from({ length: page.pageCount }, (_, index) => `<option value="${index}" ${index === page.index ? 'selected' : ''}>עמוד ${index + 1}</option>`).join('')}</select></label>${nextButton}</nav>
     <p class="album-page-range" role="status">מדבקות <bdi dir="ltr">${page.start + 1}–${page.end}</bdi></p>
     ${page.collected ? '<button class="text-button album-latest" data-action="album-latest">למדבקה האחרונה שלי</button>' : ''}
@@ -751,7 +751,7 @@ function renderSettings() {
     <section class="parent-progress"><h3>מה כבר גילינו?</h3><p id="parent-progress-summary">${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות</p><table><thead><tr><th>תחום</th><th>תשובות ללא עזרה</th><th>עם הדגמה, רמז או ניסיון נוסף</th></tr></thead><tbody>${MISSION_IDS.map(id => MISSIONS[id]).map(m => `<tr><th>${m.id === 'hebrew' ? 'עברית · מילים ושמות' : m.subject}</th><td data-independent="${m.id}">${progress.skills[m.id].correct - progress.skills[m.id].assisted}</td><td data-assisted="${m.id}">${progress.skills[m.id].assisted}</td></tr>`).join('')}</tbody></table><p class="parent-note">מוצגות רק הרפתקאות שהושלמו. זהו תיעוד משחק, ולא מבחן או הערכת יכולת.</p></section>
     <div id="learning-parent">${parentLearning(learner)}</div>
     <section id="family-panel"></section><p class="parent-note character-art-credit">איורי הדמויות: PAW Patrol / Rubble &amp; Crew © Spin Master Ltd. · <a href="https://dev.pawpatrol.com/character-guide" target="_blank" rel="noopener noreferrer">מדריך הדמויות הרשמי של מפרץ ההרפתקאות</a> · <a href="https://images.squarespace-cdn.com/content/v1/5595e2eee4b0b03840079b28/1685761053151-FY46DCUKCA43ODFF4MKK/image-asset.jpeg" target="_blank" rel="noopener noreferrer">McCown Design Agency</a>. משחק השמות נכלל בתחום עברית.</p>
-    <p class="privacy-note">אפשר לשחק במכשיר הזה ולחבר אותו לאלבום המשפחתי של אריאל בכל עת. כשמחברים את האלבום נשמרים בו המדבקות, ההתקדמות, היסטוריית הלמידה והפארק. הרפתקאות פתוחות וציורי תרגול נשמרים במכשיר. שמרו את הקוד כדי לחבר מכשיר נוסף לאותו אלבום.</p>
+    <p class="privacy-note">האלבום המשפחתי משתף מדבקות, התקדמות, היסטוריית למידה ופארק עם המכשירים שחוברו אליו בקוד. הרפתקאות פתוחות וציורי תרגול נשמרים במכשיר.</p>
     <p class="parent-note">איורים נוספים: <a href="assets/Twemoji-LICENSE.txt" target="_blank" rel="noopener">Twemoji · רישיון ושמות היוצרים</a>. כל התמונות שמורות בתוך המשחק.</p>
     <p class="save-notice" ${storageAvailable ? 'hidden' : ''}>הדפדפן לא מאפשר שמירה כרגע. אפשר לשחק, אבל ההתקדמות עלולה להיעלם בסגירה.</p>
     <button class="text-button reset-button" data-dialog="reset">${album.linked ? 'ניתוק מהאלבום ואיפוס המכשיר הזה' : 'איפוס ההתקדמות במכשיר הזה'}</button>`);

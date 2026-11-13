@@ -6,6 +6,10 @@ import { SyncRetry, rateLimitError } from './sync-retry.js';
 
 const KEY = 'puppy-adventures-family-v1';
 const ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+const keepStickers = (progress, saved) => {
+  const earned = new Set([...progress.stickers, ...saved.stickers]);
+  return STICKERS.filter((id, index) => index < progress.sessions || earned.has(id));
+};
 
 export function normalizeCode(value) {
   const code = String(value || '').toUpperCase().replace(/[\s-]/g, '');
@@ -30,14 +34,17 @@ function deviceId() {
 export function withPending(remote, own, confirmed) {
   const next = sanitizeProgress(remote);
   for (const mission of MISSION_IDS) {
-    const extra = Math.max(0, own.missions[mission] - confirmed.missions[mission]);
-    next.missions[mission] += extra;
-    next.skills[mission].correct += Math.max(0, own.skills[mission].correct - confirmed.skills[mission].correct);
+    const sessions = Math.max(0, own.missions[mission] - confirmed.missions[mission]);
+    const stars = Math.max(0, own.skills[mission].correct - confirmed.skills[mission].correct);
+    next.sessions += sessions;
+    next.stars += stars;
+    next.missions[mission] += sessions;
+    next.skills[mission].correct += stars;
     next.skills[mission].assisted += Math.max(0, own.skills[mission].assisted - confirmed.skills[mission].assisted);
   }
-  next.sessions = Object.values(next.missions).reduce((sum, n) => sum + n, 0);
-  next.stars = Object.values(next.skills).reduce((sum, skill) => sum + skill.correct, 0);
-  next.stickers = STICKERS.slice(0, Math.min(next.sessions, STICKERS.length));
+  next.sessions = Math.max(next.sessions, Object.values(next.missions).reduce((sum, n) => sum + n, 0));
+  next.stars = Math.max(next.stars, Object.values(next.skills).reduce((sum, skill) => sum + skill.correct, 0));
+  next.stickers = keepStickers(next, own);
   next.letterPractice = pendingLetterPractice(next.letterPractice, own.letterPractice, confirmed.letterPractice);
   next.clockLessons |= own.clockLessons;
   return next;
@@ -54,7 +61,7 @@ export function compactContribution(progress) {
 }
 
 export class SharedAlbum {
-  constructor({ config, storage, fetcher = globalThis.fetch.bind(globalThis), onChange = () => {}, retryOptions = {} }) {
+  constructor({ config, storage, localProgress, fetcher = globalThis.fetch.bind(globalThis), onChange = () => {}, retryOptions = {} }) {
     this.config = config;
     this.fetcher = fetcher;
     this.onChange = onChange;
@@ -69,6 +76,9 @@ export class SharedAlbum {
       const saved = JSON.parse(this.storage.getItem(KEY) || 'null');
       if (normalizeCode(saved?.code) && /^[0-9a-f-]{36}$/i.test(saved.device)) {
         this.state = { code: normalizeCode(saved.code), device: saved.device, own: sanitizeProgress(saved.own), confirmed: sanitizeProgress(saved.confirmed), remote: sanitizeProgress(saved.remote), completedIds: (Array.isArray(saved.completedIds) ? saved.completedIds : []).filter(id => /^[0-9a-f-]{36}$/i.test(id)).slice(-10000) };
+        // The game also saves the last album it showed. Use that copy to
+        // recover earned sticker IDs if the browser saved one key late.
+        if (localProgress) this.state.remote.stickers = keepStickers(this.state.remote, sanitizeProgress(localProgress));
         this.status = this.pending ? 'pending' : 'synced';
       }
     } catch { /* Browser restrictions must never block the local game. */ }
@@ -203,6 +213,13 @@ export class SharedAlbum {
     try {
       const remote = await this.request(state, captured);
       if (generation !== this.generation) return;
+      // A family's confirmed totals only grow. Keep the last valid album if
+      // a response is missing some of the progress this device already saw.
+      if (remote.sessions < state.remote.sessions || remote.stars < state.remote.stars
+          || MISSION_IDS.some(mission => remote.missions[mission] < state.remote.missions[mission])) {
+        throw new Error('sync_unavailable');
+      }
+      remote.stickers = keepStickers(remote, state.remote);
       this.state.remote = remote;
       this.state.confirmed = captured;
       this.retry.clear();

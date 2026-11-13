@@ -6,6 +6,7 @@ import { MISSION_IDS } from '../dist/content.js';
 import { STICKERS, LEGACY_STICKERS } from '../dist/stickers.js';
 import { LETTERS } from '../dist/letters.js';
 import { LETTER_MODES, sanitizeLetterPractice, suggestedLetters } from '../dist/letter-progress.js';
+import { FAMILY_KEY, GAME_KEY, openAriel } from '../dist/profiles.js';
 import { syncClock } from './helpers/sync-clock.mjs';
 
 function storage() {
@@ -198,6 +199,55 @@ test('A Safari album with 26 stickers pairs to an empty Home Screen app and surv
   home = new SharedAlbum({ config, storage: homeStore, fetcher: api.fetcher });
   assert.equal(home.progress.stars, 162);
   assert.equal(home.progress.stickers.length, 27);
+});
+
+test('Opening the Ariel-only game leaves an unpaired visitor local until a known code is entered', async () => {
+  const api = server(), familyCode = newCode();
+  let requests = 0;
+  const fetcher = (...args) => {
+    requests++;
+    return api.fetcher(...args);
+  };
+  const familyStore = openAriel(storage());
+  const family = new SharedAlbum({ config, storage: familyStore, fetcher });
+  await family.link(familyCode, legacyProgress(26), { create: true });
+  const visitorStore = openAriel(storage());
+  const browser = new SharedAlbum({ config, storage: visitorStore, fetcher });
+  await browser.flush();
+  assert.equal(requests, 1);
+  assert.equal(browser.progress, null);
+  assert.equal(visitorStore.getItem(FAMILY_KEY), null);
+  await assert.rejects(browser.link(newCode(), freshProgress()), /album_not_found/);
+  assert.equal(browser.linked, false);
+  assert.equal(family.progress.sessions, 26);
+
+  await browser.link(familyCode, freshProgress());
+  assert.deepEqual(browser.progress, family.progress);
+  assert.deepEqual(browser.progress.stickers, STICKERS.slice(0, 26));
+  const reopened = new SharedAlbum({ config, storage: visitorStore, fetcher });
+  assert.deepEqual(reopened.progress, family.progress);
+});
+
+test('A cached earned sticker survives an incomplete response, successful sync and reload', async () => {
+  const api = server(), saved = openAriel(storage()), code = newCode();
+  const family = new SharedAlbum({ config, storage: saved, fetcher: api.fetcher });
+  await family.link(code, legacyProgress(26), { create: true });
+  const displayed = family.progress;
+  displayed.stickers.push(STICKERS[29]);
+  saved.setItem(GAME_KEY, JSON.stringify({ progress: displayed }));
+  assert.equal(JSON.parse(saved.getItem(FAMILY_KEY)).remote.stickers.length, 26);
+  let incomplete = true;
+  const fetcher = (...args) => incomplete ? Promise.resolve(Response.json(freshProgress())) : api.fetcher(...args);
+  const reopened = new SharedAlbum({ config, storage: saved, localProgress: JSON.parse(saved.getItem(GAME_KEY)).progress, fetcher });
+  assert.deepEqual(reopened.progress, displayed);
+  await reopened.flush();
+  assert.equal(reopened.status, 'offline');
+  assert.deepEqual(reopened.progress, displayed);
+  incomplete = false;
+  await reopened.flush();
+  assert.equal(reopened.status, 'synced');
+  assert.deepEqual(reopened.progress, displayed);
+  assert.deepEqual(new SharedAlbum({ config, storage: saved, fetcher }).progress, displayed);
 });
 
 test('Full albums send compact counters within the real RPC payload limit', () => {
