@@ -1,8 +1,8 @@
 import { art, pup, uiIcon } from './art.js';
-import { WORDS, ANIMALS, COLORS } from './content.js';
-import { JOURNEYS, PHONICS, journeyQuestions, soundExample } from './journey.js';
-import { escapeHtml as esc } from './profiles.js';
-import { chunkClip } from './journey-audio.js';
+import { WORDS, ANIMALS, COLORS } from './content.js?v=2.2.0-voices';
+import { JOURNEYS, PHONICS, journeyQuestions, soundExample } from './journey.js?v=2.2.0-voices';
+import { escapeHtml as esc } from './profiles.js?v=2.2.0-voices';
+import { chunkClip, GIVING_CLIPS } from './journey-audio.js?v=2.2.0-voices';
 import { STORIES } from './journey-content.js';
 
 const color = id => COLORS.find(c=>c.id===id)?.hex || '#7baebc';
@@ -62,9 +62,39 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
   const say=(keys,explicit=false)=>speak(keys,explicit);
   function persist(){plan.at=Date.now();onSave(plan);}
   function help(){if(!plan.helped.includes(plan.index))plan.helped.push(plan.index);persist();}
-  function prepare(){const task=q();if(task.kind==='story'&&task.page.english)say([task.prompt,`en-${task.page.english}`]);onObservation({item:task.key,domain:JOURNEYS[plan.mode].domain,exposure:true},'seen');if(task.model || task.kind==='story'&&plan.index<3){help();}plan.state={chosen:[],tokens:[],quantity:0,attempted:[],...plan.state};if(task.tiles)plan.state.chosen=[...new Set(plan.state.chosen.filter(id=>task.tiles.some(t=>t.id===id)))].slice(0,task.pieces.length);plan.state.tokens=plan.state.tokens.filter(n=>n<(task.page?.count||task.total||100));plan.state.quantity=Math.min(plan.state.quantity,task.operation==='tens'?100:plan.max);persist();}
-  function replay(explicit=false){const task=q();if(task.kind==='story') {help();say([`journey-story-${task.story.id}-${plan.index}`,task.prompt,...(task.page.english?[`en-${task.page.english}`]:[])],explicit);}
-    else say([task.prompt,...(task.extraClips||[]),...(task.kind==='context'?[]:task.clip?[task.clip]:task.word?[`he-${task.word.id}`]:[])],explicit);}
+  function prepare() {
+    const task = q();
+    if (task.kind === 'story' && task.page.english) say([task.prompt, `en-${task.page.english}`]);
+    onObservation({ item: task.key, domain: JOURNEYS[plan.mode].domain, exposure: true }, 'seen');
+    if (task.model || (task.kind === 'story' && plan.index < 3)) help();
+    plan.state = { chosen: [], tokens: [], quantity: 0, attempted: [], ...plan.state };
+    if (task.tiles) {
+      plan.state.chosen = [...new Set(plan.state.chosen.filter(id => task.tiles.some(tile => tile.id === id)))].slice(0, task.pieces.length);
+    }
+    plan.state.tokens = plan.state.tokens.filter(n => n < (task.page?.count || task.total || 100));
+    if (task.operation === 'takeaway') plan.state.tokens = plan.state.tokens.slice(0, task.known);
+    plan.state.quantity = Math.min(plan.state.quantity, task.operation === 'tens' ? 100 : plan.max);
+    persist();
+  }
+  function replay(explicit = false, opening = false) {
+    const task = q();
+    const clips = opening ? ['good-luck'] : [];
+    if (task.operation === 'takeaway') {
+      const toGive = task.known - s().tokens.length;
+      clips.push(toGive > 0 ? GIVING_CLIPS[toGive] : 'journey-apples-left');
+    } else if (task.kind === 'story') {
+      help();
+      clips.push(`journey-story-${task.story.id}-${plan.index}`, task.prompt);
+      if (task.page.english) clips.push(`en-${task.page.english}`);
+    } else {
+      clips.push(task.prompt, ...(task.extraClips || []));
+      if (task.kind !== 'context') {
+        if (task.clip) clips.push(task.clip);
+        else if (task.word) clips.push(`he-${task.word.id}`);
+      }
+    }
+    say(clips, explicit);
+  }
   function resolved(){
     if(s().resolved)return;s().resolved=true;
     if(!plan.observed.includes(plan.index)){plan.observed.push(plan.index);onObservation({item:q().key,domain:JOURNEYS[plan.mode].domain},plan.helped.includes(plan.index)?'helped':'independent');}
@@ -98,17 +128,36 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
       ${(task.model||s().showModel)?`<div class="english-model">${pair?pairPicture(task.target):learningPicture(task.target.id)}<span>מַכִּירִים יַחַד</span>${pair?`<div><button data-j="pair-color">${uiIcon('sound')} הַצֶּבַע</button><button data-j="pair-object">${uiIcon('sound')} הַחֵפֶץ</button></div>`:''}</div>`:''}
       <button class="listen-orb" data-j="listen" aria-label="שמיעת המילה באנגלית">${uiIcon('sound')}<span>עוֹד פַּעַם? בְּשִׂמְחָה!</span></button><div class="journey-choices">${task.choices.map(c=>`<button data-j="answer" data-answer="${pair?`${c.color}-${c.object}`:c.id}" aria-label="${pair?`${COLORS.find(x=>x.id===c.color).he} ${c.object==='ball'?'כדור':'מכונית'}`:c.he}" ${s().resolved?'disabled':''}>${pair?pairPicture(c):learningPicture(c.id)}</button>`).join('')}</div>`;
   }
+  function givingView(task) {
+    const given = s().tokens.length;
+    const toGive = task.known - given;
+    const complete = toGive === 0;
+    const apples = Array.from({ length: task.total }, (_, index) => {
+      if (s().tokens.includes(index)) return '<span class="frame-cell given-apple" aria-hidden="true"></span>';
+      if (complete) return `<span class="frame-cell filled">${art('apple')}</span>`;
+      return `<button type="button" class="frame-cell filled" data-j="remove" data-token="${index}" aria-label="לתת ללולי תפוח ${index + 1}">${art('apple')}</button>`;
+    }).join('');
+    const goal = complete ? 'כַּמָּה תַּפּוּחִים נִשְׁאֲרוּ?' : toGive === 1 ? 'נִתֵּן לְלוּלִי תַּפּוּחַ אֶחָד.' : `נִתֵּן לְלוּלִי <b>${toGive}</b> תַּפּוּחִים.`;
+    return `<div class="quantity-goal">${goal}</div>
+      <div class="giving-sets">
+        <section class="giving-basket" aria-label="התפוחים בסל"><h2>הַתַּפּוּחִים בַּסַּל</h2><div class="ten-frames takeaway-frame" dir="ltr">${apples}</div></section>
+        <section class="giving-recipient" aria-label="לולי קיבלה ${given} מתוך ${task.known} תפוחים">
+          ${pup('luli')}<div><h2>הַתַּפּוּחִים שֶׁל לוּלִי</h2><div class="giving-slots" aria-hidden="true">${Array.from({ length: task.known }, (_, index) => `<span>${index < given ? art('apple') : ''}</span>`).join('')}</div></div>
+        </section>
+      </div>
+      ${complete ? `<div class="journey-choices" aria-label="כמה תפוחים נשארו?">${task.choices.map(count => `<button type="button" data-j="answer" data-answer="${count}" ${s().resolved ? 'disabled' : ''}><b class="quantity-number">${count}</b></button>`).join('')}</div>` : '<p class="journey-instruction">נִגַּע בְּתַפּוּחַ בַּסַּל כְּדֵי לָתֵת אוֹתוֹ לְלוּלִי.</p>'}`;
+  }
   function objectsView(task){
-    const take=task.operation==='takeaway',tens=task.operation==='tens',bond=task.operation==='bonds',quantity=s().quantity||0;
-    const target=take?task.total:task.answer,capacity=tens?100:plan.max<=10?10:20;
-    return `<div class="quantity-goal">${take?`לַחֲבֵרִים יֵשׁ <b>${task.total}</b> תַּפּוּחִים. נִתֵּן <b>${task.known}</b> מֵהֶם לְלוּלִי. כַּמָּה יִשָּׁאֲרוּ?`:bond?`נַשְׁלִים לְ־<b>${task.total}</b>. כְּבָר יֵשׁ <b>${task.known}</b>. כַּמָּה חֲסֵרִים?`:`נִבְנֶה כַּמּוּת שֶׁל <b>${task.total}</b>`}</div>
+    if (task.operation === 'takeaway') return givingView(task);
+    const tens=task.operation==='tens',bond=task.operation==='bonds',quantity=s().quantity||0;
+    const target=task.answer,capacity=tens?100:plan.max<=10?10:20;
+    return `<div class="quantity-goal">${bond?`נַשְׁלִים לְ־<b>${task.total}</b>. כְּבָר יֵשׁ <b>${task.known}</b>. כַּמָּה חֲסֵרִים?`:`נִבְנֶה כַּמּוּת שֶׁל <b>${task.total}</b>`}</div>
     ${tens?`<p class="journey-instruction">כָּל מוֹט = 10 יְחִידוֹת. עֲשָׂרָה מוֹטוֹת = 100.</p><div class="tens-workbench" dir="ltr">${Array.from({length:Math.floor(quantity/10)},()=>`<div class="ten-rod" aria-label="עשר יחידות">${'<i></i>'.repeat(10)}</div>`).join('')}<div class="one-units">${'<i></i>'.repeat(quantity%10)}</div></div><p class="quantity-readout" dir="rtl">${Math.floor(quantity/10)} ${Math.floor(quantity/10)===1?'עֲשֶׂרֶת':'עֲשָׂרוֹת'} וְ־${quantity%10} ${quantity%10===1?'יְחִידָה':'יְחִידוֹת'} <b dir="ltr">= ${quantity}</b></p>`:
-      `<div class="ten-frames ${take?'takeaway-frame':''}" dir="ltr">${Array.from({length:take?Math.ceil(task.total/10)*10:capacity},(_,i)=>{
-        const fixed=bond&&i<task.known,filled=take?i<task.total:fixed||i<task.known+quantity,removed=s().tokens.includes(i);
-        return `<button class="frame-cell ${fixed?'fixed':''} ${filled?'filled':''} ${removed?'removed':''} ${(task.model||s().showModel)&&i<target+(bond?task.known:0)?'ghost-target':''}" data-j="${take?'remove':'frame'}" data-token="${i}" aria-label="${take?'תפוח':'משבצת'} ${i+1}${removed?' ניתן ללולי':''}" ${s().resolved||fixed||take&&(i>=task.total||removed)?'disabled':''}>${filled?art('apple'):''}${removed?'<b>✓</b>':''}</button>`;
+      `<div class="ten-frames" dir="ltr">${Array.from({length:capacity},(_,i)=>{
+        const fixed=bond&&i<task.known,filled=fixed||i<task.known+quantity;
+        return `<button class="frame-cell ${fixed?'fixed':''} ${filled?'filled':''} ${(task.model||s().showModel)&&i<target+(bond?task.known:0)?'ghost-target':''}" data-j="frame" data-token="${i}" aria-label="משבצת ${i+1}" ${s().resolved||fixed?'disabled':''}>${filled?art('apple'):''}</button>`;
       }).join('')}</div>`}
-    ${take?`<p class="journey-instruction">נָתַנּוּ ${s().tokens.length} מִתּוֹךְ ${task.known}. נִגַּע בַּתַּפּוּחִים כְּדֵי לָתֵת אוֹתָם.</p><div class="journey-choices">${[task.answer,...[task.answer-1,task.answer+1].filter(n=>n>=0)].map(n=>`<button data-j="answer" data-answer="${n}" ${s().tokens.length!==task.known||s().resolved?'disabled':''}><b class="quantity-number">${n}</b></button>`).join('')}</div>`:
-      `<div class="quantity-tools"><button class="object-source" data-j="add" data-amount="${tens?10:1}" ${s().resolved?'disabled':''}>${tens?'<b>10</b>':art('apple')} ${uiIcon('plus')} ${tens?'מוֹט שֶׁל עֶשֶׂר':'מוֹסִיפִים אֶחָד'}</button>${tens?`<button data-j="add" data-amount="1" ${s().resolved?'disabled':''}>+1 יְחִידָה</button>`:''}<button data-j="less" data-amount="${tens?10:1}" ${!quantity||s().resolved?'disabled':''}>−${tens?'10':'1'}</button>${tens?`<button data-j="less" data-amount="1" ${!quantity||s().resolved?'disabled':''}>−1</button>`:''}</div><p class="quantity-readout">${bond?'הוֹסַפְנוּ':'בָּנִינוּ'} <b>${quantity}</b></p><button class="primary-button" data-j="check" ${s().resolved?'disabled':''}>בּוֹדְקִים ${uiIcon('check')}</button>`}`;
+    <div class="quantity-tools"><button class="object-source" data-j="add" data-amount="${tens?10:1}" ${s().resolved?'disabled':''}>${tens?'<b>10</b>':art('apple')} ${uiIcon('plus')} ${tens?'מוֹט שֶׁל עֶשֶׂר':'מוֹסִיפִים אֶחָד'}</button>${tens?`<button data-j="add" data-amount="1" ${s().resolved?'disabled':''}>+1 יְחִידָה</button>`:''}<button data-j="less" data-amount="${tens?10:1}" ${!quantity||s().resolved?'disabled':''}>−${tens?'10':'1'}</button>${tens?`<button data-j="less" data-amount="1" ${!quantity||s().resolved?'disabled':''}>−1</button>`:''}</div><p class="quantity-readout">${bond?'הוֹסַפְנוּ':'בָּנִינוּ'} <b>${quantity}</b></p><button class="primary-button" data-j="check" ${s().resolved?'disabled':''}>בּוֹדְקִים ${uiIcon('check')}</button>`;
   }
   function render(){
     const task=q(),done=s().resolved;
@@ -132,6 +181,13 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
     if(action==='phoneme'){say(soundExample(b.dataset.phoneme),true);return;}
     if(action==='next'&&s().resolved){if(plan.index===9){onComplete(plan);return;}plan.index++;plan.state={};message='';celebrating=false;prepare();render();window.scrollTo({top:0,behavior:'auto'});root.querySelector('h1').focus({preventScroll:true});if(q().kind!=='story'||plan.index<3)replay();return;}
     if(s().resolved)return;
+    if (action === 'hint' && task.operation === 'takeaway') {
+      help();
+      message = s().tokens.length < task.known ? 'נִתֵּן לְלוּלִי תַּפּוּחַ אַחַד בְּכָל נְגִיעָה.' : 'נִסְפֹּר אֶת הַתַּפּוּחִים שֶׁעֲדַיִן בַּסַּל.';
+      render();
+      replay(true);
+      return;
+    }
     if(action==='hint'){help();s().showModel=true;message=task.kind==='objects'?`נִבְנֶה יַחַד: ${task.answer}`:'נִסְתַּכֵּל בַּדֻּגְמָה וְנַקְשִׁיב שׁוּב.';persist();render();if(task.word?.id)say([task.prompt,task.kind==='context'?`journey-context-${task.word.id}`:`he-${task.word.id}`]);else replay();return;}
     if(action==='tile'){tile(Number(b.dataset.tile));return;}
     if(action==='undo'){s().chosen.pop();persist();render();return;}
@@ -145,7 +201,17 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
     if(action==='frame'&&Number(b.dataset.token)<task.known+s().quantity){s().quantity=Math.max(0,s().quantity-1);persist();render();return;}
     if(action==='add'||action==='frame'){s().quantity=Math.min(task.operation==='tens'?100:plan.max,s().quantity+(Number(b.dataset.amount)||1));persist();render();if(s().quantity<=20)say(`number-${s().quantity}`);return;}
     if(action==='less'){s().quantity=Math.max(0,s().quantity-Number(b.dataset.amount));persist();render();return;}
-    if(action==='remove'){const n=Number(b.dataset.token);if(s().tokens.length<task.known&&!s().tokens.includes(n)){s().tokens.push(n);persist();render();say(`number-${task.total-s().tokens.length}`);}return;}
+    if (action === 'remove') {
+      const token = Number(b.dataset.token);
+      if (s().tokens.length >= task.known || s().tokens.includes(token)) return;
+      const focused = document.activeElement === b;
+      s().tokens.push(token);
+      const complete = s().tokens.length === task.known;
+      persist();
+      render();
+      if (focused) root.querySelector(complete ? '[data-j="answer"]' : '[data-j="remove"]')?.focus({ preventScroll: true });
+      if (complete) say('journey-apples-left');
+    }
   },{signal:events.signal});
   mountDrops(root,'[data-j="tile"]','[data-word-drop]',source=>tile(Number(source.dataset.tile)),events.signal);
   mountDrops(root,'[data-j="source"]','[data-place]',(_,target)=>place(target.dataset.place),events.signal);

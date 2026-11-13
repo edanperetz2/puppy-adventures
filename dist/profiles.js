@@ -1,4 +1,4 @@
-import { findVoiceName, VOICE_NAMES } from './profile-content.js';
+import { findVoiceName, VOICE_NAMES } from './profile-content.js?v=2.2.0-voices';
 
 export const PROFILE_KEY = 'puppy-adventures-children-v1';
 export const GAME_KEY = 'puppy-adventures-v1';
@@ -29,7 +29,8 @@ export function cleanProfile(input) {
   if (!input || !allowedId(input.id) || !cleanName(input.name)) return null;
   const voice = VOICE_NAMES.some(item => item.id === input.voice) ? input.voice : findVoiceName(input.name)?.id || null;
   const pendingAlbum = input.id !== LEGACY_PROFILE_ID && /^[0-9A-HJKMNP-TV-Z]{24}$/u.test(input.pendingAlbum || '') ? input.pendingAlbum : null;
-  return { id: input.id, name: cleanName(input.name), address: input.address === 'male' ? 'male' : 'female', voice, pendingAlbum };
+  const voiceId = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/iu.test(input.voiceId || '') ? input.voiceId : null;
+  return { id: input.id, name: cleanName(input.name), address: input.address === 'male' ? 'male' : 'female', voice, pendingAlbum, ...(voiceId ? { voiceId } : {}) };
 }
 
 export function recordingData(value) {

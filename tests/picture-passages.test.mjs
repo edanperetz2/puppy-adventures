@@ -59,9 +59,10 @@ test('Every previous reading target and all 2114 original voice records remain u
   const originalWords=WORDS.filter(word=>!ids.has(word.id));
   assert.equal(originalWords.length,baseline.wordCount);
   assert.equal(hash(originalWords),baseline.wordDigest);
-  const originalClips=Object.fromEntries(Object.entries(CLIPS).filter(([key])=>!key.startsWith('he-picture-')));
+  const previouslyReleased = ([key]) => !/^(?:he-picture-|profile-good-luck|journey-give-|journey-apples-left$)/u.test(key);
+  const originalClips=Object.fromEntries(Object.entries(CLIPS).filter(previouslyReleased));
   assert.equal(Object.keys(originalClips).length,baseline.clipCount);
   assert.equal(hash(originalClips),baseline.clipDigest);
   const recordings=JSON.parse(await readFile(new URL('../dist/assets/audio/manifest.json',import.meta.url),'utf8')).clips;
-  assert.equal(hash(Object.fromEntries(Object.entries(recordings).filter(([key])=>!key.startsWith('he-picture-')))),baseline.recordingsDigest);
+  assert.equal(hash(Object.fromEntries(Object.entries(recordings).filter(previouslyReleased))),baseline.recordingsDigest);
 });

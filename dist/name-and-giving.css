@@ -1,0 +1,76 @@
+.home-pikachu {
+  position: absolute;
+  inset-inline-end: 3%;
+  inset-block-end: 11%;
+  width: clamp(43px, 8vw, 68px);
+  height: auto;
+  transform: rotate(-6deg);
+  filter: drop-shadow(0 2px 2px #344a3833);
+  pointer-events: none;
+}
+
+.profile-pronunciation {
+  margin-top: 12px;
+  padding: 0 14px 14px;
+  border: 1px solid #e8e0ef;
+  border-radius: 14px;
+  background: #fbf8ff;
+}
+
+.giving-sets {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 12px;
+  max-width: 650px;
+  margin: 18px auto;
+}
+.giving-sets section {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #dfd7c5;
+  border-radius: 18px;
+  background: #faf5e6;
+}
+.giving-sets h2 {
+  margin: 0 0 8px;
+  color: #4a5745;
+  font-size: clamp(14px, 3vw, 18px);
+}
+.giving-basket .takeaway-frame {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0 auto;
+}
+.giving-basket .frame-cell {
+  min-height: 44px;
+}
+.giving-basket .given-apple {
+  background: #efe9d9;
+  border-color: #cbc4b4;
+  opacity: .65;
+}
+.giving-sets .giving-recipient {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  background: #eaf4ec;
+  border-color: #c4d8c7;
+}
+.giving-recipient > .pup { width: clamp(48px, 11vw, 92px); }
+.giving-slots { display: flex; justify-content: center; gap: 5px; }
+.giving-slots span {
+  display: grid;
+  place-items: center;
+  width: clamp(28px, 7vw, 45px);
+  aspect-ratio: 1;
+  border: 1px dashed #819c87;
+  border-radius: 10px;
+  background: #fffefa;
+}
+.giving-slots svg { width: 90%; }
+.giving-slots span:has(svg) { border-style: solid; }
+
+@media (max-width: 540px) {
+  .giving-sets { grid-template-columns: minmax(0, 1fr); }
+  .giving-basket .takeaway-frame { max-width: 320px; }
+}

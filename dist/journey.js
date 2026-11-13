@@ -1,9 +1,10 @@
-import { WORDS, ANIMALS, COLORS, ENGLISH_OBJECTS } from './content.js';
+import { WORDS, ANIMALS, COLORS, ENGLISH_OBJECTS } from './content.js?v=2.2.0-voices';
 import { MORE_PHONICS, BLEND_GROUPS } from './english-expansion.js';
 import { distinctWordPictures } from './vocabulary.js';
 import { WORKSHOP_WORDS, STORIES } from './journey-content.js';
 import { WORD_CONTEXTS } from './word-contexts.js';
 import { choosePractice, englishPairsReady } from './learning.js';
+import { GIVING_CLIPS } from './journey-audio.js?v=2.2.0-voices';
 
 export const JOURNEYS = {
  workshop:{title:'סדנת המילים',domain:'hebrew',intro:'journey-workshop-intro',description:'שומעות, מחברות ובונות מילים',icon:'pencil'},
@@ -115,7 +116,14 @@ export function journeyQuestions(plan) {
       const cap=kind==='takeaway'?Math.min(8,plan.max):plan.max;
       const total=plan.revision===2?plan.examples[i].total:kind==='tens'?[10,20,30,32,42,52,62,75,86,100][i]:Math.min(cap,2+Math.floor(i*(cap-2)/9));
       const known=plan.revision===2?plan.examples[i].known:kind==='quantity'?0:kind==='tens'?Math.floor(total/10)*10:kind==='takeaway'?Math.min(3,Math.max(1,Math.floor(total/3))):Math.max(1,Math.floor(total/2));
-      result.push({kind:'objects',operation:kind,total,known,answer:kind==='takeaway'?total-known:kind==='bonds'?total-known:total,key:`objects:${kind}:${total}:${known}`,prompt:kind==='takeaway'?'journey-take-away':kind==='tens'?'journey-ten-model':kind==='bonds'?'journey-missing-quantity':'journey-build-quantity',extraClips:kind==='quantity'?[`number-${total}`]:[],model:i<3});
+      const answer = kind === 'takeaway' || kind === 'bonds' ? total - known : total;
+      result.push({
+        kind: 'objects', operation: kind, total, known, answer,
+        key: `objects:${kind}:${total}:${known}`,
+        prompt: kind === 'takeaway' ? GIVING_CLIPS[known] : kind === 'tens' ? 'journey-ten-model' : kind === 'bonds' ? 'journey-missing-quantity' : 'journey-build-quantity',
+        ...(kind === 'takeaway' ? { choices: mix([answer - 1, answer, answer + 1], rng) } : {}),
+        extraClips: kind === 'quantity' ? [`number-${total}`] : [], model: i < 3,
+      });
     } else {
       const group=(plan.soundIds?.length===3?plan.soundIds:['f','s','m']).map(id=>PHONICS.find(p=>p.id===id));
       const blend=plan.level==='blend'&&i>=3,phoneme=group[i<4?0:i<7?1:2];

@@ -1,4 +1,4 @@
-import { CLIPS } from './content.js';
+import { CLIPS } from './content.js?v=2.2.0-voices';
 
 export class Narrator {
   constructor(onStatus = () => {}) {
@@ -47,7 +47,8 @@ export class Narrator {
   }
 
   play(key, slow, sequence) {
-    const clip = typeof key === 'string' ? CLIPS[key] : key?.recording ? key : null;
+    const clip = typeof key === 'string' ? CLIPS[key] :
+      typeof key?.source === 'string' && key.source.startsWith('blob:') ? key : null;
     if (!clip) return Promise.resolve(false);
     return new Promise(resolve => {
       let finished = false;
@@ -63,7 +64,7 @@ export class Narrator {
       this.audio.onended = () => finish(true);
       this.audio.onerror = () => finish(false);
       this.audio.playbackRate = slow ? (clip.lang === 'he-IL' ? 0.92 : 0.82) : 1;
-      this.audio.src = clip.recording || `./assets/audio/${key}.mp3`;
+      this.audio.src = clip.source || `./assets/audio/${key}.mp3`;
       watchdog = setTimeout(() => {
         if (sequence === this.sequence) this.audio.pause();
         finish(false);

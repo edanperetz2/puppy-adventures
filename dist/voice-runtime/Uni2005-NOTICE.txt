@@ -1,0 +1,15 @@
+Uni2005 ONNX redistribution notice
+
+This repository redistributes an ONNX export and companion phone inventory
+derived from Allosaurus by Jiayan Li and contributors:
+
+  https://github.com/xinjli/allosaurus
+  model identifier: uni2005
+  recorded source revision: d9f1adaf47d3b3765b41f4177da62a051516d636
+
+The original authors retain all applicable rights. KitsuMate's role is limited
+to packaging the described artifacts for interoperable ONNX consumption.
+This redistribution does not imply the original authors' endorsement.
+
+The applicable licence is GNU GPL version 3.0; see LICENSE.
+

@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { ChildProfiles, PROFILE_KEY, GAME_KEY, FAMILY_KEY, LEGACY_PROFILE_ID, cleanName, recordingData, readInvitation, invitationNeedsNewProfile, invitationLink, escapeHtml } from '../dist/profiles.js';
 import { CLIPS } from '../dist/content.js';
 import { profileSpeech } from '../dist/profile-speech.js';
-import { findVoiceName, addressText, MALE_CLIPS } from '../dist/profile-content.js';
+import { findVoiceName, addressText } from '../dist/profile-content.js';
+import { MALE_CLIPS } from '../dist/profile-content.js?v=2.2.0-voices';
 import { freshProgress, finishSession } from '../dist/engine.js';
 import { SharedAlbum, newCode } from '../dist/sync.js';
 import { Narrator } from '../dist/audio.js';
@@ -155,6 +156,8 @@ test('Ava names and all gendered instructions resolve without changing reading t
   const boy = profileSpeech({ ...dvir, voice: 'dvir' }), girl = profileSpeech({ ...yuli, voice: 'yuli' });
   assert.deepEqual(boy('welcome'), ['profile-welcome-male-dvir']);
   assert.deepEqual(girl('welcome'), ['profile-welcome-female-yuli']);
+  assert.deepEqual(boy('good-luck'), ['profile-good-luck-dvir']);
+  assert.deepEqual(girl('good-luck'), ['profile-good-luck-yuli']);
   for (const key of ['welcome', 'try-again', 'correct-2', 'school-finish']) for (const resolve of [boy, girl]) {
     for (const clip of resolve(key)) assert.doesNotMatch(CLIPS[clip].speech, /ʔaʁiʔˈel/u);
     assert.deepEqual(profileSpeech(ariel)(key), [key]);
@@ -169,7 +172,7 @@ test('Ava names and all gendered instructions resolve without changing reading t
   assert.equal(addressText('מקשיבות ומגלות, סופרות ומחברות, מתחילות ומתקדמות', 'male'),'מקשיבים ומגלים, סופרים ומחברים, מתחילים ומתקדמים');
 });
 
-test('A recorded name plays between Ava’s greeting parts and the welcome completes once', async () => {
+test('A custom voice plays whole local phrases and never splices in an older raw recording', async () => {
   const original = { Audio: globalThis.Audio, window: globalThis.window }, requests = [];
   try {
     globalThis.window = {};
@@ -178,12 +181,15 @@ test('A recorded name plays between Ava’s greeting parts and the welcome compl
       play() { requests.push(this.src); queueMicrotask(() => this.onended?.()); return Promise.resolve(); }
     };
     const narrator = new Narrator();
-    narrator.resolveKey = profileSpeech({ name: 'שם חדש', address: 'male' }, recorded);
+    const child = { name: 'שם חדש', address: 'male' };
+    assert.deepEqual(profileSpeech(child, recorded)('welcome'), ['profile-welcome-male']);
+    assert.deepEqual(profileSpeech(child, { welcome: 'https://other.example/welcome.wav' })('welcome'), ['profile-welcome-male']);
+    narrator.resolveKey = profileSpeech(child, { welcome: 'blob:welcome', goodLuck: 'blob:good-luck' });
     const announcements = new GameAnnouncements(narrator);
     assert.equal(await announcements.start(), true);
     assert.equal(announcements.welcomePending, false);
-    assert.equal(await announcements.say('read'), true);
-    assert.deepEqual(requests, ['./assets/audio/profile-hello.mp3', recorded, './assets/audio/profile-welcome-male.mp3', './assets/audio/address-male-read.mp3']);
+    assert.equal(await announcements.say(['good-luck', 'read']), true);
+    assert.deepEqual(requests, ['blob:welcome', 'blob:good-luck', './assets/audio/address-male-read.mp3']);
   } finally {
     for (const [key, value] of Object.entries(original)) { if (value === undefined) delete globalThis[key]; else globalThis[key] = value; }
   }

@@ -4,6 +4,14 @@ A gentle learning game for phones, tablets and computers. Original illustrated p
 
 **Play:** [puppy-adventures.vercel.app](https://puppy-adventures.vercel.app)
 
+## Version 2.2.0 · Personal Ava greetings and clearer subtraction
+
+Parents can record a name, review the pronunciation the game heard, and hear complete welcome and “good luck” phrases in the game's Ava reference voice before saving. They can also type the pronunciation directly. The **שינוי שם וקול** screen can convert a recording saved by an earlier version. The 32 prepared names have both phrases ready to play immediately.
+
+The custom voice uses models downloaded when requested, up to about 105 MB the first time. Audio processing runs on the device. The profile saves the two finished greetings in its browser and plays them offline. Voice setup is per browser or installed copy. Donations in **נותנים לחברים** now move each selected apple from the basket to Luli, and a second Hebrew instruction asks how many are left after the requested apples have been given. A small Pikachu on the home screen uses the [Pokédex illustration](https://www.pokemon.com/us/pokedex/pikachu).
+
+The optional voice setup uses [BlueTTS v2 INT8](https://huggingface.co/notmax123/bluev2-onnx-int8/tree/b43c225c3578b4d50f2c38d0380e4a199a9ce711), [Uni2005 ONNX recognition](https://huggingface.co/KitsuMate/uni2005-onnx/tree/004577e41ea954fa6cfe9d8f209447780af104ca), and [ONNX Runtime Web](https://github.com/microsoft/onnxruntime/tree/v1.31.1). The worker verifies model hashes before use. The device keeps its mic audio local during processing and stores only the finished phrases after conversion.
+
 ## Version 2.1.3 · Lightweight protection for shared albums
 
 The server now limits new-album creation to 30 per hour and 100 per day, and each family's combined album/learning sync to 360 requests per minute. Existing albums remain available when creation reaches its limit. Limits apply to older installed clients too. Devices honor a temporary sync pause, continue saving locally, and automatically retry without losing or duplicating stickers, practice, learning history or park changes. No new account, CAPTCHA or paid service is required. [Security and maintenance details](SECURITY.md) explain the access model, limits and validation.

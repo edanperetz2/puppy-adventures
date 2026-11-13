@@ -101,7 +101,11 @@ export function installProfileClips(clips) {
     // to artifacts than an isolated syllable stitched between recordings.
     extra(`profile-welcome-female-${name.id}`, `שלום ${name.name}, ברוכה הבאה למשחק שלך!`, `ʃalˈom ${name.speech}, bʁuχˈa habaʔˈa lamisχˈak ʃelˈaχ!`);
     extra(`profile-welcome-male-${name.id}`, `שלום ${name.name}, ברוך הבא למשחק שלך!`, `ʃalˈom ${name.speech}, baʁˈuχ habˈa lamisχˈak ʃelχˈa!`);
+    const longerGreeting = name.id === 'maya' || name.id === 'avigayil';
+    extra(`profile-good-luck-${name.id}`, longerGreeting ? `בהצלחה ${name.name}, נתחיל לשחק!` : `בהצלחה, ${name.name}!`,
+      longerGreeting ? `behatslaχˈa ${name.speech}, natχˈil lesaχˈek!` : `behatslaχˈa, ${name.speech}!`);
   }
+  extra('profile-good-luck', 'בְּהַצְלָחָה! נַתְחִיל לְשַׂחֵק.', 'behatslaχˈa! natχˈil lesaχˈek.');
   extra('profile-hello', 'שלום!', 'ʃalˈom!');
   extra('profile-welcome-female', 'ברוכה הבאה למשחק שלך!', 'bʁuχˈa habaʔˈa lamisχˈak ʃelˈaχ!');
   extra('profile-welcome-male', 'ברוך הבא למשחק שלך!', 'baʁˈuχ habˈa lamisχˈak ʃelχˈa!');

@@ -28,7 +28,13 @@ test('Original recordings and unfinished journeys are preserved, with two explic
   assert.equal(hash(baseline.ids.map(id=>[id,CLIPS[id]])),baseline.scripts);
   const recordings=JSON.parse(await readFile(new URL('../dist/assets/audio/manifest.json',import.meta.url),'utf8')).clips;
   assert.equal(hash(baseline.ids.map(id=>[id,recordings[id]])),baseline.recordings);
-  for(const fixture of baseline.journeys)assert.equal(hash(journeyQuestions(cleanJourney(fixture.plan))),fixture.questions,`${fixture.plan.mode}:${fixture.plan.level}`);
+  for (const fixture of baseline.journeys) {
+    const questions = journeyQuestions(cleanJourney(fixture.plan)).map(({ choices, ...question }) => {
+      if (question.operation === 'takeaway') return { ...question, prompt: 'journey-take-away' };
+      return choices === undefined ? question : { ...question, choices };
+    });
+    assert.equal(hash(questions), fixture.questions, `${fixture.plan.mode}:${fixture.plan.level}`);
+  }
   for(let i=0;i<10;i++)assert.deepEqual(CLOCK_LESSONS[i].tasks.slice(0,baseline.clockTasks[i].length),baseline.clockTasks[i]);
   const progress=freshProgress();progress.sessions=27;progress.stickers=Array.from({length:27},(_,i)=>i);
   // The established sanitizer still derives the stable earned album by count.

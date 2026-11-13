@@ -35418,6 +35418,561 @@
       "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
       "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
       "sha256": "f935b8a26166407af64a7c650e22d0c53bd01af9aa12124df3dd55461bb5d2bc"
+    },
+    "journey-give-one-apple": {
+      "take": 0,
+      "segments": [
+        "nitˈen lelˈuli tapˈuaχ ʔeχˈad. niɡˈa bˈo."
+      ],
+      "lang": "he-IL",
+      "speech": "nitˈen lelˈuli tapˈuaχ ʔeχˈad. niɡˈa bˈo.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "b6116955b30b91f2875f71973a8e722b292b4d61dac4307d90b9a9b66aac24e2"
+    },
+    "journey-give-two-apples": {
+      "take": 0,
+      "segments": [
+        "nitˈen lelˈuli ʃnˈej tapuχˈim. niɡˈa batapuχˈim, ʔeχˈad ʔeχˈad."
+      ],
+      "lang": "he-IL",
+      "speech": "nitˈen lelˈuli ʃnˈej tapuχˈim. niɡˈa batapuχˈim, ʔeχˈad ʔeχˈad.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "372d9aacf3afc9ad77c54cc271720b817dc213dedc21bf0fdade430e000dde98"
+    },
+    "journey-give-three-apples": {
+      "take": 0,
+      "segments": [
+        "nitˈen lelˈuli ʃloʃˈa tapuχˈim. niɡˈa batapuχˈim, ʔeχˈad ʔeχˈad."
+      ],
+      "lang": "he-IL",
+      "speech": "nitˈen lelˈuli ʃloʃˈa tapuχˈim. niɡˈa batapuχˈim, ʔeχˈad ʔeχˈad.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "a329851972c3b6ad038669284d9a28f3af99111f981517a1ed108604db2f1cf7"
+    },
+    "journey-apples-left": {
+      "take": 0,
+      "segments": [
+        "ʔaχʃˈav nispˈoʁ ʔˈet hatapuχˈim ʃeniʃʔaʁˈu. kˈama niʃʔaʁˈu?"
+      ],
+      "lang": "he-IL",
+      "speech": "ʔaχʃˈav nispˈoʁ ʔˈet hatapuχˈim ʃeniʃʔaʁˈu. kˈama niʃʔaʁˈu?",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "76ef5c9b3c3d49321dec523fc2a99e37b5c5df259b1089adc1952e74da7e7f40"
+    },
+    "profile-good-luck-ariel": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, ʔaʁiʔˈel!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, ʔaʁiʔˈel!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "9a761e0fe9bae847d7000f53d06cfd258d7beec9003993a3c3590bb89ba2e2e8"
+    },
+    "profile-good-luck-yuli": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, jˈuli!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, jˈuli!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "80d86737b7b780aed97aa7814beba27a91328fb480d0bed0189004c29ece34d4"
+    },
+    "profile-good-luck-dvir": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, dvˈiʁ!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, dvˈiʁ!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "eee208a580e2805669bcd0cc8fc3ab0c3411b82ab50ab8191464aefa55f03875"
+    },
+    "profile-good-luck-noa": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, nˈoʔa!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, nˈoʔa!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "d6e430694a92585acfcc8a306364440d77eb91fafb4e43e69ce7fbf7cfb52f5f"
+    },
+    "profile-good-luck-maya": {
+      "lang": "he-IL",
+      "speech": "behatslaχˈa mˈaja, natχˈil lesaχˈek!",
+      "segments": [
+        "behatslaχˈa mˈaja, natχˈil lesaχˈek!"
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 1,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "ca8f1ba8d44c790dbe726180af67da192c553164f72568b202cb18a9b207c4f9"
+    },
+    "profile-good-luck-tamar": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, tamˈaʁ!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, tamˈaʁ!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "58a23c103a27b329d9c96e14723b845adfccf1cdd5d8b1abf197f1e220a1c22e"
+    },
+    "profile-good-luck-yael": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, jaʔˈel!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, jaʔˈel!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "40d02271f51cb790574ce8b233551bc8c70812815b00f7545e7928f6d438a48d"
+    },
+    "profile-good-luck-ella": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, ʔˈela!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, ʔˈela!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "9a583512b649c98b7615471e62e9de1db9d37f49c58ad7854cfc046d095e739b"
+    },
+    "profile-good-luck-libi": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, lˈibi!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, lˈibi!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "2b4670d862dd0b9a4d51883f95f00f903a775650e3a7764e2db45a7eeec22b1f"
+    },
+    "profile-good-luck-noya": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, nˈoja!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, nˈoja!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "280f183bdd464aaf5321fb27b7c8f66a687397d4ff944dd391a7ad9ea84727a8"
+    },
+    "profile-good-luck-shira": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, ʃˈiʁa!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, ʃˈiʁa!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "6c35dfe90f137723412ba2ed63112179592aeeb92723a76b248c921a4d0956a1"
+    },
+    "profile-good-luck-ori": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, ʔˈoʁi!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, ʔˈoʁi!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "3c1883674e0287ad99bd3230e9babbb0cf839d667a90301e939163f30e96f8a8"
+    },
+    "profile-good-luck-itay": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, ʔitˈaj!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, ʔitˈaj!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "dd34509be60c571a8ef6ed188c0c7d703d087f3c6b60a631a66ccbf7ef40b649"
+    },
+    "profile-good-luck-noam": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, nˈoʔam!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, nˈoʔam!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "cceb2ae752a6aade8d369f86419eefb5ad4ffa9c4c316346e4d65deabfe896f7"
+    },
+    "profile-good-luck-eitan": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, ʔejtˈan!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, ʔejtˈan!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "040fcfbce747086ed9d4e7a84c3410c81dbbd551246e5b38b777072a04edf5e7"
+    },
+    "profile-good-luck-daniel": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, danijˈel!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, danijˈel!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "c18557c6a2f5f9a196321020f8f5042e76d8a31cccb83da5fd02122ab1c22712"
+    },
+    "profile-good-luck-adam": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, ʔadˈam!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, ʔadˈam!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "0523868165e09a64f35242d99bdcad35b1215b9711ec059a670791ec962cd0b9"
+    },
+    "profile-good-luck-alon": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, ʔalˈon!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, ʔalˈon!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "b57ee53c3be7cee4a487a181ae7259a7e721efac111195062207fab3412ac78c"
+    },
+    "profile-good-luck-omer": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, ʔˈomeʁ!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, ʔˈomeʁ!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "1b8a3212f63c03eff04a582ba17c72454a37cbb5ba7223c446e831ee01990eae"
+    },
+    "profile-good-luck-yonatan": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, jonatˈan!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, jonatˈan!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "ac95c90034f1d4dd8c4c3b96417f5b5e5a52054148f51ec1267b6b53f95bc5fb"
+    },
+    "profile-good-luck-ofir": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, ʔofˈiʁ!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, ʔofˈiʁ!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "3f06fb175fc498de8df0caafc09b5dd2cc150125f59c04c6e9926f84a0223aaa"
+    },
+    "profile-good-luck-romi": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, ʁˈomi!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, ʁˈomi!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "73f348004aaed20555c65bc0e415af457b0c87077b862be56c130933426bd9d0"
+    },
+    "profile-good-luck-eden": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, ʔˈeden!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, ʔˈeden!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "b9210c97d3c2dc869898c0d4575265927ba1f4fd3360a26e696a46e9fb47f583"
+    },
+    "profile-good-luck-yuval": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, juvˈal!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, juvˈal!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "6f946e471bd90ca7390db9fc6fb821e111772fc4cfef3c1240d1ee816d8dc6f6"
+    },
+    "profile-good-luck-amit": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, ʔamˈit!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, ʔamˈit!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "f24d3625a697cfcf21be6208b76b00c75757b9fafaea8ad83c493d5a25ef76e9"
+    },
+    "profile-good-luck-tal": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, tˈal!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, tˈal!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "9db4f39a59e9d914c5eea8db078df7454b0ccdfcb6d0944ba79dae8d91df3409"
+    },
+    "profile-good-luck-liam": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, liʔˈam!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, liʔˈam!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "2fcc9ea0a660a1b268a3678f166997882f77eda63e2590439f273ad92a3d074f"
+    },
+    "profile-good-luck-hila": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, hilˈa!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, hilˈa!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "593edbaa1ca41f5713e4f87d72d7c3f562a679c7f912f56ca3df8115fc5d39c8"
+    },
+    "profile-good-luck-avigayil": {
+      "lang": "he-IL",
+      "speech": "behatslaχˈa ʔaviɡˈajil, natχˈil lesaχˈek!",
+      "segments": [
+        "behatslaχˈa ʔaviɡˈajil, natχˈil lesaχˈek!"
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 1,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "f3e3651768eb27b5bb1612857161e826ecd395464b9df02698e16df450e6be5d"
+    },
+    "profile-good-luck-lian": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, liʔˈan!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, liʔˈan!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "f96d887d9cc4d5ef14b5eddb6f7b312975b591d3136d1bd0b1ad22c03ae039ac"
+    },
+    "profile-good-luck-mika": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, mˈika!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, mˈika!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "1609655f06987e03c4b7c6cdb820cf32e24e3fffa7a58eb7f2dcbdf7cfe289ac"
+    },
+    "profile-good-luck-ron": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa, ʁˈon!"
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa, ʁˈon!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "28efe0124add86f791c7916395d31a55a04129021026b483fb5bf32ec997b90e"
+    },
+    "profile-good-luck": {
+      "take": 0,
+      "segments": [
+        "behatslaχˈa! natχˈil lesaχˈek."
+      ],
+      "lang": "he-IL",
+      "speech": "behatslaχˈa! natχˈil lesaχˈek.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "ad0bdbd96c3731f837b8a72cdb231a0a43b5e2c723cdd84750546e23eed4191a"
     }
   }
 }

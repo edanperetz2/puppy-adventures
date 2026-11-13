@@ -1,17 +1,17 @@
 import { LearningStore } from './learning-sync.js?v=2.1.3-sync';
 import { questionLearning, learningSummary } from './learning.js';
 import { packRound, unpackRound, cleanDrafts, roundKey } from './session-state.js';
-import { JOURNEYS, newJourney, cleanJourney, englishPairsReady } from './journey.js';
+import { JOURNEYS, newJourney, cleanJourney, englishPairsReady } from './journey.js?v=2.2.0-voices';
 import { STORIES } from './journey-content.js';
-import { mountJourney } from './journey-view.js';
+import { mountJourney } from './journey-view.js?v=2.2.0-voices';
 import { mountPark } from './park.js';
 import { mountFreeWriting, WRITING_STEPS } from './free-writing.js';
 import { parentLearning, learningStatus } from './learning-parent.js?v=2.1.3-sync';
-import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js';
+import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.2.0-voices';
 import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js';
 import { ADVENTURE_PHASES } from './adventure.js';
 import { art, pup, scene, uiIcon } from './art.js';
-import { Narrator } from './audio.js';
+import { Narrator } from './audio.js?v=2.2.0-voices';
 import { GameAnnouncements } from './announcements.js';
 import { SharedAlbum, normalizeCode } from './sync.js?v=2.1.3-sync';
 import { SYNC_CONFIG } from './sync-config.js';
@@ -27,9 +27,10 @@ import { suggestedLetters, practicedLetterCount, recordLetters, recognitionTarge
 import { CHARACTERS, CHARACTER_COLLECTIONS, CHARACTER_LEVELS, CHARACTER_MODES, characterCollection, selectCharacterLevel, sanitizeCharacterPractice, finishCharacterPractice, nextCharacterLevel } from './characters.js';
 import { characterMenu, characterQuestion, characterAnswer, characterAnswerLabel, characterMissionArt, characterName } from './characters-view.js';
 import { letterExampleCards } from './letter-examples.js';
-import { ChildProfiles, readInvitation, invitationNeedsNewProfile, escapeHtml, GAME_KEY } from './profiles.js';
-import { profileSpeech } from './profile-speech.js';
-import { profilePanel, mountProfileForm, personalizeUi } from './profiles-view.js';
+import { ChildProfiles, readInvitation, invitationNeedsNewProfile, escapeHtml, GAME_KEY } from './profiles.js?v=2.2.0-voices';
+import { profileSpeech } from './profile-speech.js?v=2.2.0-voices';
+import { savedNameVoice, nameVoicePlayback } from './name-voice.js?v=2.2.0-voices';
+import { profilePanel, mountProfileForm, personalizeUi } from './profiles-view.js?v=2.2.0-voices';
 import { openGameGuide, GUIDE_ICON } from './guide.js?v=2.1.2-guide';
 
 const profiles = new ChildProfiles();
@@ -114,9 +115,8 @@ const narrator = new Narrator(status => {
   if (notice) { notice.hidden = status !== 'unavailable'; notice.textContent = 'הקול לא נשמע? לחצי שוב על הרמקול. אפשר גם להיעזר בהורה.'; }
 });
 narrator.enabled = settings.sound;
-let recordedName = null;
-try { if (child) recordedName = gameStorage.getItem('name-recording'); } catch { /* A voice read failure must not block the saved game. */ }
-narrator.resolveKey = profileSpeech(child, recordedName);
+const personalPlayback = nameVoicePlayback(child?.voiceId ? await savedNameVoice(child) : null);
+narrator.resolveKey = profileSpeech(child, personalPlayback.urls);
 const announcements = new GameAnnouncements(narrator);
 let welcomeAttempted = false;
 
@@ -403,7 +403,7 @@ function renderHome() {
         <button class="primary-button hero-start" data-action="recommended">יוצאות להרפתקה ${uiIcon('arrow')}</button>
         <button class="text-button welcome-listen" data-action="welcome">${uiIcon('sound')} לחצי ונכיר את החברים</button>
         <p id="audio-notice" class="audio-notice" role="status" hidden></p>
-      </div><div class="hero-world">${scene()}<div class="world-caption"><span class="status-dot"></span> בית החברים · תמיד שמחים לראות אותך</div></div>
+      </div><div class="hero-world">${scene()}<img class="home-pikachu" src="./assets/home-pikachu.png" alt="פיקאצ׳ו" width="68" height="68"><div class="world-caption"><span class="status-dot"></span> בית החברים · תמיד שמחים לראות אותך</div></div>
     </section>
     <section class="missions" aria-labelledby="missions-title"><div class="section-heading"><div><span class="section-kicker">כל פעם מגלות משהו חדש</span><h2 id="missions-title">לאן נצא היום?</h2></div><span class="rounds-note">${SESSION_LENGTH} צעדים · מתחילות בקל ומתקדמות ${art('paw')}</span></div>
       <div class="mission-grid">${Object.values(MISSIONS).map(m => `<button class="mission-card ${m.color}" data-action="mission" data-mission="${m.id}" aria-label="${m.name} — ${m.description}">
@@ -589,7 +589,7 @@ function startMission(mission, skipLesson = false) {
   render();
   focusTitle();
   const q = current();
-  announcements.say([...(mission === 'characters' ? round.characterMode === 'mixed' ? ['characters-intro', q.prompt] : [q.prompt] : mission === 'hebrew' ? [READING_LEVELS[round.reading].clip, q.prompt] : [mission === 'letters' ? q.prompt : MISSIONS[mission].intro]), ...(q.showModel ? ['letters-recognition-hint'] : []), ...(q.targetClip ? [q.targetClip] : [])]);
+  announcements.say(['good-luck', ...(mission === 'characters' ? round.characterMode === 'mixed' ? ['characters-intro', q.prompt] : [q.prompt] : mission === 'hebrew' ? [READING_LEVELS[round.reading].clip, q.prompt] : [mission === 'letters' ? q.prompt : MISSIONS[mission].intro]), ...(q.showModel ? ['letters-recognition-hint'] : []), ...(q.targetClip ? [q.targetClip] : [])]);
 }
 
 function recommended() {
@@ -882,7 +882,7 @@ function renderLearningHub(){
 function startJourney(mode,level){
   if(!JOURNEYS[mode])return;checkpoint();narrator.stop();round=null;
   const key=`${mode}:${level}`;journeyPlan=cleanJourney(journeyDrafts[key])||newJourney(mode,level,learner.items,{mathMax:settings.mathMax});view='journey';checkpoint();render();focusTitle();
-  if(mode!=='stories'||journeyPlan.index<3)journeyController.replay();
+  if(mode!=='stories'||journeyPlan.index<3)journeyController.replay(false, journeyPlan.index === 0);
 }
 function renderJourney(){
   app.innerHTML=`${header()}<main id="main" class="journey-page"><div id="journey-root"></div></main>${footer()}`;
@@ -985,7 +985,10 @@ window.addEventListener('online', () => { void album.flush();void learner.flush(
 window.addEventListener('hashchange', () => { if (readInvitation(location.hash)) location.reload(); });
 window.addEventListener('focus', () => { void album.flush();void learner.flush(); });
 setInterval(() => { if (!document.hidden && album.linked) {void album.flush();void learner.flush();} }, 15000);
-window.addEventListener('pagehide', () => { checkpoint();narrator.stop(); profileEditor?.destroy(); });
+window.addEventListener('pagehide', event => {
+  checkpoint(); narrator.stop(); profileEditor?.destroy();
+  if (!event.persisted) personalPlayback.release();
+});
 dialog.addEventListener('cancel', () => { profileEditor?.destroy(); profileEditor = null; });
 const addressObserver = new MutationObserver(() => {
   personalizeUi(app, child);
