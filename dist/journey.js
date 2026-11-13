@@ -92,7 +92,9 @@ export function newJourney(mode,level,items={},options={}) {
   const words=selected.length?Array.from({length:SESSION_LENGTH},(_,i)=>selected[i%selected.length]).sort((a,b)=>a.level-b.level).map(w=>w.id):[];
   const familiar=['dog','cat','red','blue'];
   const known=Object.keys(items).filter(id=>id.startsWith('english:single:')&&items[id].independent>0).map(id=>id.split(':').at(-1)).filter(id=>ENGLISH_WORDS.some(x=>x.id===id));
-  const fresh=ENGLISH_WORDS.find(x=>![...familiar,...known].includes(x.id))?.id||choosePractice(ENGLISH_WORDS,items,x=>`english:single:${x.id}`,1,Date.now(),rng)[0].id;
+  const newWord = ENGLISH_WORDS.find(word => !familiar.includes(word.id) && !known.includes(word.id));
+  const reviewPool = ENGLISH_WORDS.filter(word => !familiar.includes(word.id));
+  const fresh = (newWord || choosePractice(reviewPool, items, word => `english:single:${word.id}`, 1, Date.now(), rng)[0]).id;
   const review=choosePractice(ENGLISH_WORDS.filter(w=>known.includes(w.id)&&!familiar.includes(w.id)&&w.id!==fresh),items,w=>`english:single:${w.id}`,8,Date.now(),rng).map(w=>w.id);
   const knownColors=COLORS.filter(c=>['red','blue',...known].includes(c.id));
   const pairColors=choosePractice(knownColors,items,c=>`english:pair:${c.id}-${cleanLevel==='cars'?'car':'ball'}`,2,Date.now(),rng).map(c=>c.id);
@@ -100,7 +102,8 @@ export function newJourney(mode,level,items={},options={}) {
   const blendWords=choosePractice(BLEND_GROUPS,items,g=>`phonics:blend:${g[0]}`,1,Date.now(),rng)[0];
   const soundIds=mode==='sounds'?cleanLevel==='blend'?[...new Set(blendWords.join(''))].slice(0,3):choosePractice(PHONICS.slice(0,Math.min(PHONICS.length,Math.max(3,introduced+1))),items,p=>`phonics:sound:${p.id}`,3,Date.now(),rng).sort((a,b)=>PHONICS.indexOf(a)-PHONICS.indexOf(b)).map(p=>p.id):[];
   const max=[5,10,20].includes(options.mathMax)?options.mathMax:10;
-  return {id:globalThis.crypto.randomUUID(),revision:2,length:SESSION_LENGTH,shuffleAnswers:true,varietyFrom:0,introducing:![...familiar,...known].includes(fresh),mode,level:cleanLevel,seed,words,soundIds,blendWords,pairColors,examples:mode==='objects'?objectExamples(cleanLevel,max,items,rng):[],english:[...new Set([...familiar,...review])].concat(fresh),max,index:0,state:{},helped:[],observed:[],at:Date.now()};
+  const distinctReview = mode === 'english' && cleanLevel === 'single' && !newWord;
+  return {id:globalThis.crypto.randomUUID(),revision:2,length:SESSION_LENGTH,shuffleAnswers:true,varietyFrom:0,...(distinctReview ? { distinctReview } : {}),introducing:Boolean(newWord),mode,level:cleanLevel,seed,words,soundIds,blendWords,pairColors,examples:mode==='objects'?objectExamples(cleanLevel,max,items,rng):[],english:[...new Set([...familiar,...review])].concat(fresh),max,index:0,state:{},helped:[],observed:[],at:Date.now()};
 }
 export function cleanJourney(raw) {
   if(!raw||!Object.hasOwn(JOURNEYS,raw.mode)||!/^[0-9a-f-]{36}$/i.test(raw.id)||!Number.isInteger(raw.seed))return null;
@@ -113,6 +116,7 @@ export function cleanJourney(raw) {
   const english=(Array.isArray(raw.english)?raw.english:[]).filter(id=>ENGLISH_WORDS.some(x=>x.id===id)).slice(0,13);
   if(raw.mode==='english'&&english.length<(length===SESSION_LENGTH?5:4))return null;
   const state=raw.state&&typeof raw.state==='object'?raw.state:{};
+  const distinctReview = raw.mode === 'english' && raw.level === 'single' && raw.distinctReview === true;
   const soundIds=[...new Set((Array.isArray(raw.soundIds)?raw.soundIds:['f','s','m']).filter(id=>PHONICS.some(p=>p.id===id)))].slice(0,3);
   const revision=raw.revision===2?2:1,max=[5,10,20].includes(raw.max)?raw.max:10;
   const blendWords=BLEND_GROUPS.find(g=>JSON.stringify(g)===JSON.stringify(raw.blendWords))||BLEND_GROUPS[0];
@@ -122,7 +126,7 @@ export function cleanJourney(raw) {
   if(revision===2&&raw.mode==='objects'&&examples.length!==length)return null;
   const steps = value => [...new Set((Array.isArray(value) ? value : []).filter(n => Number.isInteger(n) && n >= 0 && n < length))];
   const varietyFrom = Number.isInteger(raw.varietyFrom) && raw.varietyFrom >= 0 && raw.varietyFrom < length ? raw.varietyFrom : undefined;
-  return {id:raw.id,revision,length,shuffleAnswers:raw.shuffleAnswers===true,varietyFrom,introducing:raw.introducing!==false,mode:raw.mode,level:raw.level,seed:raw.seed>>>0,words,soundIds,blendWords,pairColors,examples,english,max,index:raw.index,state:{chosen:Array.isArray(state.chosen)?state.chosen.filter(n=>Number.isInteger(n)&&n>=0&&n<24).slice(0,24):[],tokens:Array.isArray(state.tokens)?[...new Set(state.tokens.filter(n=>Number.isInteger(n)&&n>=0&&n<100))].slice(0,100):[],quantity:Math.max(0,Math.min(100,Math.floor(state.quantity)||0)),resolved:state.resolved===true,placed:state.placed===true,showModel:state.showModel===true,attempted:Array.isArray(state.attempted)?state.attempted.filter(id=>typeof id==='string'&&/^[a-z0-9-]{1,40}$/.test(id)).slice(0,4):[]},helped:steps(raw.helped),observed:steps(raw.observed),at:Number.isSafeInteger(raw.at)?raw.at:Date.now()};
+  return {id:raw.id,revision,length,shuffleAnswers:raw.shuffleAnswers===true,varietyFrom,...(distinctReview ? { distinctReview } : {}),introducing:raw.introducing!==false,mode:raw.mode,level:raw.level,seed:raw.seed>>>0,words,soundIds,blendWords,pairColors,examples,english,max,index:raw.index,state:{chosen:Array.isArray(state.chosen)?state.chosen.filter(n=>Number.isInteger(n)&&n>=0&&n<24).slice(0,24):[],tokens:Array.isArray(state.tokens)?[...new Set(state.tokens.filter(n=>Number.isInteger(n)&&n>=0&&n<100))].slice(0,100):[],quantity:Math.max(0,Math.min(100,Math.floor(state.quantity)||0)),resolved:state.resolved===true,placed:state.placed===true,showModel:state.showModel===true,attempted:Array.isArray(state.attempted)?state.attempted.filter(id=>typeof id==='string'&&/^[a-z0-9-]{1,40}$/.test(id)).slice(0,4):[]},helped:steps(raw.helped),observed:steps(raw.observed),at:Number.isSafeInteger(raw.at)?raw.at:Date.now()};
 }
 
 export function resumeJourney(raw) {
@@ -177,7 +181,12 @@ export function journeyQuestions(plan) {
       const targets=colors.map(color=>({color,object}));
       const singlePool=plan.revision===2?ENGLISH_WORDS:[...ANIMALS.slice(0,8),...COLORS.slice(0,7)];
       const introduction = short ? 2 : 4;
-      const singleWords = short ? [warm[0], warm[1], fresh, warm[2], warm[3 + plan.seed % (warm.length - 3)], fresh] : null;
+      const reviewCount = warm.length - 3;
+      const reviewIndex = short ? plan.seed % reviewCount : 0;
+      const lastWord = plan.distinctReview && warm.length > 4
+        ? warm[3 + (reviewIndex + 1) % reviewCount]
+        : fresh;
+      const singleWords = short ? [warm[0], warm[1], fresh, warm[2], warm[3 + reviewIndex], lastWord] : null;
       const singleId = short ? singleWords[i] : i===4||i===7?fresh:warm[i%warm.length];
       const target=pair?targets[(i-3)%2]:plan.level!=='single'&&i===0?{id:object,en:object.toUpperCase(),he:object==='ball'?'כדור':'מכונית'}:singlePool.find(x=>x.id===(plan.level!=='single'?['', ...colors][i]:singleId));
       const pool=pair?targets:singlePool.filter(x=>((COLORS.some(c=>c.id===target.id))===COLORS.some(c=>c.id===x.id)) && [...warm,...(i>=introduction?[fresh]:[])].includes(x.id)&&(x.id===target.id||distinctWordPictures(target,x)));

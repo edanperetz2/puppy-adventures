@@ -1,9 +1,9 @@
 import { LearningStore } from './learning-sync.js?v=2.2.2-six';
 import { questionLearning, learningSummary } from './learning.js';
 import { packRound, unpackRound, cleanDrafts, roundKey } from './session-state.js?v=2.2.2-six';
-import { JOURNEYS, newJourney, cleanJourney, resumeJourney, englishPairsReady, journeyLength } from './journey.js?v=2.2.4-practice';
+import { JOURNEYS, newJourney, cleanJourney, resumeJourney, englishPairsReady, journeyLength } from './journey.js?v=2.2.5-practice';
 import { STORIES } from './journey-content.js';
-import { mountJourney } from './journey-view.js?v=2.2.4-practice';
+import { mountJourney } from './journey-view.js?v=2.2.5-practice';
 import { mountPark } from './park.js';
 import { mountFreeWriting, WRITING_STEPS } from './free-writing.js';
 import { parentLearning, learningStatus } from './learning-parent.js?v=2.1.3-sync';

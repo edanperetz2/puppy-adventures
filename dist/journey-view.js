@@ -1,6 +1,6 @@
 import { art, pup, uiIcon } from './art.js';
 import { WORDS, ANIMALS, COLORS } from './content.js?v=2.2.0-voices';
-import { JOURNEYS, PHONICS, STORY_RELATIONS, journeyQuestions, soundExample } from './journey.js?v=2.2.4-practice';
+import { JOURNEYS, PHONICS, STORY_RELATIONS, journeyQuestions, soundExample } from './journey.js?v=2.2.5-practice';
 import { adventurePhase } from './adventure.js?v=2.2.2-six';
 import { escapeHtml as esc } from './profiles.js?v=2.2.0-voices';
 import { chunkClip, GIVING_CLIPS } from './journey-audio.js?v=2.2.0-voices';

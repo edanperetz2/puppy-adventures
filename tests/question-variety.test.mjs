@@ -6,7 +6,7 @@ import { CLOCK_LEVELS } from '../dist/clock.js';
 import { CLOCK_LESSONS, clockLessonTasks, isFullTurn, sanitizeClockPosition, taskClips, taskSucceeded } from '../dist/clock-learning.js';
 import { CLIPS, READING_LEVELS } from '../dist/content.js';
 import { createSession } from '../dist/engine.js';
-import { cleanJourney, journeyQuestions, newJourney, PHONICS, resumeJourney, seeded } from '../dist/journey.js';
+import { cleanJourney, ENGLISH_WORDS, journeyQuestions, newJourney, PHONICS, resumeJourney, seeded } from '../dist/journey.js';
 import { STORIES } from '../dist/journey-content.js';
 import { cleanItem } from '../dist/learning.js';
 
@@ -131,6 +131,22 @@ test('Object activities use six different exercises even at the lowest cap', () 
         assert.deepEqual(questions[0].extraClips, ['number-0']);
       }
     }
+  }
+});
+
+test('Fully learned listening vocabulary produces six distinct review words', () => {
+  const known = Object.fromEntries(ENGLISH_WORDS.map(({ id }) => [`english:single:${id}`, cleanItem({ seen: 2, independent: 1 })]));
+  for (let seed = 0; seed < 100; seed++) {
+    const plan = newJourney('english', 'single', known, { rng: seeded(seed * 15485863) });
+    const questions = journeyQuestions(plan);
+    assert.equal(new Set(questions.map(q => CLIPS[q.clip].text)).size, 6);
+    assert.ok(questions.every(q => !q.newWord && q.choices.length >= 2));
+    assert.deepEqual(journeyQuestions(resumeJourney(JSON.parse(JSON.stringify(plan)))), questions);
+
+    const previousPlan = { ...plan, index: 5, distinctReview: undefined };
+    const oldQuestions = journeyQuestions(previousPlan);
+    assert.equal(oldQuestions[5].answer, oldQuestions[2].answer);
+    assert.deepEqual(journeyQuestions(resumeJourney(previousPlan)), oldQuestions);
   }
 });
 
