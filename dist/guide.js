@@ -3,7 +3,7 @@ import { uiIcon } from './art.js';
 // The header must also work while an older installed game still serves art.js.
 export const GUIDE_ICON = '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6Q7 2 2 5V20Q7 17 12 21Q17 17 22 20V5Q17 2 12 6ZM12 6V21M5 8Q7 7 9 9M15 9Q17 7 19 8M5 12Q7 11 9 13M15 13Q17 11 19 12"/></g></svg>';
 
-export const GUIDE_IMAGE = Object.freeze({ src: './assets/game-guide-six.webp', width: 2172, height: 1448, panelWidth: 1086 });
+export const GUIDE_IMAGE = Object.freeze({ src: './assets/game-guide-ariel.webp', width: 2172, height: 1448, panelWidth: 1086 });
 const gameNames = ['גינת המילים', 'סדנת המילים', 'סיפור שמשחקים', 'חברים מהמסך', 'סטודיו האותיות', 'מפרץ האנגלית', 'אנגלית בצעדים קטנים', 'מגלים צלילים באנגלית', 'סדנת המספרים', 'מעבדת המספרים', 'גן השעונים'];
 let guide = null;
 
@@ -16,7 +16,7 @@ function createGuide() {
   dialog.setAttribute('aria-describedby', 'game-guide-help');
   dialog.innerHTML = `<div class="guide-heading"><div><h2 id="game-guide-title">מדריך המשחק</h2><p id="game-guide-help">עברית מימין, אנגלית משמאל. אפשר להגדיל ולגלול לכל הכיוונים.</p></div><button class="circle-button" data-guide="close" aria-label="סגירת המדריך וחזרה למשחק">${uiIcon('close')}</button></div>
     <div class="guide-tools" aria-label="תצוגת המדריך"><div class="guide-languages"><button data-guide="he">עברית</button><button data-guide="en" lang="en" dir="ltr">English</button><button data-guide="fit">התמונה כולה</button></div><div class="guide-zoom"><button data-guide="out" aria-label="הקטנת התמונה">−</button><output aria-live="polite" aria-label="רמת הגדלה" dir="ltr">100%</output><button data-guide="in" aria-label="הגדלת התמונה">+</button></div></div>
-    <div class="guide-viewport" tabindex="0" role="region" aria-label="תמונת המדריך. אפשר לגלול או להשתמש במקשי החצים." dir="ltr"><img class="guide-image" src="${GUIDE_IMAGE.src}" width="${GUIDE_IMAGE.width}" height="${GUIDE_IMAGE.height}" alt="מפת כל משחקי חבורת ההרפתקאות: עברית מימין על רקע קרם, אנגלית משמאל על רקע תכלת. ${gameNames.join(', ')}. כולל אלבום מדבקות, פארק אישי, פרופילי ילדים, הגדרות להורים ושמירת התקדמות."><p class="guide-load-error" hidden>התמונה לא נטענה. אפשר לנסות שוב כשיש חיבור לאינטרנט.</p></div>
+    <div class="guide-viewport" tabindex="0" role="region" aria-label="תמונת המדריך. אפשר לגלול או להשתמש במקשי החצים." dir="ltr"><img class="guide-image" src="${GUIDE_IMAGE.src}" width="${GUIDE_IMAGE.width}" height="${GUIDE_IMAGE.height}" alt="מפת משחקי חבורת ההרפתקאות של אריאל. עברית מימין על רקע קרם ואנגלית משמאל על רקע תכלת. ${gameNames.join(', ')}. המדריך כולל את אלבום המדבקות, הפארק, הגדרות ההורים ושמירת ההתקדמות."><p class="guide-load-error" hidden>התמונה לא נטענה. אפשר לנסות שוב כשיש חיבור לאינטרנט.</p></div>
     <div class="guide-bottom"><a href="${GUIDE_IMAGE.src}" download="puppy-adventures-guide.webp">להורדת המדריך</a><button data-guide="close">חזרה למשחק</button></div>`;
   document.body.append(dialog);
   const viewport = dialog.querySelector('.guide-viewport');

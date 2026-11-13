@@ -9,6 +9,7 @@ import { freshProgress, finishSession } from '../dist/engine.js';
 import { SharedAlbum, newCode } from '../dist/sync.js';
 import { Narrator } from '../dist/audio.js';
 import { GameAnnouncements } from '../dist/announcements.js';
+import { ARIEL, openAriel, readArielInvitation } from '../dist/profiles.js?v=2.2.3-ariel';
 
 function storage(initial = {}) {
   const map = new Map(Object.entries(initial));
@@ -25,6 +26,91 @@ const ariel = { name: 'אריאל', voice: 'ariel', address: 'female' };
 const yuli = { name: 'יולי', address: 'female' };
 const dvir = { name: 'דביר', address: 'male' };
 const recorded = 'data:audio/webm;codecs=opus;base64,TmFtZQ==';
+
+test('A fresh visit uses Ariel and her prepared Ava recordings without creating a profile index', () => {
+  const saved = storage();
+  const game = openAriel(saved);
+  assert.deepEqual(ARIEL, ariel);
+  assert.deepEqual(profileSpeech(ARIEL)('welcome'), ['welcome']);
+  assert.deepEqual(profileSpeech(ARIEL)('good-luck'), ['profile-good-luck-ariel']);
+  assert.equal(game.getItem(GAME_KEY), null);
+  assert.equal(saved.map.size, 0);
+  game.setItem(GAME_KEY, legacySave());
+  assert.equal(openAriel(saved).getItem(GAME_KEY), saved.getItem(GAME_KEY));
+  assert.equal(saved.getItem(PROFILE_KEY), null);
+});
+
+test('Ariel opens her original album and saves while another child remains safely stored', () => {
+  const local = legacySave();
+  const code = newCode();
+  const family = JSON.stringify({ code, device: crypto.randomUUID(), remote: JSON.parse(local).progress });
+  const saved = storage({ [GAME_KEY]: local, [FAMILY_KEY]: family, 'learning-state': '{"park":"saved"}' });
+  const profiles = new ChildProfiles(saved);
+  profiles.add({ ...ariel, name: 'Ariel' });
+  const other = profiles.add(dvir, recorded);
+  const otherStore = profiles.storageFor(other.id);
+  otherStore.setItem(GAME_KEY, '{"progress":{"sessions":4}}');
+  otherStore.setItem(FAMILY_KEY, JSON.stringify({ code: newCode() }));
+  const before = new Map(saved.map);
+
+  const game = openAriel(saved);
+  assert.equal(game.getItem(GAME_KEY), local);
+  assert.equal(game.getItem(FAMILY_KEY), family);
+  assert.equal(game.getItem('learning-state'), '{"park":"saved"}');
+  assert.equal(new SharedAlbum({ storage: game, config: {} }).progress.stickers.length, 26);
+  assert.deepEqual(saved.map, before);
+  game.setItem(GAME_KEY, '{"ariel":"updated"}');
+  assert.equal(otherStore.getItem(GAME_KEY), '{"progress":{"sessions":4}}');
+  assert.equal(otherStore.getItem('name-recording'), recorded);
+});
+
+test('Ariel also keeps her save on devices where she was set up with a generated profile ID', () => {
+  const saved = storage();
+  const profiles = new ChildProfiles(saved);
+  const profile = profiles.add({ name: 'אַרִיאֵל', voice: 'yuli', address: 'male' });
+  const arielStore = profiles.storageFor(profile.id);
+  arielStore.setItem(GAME_KEY, legacySave());
+  arielStore.setItem(FAMILY_KEY, JSON.stringify({ code: newCode() }));
+  const other = profiles.add({ ...yuli, voice: 'ariel' });
+  profiles.storageFor(other.id).setItem(GAME_KEY, '{"other":"progress"}');
+
+  const game = openAriel(saved);
+  assert.equal(game.getItem(GAME_KEY), arielStore.getItem(GAME_KEY));
+  assert.equal(game.getItem(FAMILY_KEY), arielStore.getItem(FAMILY_KEY));
+  game.setItem('learning-state', '{"stored":"ariel"}');
+  assert.equal(arielStore.getItem('learning-state'), '{"stored":"ariel"}');
+  assert.equal(profiles.storageFor(other.id).getItem('learning-state'), null);
+  assert.equal(saved.getItem(GAME_KEY), null);
+  profiles.update(profile.id, { name: 'Other name' });
+  assert.equal(openAriel(saved).getItem(GAME_KEY), arielStore.getItem(GAME_KEY));
+});
+
+test('A device with only other profiles opens an empty Ariel save and keeps the other data', () => {
+  const saved = storage();
+  const profiles = new ChildProfiles(saved);
+  const other = profiles.add(dvir);
+  const otherStore = profiles.storageFor(other.id);
+  otherStore.setItem(GAME_KEY, '{"other":"progress"}');
+  otherStore.setItem(FAMILY_KEY, JSON.stringify({ code: newCode() }));
+  const game = openAriel(saved);
+  assert.equal(game.getItem(GAME_KEY), null);
+  assert.equal(game.getItem(FAMILY_KEY), null);
+  game.setItem(GAME_KEY, legacySave());
+  assert.equal(otherStore.getItem(GAME_KEY), '{"other":"progress"}');
+  assert.equal(new ChildProfiles(saved).active.id, other.id);
+});
+
+test('The Ariel edition accepts old Ariel links and code-only links without importing another name', () => {
+  const code = newCode();
+  const hash = profile => new URL(invitationLink('https://game.example', '/', code, profile)).hash;
+  assert.equal(readArielInvitation(hash()), code);
+  assert.equal(readArielInvitation(hash(ariel)), code);
+  assert.equal(readArielInvitation(hash({ ...ariel, name: 'Ariel' })), code);
+  assert.equal(readArielInvitation(hash({ ...dvir, voice: 'ariel' })), null);
+  assert.equal(readArielInvitation(hash({ ...yuli, voice: 'yuli' })), null);
+  assert.equal(readArielInvitation(hash({ ...ariel, voice: 'yuli' })), null);
+  assert.equal(readArielInvitation('#album=broken&child=אריאל'), null);
+});
 
 test('The upgrade keeps Ariel’s 26 stickers, letter practice, settings and pairing byte-for-byte', () => {
   const code = newCode(), before = legacySave();

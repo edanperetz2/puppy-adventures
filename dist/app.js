@@ -15,7 +15,7 @@ import { Narrator } from './audio.js?v=2.2.0-voices';
 import { GameAnnouncements } from './announcements.js';
 import { SharedAlbum, normalizeCode } from './sync.js?v=2.2.2-six';
 import { SYNC_CONFIG } from './sync-config.js';
-import { mountFamilyPanel, updateFamilyStatus } from './family-ui.js?v=2.2.2-six';
+import { mountFamilyPanel, updateFamilyStatus } from './family-ui.js?v=2.2.3-ariel';
 import { analogClock, CLOCK_LEVELS } from './clock.js';
 import { mountClockSchool } from './clock-school.js?v=2.2.2-six';
 import { sanitizeClockPosition, recordClockLesson } from './clock-learning.js?v=2.2.2-six';
@@ -27,24 +27,12 @@ import { suggestedLetters, practicedLetterCount, recordLetters, recognitionTarge
 import { CHARACTERS, CHARACTER_COLLECTIONS, CHARACTER_LEVELS, CHARACTER_MODES, characterCollection, selectCharacterLevel, sanitizeCharacterPractice, finishCharacterPractice, nextCharacterLevel } from './characters.js?v=2.2.2-six';
 import { characterMenu, characterQuestion, characterAnswer, characterAnswerLabel, characterMissionArt, characterName } from './characters-view.js?v=2.2.2-six';
 import { letterExampleCards } from './letter-examples.js';
-import { ChildProfiles, readInvitation, invitationNeedsNewProfile, escapeHtml, GAME_KEY } from './profiles.js?v=2.2.0-voices';
+import { ARIEL, openAriel, readArielInvitation, GAME_KEY } from './profiles.js?v=2.2.3-ariel';
 import { profileSpeech } from './profile-speech.js?v=2.2.0-voices';
-import { savedNameVoice, nameVoicePlayback } from './name-voice.js?v=2.2.0-voices';
-import { profilePanel, mountProfileForm, personalizeUi } from './profiles-view.js?v=2.2.0-voices';
-import { openGameGuide, GUIDE_ICON } from './guide.js?v=2.2.2-six';
+import { openGameGuide, GUIDE_ICON } from './guide.js?v=2.2.3-ariel';
 
-const profiles = new ChildProfiles();
-const invitation = readInvitation(location.hash);
-if (invitation) {
-  const match = profiles.findAlbum(invitation.code);
-  if (match) { try { profiles.select(match.id); } catch { /* Keep the current child if storage is unavailable. */ } }
-  history.replaceState(null, '', location.pathname + location.search);
-}
-const child = profiles.active;
-const incomingChild = invitationNeedsNewProfile(profiles, invitation);
-const pendingJoinCode = child && !incomingChild ? invitation?.code || child.pendingAlbum || null : null;
-const emptyStorage = new Map();
-const gameStorage = child ? profiles.storageFor(child.id) : { getItem: key => emptyStorage.get(key) || null, setItem: (key, value) => emptyStorage.set(key, value), removeItem: key => emptyStorage.delete(key) };
+const gameStorage = openAriel();
+let pendingJoinCode = null;
 
 const app = document.querySelector('#app');
 const dialog = document.querySelector('#parent-dialog');
@@ -52,8 +40,7 @@ const STORAGE_KEY = GAME_KEY;
 let settings = sanitizeSettings(null);
 let progress = freshProgress();
 let storageAvailable = true;
-let view = incomingChild ? 'child-invitation' : child ? 'home' : 'child-setup';
-let profileEditor = null;
+let view = 'home';
 let round = null;
 let audioStatus = 'idle';
 let dialogOpener = null;
@@ -86,9 +73,6 @@ try {
 const album = new SharedAlbum({ config: SYNC_CONFIG, storage: gameStorage, onChange: source => {
   void learner?.flush();
   if (!source.linked) return;
-  if (child.pendingAlbum) {
-    try { profiles.update(child.id, { pendingAlbum: null }); child.pendingAlbum = null; } catch { /* Progress sync is independent of profile labels. */ }
-  }
   const updated = source.progress;
   const changed = JSON.stringify(progress) !== JSON.stringify(updated);
   progress = updated;
@@ -115,13 +99,12 @@ const narrator = new Narrator(status => {
   if (notice) { notice.hidden = status !== 'unavailable'; notice.textContent = 'הקול לא נשמע? לחצי שוב על הרמקול. אפשר גם להיעזר בהורה.'; }
 });
 narrator.enabled = settings.sound;
-const personalPlayback = nameVoicePlayback(child?.voiceId ? await savedNameVoice(child) : null);
-narrator.resolveKey = profileSpeech(child, personalPlayback.urls);
+narrator.resolveKey = profileSpeech(ARIEL);
 const announcements = new GameAnnouncements(narrator);
 let welcomeAttempted = false;
 
 function startOpeningWelcome() {
-  if (!child || welcomeAttempted || document.hidden || dialog.open || view !== 'home') return;
+  if (welcomeAttempted || document.hidden || dialog.open || view !== 'home') return;
   welcomeAttempted = true;
   void announcements.start();
 }
@@ -138,32 +121,15 @@ function save() {
   } catch { storageAvailable = false; }
 }
 
-function openChild(profile, invite = null) {
-  checkpoint();
-  narrator.stop();
-  profiles.select(profile.id);
-  if (invite) {
-    const hash = new URLSearchParams({ album: invite.code, child: profile.name, address: profile.address });
-    if (profile.voice) hash.set('voice', profile.voice);
-    location.hash = hash.toString();
+function openAlbumInvite() {
+  const invite = new URLSearchParams(location.hash.slice(1));
+  if (!['album', 'child', 'voice', 'address', 'profile'].some(key => invite.has(key))) return;
+  const code = readArielInvitation(invite);
+  history.replaceState(null, '', location.pathname + location.search);
+  if (code && !album.linked) {
+    pendingJoinCode = code;
+    parentGate();
   }
-  location.reload();
-}
-
-function renderChildSetup() {
-  if (profileEditor) return;
-  app.innerHTML = `<main id="main" class="profile-setup"><div class="profile-setup-brand">${art('paw')} חבורת ההרפתקאות</div><div id="first-child-form"></div><button class="profile-guide" data-action="guide">${GUIDE_ICON} מדריך המשחק</button></main>`;
-  profileEditor = mountProfileForm(app.querySelector('#first-child-form'), { profiles, invitation, onDone: profile => openChild(profile, invitation) });
-}
-
-function editChild(editing = null, invite = null) {
-  narrator.stop();
-  openDialog(`<h2 id="parent-title">${editing ? 'השם והקול במשחק' : 'הרפתקה חדשה ונפרדת'}</h2><div id="profile-form-host"></div>`);
-  profileEditor = mountProfileForm(dialog.querySelector('#profile-form-host'), { profiles, editing, invitation: invite, onDone: profile => openChild(profile, invite), onCancel: invite ? closeDialog : renderSettings });
-}
-
-function renderChildInvitation() {
-  app.innerHTML = `${header()}<main id="main" class="profile-setup profile-invitation">${pup('bobi')}<h1 tabindex="-1">קישור לאלבום ${invitation.name ? `של <span data-learning-text>${escapeHtml(invitation.name)}</span>` : 'נוסף'}</h1><p>האלבום שבקישור ייפתח בפרופיל נפרד.<br>ההרפתקה והמדבקות של <span data-learning-text>${escapeHtml(child.name)}</span> יישארו שמורות.</p><button class="primary-button" data-action="accept-child-invitation">הוספת פרופיל לחיבור האלבום</button><button class="text-button" data-action="keep-current-child">חזרה להרפתקה של <span data-learning-text>${escapeHtml(child.name)}</span></button></main>`;
 }
 
 function applyPreferences() {
@@ -329,7 +295,13 @@ function writingCount(language,form,step=writingPractice.mode){return writingVis
 function nextWriting(language,form,start=0){const visits=writingVisits(language,form),letters=LETTERS[language];return letters.map((letter,i)=>({letter,count:visits[i],order:(i-start+letters.length)%letters.length})).sort((a,b)=>a.count-b.count||a.order-b.order)[0].letter;}
 
 function writingKey(){return `${letterDemo.language}:${letterDemo.form}:${letterDemo.index}:${writingPractice.mode}`;}
-function nameLetterButtons(language){return [...new Set([...(language==='english'&&!/[A-Za-z]/u.test(child.name)&&child.voice?child.voice:child.name).normalize('NFD').replace(/[\u0591-\u05c7]/gu,'')])].map(char=>LETTERS[language].findIndex(letter=>letter.familiar===char.toUpperCase())).filter(index=>index>=0).map(index=>`<button data-action="name-letter" data-index="${index}">${LETTERS[language][index].familiar}</button>`).join('') || '<small>בוחרים אות מהאלפבית למטה</small>';}
+function nameLetterButtons(language) {
+  const name = language === 'english' ? 'ARIEL' : ARIEL.name;
+  return [...new Set(name)].map(char => {
+    const index = LETTERS[language].findIndex(letter => letter.familiar === char);
+    return `<button data-action="name-letter" data-index="${index}">${char}</button>`;
+  }).join('');
+}
 function updateWritingStatus() {
   const language = letterDemo.language, mode = writingMode(letterDemo.form);
   const status = document.querySelector('#letter-writing-progress');
@@ -397,7 +369,7 @@ function activityCount(id) { return id === 'characters' ? Object.values(characte
 function renderHome() {
   app.innerHTML = `${header()}<main id="main" class="home-page">${resumeCard()}
     <section class="hero" aria-labelledby="hero-title">
-      <div class="hero-copy"><div class="eyebrow"><span class="tiny-sun">✦</span><span>שלום <bdi data-learning-text>${escapeHtml(child.name)}</bdi>!</span></div>
+      <div class="hero-copy"><div class="eyebrow"><span class="tiny-sun">✦</span><span>שלום <bdi>${ARIEL.name}</bdi>!</span></div>
         <h1 id="hero-title" tabindex="-1">הרפתקה קטנה,<br><span>מגלות עולם!</span></h1>
         <p class="hero-description">לולי, בובי וטופי מחכים לך.<br>בואי נשחק, נגלה ונלמד ביחד.</p>
         <button class="primary-button hero-start" data-action="recommended">יוצאות להרפתקה ${uiIcon('arrow')}</button>
@@ -544,8 +516,6 @@ function turnAlbumPage(index) {
 }
 
 function render() {
-  if (!child) { renderChildSetup(); return; }
-  if (view === 'child-invitation') { renderChildInvitation(); return; }
   freeWriting?.destroy(); freeWriting=null;
   journeyController?.destroy(); journeyController=null;
   parkController?.destroy(); parkController=null;
@@ -737,7 +707,6 @@ function celebrate(amount) {
 }
 
 function openDialog(content) {
-  profileEditor?.destroy(); profileEditor = null;
   if (!dialog.open) dialogOpener = document.activeElement;
   dialog.innerHTML = `<button class="dialog-close circle-button" aria-label="סגירה" data-dialog="close">${uiIcon('close')}</button>${content}`;
   dialog.querySelector('[data-dialog="close"]').onclick = closeDialog;
@@ -745,7 +714,6 @@ function openDialog(content) {
 }
 
 function closeDialog() {
-  profileEditor?.destroy(); profileEditor = null;
   const action = dialogOpener?.dataset?.action;
   dialog.close();
   if (view !== 'game') {
@@ -754,12 +722,12 @@ function closeDialog() {
   } else dialogOpener?.focus?.();
 }
 
-function parentGate(afterGate = renderSettings) {
+function parentGate() {
   narrator.stop();
   openDialog(`<span class="section-kicker">רגע קטן להורים</span><h2 id="parent-title">פינת ההורים</h2><p>כדי לפתוח את ההגדרות, מה התוצאה?</p><form id="parent-gate"><label class="gate-label" for="gate-answer"><span dir="ltr">7 × 3 = ?</span></label><input id="gate-answer" name="answer" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="תשובה לחידה" required><p id="gate-error" role="status"></p><button class="primary-button" type="submit">כניסה</button></form>`);
   dialog.querySelector('form').onsubmit = event => {
     event.preventDefault();
-    if (dialog.querySelector('input').value.trim() === '21') afterGate();
+    if (dialog.querySelector('input').value.trim() === '21') renderSettings();
     else dialog.querySelector('#gate-error').textContent = 'נסו שוב, או בקשו עזרה מהורה.';
   };
   dialog.querySelector('input').focus();
@@ -779,20 +747,16 @@ function renderSettings() {
     <section class="parent-progress"><h3>מה כבר גילינו?</h3><p id="parent-progress-summary">${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות</p><table><thead><tr><th>תחום</th><th>תשובות ללא עזרה</th><th>עם הדגמה, רמז או ניסיון נוסף</th></tr></thead><tbody>${MISSION_IDS.map(id => MISSIONS[id]).map(m => `<tr><th>${m.id === 'hebrew' ? 'עברית · מילים ושמות' : m.subject}</th><td data-independent="${m.id}">${progress.skills[m.id].correct - progress.skills[m.id].assisted}</td><td data-assisted="${m.id}">${progress.skills[m.id].assisted}</td></tr>`).join('')}</tbody></table><p class="parent-note">מוצגות רק הרפתקאות שהושלמו. זהו תיעוד משחק, ולא מבחן או הערכת יכולת.</p></section>
     <div id="learning-parent">${parentLearning(learner)}</div>
     <section id="family-panel"></section><p class="parent-note character-art-credit">איורי הדמויות: PAW Patrol / Rubble &amp; Crew © Spin Master Ltd. · <a href="https://dev.pawpatrol.com/character-guide" target="_blank" rel="noopener noreferrer">מדריך הדמויות הרשמי של מפרץ ההרפתקאות</a> · <a href="https://images.squarespace-cdn.com/content/v1/5595e2eee4b0b03840079b28/1685761053151-FY46DCUKCA43ODFF4MKK/image-asset.jpeg" target="_blank" rel="noopener noreferrer">McCown Design Agency</a>. משחק השמות נכלל בתחום עברית.</p>
-    <p class="privacy-note">אפשר לשחק ללא חיבור לאלבום. לכל ילד וילדה יש אלבום נפרד. בחיבור נשמרים מספר ההרפתקאות, העזרה בכל תחום והאותיות שתורגלו. השם והקלטת השם נשמרים במכשיר הזה; קישור לחיבור מכשיר נוסף כולל את השם, בלי ההקלטה. היסטוריית פריטי הלמידה והפארק נשמרים גם באלבום המחובר. הרפתקאות פתוחות וציורי תרגול נשמרים רק במכשיר, בלי לשלוח ציורים לאלבום. לא צריך אימייל או חשבון לילדים. אין פרסומות או מעקב. המיקרופון נפתח רק כשהורה בוחר להקליט שם. שמרו את הקוד כדי לחבר מכשיר נוסף לאותו אלבום.</p>
+    <p class="privacy-note">אפשר לשחק במכשיר הזה ולחבר אותו לאלבום המשפחתי של אריאל בכל עת. כשמחברים את האלבום נשמרים בו המדבקות, ההתקדמות, היסטוריית הלמידה והפארק. הרפתקאות פתוחות וציורי תרגול נשמרים במכשיר. שמרו את הקוד כדי לחבר מכשיר נוסף לאותו אלבום.</p>
     <p class="parent-note">איורים נוספים: <a href="assets/Twemoji-LICENSE.txt" target="_blank" rel="noopener">Twemoji · רישיון ושמות היוצרים</a>. כל התמונות שמורות בתוך המשחק.</p>
     <p class="save-notice" ${storageAvailable ? 'hidden' : ''}>הדפדפן לא מאפשר שמירה כרגע. אפשר לשחק, אבל ההתקדמות עלולה להיעלם בסגירה.</p>
     <button class="text-button reset-button" data-dialog="reset">${album.linked ? 'ניתוק מהאלבום ואיפוס המכשיר הזה' : 'איפוס ההתקדמות במכשיר הזה'}</button>`);
   function refreshLearning(){void Promise.all([album.flush(),learner.flush()]).then(()=>{const panel=dialog.querySelector('#learning-parent');if(panel){panel.innerHTML=parentLearning(learner);panel.querySelector('[data-learning-refresh]').onclick=refreshLearning;}});}
   dialog.querySelector('[data-learning-refresh]').onclick=refreshLearning;
-  dialog.querySelector('#settings-form').insertAdjacentHTML('beforebegin', profilePanel(profiles));
-  dialog.querySelector('[data-child-add]').onclick = () => editChild();
-  dialog.querySelector('[data-child-edit]').onclick = () => editChild(child);
-  for (const button of dialog.querySelectorAll('[data-child-select]')) button.onclick = () => {
-    try { openChild(profiles.profiles.find(profile => profile.id === button.dataset.childSelect)); }
-    catch { button.textContent = 'לא הצלחנו לעבור כרגע. נסו שוב.'; }
-  };
-  mountFamilyPanel(dialog.querySelector('#family-panel'), { album, getLocalProgress: () => progress, pendingCode: pendingJoinCode, profile: child });
+  mountFamilyPanel(dialog.querySelector('#family-panel'), {
+    album, getLocalProgress: () => progress, pendingCode: pendingJoinCode,
+    onPaired: () => { pendingJoinCode = null; },
+  });
   dialog.querySelector('#settings-form').onsubmit = event => {
     event.preventDefault();
     const form = new FormData(event.target);
@@ -907,20 +871,18 @@ function renderJourneyComplete(){
 }
 function renderPark(){
   app.innerHTML=`${header()}<main id="main" class="park-page"><div id="park-root"></div></main>${footer()}`;
-  parkController=mountPark(document.querySelector('#park-root'),{learner,stickers:progress.stickers.length,name:child.name,speak:keys=>announcements.say(keys),onHome:()=>{view='home';render();focusTitle();}});
+  parkController=mountPark(document.querySelector('#park-root'),{learner,stickers:progress.stickers.length,name:ARIEL.name,speak:keys=>announcements.say(keys),onHome:()=>{view='home';render();focusTitle();}});
 }
 
 
 app.addEventListener('click', event => {
   const button = event.target.closest('button[data-action]');
   if (!button) {
-    if (child && view === 'home' && !dialog.open && announcements.welcomePending && audioStatus !== 'speaking') void announcements.say('welcome');
+    if (view === 'home' && !dialog.open && announcements.welcomePending && audioStatus !== 'speaking') void announcements.say('welcome');
     return;
   }
   if (button.disabled) return;
   switch (button.dataset.action) {
-    case 'accept-child-invitation': parentGate(() => editChild(null, invitation)); break;
-    case 'keep-current-child': view = 'home'; render(); startOpeningWelcome(); break;
     case 'home': leaveTo('home'); break;
     case 'guide': narrator.stop(); openGameGuide(button); break;
     case 'learning-hub': openLearningHub(button.dataset.hub); break;
@@ -987,23 +949,13 @@ app.addEventListener('change', event => {
 dialog.addEventListener('click', event => { if (event.target === dialog && event.offsetX >= 0 && event.offsetX <= dialog.clientWidth && event.offsetY >= 0 && event.offsetY <= dialog.clientHeight) return; if (event.target === dialog) closeDialog(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) narrator.stop(); else { void album.flush();void learner.flush(); startOpeningWelcome(); } });
 window.addEventListener('online', () => { void album.flush();void learner.flush(); });
-window.addEventListener('hashchange', () => { if (readInvitation(location.hash)) location.reload(); });
+window.addEventListener('hashchange', openAlbumInvite);
 window.addEventListener('focus', () => { void album.flush();void learner.flush(); });
 setInterval(() => { if (!document.hidden && album.linked) {void album.flush();void learner.flush();} }, 15000);
-window.addEventListener('pagehide', event => {
-  checkpoint(); narrator.stop(); profileEditor?.destroy();
-  if (!event.persisted) personalPlayback.release();
-});
-dialog.addEventListener('cancel', () => { profileEditor?.destroy(); profileEditor = null; });
-const addressObserver = new MutationObserver(() => {
-  personalizeUi(app, child);
-  if (dialog.open) personalizeUi(dialog, child);
-});
-addressObserver.observe(app, { childList: true, characterData: true, subtree: true });
-addressObserver.observe(dialog, { childList: true, characterData: true, subtree: true });
+window.addEventListener('pagehide', () => { checkpoint(); narrator.stop(); });
 render();
-if (pendingJoinCode && !album.linked) parentGate();
-else startOpeningWelcome();
+openAlbumInvite();
+startOpeningWelcome();
 if (album.linked) {void album.flush();void learner.flush();}
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {

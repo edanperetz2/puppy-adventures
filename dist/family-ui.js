@@ -1,5 +1,5 @@
 import { newCode, normalizeCode, formatCode } from './sync.js?v=2.2.2-six';
-import { invitationLink, escapeHtml } from './profiles.js';
+import { ARIEL, invitationLink } from './profiles.js?v=2.2.3-ariel';
 
 const STATUS = {
   local: 'האלבום נשמר במכשיר הזה',
@@ -18,12 +18,12 @@ export function updateFamilyStatus(album) {
   element.classList.toggle('pending', ['pending', 'offline', 'throttled', 'storage-error'].includes(album.status));
 }
 
-export function mountFamilyPanel(element, { album, getLocalProgress, pendingCode, profile }) {
+export function mountFamilyPanel(element, { album, getLocalProgress, pendingCode, onPaired }) {
   if (!element) return;
   element.className = 'album-sync';
-  element.innerHTML = `<h3>האלבום של ${escapeHtml(profile?.name || 'הילד או הילדה')} בכל המכשירים</h3><p>אותן מדבקות ואותה התקדמות בטלפון, בטאבלט ובמחשב. לכל ילד וילדה קוד נפרד. מחברים כל מכשיר פעם אחת, בעזרת הקוד המשפחתי.</p><p class="sync-install-note"><b>באייפד: Safari והקיצור במסך הבית מתחברים בנפרד.</b> מתחילים בגרסה שבה המדבקות כבר מופיעות, יוצרים שם אלבום משפחתי, ומעתיקים את הקוד. אחר כך פותחים את הקיצור במסך הבית ומחברים אותו לאותו קוד. המדבקות הקיימות נשמרות ומצטרפות לאלבום.</p>
+  element.innerHTML = `<h3>האלבום של ${ARIEL.name} בכל המכשירים</h3><p>אותן מדבקות ואותה התקדמות בטלפון, בטאבלט ובמחשב. מחברים כל מכשיר פעם אחת, בעזרת הקוד המשפחתי של אריאל.</p><p class="sync-install-note"><b>באייפד: Safari והקיצור במסך הבית מתחברים בנפרד.</b> מתחילים בגרסה שבה המדבקות כבר מופיעות, יוצרים שם אלבום משפחתי, ומעתיקים את הקוד. אחר כך פותחים את הקיצור במסך הבית ומחברים אותו לאותו קוד. המדבקות הקיימות נשמרות ומצטרפות לאלבום.</p>
     ${album.linked ? `<p id="sync-status" class="sync-status" role="status"></p><label for="family-code" class="section-kicker">הקוד המשפחתי שלכם</label><input id="family-code" class="pair-input" type="password" readonly autocomplete="off" aria-label="הקוד המשפחתי שלכם"><div class="sync-actions"><button type="button" class="secondary-button" data-sync="copy-code">העתקת הקוד</button><button type="button" class="secondary-button" data-sync="copy-link">העתקת קישור למכשיר נוסף</button><button type="button" class="text-button" data-sync="show-code">הצגת הקוד</button><button type="button" class="text-button" data-sync="refresh">עדכון עכשיו</button></div><p class="sync-note">שמרו את הקוד בתוך המשפחה. הקוד מאפשר גישה לאלבום. כשחוזרים למשחק או מסיימים הרפתקה, האלבום מתעדכן אוטומטית. הגדרות הקול והקושי נשארות נפרדות בכל מכשיר.</p>`
-    : `<div class="sync-actions"><button type="button" class="primary-button" data-sync="create">יצירת אלבום משפחתי</button></div><form id="join-album"><label class="section-kicker" for="join-code">כבר יש אלבום במכשיר אחר? הזינו את הקוד</label><input id="join-code" name="code" class="pair-input" type="text" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX" required aria-label="קוד לחיבור לאלבום"><div class="sync-actions"><button type="submit" class="secondary-button">חיבור לאלבום הקיים</button></div></form><p class="sync-note">ההתקדמות של הפרופיל הזה תצטרף לאלבום. ודאו שזה הקוד של אותו ילד או ילדה. אין צורך באימייל או בחשבון לילדים.</p>`}
+    : `<div class="sync-actions"><button type="button" class="primary-button" data-sync="create">יצירת אלבום משפחתי</button></div><form id="join-album"><label class="section-kicker" for="join-code">כבר יש לאריאל אלבום במכשיר אחר? הזינו את הקוד שלו</label><input id="join-code" name="code" class="pair-input" type="text" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX" required aria-label="קוד לחיבור לאלבום"><div class="sync-actions"><button type="submit" class="secondary-button">חיבור לאלבום הקיים</button></div></form><p class="sync-note">ההתקדמות שנשמרה במכשיר הזה תצטרף לאלבום של אריאל. ודאו שהעתקתם את הקוד שלה.</p>`}
     <p id="pair-message" role="status" class="sync-status"></p>`;
   updateFamilyStatus(album);
 
@@ -35,7 +35,8 @@ export function mountFamilyPanel(element, { album, getLocalProgress, pendingCode
     message.textContent = 'מחברים את האלבום…';
     try {
       await album.link(code, getLocalProgress(), { create });
-      mountFamilyPanel(element, { album, getLocalProgress, profile });
+      onPaired?.();
+      mountFamilyPanel(element, { album, getLocalProgress });
       element.querySelector('#pair-message').textContent = 'האלבום מחובר! אפשר להמשיך לשחק.';
     } catch (error) {
       console.warn('Family album connection:', error.name, error.message);
@@ -70,7 +71,7 @@ export function mountFamilyPanel(element, { album, getLocalProgress, pendingCode
   };
   element.querySelector('[data-sync="refresh"]').onclick = () => album.flush();
   element.querySelector('[data-sync="copy-link"]').onclick = async () => {
-    const url = invitationLink(location.origin, location.pathname, album.code, profile);
+    const url = invitationLink(location.origin, location.pathname, album.code);
     try {
       await navigator.clipboard.writeText(url);
       element.querySelector('#pair-message').textContent = 'הקישור הועתק. פתחו אותו במכשיר הבא וחברו את האלבום בפינת ההורים.';

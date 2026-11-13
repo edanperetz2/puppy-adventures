@@ -4,8 +4,10 @@ export const PROFILE_KEY = 'puppy-adventures-children-v1';
 export const GAME_KEY = 'puppy-adventures-v1';
 export const FAMILY_KEY = 'puppy-adventures-family-v1';
 export const LEGACY_PROFILE_ID = 'ariel-legacy';
+export const ARIEL = Object.freeze({ name: 'אריאל', address: 'female', voice: 'ariel' });
+const ARIEL_STORAGE_KEY = 'puppy-adventures-ariel-storage-v1';
 const allowedId = id => id === LEGACY_PROFILE_ID || /^[0-9a-f]{8}-[0-9a-f-]{27}$/u.test(id || '');
-const allowedKey = key => [GAME_KEY, FAMILY_KEY, `${FAMILY_KEY}-check`, 'name-recording', 'learning-state'].includes(key);
+const allowedKey = key => [GAME_KEY, FAMILY_KEY, `${FAMILY_KEY}-check`, `${FAMILY_KEY}-retry`, `${FAMILY_KEY}-creation-retry`, 'name-recording', 'learning-state'].includes(key);
 
 function profileId() {
   if (crypto.randomUUID) return crypto.randomUUID();
@@ -56,7 +58,7 @@ export class ChildProfiles {
       // The original save and pairing stay at their exact original keys. This
       // is a label around Ariel's existing data, with no progress migration.
       if (!this.profiles.some(profile => profile.id === LEGACY_PROFILE_ID) && (storage.getItem(GAME_KEY) || storage.getItem(FAMILY_KEY))) {
-        this.profiles.unshift({ id: LEGACY_PROFILE_ID, name: 'אריאל', address: 'female', voice: 'ariel' });
+        this.profiles.unshift({ id: LEGACY_PROFILE_ID, ...ARIEL });
         this.activeId ||= LEGACY_PROFILE_ID;
       }
       if (this.profiles.length) this.persist();
@@ -116,14 +118,7 @@ export class ChildProfiles {
 
   storageFor(id = this.activeId) {
     if (!this.profiles.some(profile => profile.id === id)) throw new Error('unknown_profile');
-    const storage = this.storage;
-    const keyFor = key => {
-      if (!allowedKey(key)) throw new Error('unknown_profile_key');
-      return id === LEGACY_PROFILE_ID && key !== 'name-recording' ? key : `puppy-child-${id}:${key}`;
-    };
-    // Capture the immutable ID. An upload in flight when another tab switches
-    // children still writes only to the child who made that contribution.
-    return { getItem: key => storage.getItem(keyFor(key)), setItem: (key, value) => storage.setItem(keyFor(key), value), removeItem: key => storage.removeItem(keyFor(key)) };
+    return profileStorage(this.storage, id);
   }
 
   albumCode(id = this.activeId) {
@@ -134,12 +129,50 @@ export class ChildProfiles {
   findAlbum(code) { return this.profiles.find(profile => this.albumCode(profile.id) === code) || null; }
 }
 
+function profileStorage(storage, id) {
+  const keyFor = key => {
+    if (!allowedKey(key)) throw new Error('unknown_profile_key');
+    return id === LEGACY_PROFILE_ID && key !== 'name-recording' ? key : `puppy-child-${id}:${key}`;
+  };
+  // Capture the ID so an in-flight upload always writes to its own profile.
+  return { getItem: key => storage.getItem(keyFor(key)), setItem: (key, value) => storage.setItem(keyFor(key), value), removeItem: key => storage.removeItem(keyFor(key)) };
+}
+
+// Use the original save when it exists. Devices first set up during the
+// multiple-profile release may instead have Ariel under a generated ID.
+export function openAriel(storage) {
+  try {
+    storage ??= globalThis.localStorage;
+    const pinned = storage.getItem(ARIEL_STORAGE_KEY);
+    if (pinned && allowedId(pinned)) return profileStorage(storage, pinned);
+    const saved = JSON.parse(storage.getItem(PROFILE_KEY) || 'null');
+    const candidates = Array.isArray(saved?.profiles) ? saved.profiles.map(cleanProfile).filter(profile =>
+      profile && profile.id !== LEGACY_PROFILE_ID && findVoiceName(profile.name)?.id === ARIEL.voice
+    ) : [];
+    if (candidates.length) {
+      const original = profileStorage(storage, LEGACY_PROFILE_ID);
+      if (original.getItem(GAME_KEY) || original.getItem(FAMILY_KEY) || original.getItem('learning-state')) return original;
+      const match = candidates.find(profile => profile.id === saved?.activeId) || candidates[0];
+      try { storage.setItem(ARIEL_STORAGE_KEY, match.id); } catch { /* The original namespaced save can still be read. */ }
+      return profileStorage(storage, match.id);
+    }
+  } catch { /* A missing or damaged profile index still permits playing as Ariel. */ }
+  return profileStorage(storage, LEGACY_PROFILE_ID);
+}
+
 export function readInvitation(hash) {
   const query = new URLSearchParams(hash.replace(/^#/u, ''));
   const code = String(query.get('album') || '').toUpperCase().replace(/[\s-]/gu, '');
   if (!/^[0-9A-HJKMNP-TV-Z]{24}$/u.test(code)) return null;
   const voice = VOICE_NAMES.some(name => name.id === query.get('voice')) ? query.get('voice') : null;
   return { code, name: cleanName(query.get('child')), address: query.get('address') === 'male' ? 'male' : 'female', voice };
+}
+
+export function readArielInvitation(value) {
+  const query = new URLSearchParams(typeof value === 'string' ? value.replace(/^#/u, '') : value);
+  if (query.getAll('child').some(name => findVoiceName(name)?.id !== ARIEL.voice)) return null;
+  if (query.getAll('voice').some(voice => voice !== ARIEL.voice)) return null;
+  return readInvitation(`#${query}`)?.code || null;
 }
 
 export function invitationNeedsNewProfile(profiles, invitation) {

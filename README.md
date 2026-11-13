@@ -4,6 +4,12 @@ A gentle learning game for phones, tablets and computers. Original illustrated p
 
 **Play:** [puppy-adventures.vercel.app](https://puppy-adventures.vercel.app)
 
+## Version 2.2.3 · Ariel’s adventure
+
+Every device opens straight into Ariel’s game with her prepared Ava recordings. Existing saves and family album connections use their original storage. A new device can join her album from the parent settings with her family code or a pairing link.
+
+The earlier profile manager, name editor and custom voice code remain in `dist/profiles.js`, `dist/profiles-view.js` and `dist/name-voice.js`. Restoring the feature requires wiring those screens back into the app. The app leaves the saved profile list and other profiles’ data in the browser.
+
 ## Version 2.2.2 · Six-question adventures
 
 Stories keep their opening and ending, with a choice of middle pages across replays. Mixed reading visits all ten levels across rounds. The clock school has ten lessons with up to six practice exercises each. Saved ten-question rounds can still be finished from where they paused, and the shared album keeps the question totals from both lengths.

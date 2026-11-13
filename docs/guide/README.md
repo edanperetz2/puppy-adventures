@@ -1,6 +1,6 @@
 # Bilingual game guide
 
-Current release (2.2.2) uses [game-guide-six.webp](../../dist/assets/game-guide-six.webp). The English and Hebrew posters were edited to show six questions per adventure and six pages per story play, then joined at their original resolution of 2,172 × 1,448. The original posters and their verification records below document the ten-question edition.
+Version 2.2.3 uses [game-guide-ariel.webp](../../dist/assets/game-guide-ariel.webp). Both panels describe Ariel’s fixed profile and the Hebrew voice that welcomes her. The poster keeps the six-question adventures and six-page stories from version 2.2.2. The original posters and verification records below document the ten-question edition.
 
 ## Original edition
 
