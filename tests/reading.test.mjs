@@ -107,11 +107,11 @@ test('Advancement offers only the immediately following stage after eight indepe
   assert.equal(nextReadingStage('__proto__', 0), null);
 });
 
-test('Chosen stages keep targets and distractors at that stage, with ten varied questions', () => {
+test('Chosen stages keep targets and distractors at that stage, with six varied questions', () => {
   for (const [key, stage] of Object.entries(READING_LEVELS)) {
     const pool = readingWords(key), seen = new Set();
     let practice = sanitizeReadingPractice(null);
-    const rounds=stage.level===null?Math.max(...Array.from({length:10},(_,i)=>WORDS.filter(w=>w.level===i+1).length))+2:Math.ceil(pool.length/10)+2;
+    const rounds=stage.level===null?2*Math.max(...Array.from({length:10},(_,i)=>WORDS.filter(w=>w.level===i+1).length))+2:Math.ceil(pool.length/SESSION_LENGTH)+2;
     for (let seed = 0; seed < rounds; seed++) {
       const questions = createSession('hebrew', { ...DEFAULT_SETTINGS, reading: key, readingRecent: practice.recent[key] }, seeded(seed));
       assert.equal(questions.length, SESSION_LENGTH);
@@ -119,7 +119,7 @@ test('Chosen stages keep targets and distractors at that stage, with ten varied 
       for (const [index,q] of questions.entries()) {
         seen.add(q.answer);
         assert.ok(pool.some(word => word.id === q.word.id));
-        assert.equal(q.options.length, index < 3 ? 2 : 3);
+        assert.equal(q.options.length, index < 2 ? 2 : 3);
         assert.equal(new Set(q.options.map(word => word.id)).size, q.options.length);
         assert.equal(q.options.filter(word => word.id === q.answer).length, 1);
         if (stage.level !== null) assert.ok(q.options.every(word => word.level === stage.level));

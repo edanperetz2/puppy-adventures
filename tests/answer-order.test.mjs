@@ -82,11 +82,12 @@ test('Journey choices, tile identities, and story actions survive a saved round'
 
 test('On replays of the same story the correct placement can be in any slot', () => {
   const story = STORIES.find(story => story.pages.some(page => page.task === 'place'));
-  const step = story.pages.findIndex(page => page.task === 'place');
-  const correct = story.pages[step].relation, slots = new Set();
+  const page = story.pages.find(page => page.task === 'place');
+  const slots = new Set();
   for (let visit = 0; visit < 24; visit++) {
     const plan = newJourney('stories', story.id, {}, { rng: seeded(123457 * visit) });
-    slots.add(journeyQuestions(plan)[step].choices.indexOf(correct));
+    const task = journeyQuestions(plan).find(q => q.page === page);
+    if (task) slots.add(task.choices.indexOf(page.relation));
   }
   assert.deepEqual([...slots].sort(), [0, 1, 2]);
 });
@@ -94,7 +95,7 @@ test('On replays of the same story the correct placement can be in any slot', ()
 test('Subtraction varies the nearby distractors so the middle value is no longer a shortcut', () => {
   const ranks = new Set();
   const plan = newJourney('objects', 'takeaway', {}, { rng: seeded(45) });
-  const examples = Array.from({ length: 10 }, () => ({ total: 6, known: 3 }));
+  const examples = Array.from({ length: plan.length }, () => ({ total: 6, known: 3 }));
   for (let seed = 0; seed < 24; seed++) {
     for (const task of journeyQuestions({ ...plan, seed, examples })) {
       assert.equal(task.choices.length, 3);
@@ -110,11 +111,11 @@ test('Clock School varies the numbers it asks for and restores the order from a 
   for (let seed = 1; seed <= 24; seed++) {
     const tasks = clockLessonTasks(1, seed, true);
     first.add(tasks[0].number);
-    assert.equal(new Set(tasks.map(task => task.number)).size, 10);
-    const saved = sanitizeClockPosition({ lesson: 1, index: 4, seed, shufflePractice: true });
+    assert.equal(new Set(tasks.map(task => task.number)).size, 6);
+    const saved = sanitizeClockPosition({ lesson: 1, index: 4, seed, shufflePractice: true, length: 6 });
     assert.equal(saved.index, 4);
     assert.equal(saved.shufflePractice, true);
-    assert.deepEqual(clockLessonTasks(saved.lesson, saved.seed, saved.shufflePractice), tasks);
+    assert.deepEqual(clockLessonTasks(saved.lesson, saved.seed, saved.shufflePractice, saved.length), tasks);
     assert.equal(clockLessonTasks(1, seed)[0].number, 3);
   }
   assert.ok(first.size > 6);

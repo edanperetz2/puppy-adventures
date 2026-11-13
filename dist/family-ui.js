@@ -1,4 +1,4 @@
-import { newCode, normalizeCode, formatCode } from './sync.js?v=2.1.3-sync';
+import { newCode, normalizeCode, formatCode } from './sync.js?v=2.2.2-six';
 import { invitationLink, escapeHtml } from './profiles.js';
 
 const STATUS = {

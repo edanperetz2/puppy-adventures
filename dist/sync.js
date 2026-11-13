@@ -1,4 +1,4 @@
-import { finishSession, freshProgress, sanitizeProgress } from './engine.js';
+import { finishSession, freshProgress, sanitizeProgress } from './engine.js?v=2.2.2-six';
 import { STICKERS, MISSION_IDS } from './content.js';
 import { recordLetters, pendingLetterPractice } from './letter-progress.js';
 import { recordClockLesson } from './clock-learning.js';
@@ -140,13 +140,13 @@ export class SharedAlbum {
     return this.progress;
   }
 
-  complete(mission, assisted, letterRound = null, roundId = null) {
+  complete(mission, assisted, letterRound = null, roundId = null, questionCount) {
     if (!this.linked) throw new Error('not_linked');
     this.state.completedIds ||= [];
     if (roundId && this.state.completedIds.includes(roundId)) return { progress: this.progress, sticker: null };
     if (roundId) this.state.completedIds = [...this.state.completedIds, roundId].slice(-10000);
     const before = this.progress;
-    this.state.own = finishSession(this.state.own, mission, assisted, letterRound).progress;
+    this.state.own = finishSession(this.state.own, mission, assisted, letterRound, questionCount).progress;
     this.status = 'pending';
     try { this.persist(); } catch { this.status = 'storage-error'; }
     const progress = this.progress;

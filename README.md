@@ -1,8 +1,12 @@
 # חבורת ההרפתקאות · Puppy Adventures
 
-A gentle learning game for phones, tablets and computers. Original illustrated puppies guide ten-question adventures in Hebrew reading, spoken English, counting, addition, reading an analog clock, and letter recognition and writing. A separate character game practices reading the names of Rubble & Crew. Writing includes English capitals and lowercase, and Hebrew print and handwriting. Each scored adventure has three warm-up steps, four practice steps and three final challenges, within the parent's chosen difficulty bounds. Hebrew uses vowel marks by default. The default spoken-English games require no reading; an optional later path introduces first sounds and word reading.
+A gentle learning game for phones, tablets and computers. Original illustrated puppies guide six-question adventures in Hebrew reading, spoken English, counting, addition, reading an analog clock and letter recognition. A separate character game practices reading the names of Rubble & Crew and PAW Patrol. Writing includes English capitals and lowercase, and Hebrew print and handwriting. New rounds build from warm-ups to challenges and award one sticker after six questions. Hebrew uses vowel marks by default. The default spoken-English games require no reading. An optional later path introduces first sounds and word reading.
 
 **Play:** [puppy-adventures.vercel.app](https://puppy-adventures.vercel.app)
+
+## Version 2.2.2 · Six-question adventures
+
+Stories keep their opening and ending, with a choice of middle pages across replays. Mixed reading visits all ten levels across rounds. The clock school has ten lessons with up to six practice exercises each. Saved ten-question rounds can still be finished from where they paused, and the shared album keeps the question totals from both lengths.
 
 ## Version 2.2.0 · Personal Ava greetings and clearer subtraction
 

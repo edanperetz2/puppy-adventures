@@ -1,5 +1,6 @@
 import { clockTime } from './clock.js';
 import { shuffle } from './answer-order.js';
+import { LEGACY_SESSION_LENGTH, SESSION_LENGTH } from './adventure.js?v=2.2.2-six';
 
 export const CLOCK_LESSON_COUNT = 10;
 export const sanitizeClockLessons = value => Number.isInteger(value) && value >= 0 && value < 1024 ? value : 0;
@@ -60,9 +61,8 @@ for(const [index,minute,oldHours] of [[5,30,[3,5]],[6,15,[2,6]],[7,45,[2,11]]]) 
 CLOCK_LESSONS[8].tasks.push(...[11,12,13,14,16,17,18,19,21,22,23,24,26,27,28,29,31,33,36,38,41,43,46,48,51,53,57,59].map((minute,i)=>task(i%12+1,minute,i%12+1,Math.max(0,minute-5))));
 CLOCK_LESSONS[9].tasks.push(...[23,24,26,27,28,29,31,32,34,36,37,38,41,43,46,48,51,56,59].map((minute,i)=>task(i%12+1,minute,(i+3)%12+1,15)));
 
-// The bank grows, not the length of a sitting. Keep the original teaching
-// examples, then draw enough fresh practice to stay at ten steps or fewer.
-export function clockLessonTasks(index,seed=1,shufflePractice=false) {
+// A saved lesson keeps the examples selected by its original seed and length.
+export function clockLessonTasks(index,seed=1,shufflePractice=false,length=SESSION_LENGTH) {
   const bank=CLOCK_LESSONS[index].tasks,first=originalTaskCounts[index];
   let n=(seed+index*65537)>>>0;
   function draw() {
@@ -72,9 +72,9 @@ export function clockLessonTasks(index,seed=1,shufflePractice=false) {
     return (t^(t>>>14))>>>0;
   }
   // These lessons practice the same skill at different hours or numerals.
-  if (shufflePractice && [1, 2, 5, 6, 7].includes(index)) return shuffle(bank, () => draw() / 0x100000000).slice(0, 10);
+  if (shufflePractice && [1, 2, 5, 6, 7].includes(index)) return shuffle(bank, () => draw() / 0x100000000).slice(0, length);
   const extras=bank.slice(first).map((value,order)=>({value,order,tie:draw()}));
-  const chosen=extras.sort((a,b)=>a.tie-b.tie).slice(0,Math.max(0,10-first)).sort((a,b)=>a.order-b.order).map(p=>p.value);
+  const chosen=extras.sort((a,b)=>a.tie-b.tie).slice(0,Math.max(0,length-first)).sort((a,b)=>a.order-b.order).map(p=>p.value);
   return [...bank.slice(0,first),...chosen];
 }
 
@@ -99,8 +99,9 @@ export function sanitizeClockPosition(value) {
   const lesson = Number.isInteger(value?.lesson) && value.lesson >= 0 && value.lesson < 10 ? value.lesson : 0;
   const seed=Number.isInteger(value?.seed)&&value.seed>0&&value.seed<=0xffffffff?value.seed:0;
   const shufflePractice=Boolean(seed)&&value?.shufflePractice===true;
-  const tasks=seed?clockLessonTasks(lesson,seed,shufflePractice):CLOCK_LESSONS[lesson].tasks;
+  const length = seed && value?.length === SESSION_LENGTH ? SESSION_LENGTH : LEGACY_SESSION_LENGTH;
+  const tasks=seed?clockLessonTasks(lesson,seed,shufflePractice,length):CLOCK_LESSONS[lesson].tasks;
   const index = Number.isInteger(value?.index) && value.index >= 0 && value.index < tasks.length ? value.index : 0;
   const total = Number.isInteger(value?.total) && value.total >= 0 && value.total < 720 ? value.total : tasks[index].start;
-  return { lesson, index, total,...(seed?{seed}:{}),...(shufflePractice?{shufflePractice}:{}) };
+  return { lesson, index, total,...(seed?{seed}:{}),...(shufflePractice?{shufflePractice}:{}),...(length === SESSION_LENGTH ? {length} : {}) };
 }

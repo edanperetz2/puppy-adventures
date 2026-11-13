@@ -1,6 +1,6 @@
 import { ADVANCED_WORDS } from './reading-advanced.js';
 import { VOCABULARY_WORDS } from './vocabulary.js';
-import { MAX_ASSISTED_TO_ADVANCE } from './adventure.js';
+import { MAX_ASSISTED_TO_ADVANCE } from './adventure.js?v=2.2.2-six';
 import { EXPANDED_READING_WORDS } from './reading-expansion.js';
 import { SUPPLEMENTAL_LETTER_WORDS } from './word-practice-expansion.js';
 import { PICTURE_PLACE_PASSAGES } from './reading-picture-places.js';
@@ -86,6 +86,17 @@ export function readingTargets(pool, recent, count, rng = Math.random) {
   const queue = [...newWords, ...order.map(id => pool.find(word => word.id === id))].slice(0, count);
   for (let i = queue.length - 1; i > 0; i--) { const n = Math.floor(rng() * (i + 1)); [queue[i], queue[n]] = [queue[n], queue[i]]; }
   return Array.from({ length: count }, (_, i) => queue[i % queue.length]);
+}
+
+export function mixedReadingTargets(pool, recent = [], rng = Math.random) {
+  if (!Array.isArray(recent)) recent = [];
+  const levels = new Map(pool.map(word => [word.id, word.level]));
+  const lastPlayed = new Map(recent.map((id, index) => [levels.get(id), index]));
+  const bands = [[1, 2], [3, 4], [5], [6, 7], [8, 9], [10]];
+  return bands.flatMap(band => {
+    const [level] = band.sort((a, b) => (lastPlayed.get(a) ?? -1) - (lastPlayed.get(b) ?? -1));
+    return readingTargets(pool.filter(word => word.level === level), recent, 1, rng);
+  });
 }
 
 export function sanitizeReadingPractice(input) {

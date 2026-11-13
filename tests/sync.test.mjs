@@ -128,17 +128,17 @@ test('A late throttled response from a disconnected album cannot delay a differe
   assert.equal(album.progress.stickers.length, 0); assert.equal(album.status, 'synced');
 });
 
-test('A character adventure earns one shared sticker and ten Hebrew answers, including offline reopening on another device', async () => {
+test('A character adventure adds one shared sticker and six Hebrew answers across offline reopening', async () => {
   const api = server(), code = newCode(), saved = storage();
   const safari = new SharedAlbum({ config, storage: storage(), fetcher: api.fetcher });
   let tablet = new SharedAlbum({ config, storage: saved, fetcher: api.fetcher });
   await safari.link(code, legacyProgress(26), { create: true }); await tablet.link(code, freshProgress());
   api.online(false); tablet.complete('characters', 2); await tablet.flush();
   tablet = new SharedAlbum({ config, storage: saved, fetcher: api.fetcher });
-  assert.equal(tablet.progress.stickers.length, 27); assert.equal(tablet.progress.stars, 166);
+  assert.equal(tablet.progress.stickers.length, 27); assert.equal(tablet.progress.stars, 162);
   api.online(true); await tablet.flush(); await safari.flush(); await tablet.flush();
   assert.equal(safari.progress.sessions, 27); assert.equal(safari.progress.stickers.length, 27);
-  assert.equal(safari.progress.skills.hebrew.correct, 166); assert.equal(safari.progress.skills.hebrew.assisted, 2);
+  assert.equal(safari.progress.skills.hebrew.correct, 162); assert.equal(safari.progress.skills.hebrew.assisted, 2);
   assert.equal(safari.progress.missions.characters, undefined, 'Older clients need only the existing Hebrew subject');
   await tablet.flush(); await safari.flush(); assert.equal(safari.progress.sessions, 27);
 });
@@ -190,13 +190,13 @@ test('A Safari album with 26 stickers pairs to an empty Home Screen app and surv
   await home.flush(); await safari.flush();
   assert.equal(home.progress.stickers.length, 27);
   assert.equal(safari.progress.stickers.length, 27);
-  assert.equal(safari.progress.stars, 166, 'The existing 26 six-step rounds keep their original 156 answers');
+  assert.equal(safari.progress.stars, 162, 'The existing 26 rounds contribute their original 156 answers');
   assert.equal(safari.progress.skills.hebrew.correct, 156);
-  assert.equal(safari.progress.skills.math.correct, 10);
+  assert.equal(safari.progress.skills.math.correct, 6);
   await home.flush(); await safari.flush();
   assert.equal(home.progress.sessions, 27);
   home = new SharedAlbum({ config, storage: homeStore, fetcher: api.fetcher });
-  assert.equal(home.progress.stars, 166);
+  assert.equal(home.progress.stars, 162);
   assert.equal(home.progress.stickers.length, 27);
 });
 
@@ -264,7 +264,7 @@ test('Writing done during an in-flight upload is retained and concurrent devices
   assert.equal(second.progress.stickers.length, 0);
 });
 
-test('Two ten-step completions made during one upload retain all twenty answers and two rewards', async () => {
+test('An older ten-step round and a new six-step round sync together and earn two rewards', async () => {
   const api = server(), saved = storage();
   let pause = false, release;
   const fetcher = async (...args) => {
@@ -278,19 +278,19 @@ test('Two ten-step completions made during one upload retain all twenty answers 
   await first.link(code, freshProgress(), { create: true });
   await second.link(code, freshProgress());
   pause = true;
-  first.complete('math', 1);
+  first.complete('math', 7, null, crypto.randomUUID(), 10);
   await Promise.resolve();
   first.complete('math', 2);
-  assert.equal(first.progress.stars, 20);
+  assert.equal(first.progress.stars, 16);
   assert.equal(first.progress.sessions, 2);
   assert.equal(first.progress.stickers.length, 2);
   release();
   await first.flush(); await first.flush(); await second.flush();
-  assert.equal(second.progress.skills.math.correct, 20);
-  assert.equal(second.progress.skills.math.assisted, 3);
+  assert.equal(second.progress.skills.math.correct, 16);
+  assert.equal(second.progress.skills.math.assisted, 9);
   assert.equal(second.progress.stickers.length, 2);
   const reopened = new SharedAlbum({ config, storage: saved, fetcher: api.fetcher });
-  assert.equal(reopened.progress.stars, 20);
+  assert.equal(reopened.progress.stars, 16);
   assert.equal(reopened.pending, false);
 });
 
@@ -456,7 +456,7 @@ test('Letter adventures merge with previous subjects and upload once after offli
   await second.flush(); await second.flush(); await first.flush();
   assert.equal(first.progress.sessions, 2);
   assert.equal(first.progress.missions.math, 1);
-  assert.equal(first.progress.skills.letters.correct, 10);
+  assert.equal(first.progress.skills.letters.correct, 6);
   assert.equal(first.progress.skills.letters.assisted, 2);
   assert.equal(first.progress.stickers.length, 2);
 });
@@ -479,7 +479,7 @@ test('Clock practice syncs with the original subjects and survives offline reope
   await second.flush(); await first.flush(); await second.flush();
   assert.equal(first.progress.sessions, 2);
   assert.equal(first.progress.missions.clock, 1);
-  assert.equal(first.progress.skills.clock.correct, 10);
+  assert.equal(first.progress.skills.clock.correct, 6);
   assert.equal(first.progress.skills.clock.assisted, 2);
   assert.equal(first.progress.missions.hebrew, 1);
 });

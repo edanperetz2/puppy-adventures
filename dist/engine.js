@@ -1,16 +1,16 @@
-import { choosePractice, reviewPriority } from './learning.js';
+import { choosePractice } from './learning.js';
 import { ANIMALS, COLORS, NUMBERS, STICKERS, MISSIONS, MISSION_IDS } from './content.js';
 import { CLOCK_LEVELS, clockTime, clockConceptRank } from './clock.js';
 import { LETTERS, letterGroup } from './letters.js';
-import { READING_LEVELS, readingWords, readingTargets } from './reading.js';
+import { READING_LEVELS, mixedReadingTargets, readingWords, readingTargets } from './reading.js?v=2.2.2-six';
 import { isSticker } from './stickers.js';
-import { sanitizeLetterPractice, recordLetters, suggestedLetters, recognitionTargets } from './letter-progress.js';
+import { sanitizeLetterPractice, recordLetters, recognitionTargets } from './letter-progress.js';
 import { distinctWordPictures } from './vocabulary.js';
-import { SESSION_LENGTH, adventurePhase, choiceCount } from './adventure.js';
-import { sanitizeClockLessons } from './clock-learning.js?v=2.2.1-shuffle';
-import { CHARACTER_MODES, createCharacterSession, sanitizeCharacterSelection } from './characters.js';
+import { SESSION_LENGTH, adventurePhase, choiceCount } from './adventure.js?v=2.2.2-six';
+import { sanitizeClockLessons } from './clock-learning.js?v=2.2.2-six';
+import { CHARACTER_MODES, createCharacterSession, sanitizeCharacterSelection } from './characters.js?v=2.2.2-six';
 import { answerShuffler, shuffle } from './answer-order.js';
-export { SESSION_LENGTH } from './adventure.js';
+export { SESSION_LENGTH } from './adventure.js?v=2.2.2-six';
 export { shuffle };
 
 export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', letterLanguage: 'hebrew', letterWriting: Object.freeze({ hebrew: 0, english: 0 }), letterMainWriting: Object.freeze({ hebrew: 0, english: 0 }), letterWritingForm: Object.freeze({ hebrew: 'alternate', english: 'alternate' }), characterLevel: 'friends', characterCollectionLevels: Object.freeze({ crew: 'friends', paw: 'paw-friends' }), characterMode: 'mixed', sound: true, motion: true });
@@ -47,13 +47,13 @@ function buildSession(mission, rawSettings, rng) {
     const language = Object.hasOwn(LETTERS, settings.letterLanguage) ? settings.letterLanguage : 'hebrew';
     const selected = Array.isArray(settings.letterIds) ? [...new Set(settings.letterIds)].map(id => LETTERS[language].find(letter => letter.id === id)).filter(Boolean) : [];
     const group = selected.length === 3 ? selected : Number.isInteger(settings.letterStart) ? letterGroup(language, settings.letterStart) : recognitionTargets(settings.letterPractice, language, settings.learning);
-    const targets = [...shuffle(group, rng), ...shuffle([...group, group[Math.floor(rng() * group.length)]], rng), ...shuffle(group, rng)];
-    return targets.map((letter, i) => ({ id: `letters-${i}`, type: 'letter', letter, answer: letter.id, phase: adventurePhase(i), showModel: i < 3, options: optionsFrom(group, letter, rng, i < 7 ? 2 : 3), prompt: `letter-match-${language}`, targetClip: letter.clip, hint: 'letters-recognition-hint' }));
+    const targets = [...shuffle(group, rng), ...shuffle(group, rng)];
+    return targets.map((letter, i) => ({ id: `letters-${i}`, type: 'letter', letter, answer: letter.id, phase: adventurePhase(i), showModel: i < group.length, options: optionsFrom(group, letter, rng, adventurePhase(i) === 'challenge' ? 3 : 2), prompt: `letter-match-${language}`, targetClip: letter.clip, hint: 'letters-recognition-hint' }));
   }
   if (mission === 'hebrew') {
     const pool = readingWords(settings.reading);
     const targets = settings.reading === 'all'
-      ? Object.values(READING_LEVELS).filter(stage => stage.number).sort((a, b) => a.number - b.number).flatMap(stage => readingTargets(pool.filter(word => word.level === stage.level), settings.readingRecent, 1, rng))
+      ? mixedReadingTargets(pool, settings.readingRecent, rng)
       : (settings.learning && Object.keys(settings.learning).length ? choosePractice(pool, settings.learning, word => `read:${word.id}`, SESSION_LENGTH, Date.now(), rng) : readingTargets(pool, settings.readingRecent, SESSION_LENGTH, rng)).sort(readingOrder);
     // Prefer unseen reading targets before reviewing the oldest practiced ones.
     return Array.from({ length: SESSION_LENGTH }, (_, i) => {
@@ -65,15 +65,18 @@ function buildSession(mission, rawSettings, rng) {
   if (mission === 'english') {
     const max = [10, 20].includes(settings.englishMax) ? settings.englishMax : 10;
     const select = (pool, ids) => shuffle(pool.filter(item => ids.includes(item.id)), rng);
+    const knownStarters = ['dog', 'cat', 'fish'];
     const knownAnimals=ANIMALS.filter((a,index)=>index<8||settings.learning?.[`english:single:${a.id}`]?.independent>0);
     const newAnimal=ANIMALS.find(a=>!knownAnimals.includes(a));
-    const animals = [...select(ANIMALS, ['dog', 'cat', 'fish']).slice(0, 1), ...choosePractice(knownAnimals.filter(a=>!['dog','cat','fish'].includes(a.id)),settings.learning||{},a=>`english:single:${a.id}`,2,Date.now(),rng)];
-    animals.push(newAnimal||choosePractice(knownAnimals.filter(a=>!animals.includes(a)),settings.learning||{},a=>`english:single:${a.id}`,1,Date.now(),rng)[0]);
+    const reviewAnimals = knownAnimals.filter(animal => !knownStarters.includes(animal.id));
+    const animalPool = newAnimal ? [...reviewAnimals, newAnimal] : reviewAnimals;
+    const animals = [select(ANIMALS, knownStarters)[0],
+      choosePractice(animalPool, settings.learning || {}, animal => `english:single:${animal.id}`, 1, Date.now(), rng)[0]];
     const reviewColors=COLORS.filter((c,index)=>index<7||settings.learning?.[`english:single:${c.id}`]?.independent>0);
-    const colors = [select(COLORS, ['red', 'blue', 'yellow'])[0], ...choosePractice(reviewColors.filter(c=>!['red','blue','yellow'].includes(c.id)),settings.learning||{},c=>`english:single:${c.id}`,2,Date.now(),rng)];
-    const numbers = [1 + Math.floor(rng() * 3), 4 + Math.floor(rng() * 3), 7 + Math.floor(rng() * (max - 6))];
+    const colors = [select(COLORS, ['red', 'blue', 'yellow'])[0], ...choosePractice(reviewColors.filter(c=>!['red','blue','yellow'].includes(c.id)),settings.learning||{},c=>`english:single:${c.id}`,1,Date.now(),rng)];
+    const numbers = [1 + Math.floor(rng() * 3), 4 + Math.floor(rng() * (max - 3))];
     let animal = 0, color = 0, number = 0;
-    return ['animal', 'color', 'number', 'animal', 'color', 'number', 'animal', 'animal', 'color', 'number'].map((kind, i) => {
+    return ['animal', 'color', 'number', 'animal', 'color', 'number'].map((kind, i) => {
       const n = kind === 'number' ? numbers[number++] : null;
       const target = kind === 'animal' ? animals[animal++] : kind === 'color' ? colors[color++] : { id: String(n), number: n, en: NUMBERS[n] };
       const options = kind === 'number' ? numberOptions(n, max, rng, choiceCount(i)) : optionsFrom((kind === 'animal' ? ANIMALS : COLORS).filter(other=>other.id===target.id||distinctWordPictures(target,other)), target, rng, choiceCount(i));
@@ -82,9 +85,10 @@ function buildSession(mission, rawSettings, rng) {
   }
   if (mission === 'math') {
     const max = [5, 10, 20].includes(settings.mathMax) ? settings.mathMax : 10;
-    const counts=shuffle(Array.from({length:Math.min(4,max-1)},(_,i)=>i+1),rng).slice(0,3).sort((a,b)=>a-b);
-    const first=Math.max(3,counts.at(-1));
-    const sums = Array.from({ length: SESSION_LENGTH - 3 }, (_, i) => i===6?max:Math.min(max,Math.round(first+(max-first)*(i+rng()*.7)/6)));
+    const counts = shuffle([1, 2, 3, 4], rng).slice(0, 2).sort((a, b) => a - b);
+    const first = Math.max(3, counts.at(-1));
+    const sumCount = SESSION_LENGTH - counts.length;
+    const sums = Array.from({ length: sumCount }, (_, i) => i === sumCount - 1 ? max : first + Math.floor((max - first) * (i + rng()) / (sumCount - 1)));
     const additions = [];
     for (const total of [...new Set(sums)]) {
       const count = sums.filter(n => n === total).length;
@@ -95,8 +99,8 @@ function buildSession(mission, rawSettings, rng) {
       }
     }
     return Array.from({ length: SESSION_LENGTH }, (_, i) => {
-      const add = i >= 3;
-      const { total, a, b } = add ? additions[i - 3] : { total: counts[i], a: counts[i], b: 0 };
+      const add = i >= counts.length;
+      const { total, a, b } = add ? additions[i - counts.length] : { total: counts[i], a: counts[i], b: 0 };
       const item=['apple','flower','berry','ball','star','heart'][Math.floor(rng()*6)];
       return { id: `math-${i}`, type: add ? 'add' : 'count', a, b, answer: String(total), total, phase: adventurePhase(i), item, options: numberOptions(total, max, rng, choiceCount(i)), prompt: add ? 'add' : 'count', hint: add ? 'add-hint' : 'count-hint' };
     });
@@ -104,10 +108,10 @@ function buildSession(mission, rawSettings, rng) {
   if (mission === 'clock') {
     const level = CLOCK_LEVELS[settings.clockLevel] || CLOCK_LEVELS.hours;
     const hours = shuffle(Array.from({ length: 12 }, (_, i) => i + 1), rng).slice(0, SESSION_LENGTH).sort((a, b) => a - b);
-    const sample = pool => shuffle(pool,rng).slice(0,2).sort((a,b)=>a-b);
+    const sample = pool => pool[Math.floor(rng() * pool.length)];
     const minutes = settings.clockLevel === 'minutes'
-      ? [0,30,15,45,...sample([5,10,20,25,35,40,50,55]),...sample([1,2,3,4,6,7,8,9]),...sample(Array.from({length:49},(_,i)=>i+11).filter(n=>n%5))]
-      : level.minutes.length === 1 ? Array(SESSION_LENGTH).fill(0) : level.minutes.length === 2 ? [0, 0, 0, 0, 30, 30, 30, 30, 30, 30] : [0, 0, 30, 30, 15, 15, 15, 45, 45, 45];
+      ? [0, 30, 15, 45, sample([5, 10, 20, 25, 35, 40, 50, 55]), sample(level.minutes.filter(n => n % 5))]
+      : level.minutes.length === 1 ? Array(SESSION_LENGTH).fill(0) : level.minutes.length === 2 ? [0, 0, 0, 30, 30, 30] : [0, 0, 30, 15, 15, 45];
     const usedTimes=new Set();
     return hours.map((sampledHour, i) => {
       const hour=settings.learning&&Object.keys(settings.learning).length?choosePractice(Array.from({length:12},(_,h)=>h+1).filter(h=>!usedTimes.has(`${h}:${minutes[i]}`)),settings.learning,h=>`clock:${h}:${minutes[i]}`,1,Date.now(),rng)[0]:sampledHour;
@@ -127,14 +131,14 @@ export function freshProgress() {
   return { version: 1, stars: 0, sessions: 0, stickers: [], missions: Object.fromEntries(MISSION_IDS.map(id => [id, 0])), skills: Object.fromEntries(MISSION_IDS.map(id => [id, { correct: 0, assisted: 0 }])), letterPractice: sanitizeLetterPractice(null), clockLessons: 0 };
 }
 
-export function finishSession(progress, mission, assisted = 0, letterRound = null) {
+export function finishSession(progress, mission, assisted = 0, letterRound = null, questionCount = SESSION_LENGTH) {
   const next = sanitizeProgress(progress);
   const skill = Object.hasOwn(MISSIONS, mission) ? MISSIONS[mission].progressMission || mission : null;
   if (!MISSION_IDS.includes(skill)) throw new Error(`Unknown mission: ${mission}`);
-  next.stars += SESSION_LENGTH;
+  next.stars += questionCount;
   next.sessions += 1;
   next.missions[skill] += 1;
-  next.skills[skill].correct += SESSION_LENGTH;
+  next.skills[skill].correct += questionCount;
   next.skills[skill].assisted += assisted;
   if (mission === 'letters' && letterRound) next.letterPractice = recordLetters(next.letterPractice, letterRound.language, 'recognition', letterRound.ids);
   const sticker = STICKERS.find(id => !next.stickers.includes(id));

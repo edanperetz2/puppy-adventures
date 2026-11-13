@@ -92,12 +92,12 @@ test('Supported English can reach the full bank while introducing only one fresh
 test('Object work and classic arithmetic cover varied cases and keep parent caps and ascending difficulty',()=>{
   assert.equal(objectCases('bonds',20).length,190);assert.equal(objectCases('tens',20).length,91);
   const seen={quantity:new Set(),bonds:new Set(),tens:new Set(),takeaway:new Set()},additions=new Set(),objects=new Set();
-  for(let visit=0;visit<300;visit++){
+  for(let visit=0;visit<500;visit++){
     const math=createSession('math',{mathMax:20},seeded(visit));
     for(const q of math){objects.add(q.item);if(q.type==='add')additions.add(`${q.a}:${q.b}`);}
     for(const kind of Object.keys(seen)){
       const plan=newJourney('objects',kind,{}, {mathMax:20,rng:seeded(visit)}),questions=journeyQuestions(plan);
-      for(let i=0;i<10;i++){const q=questions[i];seen[kind].add(`${q.total}:${q.known}`);assert.ok(q.total<= (kind==='tens'?100:kind==='takeaway'?8:20));assert.ok(q.known>=0&&q.known<=q.total);if(i)assert.ok(q.total>=questions[i-1].total);}
+      for(let i=0;i<questions.length;i++){const q=questions[i];seen[kind].add(`${q.total}:${q.known}`);assert.ok(q.total<= (kind==='tens'?100:kind==='takeaway'?8:20));assert.ok(q.known>=0&&q.known<=q.total);if(i)assert.ok(q.total>=questions[i-1].total);}
       assert.deepEqual(journeyQuestions(cleanJourney(JSON.parse(JSON.stringify(plan)))),questions);
     }
   }
@@ -108,10 +108,10 @@ test('Object work and classic arithmetic cover varied cases and keep parent caps
 test('Clock chapters draw from larger banks but remain short, reproducible, and resumable',()=>{
   const seen=CLOCK_LESSONS.map(()=>new Set());
   for(let visit=1;visit<=400;visit++)for(let lesson=0;lesson<10;lesson++){
-    const tasks=clockLessonTasks(lesson,visit);assert.ok(tasks.length<=10);assert.ok(tasks.length>=baseline.clockTasks[lesson].length*2);
+    const tasks=clockLessonTasks(lesson,visit);assert.equal(tasks.length,6);
     assert.deepEqual(tasks,clockLessonTasks(lesson,visit));
     tasks.forEach(task=>seen[lesson].add(JSON.stringify(task)));
-    const position={lesson,index:tasks.length-1,total:tasks.at(-1).start,seed:visit};
+    const position={lesson,index:tasks.length-1,total:tasks.at(-1).start,seed:visit,length:6};
     assert.deepEqual(sanitizeClockPosition(position),position);
   }
   for(let lesson=0;lesson<10;lesson++)assert.equal(seen[lesson].size,new Set(CLOCK_LESSONS[lesson].tasks.map(t=>JSON.stringify(t))).size);
@@ -120,7 +120,7 @@ test('Clock chapters draw from larger banks but remain short, reproducible, and 
 test('Character challenges rotate through the full set of distractor pairs',()=>{
   for(const level of ['family','paw-all']){
     const cases=new Map();
-    for(let visit=0;visit<600;visit++)for(const q of createCharacterSession({characterLevel:level,characterPractice:{completed:{[level]:visit}}},seeded(visit)).slice(7)){
+    for(let visit=0;visit<600;visit++)for(const q of createCharacterSession({characterLevel:level,characterPractice:{completed:{[level]:visit}}},seeded(visit)).filter(q=>q.phase==='challenge')){
       const key=q.character.id,choices=q.options.filter(c=>c.id!==key).map(c=>c.id).sort().join(':');
       if(!cases.has(key))cases.set(key,new Set());cases.get(key).add(choices);
     }

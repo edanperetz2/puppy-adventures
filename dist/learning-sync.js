@@ -1,5 +1,5 @@
 import { LEARNING_KEY, applyObservation, cleanItems, cleanPark, mergePark } from './learning.js';
-import { normalizeCode } from './sync.js?v=2.1.3-sync';
+import { normalizeCode } from './sync.js?v=2.2.2-six';
 import { SyncRetry, rateLimitError } from './sync-retry.js';
 
 const uuid = () => globalThis.crypto.randomUUID();

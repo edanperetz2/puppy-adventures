@@ -47,7 +47,7 @@ test('A practiced sentence bank keeps its history and offers the new passages be
   assert.equal(seen.size,360);
   for(let seed=0;seed<50;seed++){
     const round=createSession('hebrew',{...DEFAULT_SETTINGS,reading:'sentences',readingRecent:saved.recent.sentences},rng(seed+1));
-    assert.equal(round.length,10);
+    assert.equal(round.length,6);
     assert.ok(round.every(q=>ids.has(q.answer)&&q.options.every(o=>o.family===q.word.family)));
     for(const q of round)assert.equal(q.options.filter(o=>o.id===q.answer).length,1);
     for(let i=1;i<round.length;i++)assert.ok((round[i].word.scene.count||0)>=(round[i-1].word.scene.count||0));

@@ -1,6 +1,7 @@
 import { art, pup, uiIcon } from './art.js';
 import { WORDS, ANIMALS, COLORS } from './content.js?v=2.2.0-voices';
-import { JOURNEYS, PHONICS, STORY_RELATIONS, journeyQuestions, soundExample } from './journey.js?v=2.2.1-shuffle';
+import { JOURNEYS, PHONICS, STORY_RELATIONS, journeyQuestions, soundExample } from './journey.js?v=2.2.2-six';
+import { adventurePhase } from './adventure.js?v=2.2.2-six';
 import { escapeHtml as esc } from './profiles.js?v=2.2.0-voices';
 import { chunkClip, GIVING_CLIPS } from './journey-audio.js?v=2.2.0-voices';
 import { STORIES } from './journey-content.js';
@@ -37,9 +38,9 @@ export function mountDrops(root, selector, targetSelector, onDrop, signal, onDra
   root.addEventListener('pointercancel',clear,{signal});signal.addEventListener('abort',clear,{once:true});
 }
 
-function storyMemory(story,index,resolved){
+function storyMemory(questions,index,resolved){
   const state={props:[],placements:{},groups:{}};
-  for(const p of story.pages.slice(0,index+(resolved?1:0))){
+  for(const { page: p } of questions.slice(0,index+(resolved?1:0))){
     if(p.task==='place'){state.placements[p.target]=p.relation;delete state.groups[p.target];}
     else if(p.task==='count')state.groups[p.target]=p.count;
     else if(['read','choose','english'].includes(p.task)&&!['table','tree','red','blue'].includes(p.target)){
@@ -59,6 +60,8 @@ function storyProps(memory,page){
 export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,onComplete,onHome}) {
   const events=new AbortController(), questions=journeyQuestions(plan);let message='',celebrating=false;
   const q=()=>questions[plan.index],s=()=>plan.state;
+  const phase = () => adventurePhase(plan.index, questions.length);
+  const atEnd = () => plan.index === questions.length - 1;
   const say=(keys,explicit=false)=>speak(keys,explicit);
   function persist(){plan.at=Date.now();onSave(plan);}
   function help(){if(!plan.helped.includes(plan.index))plan.helped.push(plan.index);persist();}
@@ -66,7 +69,7 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
     const task = q();
     if (task.kind === 'story' && task.page.english) say([task.prompt, `en-${task.page.english}`]);
     onObservation({ item: task.key, domain: JOURNEYS[plan.mode].domain, exposure: true }, 'seen');
-    if (task.model || (task.kind === 'story' && plan.index < 3)) help();
+    if (task.model || (task.kind === 'story' && phase() === 'warmup')) help();
     plan.state = { chosen: [], tokens: [], quantity: 0, attempted: [], ...plan.state };
     if (task.tiles) {
       plan.state.chosen = [...new Set(plan.state.chosen.filter(id => task.tiles.some(tile => tile.id === id)))].slice(0, task.pieces.length);
@@ -84,7 +87,7 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
       clips.push(toGive > 0 ? GIVING_CLIPS[toGive] : 'journey-apples-left');
     } else if (task.kind === 'story') {
       help();
-      clips.push(`journey-story-${task.story.id}-${plan.index}`, task.prompt);
+      clips.push(task.prompt.replace(/-prompt$/, ''), task.prompt);
       if (task.page.english) clips.push(`en-${task.page.english}`);
     } else {
       clips.push(task.prompt, ...(task.extraClips || []));
@@ -114,7 +117,7 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
   function storyView(task){
     const p = task.page, done = s().resolved;
     const labels = { on: 'עַל הַשֻּׁלְחָן', under: 'מִתַּחַת לַשֻּׁלְחָן', beside: 'לְיַד הַשֻּׁלְחָן' };
-    const memory = storyMemory(task.story, plan.index, done);
+    const memory = storyMemory(questions, plan.index, done);
     const dropZones = p.task === 'place' && !done
       ? `<div class="story-drop-zones" aria-hidden="true" hidden>${STORY_RELATIONS.map(relation => `<span data-drop-place="${relation}" class="story-drop ${relation}">${labels[relation]}</span>`).join('')}</div>`
       : '';
@@ -171,10 +174,10 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
   }
   function render(){
     const task=q(),done=s().resolved;
-    root.innerHTML=`<div class="journey-top"><button class="text-button" data-j="home">${uiIcon('home')} הַהַרְפַּתְקָה נִשְׁמֶרֶת</button><span>צַעַד ${plan.index+1} מִתּוֹךְ 10</span></div><div class="step-track">${questions.map((_,i)=>`<span class="step-dot ${i<plan.index?'done':i===plan.index?'current':''}">${i<plan.index?'✓':i+1}</span>`).join('')}</div>
-      <section class="journey-board ${done?'journey-done':''} ${celebrating?'journey-celebrate':''}"><div class="question-heading"><div><span class="section-kicker">${plan.index<3?'מַתְחִילִים יַחַד':plan.index<7?'מְתַרְגְּלִים בְּנַחַת':'עוֹד צַעַד קָטָן'}</span><h1 tabindex="-1">${plan.mode==='stories'?task.story.title:JOURNEYS[plan.mode].title}</h1></div><button data-j="replay" class="circle-button" aria-label="שמיעת ההוראות">${uiIcon('sound')}</button></div>
+    root.innerHTML=`<div class="journey-top"><button class="text-button" data-j="home">${uiIcon('home')} הַהַרְפַּתְקָה נִשְׁמֶרֶת</button><span>צַעַד ${plan.index+1} מִתּוֹךְ ${questions.length}</span></div><div class="step-track">${questions.map((_,i)=>`<span class="step-dot ${i<plan.index?'done':i===plan.index?'current':''}">${i<plan.index?'✓':i+1}</span>`).join('')}</div>
+      <section class="journey-board ${done?'journey-done':''} ${celebrating?'journey-celebrate':''}"><div class="question-heading"><div><span class="section-kicker">${phase()==='warmup'?'מַתְחִילִים יַחַד':phase()==='practice'?'מְתַרְגְּלִים בְּנַחַת':'עוֹד צַעַד קָטָן'}</span><h1 tabindex="-1">${plan.mode==='stories'?task.story.title:JOURNEYS[plan.mode].title}</h1></div><button data-j="replay" class="circle-button" aria-label="שמיעת ההוראות">${uiIcon('sound')}</button></div>
       ${plan.mode==='workshop'?wordView(task):plan.mode==='stories'?storyView(task):plan.mode==='objects'?objectsView(task):englishView(task)}
-      <div class="journey-feedback" role="status" aria-live="polite">${message|| (done?'כָּל הַכָּבוֹד! אֶפְשָׁר לְהַמְשִׁיךְ.':'אֶפְשָׁר לְנַסּוֹת וּלְבַקֵּשׁ עֶזְרָה. אֲנַחְנוּ כָּאן בְּיַחַד ♡')}</div><div class="journey-controls">${done?`<button class="primary-button" data-j="next">${plan.index===9?'לַמַּדְבֵּקָה שֶׁלִּי':'מַמְשִׁיכִים'} ${uiIcon('arrow')}</button>`:`<button class="hint-button" data-j="hint">${uiIcon('hint')} רֶמֶז קָטָן</button>`}</div></section>`;
+      <div class="journey-feedback" role="status" aria-live="polite">${message|| (done?'כָּל הַכָּבוֹד! אֶפְשָׁר לְהַמְשִׁיךְ.':'אֶפְשָׁר לְנַסּוֹת וּלְבַקֵּשׁ עֶזְרָה. אֲנַחְנוּ כָּאן בְּיַחַד ♡')}</div><div class="journey-controls">${done?`<button class="primary-button" data-j="next">${atEnd()?'לַמַּדְבֵּקָה שֶׁלִּי':'מַמְשִׁיכִים'} ${uiIcon('arrow')}</button>`:`<button class="hint-button" data-j="hint">${uiIcon('hint')} רֶמֶז קָטָן</button>`}</div></section>`;
   }
   function tile(id){if(s().resolved)return;const task=q();if(s().chosen.includes(id))return;s().chosen.push(id);persist();if(task.kind==='chunks')say(chunkClip(task.word.id,id));
     if(task.kind==='missing'){const value=task.tiles.find(t=>t.id===id).text;if(value===task.pieces[task.missing])resolved();else{s().chosen=[];retry();}}else render();}
@@ -189,7 +192,7 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
     if(action==='pair-color'){say(`en-${task.target.color}`,true);return;}
     if(action==='pair-object'){say(`journey-en-${task.target.object}`,true);return;}
     if(action==='phoneme'){say(soundExample(b.dataset.phoneme),true);return;}
-    if(action==='next'&&s().resolved){if(plan.index===9){onComplete(plan);return;}plan.index++;plan.state={};message='';celebrating=false;prepare();render();window.scrollTo({top:0,behavior:'auto'});root.querySelector('h1').focus({preventScroll:true});if(q().kind!=='story'||plan.index<3)replay();return;}
+    if(action==='next'&&s().resolved){if(atEnd()){onComplete(plan);return;}plan.index++;plan.state={};message='';celebrating=false;prepare();render();window.scrollTo({top:0,behavior:'auto'});root.querySelector('h1').focus({preventScroll:true});if(q().kind!=='story'||phase()==='warmup')replay();return;}
     if(s().resolved)return;
     if (action === 'hint' && task.operation === 'takeaway') {
       help();

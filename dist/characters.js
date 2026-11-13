@@ -1,4 +1,4 @@
-import { SESSION_LENGTH, MAX_ASSISTED_TO_ADVANCE, adventurePhase, choiceCount } from './adventure.js';
+import { SESSION_LENGTH, isSessionLength, MAX_ASSISTED_TO_ADVANCE, adventurePhase, choiceCount } from './adventure.js?v=2.2.2-six';
 
 // Portrait windows into the unmodified, credited character artwork. These are
 // display crops, not newly drawn versions of the familiar characters.
@@ -79,7 +79,7 @@ export function sanitizeCharacterPractice(input) {
 
 export function finishCharacterPractice(input, level, questions) {
   const result = sanitizeCharacterPractice(input);
-  if (!Object.hasOwn(CHARACTER_LEVELS, level) || !Array.isArray(questions) || questions.length !== SESSION_LENGTH) return result;
+  if (!Object.hasOwn(CHARACTER_LEVELS, level) || !Array.isArray(questions) || !isSessionLength(questions.length)) return result;
   if (!questions.every(q => q.type === 'character' && CHARACTER_DIRECTIONS.includes(q.direction) && characterPool(level).some(c => c.id === q.character?.id))) return result;
   result.completed[level] = Math.min(1000000, result.completed[level] + 1);
   for (const q of questions) result.seen[q.direction][q.character.id] = Math.min(1000000, result.seen[q.direction][q.character.id] + 1);
@@ -112,8 +112,8 @@ export function createCharacterSession(settings = {}, rng = Math.random) {
   const collection = characterCollection(level), tierOf = character => characterTier(character, collection);
   let last = null;
   return Array.from({ length: SESSION_LENGTH }, (_, index) => {
-    // Each collection introduces three friends, then expands its own cast.
-    const tier = Math.min(levelTier, index < 3 ? 1 : index < 7 ? 2 : 3);
+    const phase = adventurePhase(index);
+    const tier = Math.min(levelTier, phase === 'warmup' ? 1 : phase === 'practice' ? 2 : 3);
     const direction = mode === 'mixed' ? CHARACTER_DIRECTIONS[index % 2] : mode;
     const candidates = pool.filter(c => tierOf(c) === tier && c.id !== last);
     const available = candidates.length ? candidates : pool.filter(c => tierOf(c) === tier);
@@ -121,7 +121,7 @@ export function createCharacterSession(settings = {}, rng = Math.random) {
     const character = ordered[0];
     total[character.id]++; recent[direction][character.id]++; last = character.id;
     const alternatives = shuffle(pool.filter(c => c.id !== character.id && tierOf(c) <= tier), rng);
-    if (index >= 7) {
+    if (phase === 'challenge') {
       alternatives.sort((a, b) => similarity(character, b) - similarity(character, a));
       // Cycle the full set of distractor pairs. A hard round used to always
       // pick the same two similar names, even after many completed visits.
@@ -130,7 +130,7 @@ export function createCharacterSession(settings = {}, rng = Math.random) {
       alternatives.splice(0,alternatives.length,...pairs[offset]);
     }
     const options = shuffle([character, ...alternatives.slice(0, choiceCount(index) - 1)], rng);
-    return { id: `characters-${index}`, type: 'character', collection, direction, character, answer: character.id, options, phase: adventurePhase(index), tier,
+    return { id: `characters-${index}`, type: 'character', collection, direction, character, answer: character.id, options, phase, tier,
       prompt: `characters-${direction}`, hint: 'characters-hint' };
   });
 }

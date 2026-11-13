@@ -15,7 +15,7 @@ test('Recognition introduces every Hebrew and English letter before reviewing pr
       assert.equal(group.filter(letter => !encountered.has(letter.id)).length, Math.min(3, remaining));
       const questions = createSession('letters', { letterLanguage: language, letterPractice: progress.letterPractice });
       assert.deepEqual(new Set(questions.map(q => q.answer)), new Set(group.map(letter => letter.id)));
-      assert.deepEqual(group.map(letter => questions.filter(q => q.answer === letter.id).length).sort(), [3, 3, 4]);
+      assert.deepEqual(group.map(letter => questions.filter(q => q.answer === letter.id).length).sort(), [2, 2, 2]);
       progress = finishSession(progress, 'letters', 1, { language, ids: questions.map(q => q.answer) }).progress;
       for (const letter of group) encountered.add(letter.id);
       assert.equal(practicedLetterCount(progress.letterPractice, language, 'recognition'), encountered.size);

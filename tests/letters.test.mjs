@@ -79,17 +79,17 @@ test('Long writing loops have time to unfold and separate strokes have a visible
   assert.ok(PEN_LIFT_MS >= 500);
 });
 
-test('Every starting letter gets ten balanced questions that move from a shown model to recall', () => {
+test('Every starting letter gets six questions that move from a shown model to recall', () => {
   for (const language of Object.keys(LETTERS)) for (let start = 0; start < LETTERS[language].length; start++) for (let seed = 0; seed < 12; seed++) {
     const group = letterGroup(language, start);
     const questions = createSession('letters', { ...DEFAULT_SETTINGS, letterLanguage: language, letterStart: start }, seeded(seed));
-    assert.equal(questions.length, 10);
+    assert.equal(questions.length, 6);
     assert.deepEqual(new Set(questions.slice(0, 3).map(q => q.answer)), new Set(group.map(letter => letter.id)));
-    assert.deepEqual(group.map(letter => questions.filter(q => q.answer === letter.id).length).sort(), [3, 3, 4]);
+    assert.deepEqual(group.map(letter => questions.filter(q => q.answer === letter.id).length).sort(), [2, 2, 2]);
     for (const [index, q] of questions.entries()) {
       assert.equal(q.type, 'letter');
       assert.equal(q.letter.language, language);
-      assert.equal(new Set(q.options.map(o => o.id)).size, index < 7 ? 2 : 3);
+      assert.equal(new Set(q.options.map(o => o.id)).size, index < 4 ? 2 : 3);
       assert.equal(q.showModel, index < 3);
       assert.equal(q.options.filter(o => o.id === q.answer).length, 1);
       assert.equal(q.prompt, `letter-match-${language}`);

@@ -56,28 +56,33 @@ test('Reviewed identities prevent the Mix/Wheeler swap, and PAW portraits retain
   }
 });
 
-test('Every character level and direction has ten unambiguous steps, expanding the cast and choices in order', () => {
-  for (const characterLevel of Object.keys(CHARACTER_LEVELS)) for (const characterMode of Object.keys(CHARACTER_MODES)) for (let seed = 0; seed < 100; seed++) {
-    const questions = createSession('characters', { characterLevel, characterMode }, seeded(seed));
-    assert.equal(questions.length, 10);
+test('Every character level has six unambiguous steps and covers the full cast across replays', () => {
+  for (const characterLevel of Object.keys(CHARACTER_LEVELS)) for (const characterMode of Object.keys(CHARACTER_MODES)) {
     const cast = characterPool(characterLevel);
-    assert.deepEqual(new Set(questions.map(q => q.character.id)), new Set(cast.map(c => c.id)), 'Every selected friend is a target, not only a distractor');
-    let previousTier = 0;
-    for (const [index, q] of questions.entries()) {
-      assert.equal(q.type, 'character');
-      assert.equal(q.options.length, index < 3 ? 2 : 3);
-      assert.equal(new Set(q.options.map(c => c.id)).size, q.options.length);
-      assert.equal(q.options.filter(c => c.id === q.answer).length, 1);
-      assert.equal(q.answer, q.character.id);
-      assert.ok(q.tier >= previousTier); previousTier = q.tier;
-      assert.equal(q.collection, characterCollection(characterLevel));
-      assert.ok(q.options.every(c => cast.includes(c) && characterTier(c, q.collection) <= q.tier));
-      assert.equal(q.phase, index < 3 ? 'warmup' : index < 7 ? 'practice' : 'challenge');
-      if (index) assert.notEqual(q.character.id, questions[index - 1].character.id);
-      assert.ok(CLIPS[q.prompt]); assert.ok(CLIPS[q.hint]);
-      assert.equal(q.targetClip, undefined, 'The answer name must not be automatically read before a hint or success');
-      assert.equal(q.direction, characterMode === 'mixed' ? index % 2 ? 'name-picture' : 'picture-name' : characterMode);
+    const castIds = new Set(cast.map(c => c.id));
+    const seen = new Set();
+    for (let seed = 0; seed < 100; seed++) {
+      const questions = createSession('characters', { characterLevel, characterMode }, seeded(seed));
+      assert.equal(questions.length, 6);
+      let previousTier = 0;
+      for (const [index, q] of questions.entries()) {
+        assert.equal(q.type, 'character');
+        seen.add(q.character.id);
+        assert.equal(q.options.length, index < 2 ? 2 : 3);
+        assert.equal(new Set(q.options.map(c => c.id)).size, q.options.length);
+        assert.equal(q.options.filter(c => c.id === q.answer).length, 1);
+        assert.equal(q.answer, q.character.id);
+        assert.ok(q.tier >= previousTier); previousTier = q.tier;
+        assert.equal(q.collection, characterCollection(characterLevel));
+        assert.ok(q.options.every(c => castIds.has(c.id) && characterTier(c, q.collection) <= q.tier));
+        assert.equal(q.phase, index < 2 ? 'warmup' : index < 4 ? 'practice' : 'challenge');
+        if (index) assert.notEqual(q.character.id, questions[index - 1].character.id);
+        assert.ok(CLIPS[q.prompt]); assert.ok(CLIPS[q.hint]);
+        assert.equal(q.targetClip, undefined, 'The answer name must not be automatically read before a hint or success');
+        assert.equal(q.direction, characterMode === 'mixed' ? index % 2 ? 'name-picture' : 'picture-name' : characterMode);
+      }
     }
+    assert.deepEqual(seen, castIds);
   }
 });
 
@@ -128,7 +133,7 @@ test('Names count as Hebrew reading, preserving the established family protocol 
   old.clockLessons = 35; old.letterPractice.hebrew.writingMain[5] = 2;
   const result = finishSession(old, 'characters', 2).progress;
   assert.equal(result.sessions, 27); assert.equal(result.stickers.length, 27);
-  assert.equal(result.missions.hebrew, 27); assert.equal(result.skills.hebrew.correct, 166); assert.equal(result.skills.hebrew.assisted, 2);
+  assert.equal(result.missions.hebrew, 27); assert.equal(result.skills.hebrew.correct, 162); assert.equal(result.skills.hebrew.assisted, 2);
   assert.equal(result.clockLessons, 35); assert.equal(result.letterPractice.hebrew.writingMain[5], 2);
   assert.equal(old.sessions, 26);
   const contribution = compactContribution(result);
@@ -144,10 +149,10 @@ test('Saved character choices and full-round practice survive reopening without 
   assert.equal(sanitizeSettings({ characterLevel: '__proto__', characterMode: 'invalid' }).characterLevel, 'friends');
   assert.equal(sanitizeSettings({ characterMode: 'invalid' }).characterMode, 'mixed');
   const questions = createCharacterSession(settings, seeded(10)), initial = sanitizeCharacterPractice(null);
-  assert.deepEqual(finishCharacterPractice(initial, 'family', questions.slice(0, 9)), initial);
+  assert.deepEqual(finishCharacterPractice(initial, 'family', questions.slice(0, -1)), initial);
   const saved = finishCharacterPractice(initial, 'family', questions);
   assert.equal(saved.completed.family, 1); assert.equal(initial.completed.family, 0);
-  assert.equal(Object.values(saved.seen['name-picture']).reduce((sum, n) => sum + n, 0), 10);
+  assert.equal(Object.values(saved.seen['name-picture']).reduce((sum, n) => sum + n, 0), 6);
   assert.equal(Object.values(saved.seen['picture-name']).reduce((sum, n) => sum + n, 0), 0);
   assert.deepEqual(sanitizeCharacterPractice(JSON.parse(JSON.stringify(saved))), saved);
   const corrupt = sanitizeCharacterPractice({ completed: { friends: -1, family: Infinity }, seen: { 'picture-name': { rubble: '2', mix: 1000001, charger: 2 } } });
@@ -155,7 +160,7 @@ test('Saved character choices and full-round practice survive reopening without 
   assert.equal(sanitizeProgress({ version: 1, sessions: 26, stars: 156 }).stickers.length, 26);
 });
 
-test('Less-practiced names are offered first, while advancement keeps eight independent answers as the threshold', () => {
+test('Less-practiced names are offered first and advancement allows two assisted answers', () => {
   const practice = sanitizeCharacterPractice(null); practice.seen['picture-name'].rubble = 99;
   for (let seed = 0; seed < 40; seed++) assert.notEqual(createCharacterSession({ characterPractice: practice }, seeded(seed))[0].answer, 'rubble');
   assert.equal(nextCharacterLevel('friends', 0), 'crew'); assert.equal(nextCharacterLevel('friends', 2), 'crew');

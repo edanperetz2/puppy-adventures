@@ -8,7 +8,7 @@ import { newJourney,journeyQuestions,cleanJourney } from '../dist/journey.js';
 import { WORKSHOP_WORDS,STORIES } from '../dist/journey-content.js';
 import { CLIPS,WORDS } from '../dist/content.js';
 import { packRound,unpackRound,cleanDrafts,roundKey } from '../dist/session-state.js';
-import { createSession,DEFAULT_SETTINGS,freshProgress } from '../dist/engine.js';
+import { createSession,DEFAULT_SETTINGS,finishSession,freshProgress } from '../dist/engine.js';
 import { SharedAlbum } from '../dist/sync.js';
 import { ChildProfiles,GAME_KEY } from '../dist/profiles.js';
 import { cleanInk } from '../dist/free-writing.js';
@@ -72,7 +72,7 @@ test('An answer entered during an upload remains pending until the following bat
 test('A different family never receives another family’s pending practice',async()=>{
  let link=code;const store=new LearningStore({storage:memory(),config:{url:'https://example.test',key:'public'},getCode:()=>link,fetcher:service(),now:()=>time});await store.flush();link=null;store.record({item:'read:dog',domain:'hebrew'},'helped');link='9AB3CD4EF5GH6JK7MN8PQ9RS';await store.flush();assert.deepEqual(store.items,{});
 });
-test('Every old adventure resumes its exact questions, attempted answers, help and completed step',()=>{
+test('Saved adventures resume their exact questions, attempted answers, help and completed step',()=>{
  for(const mission of ['hebrew','english','math','clock','letters','characters']){
    const settings={...DEFAULT_SETTINGS,clockLevel:'minutes'},questions=createSession(mission,settings);
    const original={id:crypto.randomUUID(),key:roundKey(mission,settings),mission,questions,index:4,resolved:true,helped:new Set([1,4]),observed:new Set([0,1,2,3,4]),attempted:new Set([questions[4].options.find(o=>o.id!==questions[4].answer).id]),counted:new Set(['0','2']),reading:settings.reading,letterLanguage:settings.letterLanguage,letterIds:mission==='letters'?[...new Set(questions.map(q=>q.letter.id))]:null,clockLevel:settings.clockLevel,characterLevel:settings.characterLevel,characterMode:settings.characterMode,at:time};
@@ -80,22 +80,62 @@ test('Every old adventure resumes its exact questions, attempted answers, help a
  }
  assert.equal(unpackRound({mission:'hebrew',questions:Array(10).fill({word:'<script>'})}),null);
 });
+test('An unfinished ten-question adventure still resumes at question nine and earns its original score', () => {
+  const mission = 'math';
+  const questions = [...createSession(mission), ...createSession(mission).slice(0, 4)];
+  const saved = packRound({
+    id: crypto.randomUUID(), key: 'math:default', mission, questions, index: 8,
+    resolved: true, attempted: [], counted: [], helped: [1, 8], observed: [8],
+  });
+  const resumed = unpackRound(JSON.parse(JSON.stringify(saved)));
+  assert.equal(resumed.index, 8);
+  assert.equal(resumed.resolved, true);
+  assert.equal(resumed.questions.length, 10);
+  assert.deepEqual(resumed.questions[8].options.map(option => option.id), saved.questions[8].options);
+  assert.deepEqual([...resumed.observed], [8]);
+  const original = finishSession(freshProgress(), 'hebrew').progress;
+  const { progress } = finishSession(original, mission, resumed.helped.size, null, resumed.questions.length);
+  assert.equal(progress.stickers.length, 2);
+  assert.equal(progress.stars, 16);
+  assert.equal(progress.skills.math.correct, 10);
+});
 test('A completed round receipt prevents a repeated reward after reopening the shared album',()=>{
  const storage=memory(),album=new SharedAlbum({storage,config:{},fetcher:async()=>{throw Error('offline');}});
  album.state={code,device:crypto.randomUUID(),own:freshProgress(),confirmed:freshProgress(),remote:freshProgress()};
  const id=crypto.randomUUID();album.complete('hebrew',0,null,id);const again=new SharedAlbum({storage,config:{},fetcher:async()=>{throw Error('offline');}});assert.equal(again.complete('hebrew',0,null,id).progress.sessions,1);assert.equal(again.progress.stickers.length,1);
 });
-test('All new activities have ten executable steps and restore without changing their plan',()=>{
+test('All new activities have six executable steps and restore without changing their plan',()=>{
  const cases=[...Array.from({length:4},(_,i)=>['workshop',i+1]),...STORIES.map(s=>['stories',s.id]),['english','single'],['english','pairs'],['english','cars'],['objects','quantity'],['objects','bonds'],['objects','tens'],['objects','takeaway'],['sounds','sounds'],['sounds','blend']];
- for(const [mode,level] of cases){const plan=newJourney(mode,level,{}, {mathMax:5,rng:()=>.41}),questions=journeyQuestions(plan);assert.equal(questions.length,10);for(const q of questions){assert.ok(CLIPS[q.prompt]);if(q.clip)assert.ok(CLIPS[q.clip]);if(q.kind==='story'&&q.page.task!=='place')assert.ok(q.choices.includes(q.answer));if(q.kind==='chunks')assert.equal(q.pieces.join('').normalize('NFC'),q.word.pointed.normalize('NFC'));}
+ for(const [mode,level] of cases){const plan=newJourney(mode,level,{}, {mathMax:5,rng:()=>.41}),questions=journeyQuestions(plan);assert.equal(questions.length,6);for(const q of questions){assert.ok(CLIPS[q.prompt]);if(q.clip)assert.ok(CLIPS[q.clip]);if(q.kind==='story'&&q.page.task!=='place')assert.ok(q.choices.includes(q.answer));if(q.kind==='chunks')assert.equal(q.pieces.join('').normalize('NFC'),q.word.pointed.normalize('NFC'));}
    plan.index=5;plan.state={chosen:[0],quantity:2,tokens:[1],resolved:true,showModel:true};const restored=cleanJourney(JSON.parse(JSON.stringify(plan)));assert.ok(restored);assert.deepEqual(journeyQuestions(restored),questions);assert.equal(restored.state.resolved,true);assert.equal(restored.state.showModel,true);const odd=cleanJourney({...plan,helped:3,observed:'bad'});assert.ok(odd);assert.deepEqual(odd.helped,[]);assert.deepEqual(odd.observed,[]);
-   if(mode==='objects')for(let i=1;i<10;i++)assert.ok(questions[i].total>=questions[i-1].total);
-   if(mode==='workshop')for(let i=1;i<10;i++)assert.ok(questions[i].entry.level>=questions[i-1].entry.level);
+   if(mode==='objects')for(let i=1;i<questions.length;i++)assert.ok(questions[i].total>=questions[i-1].total);
+   if(mode==='workshop')for(let i=1;i<questions.length;i++)assert.ok(questions[i].entry.level>=questions[i-1].entry.level);
  }
 });
 test('English starts with familiar words, introduces one new word, and pairs use only two familiar words',()=>{
  const plan=newJourney('english','single',{}, {rng:()=>.5}),qs=journeyQuestions(plan);assert.deepEqual(qs.slice(0,3).map(q=>q.kind),['single','single','single']);assert.equal(qs.filter(q=>q.newWord).length,1);assert.ok(qs.slice(0,3).every(q=>q.choices.length===2));assert.ok(qs.every(q=>q.clip.startsWith('en-')));
  const pairs=journeyQuestions(newJourney('english','pairs',{}, {rng:()=>.5}));assert.ok(pairs.slice(0,3).every(q=>q.kind==='single'));assert.equal(pairs[0].target.id,'ball');assert.equal(pairs[0].model,true);assert.ok(pairs.slice(3).every(q=>q.target.object==='ball'));assert.ok(pairs.slice(3).every(q=>q.kind==='pair'&&q.clip.slice('journey-en-'.length).split('-').length===2));
+});
+test('Six-step stories preserve the original ending, recordings and access to every middle page', () => {
+  for (const story of STORIES) {
+    const seen = new Set();
+    const plan = newJourney('stories', story.id);
+    for (let seed = 0; seed < 12; seed++) {
+      const questions = journeyQuestions({ ...plan, seed });
+      const pageIds = questions.map(task => story.pages.indexOf(task.page));
+      assert.equal(pageIds.length, 6);
+      assert.equal(pageIds[0], 0);
+      assert.equal(pageIds.at(-1), story.pages.length - 1);
+      assert.deepEqual(pageIds, [...new Set(pageIds)].sort((a, b) => a - b));
+      for (const [index, task] of questions.entries()) {
+        const clip = `journey-story-${story.id}-${pageIds[index]}`;
+        assert.equal(CLIPS[clip].text, task.page.text);
+        assert.equal(CLIPS[task.prompt].text, task.page.prompt);
+        seen.add(pageIds[index]);
+      }
+    }
+    assert.equal(seen.size, story.pages.length, story.id);
+  }
 });
 test('Workshop syllables, reading text, name namespaces and ink remain bounded and separate',()=>{
  for(const entry of WORKSHOP_WORDS)assert.equal(entry.chunks.map(c=>c.text).join('').normalize('NFC'),WORDS.find(w=>w.id===entry.id).pointed.normalize('NFC'));

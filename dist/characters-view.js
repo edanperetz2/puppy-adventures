@@ -1,4 +1,5 @@
-import { CHARACTERS, CHARACTER_ART, CHARACTER_COLLECTIONS, CHARACTER_LEVELS, CHARACTER_MODES, characterPool, characterPortrait, characterCollection } from './characters.js';
+import { CHARACTERS, CHARACTER_ART, CHARACTER_COLLECTIONS, CHARACTER_LEVELS, CHARACTER_MODES, characterPool, characterPortrait, characterCollection } from './characters.js?v=2.2.2-six';
+import { SESSION_LENGTH } from './adventure.js?v=2.2.2-six';
 import { uiIcon } from './art.js';
 
 export const CHARACTER_DESCRIPTIONS = Object.freeze({
@@ -26,7 +27,7 @@ export function characterMenu(settings, practice) {
       const members = characterPool(key);
       return `<button class="character-level-card" data-action="character-level" data-level="${key}" aria-pressed="${settings.characterLevel === key}"><span class="character-level-number">שלב ${level.number}</span><div class="character-level-portraits" aria-hidden="true">${members.slice(-3).map(c => characterPortrait(c, '', '', collection)).join('')}</div><h3>${level.name}</h3><p>${level.description}</p><small>${members.length} חברים${practice.completed[key] ? ` · הרפתקאות שהשלמת: ${practice.completed[key]} ${uiIcon('check')}` : ''}</small></button>`;
     }).join('')}</div></section>
-    <section class="character-start"><div><span class="section-kicker">${stage.name} · ${CHARACTER_MODES[settings.characterMode]}</span><p>10 צעדים קטנים · בכל הרפתקה שלמה מקבלות מדבקה</p></div><button class="primary-button" data-action="character-start">בואי נשחק ${uiIcon('arrow')}</button></section>
+    <section class="character-start"><div><span class="section-kicker">${stage.name} · ${CHARACTER_MODES[settings.characterMode]}</span><p>${SESSION_LENGTH} צעדים קטנים · בכל הרפתקה שלמה מקבלות מדבקה</p></div><button class="primary-button" data-action="character-start">בואי נשחק ${uiIcon('arrow')}</button></section>
     <details class="character-roster"><summary>נכיר את החברים ואת השמות שלהם ${uiIcon('sound')}</summary><div class="character-roster-grid">${cast.map(c => `<button data-action="character-sound" data-character="${c.id}" aria-label="שמיעת השם ${c.he}">${characterPortrait(c, descriptions[c.id], '', collection)}<b lang="he" dir="rtl">${characterName(c, settings.nikud)}</b>${uiIcon('sound')}</button>`).join('')}</div></details><p id="audio-notice" class="audio-notice" role="status" hidden></p></main>`;
 }
 

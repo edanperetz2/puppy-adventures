@@ -1,5 +1,9 @@
 # Bilingual game guide
 
+Current release (2.2.2) uses [game-guide-six.webp](../../dist/assets/game-guide-six.webp). The English and Hebrew posters were edited to show six questions per adventure and six pages per story play, then joined at their original resolution of 2,172 × 1,448. The original posters and their verification records below document the ten-question edition.
+
+## Original edition
+
 The app serves `dist/assets/game-guide.png`: **English on the left with a pale blue background; Hebrew on the right with warm cream**. The two source PNGs are `guide-en.png` and `guide-he.png`. Their text was checked against the app and the Hebrew poster was read for spelling, right-to-left ordering, number order and matching descriptions. English letters, words and arithmetic keep their natural left-to-right order.
 
 The current content has eleven main activities, ten Hebrew reading stages with 1,458 targets including 647 short picture-matching passages, 64 workshop words, eight ten-page interactive stories, twenty first-sound examples, thirty optional short English reading words, ten clock lessons, 1,000 sticker slots and a forty-space park with twelve decoration types. Short passages and complete playable stories are distinct activities. Writing forms cover Hebrew print/handwriting and English uppercase/lowercase. Completed scored ten-question adventures award stickers; writing practice and guided clock lessons save their own progress.
