@@ -1,6 +1,6 @@
 import { art, pup, uiIcon } from './art.js';
 import { WORDS, ANIMALS, COLORS } from './content.js?v=2.2.0-voices';
-import { JOURNEYS, PHONICS, journeyQuestions, soundExample } from './journey.js?v=2.2.0-voices';
+import { JOURNEYS, PHONICS, STORY_RELATIONS, journeyQuestions, soundExample } from './journey.js?v=2.2.1-shuffle';
 import { escapeHtml as esc } from './profiles.js?v=2.2.0-voices';
 import { chunkClip, GIVING_CLIPS } from './journey-audio.js?v=2.2.0-voices';
 import { STORIES } from './journey-content.js';
@@ -16,9 +16,9 @@ export function learningPicture(id) {
   return art(id);
 }
 // Pointer events cover touch, pen and mouse. Every drop also has a tap button.
-export function mountDrops(root, selector, targetSelector, onDrop, signal) {
+export function mountDrops(root, selector, targetSelector, onDrop, signal, onDrag) {
   let dragging=null,ghost=null,moved=false,start=null;
-  const clear=()=>{ghost?.remove();ghost=null;dragging=null;start=null;};
+  const clear=()=>{if(ghost){ghost.remove();onDrag?.(false);}ghost=null;dragging=null;start=null;};
   root.addEventListener('pointerdown',e=>{
     const source=e.target.closest(selector);if(!source||source.disabled||e.button!==0)return;
     dragging=source;start={x:e.clientX,y:e.clientY};moved=false;source.setPointerCapture(e.pointerId);
@@ -26,7 +26,7 @@ export function mountDrops(root, selector, targetSelector, onDrop, signal) {
   root.addEventListener('pointermove',e=>{
     if(!dragging)return;if(!moved&&Math.hypot(e.clientX-start.x,e.clientY-start.y)<8)return;
     e.preventDefault();moved=true;
-    if(!ghost){ghost=dragging.cloneNode(true);ghost.classList.add('drag-ghost');ghost.removeAttribute('id');ghost.setAttribute('aria-hidden','true');document.body.append(ghost);}
+    if(!ghost){ghost=dragging.cloneNode(true);ghost.classList.add('drag-ghost');ghost.removeAttribute('id');ghost.setAttribute('aria-hidden','true');document.body.append(ghost);onDrag?.(true);}
     ghost.style.left=`${e.clientX}px`;ghost.style.top=`${e.clientY}px`;
   },{signal});
   root.addEventListener('pointerup',e=>{
@@ -112,11 +112,21 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
       <div class="journey-controls"><button class="secondary-button" data-j="undo" ${!selected.length||s().resolved?'disabled':''}>${uiIcon('again')} מְנַסִּים אַחֶרֶת</button>${!missing?`<button class="primary-button" data-j="check" ${selected.length!==pieces.length||s().resolved?'disabled':''}>בּוֹדְקִים ${uiIcon('check')}</button>`:''}</div>`;
   }
   function storyView(task){
-    const p=task.page,table=art('table'),rel={on:'עַל הַשֻּׁלְחָן',under:'מִתַּחַת לַשֻּׁלְחָן',beside:'לְיַד הַשֻּׁלְחָן'};
-    const memory=storyMemory(task.story,plan.index,s().resolved);
-    const scene=`<div class="story-scene ${s().placed?'story-changed':''}"><div class="story-tree">${art('tree')}</div><div class="story-pup">${pup(task.story.pup)}</div><div class="story-table">${table}</div>${storyProps(memory,p)}${p.task==='count'?`<div class="story-counted" style="--count-columns:${Math.min(4,p.count)}">${Array.from({length:p.count},(_,i)=>`<button data-j="count" data-token="${i}" aria-label="ספירת פריט ${i+1}" class="${s().tokens.includes(i)?'counted':''}">${learningPicture(p.target)}${s().tokens.includes(i)?`<b>${s().tokens.indexOf(i)+1}</b>`:''}</button>`).join('')}</div>`:s().placed?`<div class="story-placed ${p.relation}">${art(p.target)}</div>`:''}
-      ${p.task==='place'?`<div class="story-drop-zones">${['on','under','beside'].map(r=>`<button data-j="place" data-place="${r}" class="story-drop ${r}" ${s().resolved?'disabled':''}>${rel[r]}</button>`).join('')}</div>`:''}</div>`;
-    return `<div class="story-reading"><span>סִפּוּר ${STORIES.findIndex(story=>story.id===plan.level)+1} · עַמּוּד ${plan.index+1}</span><p dir="rtl" lang="he">${nikud?p.text:p.text.replace(/[\u0591-\u05c7]/gu,'')}</p><button data-j="read-story" class="text-button">${uiIcon('sound')} קוֹרְאִים יַחַד</button></div>${scene}<p class="journey-instruction">${p.prompt}</p>${p.task==='place'?`<div class="story-source"><button data-j="source" aria-label="גרירת ${WORDS.find(word=>word.id===p.target)?.he||p.target} למקום המתאים">${art(p.target)}</button><span>גוֹרְרִים לַמָּקוֹם. אֶפְשָׁר גַּם לִבְחֹר בִּנְגִיעָה.</span></div>`:`<div class="journey-choices">${task.choices.map(id=>`<button data-j="answer" data-answer="${id}" aria-label="${p.task==='count'?id:WORDS.find(w=>w.id===id)?.he||ANIMALS.find(w=>w.id===id)?.he||COLORS.find(w=>w.id===id)?.he||id}" ${s().resolved?'disabled':''}>${p.task==='count'?`<b class="quantity-number">${id}</b>`:learningPicture(id)}</button>`).join('')}</div>`}`;
+    const p = task.page, done = s().resolved;
+    const labels = { on: 'עַל הַשֻּׁלְחָן', under: 'מִתַּחַת לַשֻּׁלְחָן', beside: 'לְיַד הַשֻּׁלְחָן' };
+    const memory = storyMemory(task.story, plan.index, done);
+    const dropZones = p.task === 'place' && !done
+      ? `<div class="story-drop-zones" aria-hidden="true" hidden>${STORY_RELATIONS.map(relation => `<span data-drop-place="${relation}" class="story-drop ${relation}">${labels[relation]}</span>`).join('')}</div>`
+      : '';
+    const movedObject = s().placed ? `<div class="story-placed ${p.relation}">${art(p.target)}</div>` : '';
+    const countObjects = p.task === 'count' ? `<div class="story-counted" style="--count-columns:${Math.min(4,p.count)}">${Array.from({length:p.count},(_,i)=>`<button data-j="count" data-token="${i}" aria-label="ספירת פריט ${i+1}" class="${s().tokens.includes(i)?'counted':''}">${learningPicture(p.target)}${s().tokens.includes(i)?`<b>${s().tokens.indexOf(i)+1}</b>`:''}</button>`).join('')}</div>` : '';
+    const scene = `<div class="story-scene ${s().placed?'story-changed':''}"><div class="story-tree">${art('tree')}</div><div class="story-pup">${pup(task.story.pup)}</div><div class="story-table">${art('table')}</div>${storyProps(memory,p)}${countObjects}${movedObject}${dropZones}</div>`;
+    const places = task.choices.length ? task.choices : STORY_RELATIONS;
+    const answers = p.task === 'place'
+      ? `<div class="story-source"><button data-j="source" aria-label="גרירת ${WORDS.find(word=>word.id===p.target)?.he||p.target} למקום המתאים" ${done?'disabled':''}>${art(p.target)}</button><span>גוֹרְרִים לַמָּקוֹם. אֶפְשָׁר גַּם לִבְחֹר לְמַטָּה.</span></div>
+        <div class="quantity-tools" role="group" aria-label="בחירת מקום">${places.map(relation => `<button data-j="place" data-place="${relation}" ${done?'disabled':''}>${labels[relation]}</button>`).join('')}</div>`
+      : `<div class="journey-choices">${task.choices.map(id=>`<button data-j="answer" data-answer="${id}" aria-label="${p.task==='count'?id:WORDS.find(w=>w.id===id)?.he||ANIMALS.find(w=>w.id===id)?.he||COLORS.find(w=>w.id===id)?.he||id}" ${done?'disabled':''}>${p.task==='count'?`<b class="quantity-number">${id}</b>`:learningPicture(id)}</button>`).join('')}</div>`;
+    return `<div class="story-reading"><span>סִפּוּר ${STORIES.findIndex(story=>story.id===plan.level)+1} · עַמּוּד ${plan.index+1}</span><p dir="rtl" lang="he">${nikud?p.text:p.text.replace(/[\u0591-\u05c7]/gu,'')}</p><button data-j="read-story" class="text-button">${uiIcon('sound')} קוֹרְאִים יַחַד</button></div>${scene}<p class="journey-instruction">${p.prompt}</p>${answers}`;
   }
   function englishView(task){
     if(task.kind==='sound'||task.kind==='blend') {
@@ -214,7 +224,10 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
     }
   },{signal:events.signal});
   mountDrops(root,'[data-j="tile"]','[data-word-drop]',source=>tile(Number(source.dataset.tile)),events.signal);
-  mountDrops(root,'[data-j="source"]','[data-place]',(_,target)=>place(target.dataset.place),events.signal);
+  mountDrops(root, '[data-j="source"]', '[data-drop-place]', (_, target) => place(target.dataset.dropPlace), events.signal, dragging => {
+    const zones = root.querySelector('.story-drop-zones');
+    if (zones) zones.hidden = !dragging;
+  });
   mountDrops(root,'[data-j="add"]','[data-j="frame"]',source=>{if(!s().resolved){s().quantity=Math.min(plan.max,s().quantity+(Number(source.dataset.amount)||1));persist();render();}},events.signal);
   prepare();render();return {replay,destroy:()=>events.abort()};
 }

@@ -7,20 +7,13 @@ import { isSticker } from './stickers.js';
 import { sanitizeLetterPractice, recordLetters, suggestedLetters, recognitionTargets } from './letter-progress.js';
 import { distinctWordPictures } from './vocabulary.js';
 import { SESSION_LENGTH, adventurePhase, choiceCount } from './adventure.js';
-import { sanitizeClockLessons } from './clock-learning.js';
+import { sanitizeClockLessons } from './clock-learning.js?v=2.2.1-shuffle';
 import { CHARACTER_MODES, createCharacterSession, sanitizeCharacterSelection } from './characters.js';
+import { answerShuffler, shuffle } from './answer-order.js';
 export { SESSION_LENGTH } from './adventure.js';
+export { shuffle };
 
 export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', letterLanguage: 'hebrew', letterWriting: Object.freeze({ hebrew: 0, english: 0 }), letterMainWriting: Object.freeze({ hebrew: 0, english: 0 }), letterWritingForm: Object.freeze({ hebrew: 'alternate', english: 'alternate' }), characterLevel: 'friends', characterCollectionLevels: Object.freeze({ crew: 'friends', paw: 'paw-friends' }), characterMode: 'mixed', sound: true, motion: true });
-
-export function shuffle(values, rng = Math.random) {
-  const copy = [...values];
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy;
-}
 
 function optionsFrom(pool, correct, rng, count = 3) {
   return shuffle([correct, ...shuffle(pool.filter(x => x.id !== correct.id), rng).slice(0, count - 1)], rng);
@@ -40,6 +33,14 @@ function readingOrder(a, b) {
 }
 
 export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Math.random) {
+  const orderAnswers = answerShuffler(rng);
+  return buildSession(mission, rawSettings, rng).map(question => ({
+    ...question,
+    options: orderAnswers(question.options, question.answer),
+  }));
+}
+
+function buildSession(mission, rawSettings, rng) {
   const settings = { ...DEFAULT_SETTINGS, ...rawSettings };
   if (mission === 'characters') return createCharacterSession(settings, rng);
   if (mission === 'letters') {

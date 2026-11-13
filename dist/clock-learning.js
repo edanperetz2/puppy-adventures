@@ -1,4 +1,5 @@
 import { clockTime } from './clock.js';
+import { shuffle } from './answer-order.js';
 
 export const CLOCK_LESSON_COUNT = 10;
 export const sanitizeClockLessons = value => Number.isInteger(value) && value >= 0 && value < 1024 ? value : 0;
@@ -61,10 +62,18 @@ CLOCK_LESSONS[9].tasks.push(...[23,24,26,27,28,29,31,32,34,36,37,38,41,43,46,48,
 
 // The bank grows, not the length of a sitting. Keep the original teaching
 // examples, then draw enough fresh practice to stay at ten steps or fewer.
-export function clockLessonTasks(index,seed=1) {
+export function clockLessonTasks(index,seed=1,shufflePractice=false) {
   const bank=CLOCK_LESSONS[index].tasks,first=originalTaskCounts[index];
   let n=(seed+index*65537)>>>0;
-  const extras=bank.slice(first).map((value,order)=>{n=(n+0x6d2b79f5)>>>0;let t=Math.imul(n^(n>>>15),n|1);t^=t+Math.imul(t^(t>>>7),t|61);return{value,order,tie:(t^(t>>>14))>>>0};});
+  function draw() {
+    n=(n+0x6d2b79f5)>>>0;
+    let t=Math.imul(n^(n>>>15),n|1);
+    t^=t+Math.imul(t^(t>>>7),t|61);
+    return (t^(t>>>14))>>>0;
+  }
+  // These lessons practice the same skill at different hours or numerals.
+  if (shufflePractice && [1, 2, 5, 6, 7].includes(index)) return shuffle(bank, () => draw() / 0x100000000).slice(0, 10);
+  const extras=bank.slice(first).map((value,order)=>({value,order,tie:draw()}));
   const chosen=extras.sort((a,b)=>a.tie-b.tie).slice(0,Math.max(0,10-first)).sort((a,b)=>a.order-b.order).map(p=>p.value);
   return [...bank.slice(0,first),...chosen];
 }
@@ -89,8 +98,9 @@ export function taskSucceeded(lesson, task, total, moved) {
 export function sanitizeClockPosition(value) {
   const lesson = Number.isInteger(value?.lesson) && value.lesson >= 0 && value.lesson < 10 ? value.lesson : 0;
   const seed=Number.isInteger(value?.seed)&&value.seed>0&&value.seed<=0xffffffff?value.seed:0;
-  const tasks=seed?clockLessonTasks(lesson,seed):CLOCK_LESSONS[lesson].tasks;
+  const shufflePractice=Boolean(seed)&&value?.shufflePractice===true;
+  const tasks=seed?clockLessonTasks(lesson,seed,shufflePractice):CLOCK_LESSONS[lesson].tasks;
   const index = Number.isInteger(value?.index) && value.index >= 0 && value.index < tasks.length ? value.index : 0;
   const total = Number.isInteger(value?.total) && value.total >= 0 && value.total < 720 ? value.total : tasks[index].start;
-  return { lesson, index, total,...(seed?{seed}:{}) };
+  return { lesson, index, total,...(seed?{seed}:{}),...(shufflePractice?{shufflePractice}:{}) };
 }

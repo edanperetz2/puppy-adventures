@@ -1,23 +1,32 @@
 import { CLIPS } from './content.js';
 import { pup, uiIcon } from './art.js';
 import { mountClockDial } from './clock-dial.js';
-import { CLOCK_LESSONS, clockLessonTasks, clockParts, clockTotal, learningTime, taskClips, taskSucceeded, sanitizeClockPosition, hasClockLesson, clockLessonCount, nextClockLesson, journeyMinutes, realMinuteSeconds } from './clock-learning.js';
+import { CLOCK_LESSONS, clockLessonTasks, clockParts, clockTotal, learningTime, taskClips, taskSucceeded, sanitizeClockPosition, hasClockLesson, clockLessonCount, nextClockLesson, journeyMinutes, realMinuteSeconds } from './clock-learning.js?v=2.2.1-shuffle';
 
 export function mountClockSchool(root, { getProgress, position, onPosition, onRecord, speak, onPractice, practiceName, returnToGame = false, motion = true } ) {
   let screen='map', lessonIndex=0, taskIndex=0, dial=null, moved=false, result=false, feedback='', demonstrating=false, selected='hour', saveTimer=null, realTimer=null, realRestore=[];
   let saved=sanitizeClockPosition(position);
-  let practiceSeed=saved.seed||1,practiceLessons=[];
-  function prepareExamples(seed){practiceSeed=seed;practiceLessons=CLOCK_LESSONS.map((lesson,index)=>({...lesson,tasks:clockLessonTasks(index,seed)}));}
-  prepareExamples(practiceSeed);
+  let practiceSeed, shufflePractice, practiceLessons;
+  function prepareExamples(seed, shuffled) {
+    practiceSeed = seed;
+    shufflePractice = shuffled;
+    practiceLessons = CLOCK_LESSONS.map((lesson, index) => ({ ...lesson, tasks: clockLessonTasks(index, seed, shuffled) }));
+  }
+  prepareExamples(saved.seed || 1, saved.shufflePractice === true);
   const abort=new AbortController();
   const lesson=()=>practiceLessons[lessonIndex], task=()=>lesson().tasks[taskIndex];
+  const demonstration = () => lesson().demo || CLOCK_LESSONS[lessonIndex].tasks[0];
   const activeHand=()=>task().hand||lesson().hand;
   const button=(action,label,cls='secondary-button',extra='')=>`<button type="button" class="${cls}" data-school="${action}" ${extra}>${label}</button>`;
   const replayButton=()=>button('speak',uiIcon('sound'),'circle-button','aria-label="שמיעת ההסבר שוב"');
   const introText=()=>lesson().intro.map(key=>CLIPS[key].text).join(' ');
+  function taskPosition(lesson, index, total = practiceLessons[lesson].tasks[index].start) {
+    return { lesson, index, total, seed: practiceSeed, ...(shufflePractice ? { shufflePractice } : {}) };
+  }
   function persist() {
     if(screen!=='try'||!dial)return;
-    saved={lesson:lessonIndex,index:taskIndex,total:clockTotal(clockParts(dial.total).hour,clockParts(dial.total).minute),seed:practiceSeed};
+    const { hour, minute } = clockParts(dial.total);
+    saved=taskPosition(lessonIndex, taskIndex, clockTotal(hour, minute));
     onPosition(saved);
   }
   function titleFocus(){root.querySelector('h1')?.focus({preventScroll:true});}
@@ -46,7 +55,7 @@ export function mountClockSchool(root, { getProgress, position, onPosition, onRe
   }
   function updateJourney(total){
     const node=root.querySelector('.minute-journey');if(!node)return;
-    const start=screen==='explain'?(lesson().demo||lesson().tasks[0]).start:task().start,n=journeyMinutes(start,total);
+    const start=screen==='explain'?demonstration().start:task().start,n=journeyMinutes(start,total);
     node.querySelectorAll('[data-minute-bead]').forEach((bead,i)=>bead.classList.toggle('filled',i<n));
     node.querySelector('[data-journey-count]').textContent=n===1?'דקה אחת':`${n} דקות`;
     node.classList.toggle('whole-hour',n===60);node.querySelector('.journey-dog').style.right=`${n/60*85}%`;
@@ -87,18 +96,18 @@ export function mountClockSchool(root, { getProgress, position, onPosition, onRe
     }else{
       const free=screen==='free',explain=screen==='explain',l=lesson();selected=!free&&activeHand()==='minute'?'minute':'hour';
       root.innerHTML=`<div class="school-top">${button('map','לכל הגילויים','text-button')}<span>${free?'מגלות בקצב שלך':`גילוי ${lessonIndex+1} מתוך 10`}</span>${returnToGame?button('practice','חוזרות למשחק','text-button'):''}</div><section class="school-board ${free?'school-free':explain?'school-explain':'school-try'} ${l.hand==='face'&&!free?'face-lesson':''} ${l.journey&&!free?'duration-lesson':''}"><div class="school-board-heading"><div><span class="section-kicker">${free?'מזיזות, מקשיבות ומגלות':explain?'קודם מגלות ביחד':`עכשיו תורך · ניסיון ${taskIndex+1} מתוך ${l.tasks.length}`}</span><h1 tabindex="-1">${free?'השעון שלי':l.title}</h1></div>${replayButton()}</div><div class="school-board-layout"><div class="school-clock-column"><div data-school-dial></div>${timeCard()}<p class="school-clock-detail" data-school-detail></p><p class="school-touch-note">${explain?'בובי מסביר ומדגים. אחר כך תורך':!free&&l.hand==='face'?'לחצי על המספר שעל השעון':'גררי את העיגולים שעל המחוגים'}</p></div><div class="school-guide-column">${free?`<div class="school-explanation"><p>הקצר והסגול מראה את השעה.<br>הארוך והירוק מראה את הדקות.</p><p>כשהארוך משלים סיבוב, הקצר מתקדם שעה אחת.</p></div>${controls('both')}${button('controls','איך מזיזים את המחוגים?','text-button')}`:explain?`<div class="school-explanation"><span class="school-bobi-label">בובי מסביר ${uiIcon('sound')}</span><p>${introText()}</p></div>${journey()}<p class="school-demo-status" role="status" data-demo-status>נסתכל, נקשיב ונגלה</p><div class="school-learning-actions">${button('demo','בובי מדגים','secondary-button')}${button('try','עכשיו תורי','primary-button')}</div>`:`<div class="school-goal"><span>השעון שנבנה עכשיו</span><h2>${taskText()}</h2>${button('target',`${uiIcon('sound')} נשמע שוב`,'text-button')}</div>${journey()}${l.hand==='face'?'':controls(activeHand())}<div class="school-feedback" role="status" data-school-feedback></div><div class="school-learning-actions">${button('check','בדקי את השעון','primary-button',`${moved?'':'disabled'}`)}${button('demo','בובי מדגים','secondary-button')}${button('next-task',taskIndex===l.tasks.length-1?'גילינו! ממשיכות':'ננסה עוד פעם','primary-button','hidden')}</div>${button('explain','בחזרה להסבר','text-button')}`}</div></div><p id="audio-notice" class="audio-notice" role="status" hidden></p></section>`;
-      const total=free?clockTotal(3,0):explain?(l.demo||l.tasks[0]).total:saved.lesson===lessonIndex&&saved.index===taskIndex?saved.total:task().start;
+      const total=free?clockTotal(3,0):explain?demonstration().total:saved.lesson===lessonIndex&&saved.index===taskIndex?saved.total:task().start;
       attachDial(total,free?'both':explain?'face':activeHand());
       if(!explain&&!free&&l.hand==='face')root.querySelector('[data-school=check]').hidden=true;
       if(result)updateFeedback();
     }
   }
-  function openLesson(index,resume=false){persist();if(!resume)prepareExamples(1+Math.floor(Math.random()*0xffffffff));lessonIndex=index;taskIndex=resume&&saved.lesson===index&&!hasClockLesson(getProgress(),index)?saved.index:0;screen=resume&&taskIndex>0?'try':'explain';moved=false;result=false;feedback='';if(!resume||saved.lesson!==index)saved={lesson:index,index:0,total:lesson().tasks[0].start,seed:practiceSeed};render();titleFocus();speak(screen==='explain'?lesson().intro:taskClips(lesson(),task()));}
+  function openLesson(index,resume=false){persist();if(!resume)prepareExamples(1+Math.floor(Math.random()*0xffffffff),true);lessonIndex=index;taskIndex=resume&&saved.lesson===index&&!hasClockLesson(getProgress(),index)?saved.index:0;screen=resume&&taskIndex>0?'try':'explain';moved=false;result=false;feedback='';if(!resume||saved.lesson!==index)saved=taskPosition(index,0);render();titleFocus();speak(screen==='explain'?lesson().intro:taskClips(lesson(),task()));}
   function updateFeedback(){const node=root.querySelector('[data-school-feedback]');if(!node)return;node.textContent=feedback;node.classList.toggle('success',result);root.querySelector('[data-school=check]').hidden=result||lesson().hand==='face';root.querySelector('[data-school=next-task]').hidden=!result;root.querySelector('[data-school=demo]').disabled=result;}
   function success(){result=true;feedback='כל הכבוד! הצלחת!';updateFeedback();for(const b of root.querySelectorAll('.school-hand-controls button,.clock-grip,[data-dial-number],[data-school=five-minutes],[data-school=one-minute],[data-school=real-minute]'))b.disabled=true;speak(['correct-1',...(lesson().journey?[task().duration===1?'school-one-minute':'school-one-hour']:lesson().hand==='face'?[]:dial.time().clips)]);root.querySelector('[data-school=next-task]').focus({preventScroll:true});}
   function showDemo(){
     if(demonstrating||result)return;demonstrating=true;
-    const t=screen==='explain'?(lesson().demo||lesson().tasks[0]):task();speak(['school-demo']);
+    const t=screen==='explain'?demonstration():task();speak(['school-demo']);
     const status=root.querySelector('[data-demo-status]')||root.querySelector('[data-school-feedback]');status.textContent='עכשיו בובי מדגים. אחר כך תורך ♡';
     const disabledBefore=[...root.querySelectorAll('[data-school=check],[data-school=try],[data-school=demo],[data-school=step],[data-school=select],[data-school=real-minute],[data-school=five-minutes],[data-school=one-minute]')].map(b=>[b,b.disabled]);
     for(const [b] of disabledBefore)b.disabled=true;
@@ -126,12 +135,12 @@ export function mountClockSchool(root, { getProgress, position, onPosition, onRe
       case 'one-minute':dial.step('minute',1);break;
       case 'five-minutes':dial.step('minute',5);break;
       case 'real-minute':realMinute();break;
-      case 'try':screen='try';result=false;moved=false;feedback='';saved={lesson:lessonIndex,index:taskIndex,total:task().start,seed:practiceSeed};render();onPosition(saved);titleFocus();speak(taskClips(lesson(),task()));break;
+      case 'try':screen='try';result=false;moved=false;feedback='';saved=taskPosition(lessonIndex,taskIndex);render();onPosition(saved);titleFocus();speak(taskClips(lesson(),task()));break;
       case 'explain':persist();screen='explain';render();titleFocus();speak(lesson().intro);break;
       case 'demo':showDemo();break;
       case 'target':speak(taskClips(lesson(),task()),true);break;
       case 'check':if(taskSucceeded(lesson(),task(),dial.total,moved))success();else{feedback=lesson().turn?'הארוך צריך להשלים סיבוב שלם בכיוון החץ. אפשר להיעזר בכפתור +.':'נבדוק את שני המחוגים. אפשר לראות שוב את ההדגמה.';updateFeedback();speak(['school-try-again',...taskClips(lesson(),task())]);}break;
-      case 'next-task':if(!result)break;if(taskIndex===lesson().tasks.length-1){onRecord(lessonIndex);screen='done';saved={lesson:Math.min(9,lessonIndex+1),index:0,total:CLOCK_LESSONS[Math.min(9,lessonIndex+1)].tasks[0].start,seed:practiceSeed};onPosition(saved);render();titleFocus();speak(clockLessonCount(getProgress())===10?'school-finish':'school-lesson-done');}else{taskIndex++;saved={lesson:lessonIndex,index:taskIndex,total:task().start,seed:practiceSeed};onPosition(saved);result=false;moved=false;feedback='';render();titleFocus();speak(taskClips(lesson(),task()));}break;
+      case 'next-task':if(!result)break;if(taskIndex===lesson().tasks.length-1){onRecord(lessonIndex);screen='done';saved=taskPosition(Math.min(9,lessonIndex+1),0);onPosition(saved);render();titleFocus();speak(clockLessonCount(getProgress())===10?'school-finish':'school-lesson-done');}else{taskIndex++;saved=taskPosition(lessonIndex,taskIndex);onPosition(saved);result=false;moved=false;feedback='';render();titleFocus();speak(taskClips(lesson(),task()));}break;
     }
   },{signal:abort.signal});
   function replay(explicit=false){speak(screen==='map'?'school-welcome':screen==='free'?'school-free':screen==='done'?'school-lesson-done':screen==='explain'?lesson().intro:taskClips(lesson(),task()),explicit);}

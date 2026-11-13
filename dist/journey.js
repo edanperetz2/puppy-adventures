@@ -5,6 +5,7 @@ import { WORKSHOP_WORDS, STORIES } from './journey-content.js';
 import { WORD_CONTEXTS } from './word-contexts.js';
 import { choosePractice, englishPairsReady } from './learning.js';
 import { GIVING_CLIPS } from './journey-audio.js?v=2.2.0-voices';
+import { answerShuffler, shuffle as mix } from './answer-order.js';
 
 export const JOURNEYS = {
  workshop:{title:'סדנת המילים',domain:'hebrew',intro:'journey-workshop-intro',description:'שומעות, מחברות ובונות מילים',icon:'pencil'},
@@ -22,8 +23,13 @@ export const PHONICS = [
 export const soundExample = letter => {const word=PHONICS.find(p=>p.id===letter)?.word;return word==='fish'?'en-fish':`journey-en-${word}`;};
 export const ENGLISH_PAIRS = ['ball','car'].flatMap(object=>COLORS.map(c=>({color:c.id,object})));
 export const ENGLISH_WORDS = [...ANIMALS,...COLORS,...ENGLISH_OBJECTS];
+export const STORY_RELATIONS = ['on', 'under', 'beside'];
 export function seeded(seed) { let n=seed>>>0;return()=>{n=(Math.imul(1664525,n)+1013904223)>>>0;return n/4294967296;}; }
-const mix=(list,rng)=>{const a=[...list];for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+
+function numberChoices(answer, min, max, count, rng) {
+  const nearby = [-2, -1, 1, 2].map(offset => answer + offset).filter(n => n >= min && n <= max);
+  return [answer, ...mix(nearby, rng).slice(0, count - 1)];
+}
 // Enumerated cases give the saved learning history many real combinations to
 // choose from, rather than repeating one fixed split for each total.
 export function objectCases(kind,max=10) {
@@ -65,7 +71,7 @@ export function newJourney(mode,level,items={},options={}) {
   const blendWords=choosePractice(BLEND_GROUPS,items,g=>`phonics:blend:${g[0]}`,1,Date.now(),rng)[0];
   const soundIds=mode==='sounds'?cleanLevel==='blend'?[...new Set(blendWords.join(''))].slice(0,3):choosePractice(PHONICS.slice(0,Math.min(PHONICS.length,Math.max(3,introduced+1))),items,p=>`phonics:sound:${p.id}`,3,Date.now(),rng).sort((a,b)=>PHONICS.indexOf(a)-PHONICS.indexOf(b)).map(p=>p.id):[];
   const max=[5,10,20].includes(options.mathMax)?options.mathMax:10;
-  return {id:globalThis.crypto.randomUUID(),revision:2,introducing:![...familiar,...known].includes(fresh),mode,level:cleanLevel,seed,words,soundIds,blendWords,pairColors,examples:mode==='objects'?objectExamples(cleanLevel,max,items,rng):[],english:[...new Set([...familiar,...review])].concat(fresh),max,index:0,state:{},helped:[],observed:[],at:Date.now()};
+  return {id:globalThis.crypto.randomUUID(),revision:2,shuffleAnswers:true,introducing:![...familiar,...known].includes(fresh),mode,level:cleanLevel,seed,words,soundIds,blendWords,pairColors,examples:mode==='objects'?objectExamples(cleanLevel,max,items,rng):[],english:[...new Set([...familiar,...review])].concat(fresh),max,index:0,state:{},helped:[],observed:[],at:Date.now()};
 }
 export function cleanJourney(raw) {
   if(!raw||!JOURNEYS[raw.mode]||!/^[0-9a-f-]{36}$/i.test(raw.id)||!Number.isInteger(raw.seed)||!Number.isInteger(raw.index)||raw.index<0||raw.index>9)return null;
@@ -82,7 +88,7 @@ export function cleanJourney(raw) {
   const pairColors=[...new Set((Array.isArray(raw.pairColors)?raw.pairColors:[]).filter(id=>COLORS.some(c=>c.id===id)))].slice(0,2);
   const examples=(Array.isArray(raw.examples)?raw.examples:[]).filter(p=>objectCases(raw.level,max).some(c=>c.total===p?.total&&c.known===p?.known)).slice(0,10).map(({total,known})=>({total,known}));
   if(revision===2&&raw.mode==='objects'&&examples.length!==10)return null;
-  return {id:raw.id,revision,introducing:raw.introducing!==false,mode:raw.mode,level:raw.level,seed:raw.seed>>>0,words,soundIds,blendWords,pairColors,examples,english,max,index:raw.index,state:{chosen:Array.isArray(state.chosen)?state.chosen.filter(n=>Number.isInteger(n)&&n>=0&&n<24).slice(0,24):[],tokens:Array.isArray(state.tokens)?[...new Set(state.tokens.filter(n=>Number.isInteger(n)&&n>=0&&n<100))].slice(0,100):[],quantity:Math.max(0,Math.min(100,Math.floor(state.quantity)||0)),resolved:state.resolved===true,placed:state.placed===true,showModel:state.showModel===true,attempted:Array.isArray(state.attempted)?state.attempted.filter(id=>typeof id==='string'&&/^[a-z0-9-]{1,40}$/.test(id)).slice(0,4):[]},helped:[...new Set((Array.isArray(raw.helped)?raw.helped:[]).filter(n=>Number.isInteger(n)&&n>=0&&n<10))],observed:[...new Set((Array.isArray(raw.observed)?raw.observed:[]).filter(n=>Number.isInteger(n)&&n>=0&&n<10))],at:Number.isSafeInteger(raw.at)?raw.at:Date.now()};
+  return {id:raw.id,revision,shuffleAnswers:raw.shuffleAnswers===true,introducing:raw.introducing!==false,mode:raw.mode,level:raw.level,seed:raw.seed>>>0,words,soundIds,blendWords,pairColors,examples,english,max,index:raw.index,state:{chosen:Array.isArray(state.chosen)?state.chosen.filter(n=>Number.isInteger(n)&&n>=0&&n<24).slice(0,24):[],tokens:Array.isArray(state.tokens)?[...new Set(state.tokens.filter(n=>Number.isInteger(n)&&n>=0&&n<100))].slice(0,100):[],quantity:Math.max(0,Math.min(100,Math.floor(state.quantity)||0)),resolved:state.resolved===true,placed:state.placed===true,showModel:state.showModel===true,attempted:Array.isArray(state.attempted)?state.attempted.filter(id=>typeof id==='string'&&/^[a-z0-9-]{1,40}$/.test(id)).slice(0,4):[]},helped:[...new Set((Array.isArray(raw.helped)?raw.helped:[]).filter(n=>Number.isInteger(n)&&n>=0&&n<10))],observed:[...new Set((Array.isArray(raw.observed)?raw.observed:[]).filter(n=>Number.isInteger(n)&&n>=0&&n<10))],at:Number.isSafeInteger(raw.at)?raw.at:Date.now()};
 }
 export function journeyQuestions(plan) {
   const rng=seeded(plan.seed),result=[];
@@ -130,6 +136,29 @@ export function journeyQuestions(plan) {
       const words=plan.revision===2?plan.blendWords:BLEND_GROUPS[0];const word=words[(i-3+9)%3];
       const choices=blend?mix(words,rng):mix([phoneme,...mix(group.filter(x=>x.id!==phoneme.id),rng).slice(0,i<7?1:2)],rng);
       result.push({kind:blend?'blend':'sound',phoneme,word,choices,answer:blend?word:phoneme.id,key:blend?`phonics:blend:${word}`:`phonics:sound:${phoneme.id}`,prompt:'journey-phonics-intro',model:i<3||blend&&i<7||!blend&&[4,7].includes(i),clip:blend?`journey-en-${word}`:soundExample(phoneme.id)});
+    }
+  }
+  if (!plan.shuffleAnswers) return result;
+
+  const answerRng = seeded(plan.seed ^ 0x9e3779b9);
+  const orderAnswers = answerShuffler(answerRng);
+  for (const [index, task] of result.entries()) {
+    if (task.kind === 'story' && task.page.task === 'place') {
+      task.choices = orderAnswers(STORY_RELATIONS, task.page.relation);
+      continue;
+    }
+    if (task.kind === 'story' && task.page.task === 'count') {
+      task.choices = numberChoices(task.page.count, 1, 10, index < 3 ? 2 : 3, answerRng).map(String);
+    }
+    if (task.operation === 'takeaway') {
+      task.choices = numberChoices(task.answer, 0, task.total, task.total === 2 ? 2 : 3, answerRng);
+    }
+    if (task.choices?.length) {
+      task.choices = task.kind === 'pair'
+        ? orderAnswers(task.choices, task.answer, choice => `${choice.color}-${choice.object}`)
+        : orderAnswers(task.choices, task.answer);
+    } else if (task.tiles) {
+      task.tiles = orderAnswers(task.tiles, task.kind === 'missing' ? task.pieces[task.missing] : undefined, tile => tile.text);
     }
   }
   return result;
