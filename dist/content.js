@@ -11,6 +11,7 @@ import { installProfileClips } from './profile-content.js?v=2.2.0-voices';
 import { MORE_ANIMALS, MORE_COLORS, ENGLISH_OBJECTS } from './english-expansion.js';
 import { LETTER_EXAMPLE_CLIPS } from './word-practice-expansion.js';
 import { NUMBER_WORKSHOP_CLIPS } from './number-workshop-content.js?v=2.5.0-play';
+import { ACT_OUT_INSTRUCTION, ACT_OUT_PROMPT } from './act-out.js?v=2.6.0-stories';
 export { ENGLISH_OBJECTS } from './english-expansion.js';
 export { WORDS, READING_LEVELS } from './reading.js';
 
@@ -143,3 +144,4 @@ installJourneyClips(CLIPS);
 Object.assign(CLIPS, LETTER_EXAMPLE_CLIPS);
 installProfileClips(CLIPS);
 Object.assign(CLIPS, NUMBER_WORKSHOP_CLIPS);
+CLIPS[ACT_OUT_PROMPT] = { lang: 'he-IL', text: ACT_OUT_INSTRUCTION, speech: 'kiʁʔˈi ʔˈet hamiʃpˈat. hazˈizi ʔˈet mˈa ʃematʔˈim.' };

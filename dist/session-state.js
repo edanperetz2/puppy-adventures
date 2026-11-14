@@ -1,8 +1,9 @@
-import { WORDS, ANIMALS, COLORS, NUMBERS, CLIPS, MISSIONS, READING_LEVELS } from './content.js';
+import { WORDS, ANIMALS, COLORS, NUMBERS, CLIPS, MISSIONS, READING_LEVELS } from './content.js?v=2.6.0-stories';
 import { LETTERS } from './letters.js';
 import { clockTime, CLOCK_LEVELS } from './clock.js';
 import { CHARACTERS, CHARACTER_LEVELS, CHARACTER_MODES } from './characters.js?v=2.2.2-six';
 import { adventurePhase, isSessionLength } from './adventure.js?v=2.2.2-six';
+import { ACT_OUT_PROMPT, canActOut, cleanActOutMoves } from './act-out.js?v=2.6.0-stories';
 
 export const roundKey = (mission,settings) => `${mission}:${mission==='hebrew'?settings.reading:mission==='letters'?settings.letterLanguage:mission==='clock'?settings.clockLevel:mission==='characters'?`${settings.characterLevel}:${settings.characterMode}`:'default'}`;
 export function packRound(round) {
@@ -16,7 +17,16 @@ export function unpackRound(raw) {
       const q={id:`${raw.mission}-${i}`,type:d.type,phase:adventurePhase(i,raw.questions.length),prompt:d.prompt,hint:d.hint};
       if(!CLIPS[q.prompt]||!CLIPS[q.hint]||!Array.isArray(d.options)||d.options.length<2||d.options.length>3)throw Error();
       let pool;
-      if(d.type==='read'){q.word=WORDS.find(w=>w.id===d.word);if(!q.word)throw Error();pool=WORDS;q.answer=q.word.id;}
+      if (d.type === 'read') {
+        q.word = WORDS.find(word => word.id === d.word);
+        if (!q.word) throw Error();
+        pool = WORDS;
+        q.answer = q.word.id;
+        if (d.actOut === true && raw.mission === 'hebrew' && raw.reading === 'sentences' && canActOut(q.word)) {
+          q.actOut = true;
+          q.prompt = ACT_OUT_PROMPT;
+        }
+      }
       else if(d.type==='letter'){q.letter=LETTERS[d.letter?.language]?.find(l=>l.id===d.letter.id);if(!q.letter)throw Error();pool=LETTERS[d.letter.language];q.answer=q.letter.id;q.showModel=d.showModel===true;q.targetClip=q.letter.clip;}
       else if(d.type==='character'){q.character=CHARACTERS.find(c=>c.id===d.character);if(!q.character||!['picture-name','name-picture'].includes(d.direction)||!['crew','paw'].includes(d.collection))throw Error();Object.assign(q,{collection:d.collection,direction:d.direction,tier:Math.min(3,Math.max(1,Number(d.tier)||1)),answer:q.character.id});pool=CHARACTERS;}
       else if(d.type==='clock'){if(!Number.isInteger(d.time?.hour)||d.time.hour<1||d.time.hour>12||!Number.isInteger(d.time.minute)||d.time.minute<0||d.time.minute>59)throw Error();q.time=clockTime(d.time.hour,d.time.minute);q.answer=q.time.id;pool=Array.from({length:12},(_,h)=>Array.from({length:60},(_,m)=>clockTime(h+1,m))).flat();}
@@ -26,7 +36,10 @@ export function unpackRound(raw) {
       q.options=d.options.map(id=>pool.find(o=>o.id===id));if(q.options.some(o=>!o)||new Set(d.options).size!==d.options.length||!d.options.includes(q.answer))throw Error();return q;
     });
     const ints=value=>new Set((Array.isArray(value)?value:[]).filter(n=>Number.isInteger(n)&&n>=0&&n<questions.length));
-    return {id:raw.id,key:typeof raw.key==='string'&&/^[a-z0-9:_-]{1,96}$/.test(raw.key)?raw.key:`${raw.mission}:default`,mission:raw.mission,questions,index:raw.index,resolved:raw.resolved===true,attempted:new Set((raw.attempted||[]).filter(id=>questions[raw.index].options.some(o=>o.id===id))),counted:new Set((raw.counted||[]).filter(n=>/^(\d{1,2})$/.test(String(n))&&Number(n)<40).map(String)),helped:ints(raw.helped),observed:ints(raw.observed),letterIds:Array.isArray(raw.letterIds)?raw.letterIds.filter(id=>LETTERS[raw.letterLanguage]?.some(l=>l.id===id)).slice(0,3):null,letterLanguage:raw.letterLanguage==='english'?'english':'hebrew',reading:Object.hasOwn(READING_LEVELS,raw.reading)?raw.reading:'short',clockLevel:Object.hasOwn(CLOCK_LEVELS,raw.clockLevel)?raw.clockLevel:'hours',characterLevel:Object.hasOwn(CHARACTER_LEVELS,raw.characterLevel)?raw.characterLevel:'friends',characterMode:Object.hasOwn(CHARACTER_MODES,raw.characterMode)?raw.characterMode:'mixed',sticker:null,awarded:false,at:Number.isSafeInteger(raw.at)?raw.at:0};
+    const restored = {id:raw.id,key:typeof raw.key==='string'&&/^[a-z0-9:_-]{1,96}$/.test(raw.key)?raw.key:`${raw.mission}:default`,mission:raw.mission,questions,index:raw.index,resolved:raw.resolved===true,attempted:new Set((raw.attempted||[]).filter(id=>questions[raw.index].options.some(o=>o.id===id))),counted:new Set((raw.counted||[]).filter(n=>/^(\d{1,2})$/.test(String(n))&&Number(n)<40).map(String)),helped:ints(raw.helped),observed:ints(raw.observed),letterIds:Array.isArray(raw.letterIds)?raw.letterIds.filter(id=>LETTERS[raw.letterLanguage]?.some(l=>l.id===id)).slice(0,3):null,letterLanguage:raw.letterLanguage==='english'?'english':'hebrew',reading:Object.hasOwn(READING_LEVELS,raw.reading)?raw.reading:'short',clockLevel:Object.hasOwn(CLOCK_LEVELS,raw.clockLevel)?raw.clockLevel:'hours',characterLevel:Object.hasOwn(CHARACTER_LEVELS,raw.characterLevel)?raw.characterLevel:'friends',characterMode:Object.hasOwn(CHARACTER_MODES,raw.characterMode)?raw.characterMode:'mixed',sticker:null,awarded:false,at:Number.isSafeInteger(raw.at)?raw.at:0};
+    const current = questions[restored.index];
+    if (current.actOut) restored.actOutMoves = cleanActOutMoves(current.word, restored.id, raw.actOutMoves, restored.resolved);
+    return restored;
   }catch{return null;}
 }
 export function cleanDrafts(raw){return Object.fromEntries(Object.values(raw||{}).slice(0,40).map(unpackRound).filter(Boolean).map(r=>[r.key,packRound(r)]));}

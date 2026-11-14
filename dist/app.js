@@ -1,17 +1,17 @@
 import { LearningStore } from './learning-sync.js?v=2.2.2-six';
 import { questionLearning, learningSummary } from './learning.js';
-import { packRound, unpackRound, cleanDrafts, roundKey } from './session-state.js?v=2.2.2-six';
+import { packRound, unpackRound, cleanDrafts, roundKey } from './session-state.js?v=2.6.0-stories';
 import { JOURNEYS, newJourney, cleanJourney, resumeJourney, englishPairsReady, journeyLength } from './journey.js?v=2.2.5-practice';
 import { STORIES } from './journey-content.js';
 import { mountJourney } from './journey-view.js?v=2.2.5-practice';
 import { mountPark } from './park.js';
 import { mountFreeWriting, WRITING_STEPS } from './free-writing.js?v=2.3.3-dictation';
 import { parentLearning, learningStatus } from './learning-parent.js?v=2.3.3-dictation';
-import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.5.0-play';
+import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.6.0-stories';
 import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.2.4-practice';
 import { ADVENTURE_PHASES, adventurePhase } from './adventure.js?v=2.2.2-six';
 import { art, pup, scene, uiIcon } from './art.js';
-import { Narrator } from './audio.js?v=2.5.0-play';
+import { Narrator } from './audio.js?v=2.6.0-stories';
 import { GameAnnouncements } from './announcements.js';
 import { SharedAlbum, normalizeCode } from './sync.js?v=2.2.6-album';
 import { SYNC_CONFIG } from './sync-config.js';
@@ -36,6 +36,8 @@ import { numberWritingKey, mountNumberWriting } from './number-writing.js?v=2.3.
 import { mountNumberDictation, numberDictationKey } from './number-dictation.js?v=2.3.3-dictation';
 import { mountFruitCutting } from './fruit-cutting.js?v=2.5.0-play';
 import { mountPikachu, pikachuImage, PIKACHU_TITLE } from './pikachu-game.js?v=2.5.1-pikachu-greeting';
+import { ACT_OUT_PROMPT, actOutSteps } from './act-out.js?v=2.6.0-stories';
+import { mountActOut } from './act-out-view.js?v=2.6.0-stories';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -64,6 +66,7 @@ let drafts = {}, journeyDrafts = {}, awardedRounds = [], writingPractice = { mod
 let learner = null, journeyController = null, journeyPlan = null, parkController = null, freeWriting = null, hub = 'hebrew';
 let numberRound = null, numberDrafts = {}, numberController = null, numberSticker = null;
 let pikachuController = null;
+let actOutController = null;
 
 try {
   const saved = JSON.parse(gameStorage.getItem(STORAGE_KEY) || 'null');
@@ -421,7 +424,7 @@ function questionVisual(q) {
   if (q.type === 'character') return characterQuestion(q, settings.nikud);
   if (q.type === 'letter') return `<div class="letter-question-layout" dir="rtl"><div class="letter-question-card"><small>${q.letter.language === 'hebrew' ? 'איזו אות בכתב יד מתאימה?' : 'איזו אות קטנה מתאימה?'}</small><bdi class="letter-familiar" dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}">${q.letter.familiar}</bdi></div><div id="letter-recognition-model" class="letter-recognition-model" ${q.showModel ? '' : 'hidden'}>${letterShape(q.letter)}<span>זו אותה אות · נסתכל על הצורה</span></div></div>`;
   if (q.type === 'clock') return `<div class="clock-question-clock">${analogClock(q.time.hour, q.time.minute)}</div><button class="text-button clock-learn-link" data-action="clock-learn">${uiIcon('hint')} נזכרות איך קוראים שעון</button>`;
-  if (q.type === 'read') return `<div class="word-card ${q.word.scene ? 'phrase-word' : q.word.he.length >= 6 ? 'long-word' : ''}"><span class="card-label">מה כתוב כאן?</span><div class="target-word" lang="he" dir="rtl">${q.word.scene ? wordText(q.word).split(' ').map(word => `<span class="reading-token">${word}</span>`).join(' ') : wordText(q.word)}</div><span class="word-underline"></span></div>`;
+  if (q.type === 'read') return `<div class="word-card ${q.word.scene ? 'phrase-word' : q.word.he.length >= 6 ? 'long-word' : ''}">${q.actOut ? '' : '<span class="card-label">מה כתוב כאן?</span>'}<div class="target-word" lang="he" dir="rtl">${q.word.scene ? wordText(q.word).split(' ').map(word => `<span class="reading-token">${word}</span>`).join(' ') : wordText(q.word)}</div>${q.actOut ? '' : '<span class="word-underline"></span>'}</div>`;
   if (q.type === 'listen') return `<button class="listen-orb" data-action="listen-word" aria-label="שמיעת המילה באנגלית">${uiIcon('sound')}<span class="sound-waves"><i></i><i></i><i></i><i></i><i></i></span><span>לחצי ושמעי את המילה</span></button>`;
   if (q.type === 'count') return `<div class="counting-stage">${tallyGroup(q.a, 0, q.item)}<p class="tally-instruction">אפשר לגעת בכל פריט ולספור ביחד</p></div>`;
   return `<div class="addition-stage ${Math.max(q.a, q.b) > 10 ? 'large-add' : ''}" dir="ltr"><div class="add-group">${tallyGroup(q.a, 0, q.item)}<span class="group-number">${q.a}</span></div><span class="plus-sign" aria-label="ועוד">+</span><div class="add-group">${tallyGroup(q.b, q.a, q.item)}<span class="group-number">${q.b}</span></div></div><div class="equation" dir="ltr" aria-label="${q.a} ועוד ${q.b}">${q.a} <span>+</span> ${q.b} <span>=</span> <b>?</b></div>`;
@@ -451,18 +454,38 @@ function renderGame() {
   const q = current();
   const length = round.questions.length;
   learner.record({...questionLearning(q),eventId:`${round.id}:seen:${round.index}`},'seen');
-  const title = q.type === 'character' ? q.direction === 'picture-name' ? 'מה השם של הדמות?' : 'איזו דמות מתאימה לשם?' : q.type === 'letter' ? 'איזו אות מתאימה?' : q.type === 'clock' ? 'מה השעה בשעון?' : q.type === 'read' ? q.word.scene ? 'איזו תמונה מתאימה למה שכתוב?' : 'איזו תמונה מתאימה למילה?' : q.type === 'listen' ? 'מה שמעת באנגלית?' : q.type === 'add' ? 'כמה יש ביחד?' : 'כמה יש בסל?';
+  const actingTitle = settings.nikud ? 'מְשַׂחֲקוֹת אֶת הַסִּפּוּר' : 'משחקות את הסיפור';
+  const title = q.actOut ? actingTitle : q.type === 'character' ? q.direction === 'picture-name' ? 'מה השם של הדמות?' : 'איזו דמות מתאימה לשם?' : q.type === 'letter' ? 'איזו אות מתאימה?' : q.type === 'clock' ? 'מה השעה בשעון?' : q.type === 'read' ? q.word.scene ? 'איזו תמונה מתאימה למה שכתוב?' : 'איזו תמונה מתאימה למילה?' : q.type === 'listen' ? 'מה שמעת באנגלית?' : q.type === 'add' ? 'כמה יש ביחד?' : 'כמה יש בסל?';
   const stage = q.type === 'read' ? round.reading === 'all' ? Object.values(READING_LEVELS).find(level => level.level === q.word.level) : READING_LEVELS[round.reading] : null;
-  app.innerHTML = `${header()}<main id="main" class="game-page ${mission.color} ${q.type === 'character' ? 'character-game' : q.type === 'clock' ? 'clock-game' : q.type === 'letter' ? 'letter-game' : q.type === 'read' ? 'reading-game' : ''}">
+  app.innerHTML = `${header()}<main id="main" class="game-page ${mission.color} ${q.type === 'character' ? 'character-game' : q.type === 'clock' ? 'clock-game' : q.type === 'letter' ? 'letter-game' : q.type === 'read' ? 'reading-game' : ''}${q.actOut ? ' act-out-game' : ''}">
     <div class="game-topline"><button class="text-button back-button" data-action="${q.type === 'character' ? 'characters-menu' : q.type === 'read' ? 'reading-levels' : q.type === 'letter' ? 'letters-menu' : 'home'}">${uiIcon('home')} ${q.type === 'character' ? 'לבחירת חברים' : q.type === 'read' ? 'לבחירת שלב' : q.type === 'letter' ? 'למסלולי האותיות' : 'למפת ההרפתקאות'}</button><span class="mission-label">${mission.name}${q.type === 'character' ? ` · שלב ${CHARACTER_LEVELS[round.characterLevel].number}` : ''}${q.type === 'letter' ? ' · משחק זיהוי' : ''}${stage ? ` · ${stage.number ? `שלב ${stage.number}` : stage.name}` : ''}</span><span class="step-label">צעד ${round.index + 1} מתוך ${length}</span></div>
     <div class="step-track" aria-label="התקדמות: ${round.index} מתוך ${length}">${round.questions.map((_, i) => `<span class="step-dot ${i < round.index ? 'done' : i === round.index ? 'current' : ''}">${i < round.index ? uiIcon('check') : i + 1}</span>`).join('')}</div>
     <section class="game-board"><div class="question-heading"><div><span class="section-kicker">${ADVENTURE_PHASES[q.phase]}</span><h1 id="question-title" tabindex="-1">${title}</h1></div><button class="circle-button replay-button" data-action="replay" aria-label="שמיעת ההוראות שוב">${uiIcon('sound')}</button></div>
       <div class="question-visual">${questionVisual(q)}</div>
-      <div class="answer-grid ${q.options.length === 2 ? 'two-options' : ''} ${q.type === 'character' ? q.direction === 'picture-name' ? 'character-names' : 'character-pictures' : ''} ${q.type === 'read' && q.word.scene ? 'scene-options' : ''} ${q.type === 'count' || q.type === 'add' || q.kind === 'number' ? 'numeric-options' : ''}" ${q.type === 'letter' ? `dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}"` : ''} role="group" aria-label="בחירת תשובה">${q.options.map(option => `${q.type === 'clock' ? '<div class="clock-choice">' : ''}<button class="answer-button ${round.attempted.has(option.id) ? 'try-again' : ''}" data-action="answer" data-answer="${option.id}" aria-label="${answerLabel(q, option)}" ${round.attempted.has(option.id) ? 'disabled' : ''}>${answerVisual(q, option)}<span class="answer-check">${uiIcon('check')}</span></button>${q.type === 'clock' ? `<button class="clock-option-sound" data-action="clock-option-audio" data-clips="${option.clips.join(' ')}" aria-label="שמיעת האפשרות ${option.he}">${uiIcon('sound')}</button></div>` : ''}`).join('')}</div>
+      ${q.actOut ? '<div id="act-out-root"></div>' : `<div class="answer-grid ${q.options.length === 2 ? 'two-options' : ''} ${q.type === 'character' ? q.direction === 'picture-name' ? 'character-names' : 'character-pictures' : ''} ${q.type === 'read' && q.word.scene ? 'scene-options' : ''} ${q.type === 'count' || q.type === 'add' || q.kind === 'number' ? 'numeric-options' : ''}" ${q.type === 'letter' ? `dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}"` : ''} role="group" aria-label="בחירת תשובה">${q.options.map(option => `${q.type === 'clock' ? '<div class="clock-choice">' : ''}<button class="answer-button ${round.attempted.has(option.id) ? 'try-again' : ''}" data-action="answer" data-answer="${option.id}" aria-label="${answerLabel(q, option)}" ${round.attempted.has(option.id) ? 'disabled' : ''}>${answerVisual(q, option)}<span class="answer-check">${uiIcon('check')}</span></button>${q.type === 'clock' ? `<button class="clock-option-sound" data-action="clock-option-audio" data-clips="${option.clips.join(' ')}" aria-label="שמיעת האפשרות ${option.he}">${uiIcon('sound')}</button></div>` : ''}`).join('')}</div>`}
       <div class="feedback-row"><div class="feedback" id="feedback" role="status" aria-live="polite">קחי את הזמן. החברים כאן איתך ♡</div><button class="hint-button" data-action="hint">${uiIcon('hint')} רמז קטן</button><button class="primary-button next-button" data-action="next" hidden>ממשיכות ${uiIcon('arrow')}</button></div>
       <div id="letter-success-examples">${round.resolved && q.type==='letter' ? letterExampleCards(q.letter,settings.nikud) : ''}</div><p id="audio-notice" class="audio-notice" role="status" hidden></p>
     </section><div class="buddy-bar">${pup(mission.pup)}<span id="buddy-message">${{ luli: 'לולי', bobi: 'בובי', tofi: 'טופי' }[mission.pup]} כאן לעזור לך!</span><span class="buddy-hearts">♡ ♡ ♡</span></div>
   </main>${footer()}`;
+  if (q.actOut) actOutController = mountActOut(document.querySelector('#act-out-root'), {
+    word: q.word, roundId: round.id, moves: round.actOutMoves || [], resolved: round.resolved,
+    nikud: settings.nikud, motion: () => settings.motion,
+    onMove: (moves, complete) => {
+      round.actOutMoves = moves;
+      if (complete) resolveAnswer(q);
+      else {
+        checkpoint();
+        document.querySelector('#feedback').textContent = settings.nikud ? `הֻנְּחוּ ${moves.length}. הַמְשִׁיכִי לְפִי הַמִּשְׁפָּט.` : `הונחו ${moves.length}. המשיכי לפי המשפט.`;
+      }
+    },
+    onFinish: () => document.querySelector('.next-button')?.focus({ preventScroll: false }),
+    onRetry: () => {
+      round.helped.add(round.index);
+      document.querySelector('#feedback').textContent = settings.nikud ? 'נַסִּי שׁוּב. אֶפְשָׁר לִקְרֹא עוֹד פַּעַם.' : 'נסי שוב. אפשר לקרוא עוד פעם.';
+      checkpoint();
+      announcements.say('try-again');
+    },
+  });
 }
 
 function renderComplete() {
@@ -542,6 +565,7 @@ function render() {
   numberController?.destroy(); numberController=null;
   parkController?.destroy(); parkController=null;
   pikachuController?.destroy(); pikachuController=null;
+  actOutController?.destroy(); actOutController=null;
   letterPad?.destroy(); letterPad = null;
   clockSchool?.destroy(); clockSchool = null;
   applyPreferences();
@@ -587,6 +611,9 @@ function startMission(mission, skipLesson = false) {
   if(restored){round=restored;view='game';render();focusTitle();return;}
   const letterIds = mission === 'letters' ? recognitionGroup().map(letter => letter.id) : null;
   const questions = createSession(mission, { ...settings, learning:learner.items, readingRecent: readingPractice.recent[settings.reading], letterPractice: progress.letterPractice, letterIds, characterPractice });
+  if (mission === 'hebrew' && settings.reading === 'sentences') {
+    for (const index of actOutSteps(questions)) Object.assign(questions[index], { actOut: true, prompt: ACT_OUT_PROMPT });
+  }
   round = { id:crypto.randomUUID(), key, observed:new Set(), mission, questions, letterIds, letterLanguage: settings.letterLanguage, reading: settings.reading, clockLevel: settings.clockLevel, characterLevel: settings.characterLevel, characterMode: settings.characterMode, index: 0, resolved: false, attempted: new Set(), counted: new Set(), helped: new Set(questions.flatMap((q, i) => q.showModel ? [i] : [])), sticker: null, awarded: false };
   view = 'game'; checkpoint();
   render();
@@ -649,7 +676,7 @@ function hint() {
     face.classList.remove('highlight-hour', 'highlight-minute'); face.classList.add(q.time.minute === 0 ? 'highlight-hour' : 'highlight-minute');
     announcements.say(q.hint); return;
   }
-  document.querySelector('#feedback').textContent = q.type === 'read' ? 'נשמע מה כתוב, ואז נחפש את התמונה.' : q.type === 'listen' ? 'נקשיב שוב לאט. איזו תמונה מתאימה?' : 'געי בפריטים אחד־אחד. נמשיך לספור יחד.';
+  document.querySelector('#feedback').textContent = q.actOut ? 'נשמע מה כתוב ונזיז את מה שמתאים.' : q.type === 'read' ? 'נשמע מה כתוב, ואז נחפש את התמונה.' : q.type === 'listen' ? 'נקשיב שוב לאט. איזו תמונה מתאימה?' : 'געי בפריטים אחד־אחד. נמשיך לספור יחד.';
   announcements.say([q.hint, ...(q.type === 'read' ? [`he-${q.word.id}`] : q.targetClip ? [q.targetClip] : [])], { slow: true });
 }
 
@@ -667,20 +694,24 @@ function tally(button) {
 function answer(button) {
   if (round.resolved || round.attempted.has(button.dataset.answer)) return;
   const q = current();
-  const feedback = document.querySelector('#feedback');
   if (button.dataset.answer !== q.answer) {
     round.attempted.add(button.dataset.answer);
     round.helped.add(round.index);
     button.classList.add('try-again');
     button.disabled = true;
-    feedback.textContent = 'נסי שוב, אריאל. אני כאן איתך ♡';
+    document.querySelector('#feedback').textContent = 'נסי שוב, אריאל. אני כאן איתך ♡';
     checkpoint(); announcements.say('try-again');
     return;
   }
+  resolveAnswer(q, button);
+}
+
+function resolveAnswer(q, button = null) {
+  const feedback = document.querySelector('#feedback');
   round.resolved = true;
   if (!round.observed.has(round.index)) { learner.record({...questionLearning(q),eventId:`${round.id}:${round.index}`},round.helped.has(round.index)?'helped':'independent'); round.observed.add(round.index); }
   checkpoint();
-  button.classList.add('correct');
+  button?.classList.add('correct');
   for (const option of document.querySelectorAll('.answer-button')) option.disabled = true;
   document.querySelector('.hint-button').hidden = true;
   const lessonLink = document.querySelector('[data-action="clock-learn"]');
@@ -697,7 +728,7 @@ function answer(button) {
   announcements.say([`correct-${1 + round.index % 3}`, ...(q.type === 'character' ? [q.character.clip] : q.type === 'clock' ? q.time.clips : q.type === 'read' ? [`he-${q.word.id}`] : q.targetClip ? [q.targetClip] : [])]);
   narrator.chime();
   celebrate(16);
-  next.focus({ preventScroll: q.type !== 'character' && q.type !== 'clock' && !(q.type === 'read' && q.word.scene) });
+  if (!q.actOut) next.focus({ preventScroll: q.type !== 'character' && q.type !== 'clock' && !(q.type === 'read' && q.word.scene) });
 }
 
 function nextQuestion() {
@@ -722,6 +753,7 @@ function nextQuestion() {
   round.resolved = false;
   round.attempted = new Set();
   round.counted = new Set();
+  delete round.actOutMoves;
   checkpoint(); render(); focusTitle();
   const q = current();
   announcements.say([q.prompt, ...(q.showModel ? ['letters-recognition-hint'] : []), ...(q.targetClip ? [q.targetClip] : [])]);

@@ -8,6 +8,8 @@ import { PICTURE_SCENE_PASSAGES } from '../dist/reading-picture-scenes.js';
 import { readingWords, readingTargets, sanitizeReadingPractice, finishReadingPractice } from '../dist/reading.js';
 import { createSession, DEFAULT_SETTINGS } from '../dist/engine.js';
 import { art } from '../dist/art.js';
+import { actOutMatches, actOutPlan, actOutSteps, canActOut } from '../dist/act-out.js';
+import { packRound, unpackRound } from '../dist/session-state.js';
 const additions=[...PICTURE_PLACE_PASSAGES,...PICTURE_SCENE_PASSAGES];
 const ids=new Set(additions.map(word=>word.id));
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
@@ -59,10 +61,50 @@ test('Every previous reading target and all 2114 original voice records remain u
   const originalWords=WORDS.filter(word=>!ids.has(word.id));
   assert.equal(originalWords.length,baseline.wordCount);
   assert.equal(hash(originalWords),baseline.wordDigest);
-  const previouslyReleased = ([key]) => !/^(?:he-picture-|profile-good-luck|journey-give-|journey-apples-left$|number-workshop-)/u.test(key);
+  const previouslyReleased = ([key]) => !/^(?:he-picture-|profile-good-luck|journey-give-|journey-apples-left$|number-workshop-|act-out$)/u.test(key);
   const originalClips=Object.fromEntries(Object.entries(CLIPS).filter(previouslyReleased));
   assert.equal(Object.keys(originalClips).length,baseline.clipCount);
   assert.equal(hash(originalClips),baseline.clipDigest);
   const recordings=JSON.parse(await readFile(new URL('../dist/assets/audio/manifest.json',import.meta.url),'utf8')).clips;
   assert.equal(hash(Object.fromEntries(Object.entries(recordings).filter(previouslyReleased))),baseline.recordingsDigest);
+});
+
+test('Acting out a sentence tests the correct object detail and its destination', () => {
+  const ready = readingWords('sentences').filter(canActOut);
+  const roundId = '02968f01-5fbd-4ecb-96dc-8d98339db381';
+  assert.deepEqual(new Set(ready.map(word => word.scene.kind)), new Set(['position', 'arrangement', 'travel']));
+  for (const word of ready) {
+    const plan = actOutPlan(word, roundId);
+    assert.deepEqual(actOutPlan(word, roundId), plan);
+    assert.ok(plan.destinations.includes(plan.target));
+    assert.ok(new Set(plan.destinations).size >= 2);
+    if (word.scene.kind === 'travel') assert.equal(plan.target, word.scene.anchor);
+    else assert.equal(plan.target, word.scene.position);
+    if (word.scene.count) assert.equal(plan.pieces.length, word.scene.count + 1);
+    const matching = plan.pieces.flatMap((_, index) => plan.destinations.filter(place => actOutMatches(word, plan, index, place)));
+    assert.deepEqual(matching, Array(word.scene.count ? word.scene.count + 1 : 1).fill(plan.target), word.id);
+  }
+  for (let seed = 1; seed <= 40; seed++) {
+    const questions = createSession('hebrew', { ...DEFAULT_SETTINGS, reading: 'sentences' }, rng(seed));
+    const active = actOutSteps(questions);
+    assert.ok(active.length <= 2 && active.every(index => canActOut(questions[index].word)));
+    assert.ok(active.length < 2 || active[1] > active[0] + 1);
+  }
+});
+
+test('Saved short stories keep the same props and only valid, distinct placements', () => {
+  const questions = createSession('hebrew', { ...DEFAULT_SETTINGS, reading: 'sentences' }, rng(3));
+  const word = additions.find(word => word.scene.kind === 'arrangement' && word.scene.count === 3);
+  const index = 4;
+  const id = '2ac22275-6605-4c48-a858-53e6a49c26ee';
+  const alternatives = additions.filter(option => option.family === word.family && option !== word).slice(0, 2);
+  questions[index] = { ...questions[index], word, options: [word, ...alternatives] };
+  const raw = packRound({ id, mission: 'hebrew', reading: 'sentences', questions, index, attempted: [], helped: [], counted: [], actOutMoves: [0, 0, 2, 3, 99, '1'] });
+  assert.equal(unpackRound(raw).questions[index].actOut, undefined);
+  raw.questions[index].actOut = true;
+  const restored = unpackRound(raw);
+  assert.equal(restored.questions[index].actOut, true);
+  assert.equal(restored.questions[index].prompt, 'act-out');
+  assert.deepEqual(restored.actOutMoves, [0, 2]);
+  assert.deepEqual(unpackRound({ ...raw, resolved: true, actOutMoves: [2] }).actOutMoves, [2, 0, 1]);
 });

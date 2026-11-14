@@ -16362,6 +16362,13 @@
       "detected_ipa": "jˈeʃ ʃnˈej χatsaʔˈim, hosˈifi ʔˈad ʃejihjˈu ʔasaʁˈa.",
       "phoneme_edit_ratio": 0,
       "seconds": 5.2
+    },
+    "act-out": {
+      "sha256": "c5d9a7fd52445c35a78c0aca98258e86f682f70dfb5a93fb4bbb8e4dfa9a83d8",
+      "expected_ipa": "kiʁʔˈi ʔˈet hamiʃpˈat. hazˈizi ʔˈet mˈa ʃematʔˈim.",
+      "detected_ipa": "kiʁʔˈi ʔˈet hamiʃpˈat, hazˈizi ʔˈet mˈa ʃematʔˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.66
     }
   }
 }

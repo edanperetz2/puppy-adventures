@@ -9,18 +9,21 @@ const moon = '<path d="M34 25A19 19 0 1 0 59 50A19 19 0 0 1 34 25" fill="#dfc98d
 
 export function hasReadingScene(id) { return Object.hasOwn(READING_SCENES, id); }
 
+export function paintedReadingObject(object, color, body) {
+  if (!palette[color]) return body;
+  const [tone, light] = palette[color];
+  const replacements = { ball: { '#f0b15f': tone, '#6aafa9': light }, flower: { '#e7a4ac': tone }, car: { '#82b5ad': tone }, butterfly: { '#b49ace': tone, '#edb4c1': light, '#f2c976': light }, bird: { '#85b8cd': tone, '#6ca7c2': tone, '#c0dce5': light }, star: { '#f3c65c': tone, '#e5aa3b': tone, '#ffedaa': light }, heart: { '#ec859c': tone, '#ffc0ce': light }, balloon: { '#BB1A34': tone } }[object] || {};
+  for (const [from, to] of Object.entries(replacements)) body = body.replaceAll(from, to);
+  return body;
+}
+
 export function readingScene(id, baseArt) {
   if (!hasReadingScene(id)) return null;
   const spec = READING_SCENES[id];
   const raw = (object, color) => {
     let body = baseArt(object).replace(/^<svg\b[^>]*>/u, '').replace(/<\/svg>$/u, '');
     if (object === 'pencil' && spec.kind === 'position' && spec.position === 'on') body = `<g transform="rotate(-45 100 100)">${body}</g>`;
-    if (color && palette[color]) {
-      const [tone, light] = palette[color];
-      const replacements = { ball: { '#f0b15f': tone, '#6aafa9': light }, flower: { '#e7a4ac': tone }, car: { '#82b5ad': tone }, butterfly: { '#b49ace': tone, '#edb4c1': light, '#f2c976': light }, bird: { '#85b8cd': tone, '#6ca7c2': tone, '#c0dce5': light }, star: { '#f3c65c': tone, '#e5aa3b': tone, '#ffedaa': light }, heart: { '#ec859c': tone, '#ffc0ce': light }, balloon: { '#BB1A34': tone } }[object] || {};
-      for (const [from, to] of Object.entries(replacements)) body = body.replaceAll(from, to);
-    }
-    return body;
+    return paintedReadingObject(object, color, body);
   };
   const place = (body, x, y, size, cls = '') => `<g transform="translate(${x} ${y}) scale(${size / 200})"><g class="${cls}">${body}</g></g>`;
   const at = (object, x, y, size, color, cls) => place(raw(object, color), x, y, size, cls);
