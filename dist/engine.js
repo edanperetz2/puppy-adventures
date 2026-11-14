@@ -1,5 +1,5 @@
 import { choosePractice } from './learning.js';
-import { ANIMALS, COLORS, NUMBERS, STICKERS, MISSIONS, MISSION_IDS } from './content.js?v=2.7.0-science';
+import { ANIMALS, COLORS, NUMBERS, STICKERS, MISSIONS, MISSION_IDS } from './content.js?v=2.7.1-pepper';
 import { CLOCK_LEVELS, clockTime, clockConceptRank } from './clock.js';
 import { LETTERS, letterGroup } from './letters.js';
 import { READING_LEVELS, mixedReadingTargets, readingWords, readingTargets } from './reading.js?v=2.7.0-science';

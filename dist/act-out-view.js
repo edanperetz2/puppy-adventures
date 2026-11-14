@@ -1,5 +1,5 @@
 import { art, uiIcon } from './art.js?v=2.7.0-science';
-import { CLIPS, COLORS, WORDS } from './content.js?v=2.7.0-science';
+import { CLIPS, COLORS, WORDS } from './content.js?v=2.7.1-pepper';
 import { paintedReadingObject, sleepingReadingAnimal } from './reading-scenes.js?v=2.7.0-science';
 import { actOutMatches, actOutPlan, actOutPrompt } from './act-out.js?v=2.7.0-science';
 

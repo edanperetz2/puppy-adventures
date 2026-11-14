@@ -13,7 +13,7 @@ import { LETTER_EXAMPLE_CLIPS } from './word-practice-expansion.js';
 import { NUMBER_WORKSHOP_CLIPS } from './number-workshop-content.js?v=2.5.0-play';
 import { ACT_OUT_INSTRUCTION, ACT_OUT_PROMPT } from './act-out.js?v=2.7.0-science';
 import { ACTION_STORY_INSTRUCTIONS } from './reading-animal-stories.js?v=2.7.0-science';
-import { SCIENCE_CLIPS } from './science-content.js?v=2.7.0-science';
+import { SCIENCE_CLIPS } from './science-content.js?v=2.7.1-pepper';
 export { ENGLISH_OBJECTS } from './english-expansion.js';
 export { WORDS, READING_LEVELS } from './reading.js?v=2.7.0-science';
 

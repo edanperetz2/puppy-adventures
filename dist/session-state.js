@@ -1,4 +1,4 @@
-import { WORDS, ANIMALS, COLORS, NUMBERS, CLIPS, MISSIONS, READING_LEVELS } from './content.js?v=2.7.0-science';
+import { WORDS, ANIMALS, COLORS, NUMBERS, CLIPS, MISSIONS, READING_LEVELS } from './content.js?v=2.7.1-pepper';
 import { LETTERS } from './letters.js';
 import { clockTime, CLOCK_LEVELS } from './clock.js';
 import { CHARACTERS, CHARACTER_LEVELS, CHARACTER_MODES } from './characters.js?v=2.2.2-six';

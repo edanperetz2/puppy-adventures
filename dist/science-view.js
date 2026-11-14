@@ -1,6 +1,6 @@
 import { art, uiIcon } from './art.js?v=2.7.0-science';
 import { shuffle } from './answer-order.js';
-import { SCIENCE_TITLE, SCIENCE_EXPERIMENTS, SCIENCE_ACTIONS, SCIENCE_CLIPS, scienceClip } from './science-content.js?v=2.7.0-science';
+import { SCIENCE_TITLE, SCIENCE_EXPERIMENTS, SCIENCE_ACTIONS, SCIENCE_CLIPS, scienceClip } from './science-content.js?v=2.7.1-pepper';
 
 const localText = (text, nikud) => nikud ? text : text.replace(/[\u0591-\u05bd\u05bf-\u05c7]/gu, '');
 const clipText = key => SCIENCE_CLIPS[scienceClip(key)].text;
@@ -9,15 +9,17 @@ const pictures = {
   mix: '<i class="lab-layer-symbol mixed"></i>',
   float: '<i class="lab-float-symbol"></i>',
   sink: '<i class="lab-float-symbol sunk"></i>',
+  'pepper-moves': '<i class="lab-pepper-choice lab-pepper-choice-spread"></i>',
+  'pepper-stays': '<i class="lab-pepper-choice"></i>',
 };
-const toolEffects = new Set(['water', 'oil', 'spoon', 'soap', 'cork', 'wood', 'rock', 'cold-ice', 'warm-ice']);
+const toolEffects = new Set(['water', 'oil', 'spoon', 'soap', 'cork', 'wood', 'rock', 'cold-ice', 'warm-ice', 'pepper', 'water-drop']);
 const cold = 'מַיִם קָרִים';
 const warm = 'מַיִם חַמִּים';
 
 export function scienceArt(name) {
   if (name === 'look') return uiIcon('hint');
   if (pictures[name]) return pictures[name];
-  if (['water', 'oil', 'soap', 'cork', 'wood'].includes(name)) return `<i class="lab-prop lab-prop-${name}"></i>`;
+  if (['water', 'oil', 'soap', 'cork', 'wood', 'pepper'].includes(name)) return `<i class="lab-prop lab-prop-${name}"></i>`;
   return art({ warm: 'sun', cold: 'ice', timer: 'clock' }[name] || name);
 }
 
@@ -50,7 +52,42 @@ function liquidGlass(state, label = '', drop = 'main') {
   return glass({ water: state !== 'empty', contents, state, label, drop });
 }
 
+// Keep each grain visible as it is carried from its original spot toward the rim.
+const pepperGrains = Array.from({ length: 32 }, (_, index) => {
+  const angle = index * 2.4;
+  const radius = 5 + 35 * Math.sqrt(index / 31);
+  const edge = 35 + radius * .23 + (index * 7 % 11) * .25;
+  const x = Math.cos(angle);
+  const y = Math.sin(angle);
+  const position = (distance, direction) => (50 + distance * direction).toFixed(2);
+  return `<i class="lab-pepper-grain" style="--x:${position(radius, x)}%;--y:${position(radius, y)}%;--edge-x:${position(edge, x)}%;--edge-y:${position(edge, y)}%;--grain:${2 + index % 3}px;--delay:${index * 11 % 215}ms"></i>`;
+}).join('');
+
+function pepperDishes(state, step, effect, text) {
+  const sprinkled = ['sprinkled', 'water-tested', 'soap-tested'].includes(state);
+  const compared = state === 'soap-tested';
+  const sharedDrop = step.actions.includes('water') || step.actions.includes('pepper');
+  const dishes = [
+    { id: 'water-drop', dish: 'צַלַּחַת 1', tested: state === 'water-tested' || compared, label: 'טִפַּת מַיִם' },
+    { id: 'soap', dish: 'צַלַּחַת 2', tested: compared, label: 'טִפַּת סַבּוֹן' },
+  ];
+  return `<div class="lab-pepper-pair">${dishes.map(({ id, dish, tested, label }) => {
+    const active = !tested && step.actions.includes(id);
+    const dropping = effect === id;
+    return `<div class="lab-pepper-dish" data-dish="${id}" data-tested="${tested}" data-dropping="${dropping}">
+      <div class="lab-pepper-bowl${active ? ' lab-pepper-target' : ''}" data-lab-drop="${sharedDrop ? 'main' : id}">
+        <div class="lab-pepper-surface${state === 'empty' ? '' : ' lab-pepper-wet'}">
+          ${sprinkled ? pepperGrains : ''}${dropping ? '<i class="lab-pepper-ripple"></i>' : ''}
+        </div>
+        ${dropping ? '<i class="lab-pepper-drop"></i>' : ''}
+      </div>
+      <span class="lab-cup-label">${text(tested ? label : dish)}</span>
+    </div>`;
+  }).join('')}</div>`;
+}
+
 function experimentScene(path, state, step, effect, text) {
+  if (path === 'pepper') return pepperDishes(state, step, effect, text);
   if (path === 'liquids') {
     const compare = state === 'soapy-layers' || state === 'droplets';
     const cups = compare
@@ -96,7 +133,7 @@ export function mountScience(root, { path, saved, nikud, motion, speak, onSave, 
     const scene = selected ? current.after : current.before;
     const field = `<div class="lab-stage lab-stage-${path}" data-effect="${effect}" data-lab-scene="${scene}" role="img" aria-label="${text(figureLabel)}">
       ${experimentScene(path, scene, current, effect, text)}
-      ${effect && ['water', 'oil', 'soap', 'spoon', 'time'].includes(effect) ? `<span class="lab-in-motion lab-picture">${scienceArt(SCIENCE_ACTIONS[effect].icon)}</span>` : ''}
+      ${path !== 'pepper' && ['water', 'oil', 'soap', 'spoon', 'time'].includes(effect) ? `<span class="lab-in-motion lab-picture">${scienceArt(SCIENCE_ACTIONS[effect].icon)}</span>` : ''}
     </div>`;
     const buttons = ordered[state.index].map(id => `<button class="lab-tool${toolEffects.has(id) ? ' lab-draggable' : ''}" data-lab-action="${id}" type="button" ${selected ? ' disabled' : ''}>
       <span class="lab-picture" aria-hidden="true">${scienceArt(SCIENCE_ACTIONS[id].icon)}</span><span>${actionLabel(id, current)}</span></button>`).join('');

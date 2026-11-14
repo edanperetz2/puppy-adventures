@@ -16782,6 +16782,83 @@
       "detected_ipa": "ɡˈam bamˈajim hakaʁˈim hakˈeʁaχ namˈes, hakˈeʁaχ hafˈaχ lemˈajim.",
       "phoneme_edit_ratio": 0,
       "seconds": 1.95
+    },
+    "science-pepper-water": {
+      "sha256": "ab11a6cd3b480b22a278c57f9fda966dc477235ca0f67f9745aa381bf8c3d775",
+      "expected_ipa": "malʔˈi ʔˈet ʃtˈej hatsalaχˈot bemˈajim.",
+      "detected_ipa": "malʔˈi ʔˈet ʃtˈej hatsalaχˈot bemˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2
+    },
+    "science-pepper-water-ready": {
+      "sha256": "efcc503588b303d905a348bb3a4221616af703967710ff0c31983b9a0d15fd86",
+      "expected_ipa": "biʃtˈej hatsalaχˈot jˈeʃ mˈajim.",
+      "detected_ipa": "biʃtˈej hatsalaχˈot jˈeʃ mˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.17
+    },
+    "science-pepper-sprinkle": {
+      "sha256": "c9e875293eaa64097045aef5ced17315aed80fc481ac6c8db547c15f8616f3dc",
+      "expected_ipa": "pazʁˈi pilpˈel ʔˈal hamˈajim.",
+      "detected_ipa": "pazʁˈi, pilpˈel ʔˈal hamˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.11
+    },
+    "science-pepper-floats": {
+      "sha256": "688fdebd0c944b38e8317c070c1ac4f43c45156b9f158bba21dfef0947cd28e6",
+      "expected_ipa": "hapilpˈel tsˈaf ʔˈal hamˈajim.",
+      "detected_ipa": "hapilpˈel tsˈaf ʔˈal hamˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.08
+    },
+    "science-pepper-guess": {
+      "sha256": "07bf36ed962092108fcaf4eb901c4f43c895e55b2931c6e317a59c04e1480c49",
+      "expected_ipa": "mˈa jikʁˈe kʃenosˈif sabˈon? hapilpˈel jazˈuz ʔˈo jiʃaʔˈeʁ bamakˈom?",
+      "detected_ipa": "mˈa jikʁˈe kʃenosˈif sabˈon, hapilpˈel jazˈuz ʔˈo jiʃaʔˈeʁ bamakˈom?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.33
+    },
+    "science-pepper-plain-drop": {
+      "sha256": "6a30413bef090076b717aee8f029d57c984a36d8b81d83f264982604d56d13bc",
+      "expected_ipa": "kˈodem hosˈifi tipˈat mˈajim latsalˈaχat haʁiʃonˈa.",
+      "detected_ipa": "kˈodem hosˈifi tipˈat mˈajim latsalˈaχat haʁiʃonˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.12
+    },
+    "science-pepper-still": {
+      "sha256": "fb4cf9440bbde70fd325d30db577c086d238bb20108445ee7bd7909a78760b02",
+      "expected_ipa": "hapilpˈel ʔˈod mefuzˈaʁ.",
+      "detected_ipa": "hapilpˈel ʔˈod mefuzˈaʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 3.94
+    },
+    "science-pepper-soap-drop": {
+      "sha256": "70805847d48892eb213606e475b6b94fb2ddf7509759f968392fa545d11c6780",
+      "expected_ipa": "hosˈifi tipˈat sabˈon kelˈim latsalˈaχat haʃnijˈa.",
+      "detected_ipa": "hosˈifi tipˈat sabˈon kelˈim latsalˈaχat haʃnijˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.09
+    },
+    "science-pepper-scattered": {
+      "sha256": "7311707868f768948e8636395ba2b79782540ca716e6057795c6e17181f578bf",
+      "expected_ipa": "tiʁʔˈi! hapilpˈel zˈaz latsdadˈim.",
+      "detected_ipa": "tiʁʔˈi, hapilpˈel zˈaz latsdadˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.89
+    },
+    "science-pepper-why": {
+      "sha256": "2eb28060d851bc7be382e62e17b09cb41548e0e5b33f536924a88d1a4758e832",
+      "expected_ipa": "lˈama hapilpˈel zˈaz?",
+      "detected_ipa": "lˈama hapilpˈel zˈaz?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 5.06
+    },
+    "science-pepper-explain": {
+      "sha256": "644726c6157c8e51cf9904343533c21c988b05f74465f0c8ead1db3d7a9af6cd",
+      "expected_ipa": "hasabˈon ʃinˈa ʔˈet mˈetaχ hapanˈim ʃˈel hamˈajim. hamˈajim zˈazu velakχˈu ʔitˈam ʔˈet hapilpˈel.",
+      "detected_ipa": "hasabˈon ʃinˈa ʔˈet mˈetaχ hapanˈim ʃˈel hamˈajim. hamˈajim zˈazu velakχˈu ʔitˈam ʔˈet hapilpˈel.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.67
     }
   }
 }

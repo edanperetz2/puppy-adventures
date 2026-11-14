@@ -1,17 +1,17 @@
 import { LearningStore } from './learning-sync.js?v=2.2.2-six';
 import { questionLearning, learningSummary } from './learning.js';
-import { packRound, unpackRound, cleanDrafts, roundKey } from './session-state.js?v=2.7.0-science';
+import { packRound, unpackRound, cleanDrafts, roundKey } from './session-state.js?v=2.7.1-pepper';
 import { JOURNEYS, newJourney, cleanJourney, resumeJourney, englishPairsReady, journeyLength } from './journey.js?v=2.2.5-practice';
 import { STORIES } from './journey-content.js';
 import { mountJourney } from './journey-view.js?v=2.2.5-practice';
 import { mountPark } from './park.js';
 import { mountFreeWriting, WRITING_STEPS } from './free-writing.js?v=2.3.3-dictation';
 import { parentLearning, learningStatus } from './learning-parent.js?v=2.3.3-dictation';
-import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.7.0-science';
-import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.7.0-science';
+import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.7.1-pepper';
+import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.7.1-pepper';
 import { ADVENTURE_PHASES, adventurePhase } from './adventure.js?v=2.2.2-six';
 import { art, pup, scene, uiIcon } from './art.js?v=2.7.0-science';
-import { Narrator } from './audio.js?v=2.7.0-science';
+import { Narrator } from './audio.js?v=2.7.1-pepper';
 import { GameAnnouncements } from './announcements.js';
 import { SharedAlbum, normalizeCode } from './sync.js?v=2.2.6-album';
 import { SYNC_CONFIG } from './sync-config.js';
@@ -37,9 +37,9 @@ import { mountNumberDictation, numberDictationKey } from './number-dictation.js?
 import { mountFruitCutting } from './fruit-cutting.js?v=2.5.0-play';
 import { mountPikachu, pikachuImage, PIKACHU_TITLE } from './pikachu-game.js?v=2.5.1-pikachu-greeting';
 import { actOutPrompt, actOutSteps } from './act-out.js?v=2.7.0-science';
-import { mountActOut } from './act-out-view.js?v=2.7.0-science';
-import { SCIENCE_TITLE, SCIENCE_EXPERIMENTS, cleanScienceRound, scienceClip } from './science-content.js?v=2.7.0-science';
-import { mountScience, scienceArt, scienceMenu } from './science-view.js?v=2.7.0-science';
+import { mountActOut } from './act-out-view.js?v=2.7.1-pepper';
+import { SCIENCE_TITLE, SCIENCE_EXPERIMENTS, cleanScienceRound, scienceClip } from './science-content.js?v=2.7.1-pepper';
+import { mountScience, scienceArt, scienceMenu } from './science-view.js?v=2.7.1-pepper';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;

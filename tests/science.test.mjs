@@ -38,3 +38,15 @@ test('An experiment resumes after either prediction and rejects invalid saves', 
   const unfinished = cleanScienceRound('liquids', { ...completed, actions: completed.actions.slice(0, 5) });
   assert.equal(unfinished.complete, false);
 });
+
+test('Pepper compares a plain water drop with a soap drop and saves the comparison', () => {
+  const { steps } = SCIENCE_EXPERIMENTS.pepper;
+  assert.deepEqual(steps.map(step => step.after), ['water', 'sprinkled', 'sprinkled', 'water-tested', 'soap-tested', 'soap-tested']);
+  assert.equal(steps[4].observes, 2);
+  assert.deepEqual(steps[3].actions, ['water-drop']);
+  assert.deepEqual(steps[4].actions, ['soap']);
+  for (const guess of steps[2].actions) {
+    const saved = { index: 4, actions: ['water', 'pepper', guess, 'water-drop', 'soap'], complete: false, at: 21 };
+    assert.deepEqual(cleanScienceRound('pepper', JSON.parse(JSON.stringify(saved))), saved);
+  }
+});

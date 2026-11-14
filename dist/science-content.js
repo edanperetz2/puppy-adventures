@@ -34,6 +34,17 @@ export const SCIENCE_EXPERIMENTS = {
       { before: 'melted-warm', prompt: 'time-more', actions: ['time'], after: 'melted-both', result: 'both-melt' },
     ],
   },
+  pepper: {
+    title: 'פִּלְפֵּל וְסַבּוֹן', icon: 'pepper',
+    steps: [
+      { before: 'empty', prompt: 'pepper-water', actions: ['water'], after: 'water', result: 'pepper-water-ready' },
+      { before: 'water', prompt: 'pepper-sprinkle', actions: ['pepper'], after: 'sprinkled', result: 'pepper-floats' },
+      { before: 'sprinkled', prompt: 'pepper-guess', actions: ['pepper-moves', 'pepper-stays'], after: 'sprinkled', result: 'test-idea' },
+      { before: 'sprinkled', prompt: 'pepper-plain-drop', actions: ['water-drop'], after: 'water-tested', result: 'pepper-still' },
+      { before: 'water-tested', prompt: 'pepper-soap-drop', actions: ['soap'], after: 'soap-tested', result: 'pepper-scattered', observes: 2 },
+      { before: 'soap-tested', prompt: 'pepper-why', actions: ['look'], after: 'soap-tested', result: 'pepper-explain' },
+    ],
+  },
 };
 
 export const SCIENCE_ACTIONS = {
@@ -54,6 +65,10 @@ export const SCIENCE_ACTIONS = {
   cold: { icon: 'cold', label: 'בַּכּוֹס הַקָּרָה' },
   time: { icon: 'timer', label: 'הַעֲבִירִי זְמַן' },
   look: { icon: 'look', label: 'בּוֹאִי נִסְתַּכֵּל' },
+  pepper: { icon: 'pepper', label: 'פַּזְּרִי פִּלְפֵּל' },
+  'water-drop': { icon: 'water', label: 'טִפַּת מַיִם' },
+  'pepper-moves': { icon: 'pepper-moves', label: 'יָזוּז לַצְּדָדִים' },
+  'pepper-stays': { icon: 'pepper-stays', label: 'יִשָּׁאֵר בַּמָּקוֹם' },
 };
 
 const clips = [
@@ -92,6 +107,17 @@ const clips = [
   ['ice-compare', 'בַּכּוֹס הַקָּרָה עוֹד יֵשׁ קֶרַח.', 'bakˈos hakaʁˈa ʔˈod jˈeʃ kˈeʁaχ.'],
   ['time-more', 'נַעֲבִיר עוֹד קְצָת זְמַן.', 'naʔavˈiʁ ʔˈod ktsˈat zmˈan.'],
   ['both-melt', 'גַּם בַּמַּיִם הַקָּרִים הַקֶּרַח נָמֵס. הַקֶּרַח הָפַךְ לְמַיִם.', 'ɡˈam bamˈajim hakaʁˈim hakˈeʁaχ namˈes. hakˈeʁaχ hafˈaχ lemˈajim.'],
+  ['pepper-water', 'מַלְּאִי אֶת שְׁתֵּי הַצַּלָּחוֹת בְּמַיִם.', 'malʔˈi ʔˈet ʃtˈej hatsalaχˈot bemˈajim.'],
+  ['pepper-water-ready', 'בִּשְׁתֵּי הַצַּלָּחוֹת יֵשׁ מַיִם.', 'biʃtˈej hatsalaχˈot jˈeʃ mˈajim.'],
+  ['pepper-sprinkle', 'פַּזְּרִי פִּלְפֵּל עַל הַמַּיִם.', 'pazʁˈi pilpˈel ʔˈal hamˈajim.'],
+  ['pepper-floats', 'הַפִּלְפֵּל צָף עַל הַמַּיִם.', 'hapilpˈel tsˈaf ʔˈal hamˈajim.'],
+  ['pepper-guess', 'מָה יִקְרֶה כְּשֶׁנּוֹסִיף סַבּוֹן? הַפִּלְפֵּל יָזוּז אוֹ יִשָּׁאֵר בַּמָּקוֹם?', 'mˈa jikʁˈe kʃenosˈif sabˈon? hapilpˈel jazˈuz ʔˈo jiʃaʔˈeʁ bamakˈom?'],
+  ['pepper-plain-drop', 'קֹדֶם הוֹסִיפִי טִפַּת מַיִם לַצַּלַּחַת הָרִאשׁוֹנָה.', 'kˈodem hosˈifi tipˈat mˈajim latsalˈaχat haʁiʃonˈa.'],
+  ['pepper-still', 'הַפִּלְפֵּל עוֹד מְפֻזָּר.', 'hapilpˈel ʔˈod mefuzˈaʁ.'],
+  ['pepper-soap-drop', 'הוֹסִיפִי טִפַּת סַבּוֹן כֵּלִים לַצַּלַּחַת הַשְּׁנִיָּה.', 'hosˈifi tipˈat sabˈon kelˈim latsalˈaχat haʃnijˈa.'],
+  ['pepper-scattered', 'תִּרְאִי! הַפִּלְפֵּל זָז לַצְּדָדִים.', 'tiʁʔˈi! hapilpˈel zˈaz latsdadˈim.'],
+  ['pepper-why', 'לָמָּה הַפִּלְפֵּל זָז?', 'lˈama hapilpˈel zˈaz?'],
+  ['pepper-explain', 'הַסַּבּוֹן שִׁנָּה אֶת מֶתַח הַפָּנִים שֶׁל הַמַּיִם. הַמַּיִם זָזוּ וְלָקְחוּ אִתָּם אֶת הַפִּלְפֵּל.', 'hasabˈon ʃinˈa ʔˈet mˈetaχ hapanˈim ʃˈel hamˈajim. hamˈajim zˈazu velakχˈu ʔitˈam ʔˈet hapilpˈel.'],
 ];
 
 export const scienceClip = key => `science-${key}`;

@@ -1,4 +1,4 @@
-import { CLIPS } from './content.js?v=2.7.0-science';
+import { CLIPS } from './content.js?v=2.7.1-pepper';
 
 export class Narrator {
   constructor(onStatus = () => {}) {
