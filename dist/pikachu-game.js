@@ -3,7 +3,7 @@ import { answerShuffler, shuffle } from './answer-order.js';
 import { art, uiIcon } from './art.js';
 import { WORDS } from './reading.js';
 
-export const PIKACHU_CALL_URL = new URL('./assets/audio/pikachu-call.mp3', import.meta.url);
+export const PIKACHU_CALL_URL = new URL('./assets/audio/pikachu-greeting.mp3', import.meta.url);
 
 export const PIKACHU_TITLE = 'מְחַפְּשׂוֹת עִם פִּיקָאצ׳וּ';
 const FINISH = 'כָּל הַכָּבוֹד! מָצָאתְ אֶת כָּל הַתְּמוּנוֹת';
@@ -274,7 +274,7 @@ export function mountPikachu(root, { nikud, motion, sound }) {
   render();
   updateSound();
   return {
-    greet, updateSound,
+    hop, updateSound,
     update() { if (!allowMotion()) clearMotion(); updateSound(); render(); },
     destroy() {
       events.abort(); clearMotion(); call.pause();

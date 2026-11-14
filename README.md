@@ -20,7 +20,7 @@ Parents can record a name, review the pronunciation the game heard, and hear com
 
 The custom voice uses models downloaded when requested, up to about 105 MB the first time. Audio processing runs on the device. The profile saves the two finished greetings in its browser and plays them offline. Voice setup is per browser or installed copy. Donations in **נותנים לחברים** now move each selected apple from the basket to Luli, and a second Hebrew instruction asks how many are left after the requested apples have been given.
 
-The **מחפשות עם פיקאצ׳ו** game uses the Pokédex illustration and Pikachu's “Pika pika!” voice clip from Pokémon Yellow, catalogued as cry 08. The game bundles an MP3 copy for offline play. [Pokédex illustration](https://www.pokemon.com/us/pokedex/pikachu) · [Pokémon Yellow voice clip source](https://tcrf.tiago.zip/wiki/Pok%C3%A9mon_Yellow-2fja#Unused_Cries)
+In **מחפשות עם פיקאצ׳ו**, tapping the Pokédex illustration plays a short, quieter edit of the “Pika Pika Happy” television soundboard recording. The game bundles the MP3 for offline play. [Pokédex illustration](https://www.pokemon.com/us/pokedex/pikachu) · [Pika Pika Happy recording](https://soundboard.com/sb/sound/298340)
 
 The optional voice setup uses [BlueTTS v2 INT8](https://huggingface.co/notmax123/bluev2-onnx-int8/tree/b43c225c3578b4d50f2c38d0380e4a199a9ce711), [Uni2005 ONNX recognition](https://huggingface.co/KitsuMate/uni2005-onnx/tree/004577e41ea954fa6cfe9d8f209447780af104ca), and [ONNX Runtime Web](https://github.com/microsoft/onnxruntime/tree/v1.31.1). The worker verifies model hashes before use. The device keeps its mic audio local during processing and stores only the finished phrases after conversion.
 

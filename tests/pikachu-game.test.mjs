@@ -44,9 +44,10 @@ test('Pikachu has six varied picture clues that progress from objects to details
   assert.ok(seen.size > 30);
 });
 
-test('The Pokémon Yellow character sound is bundled for offline play', async () => {
+test('The gentle Pikachu greeting replaces the Game Boy sound for offline play', async () => {
   const offline = JSON.parse(await readFile(new URL('../dist/offline.json', import.meta.url), 'utf8'));
-  assert.ok(offline.includes('./assets/audio/pikachu-call.mp3'));
+  assert.ok(offline.includes('./assets/audio/pikachu-greeting.mp3'));
+  assert.ok(!offline.includes('./assets/audio/pikachu-call.mp3'));
   const bytes = await readFile(PIKACHU_CALL_URL);
-  assert.equal(createHash('sha256').update(bytes).digest('hex'), '93489c8e64b379282340f486c80c704efb65ae9fd4dc97fcf3cbf41de1aad347');
+  assert.equal(createHash('sha256').update(bytes).digest('hex'), '4894d1325344bcc37467a48b2a42e43498593ed09a07c14e1c8b5572a139af9a');
 });

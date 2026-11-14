@@ -35,7 +35,7 @@ import { NUMBER_WORKSHOP_TITLE, numberMenu, mountNumberRound, numberComplete } f
 import { numberWritingKey, mountNumberWriting } from './number-writing.js?v=2.3.3-dictation';
 import { mountNumberDictation, numberDictationKey } from './number-dictation.js?v=2.3.3-dictation';
 import { mountFruitCutting } from './fruit-cutting.js?v=2.5.0-play';
-import { mountPikachu, pikachuImage, PIKACHU_TITLE } from './pikachu-game.js?v=2.5.0-play';
+import { mountPikachu, pikachuImage, PIKACHU_TITLE } from './pikachu-game.js?v=2.5.1-pikachu-greeting';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -924,7 +924,7 @@ function renderFruitCutting() {
 function openPikachu() {
   narrator.stop();
   view = 'pikachu'; render(); focusTitle();
-  pikachuController.greet();
+  pikachuController.hop();
 }
 
 function renderPikachu() {
