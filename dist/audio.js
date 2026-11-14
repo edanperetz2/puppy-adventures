@@ -1,4 +1,4 @@
-import { CLIPS } from './content.js?v=2.6.1-animal-stories';
+import { CLIPS } from './content.js?v=2.6.2-swim-bedtime';
 
 export class Narrator {
   constructor(onStatus = () => {}) {

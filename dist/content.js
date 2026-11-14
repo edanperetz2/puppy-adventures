@@ -2,7 +2,7 @@ import { clockTime } from './clock.js';
 import { HEBREW_NARRATION, HEBREW_NUMBERS, clockSpeech } from './speech.js';
 import { hebrewSpeech } from './hebrew-pronunciation.js';
 import { LETTERS } from './letters.js';
-import { WORDS } from './reading.js?v=2.6.1-animal-stories';
+import { WORDS } from './reading.js?v=2.6.2-swim-bedtime';
 import { CLOCK_SCHOOL_SCRIPTS } from './clock-school-content.js';
 import { LETTER_WRITING_SCRIPTS } from './letter-writing-content.js';
 import { CHARACTER_SCRIPTS } from './characters-content.js';
@@ -11,10 +11,10 @@ import { installProfileClips } from './profile-content.js?v=2.2.0-voices';
 import { MORE_ANIMALS, MORE_COLORS, ENGLISH_OBJECTS } from './english-expansion.js';
 import { LETTER_EXAMPLE_CLIPS } from './word-practice-expansion.js';
 import { NUMBER_WORKSHOP_CLIPS } from './number-workshop-content.js?v=2.5.0-play';
-import { ACT_OUT_INSTRUCTION, ACT_OUT_PROMPT } from './act-out.js?v=2.6.1-animal-stories';
-import { ANIMAL_STORY_INSTRUCTIONS } from './reading-animal-stories.js?v=2.6.1-animal-stories';
+import { ACT_OUT_INSTRUCTION, ACT_OUT_PROMPT } from './act-out.js?v=2.6.2-swim-bedtime';
+import { ANIMAL_STORY_INSTRUCTIONS } from './reading-animal-stories.js?v=2.6.2-swim-bedtime';
 export { ENGLISH_OBJECTS } from './english-expansion.js';
-export { WORDS, READING_LEVELS } from './reading.js?v=2.6.1-animal-stories';
+export { WORDS, READING_LEVELS } from './reading.js?v=2.6.2-swim-bedtime';
 
 export const ANIMALS = [
   { id: 'dog', en: 'DOG', he: 'כלב' },

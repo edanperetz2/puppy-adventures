@@ -19,8 +19,8 @@ const rng=seed=>()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296)
 
 test('Short picture stories more than double at the same reading level and length',()=>{
   assert.equal(additions.length,360);
-  assert.equal(readingWords('sentences').length,656);
-  assert.equal(WORDS.length,1467);
+  assert.equal(readingWords('sentences').length,662);
+  assert.equal(WORDS.length,1473);
   assert.equal(new Set(WORDS.map(word=>word.he)).size,WORDS.length);
   assert.equal(new Set(WORDS.map(word=>art(word.id))).size,WORDS.length);
   for(const word of additions){
@@ -65,7 +65,7 @@ test('Every previous reading target and all 2114 original voice records remain u
   const originalWords=WORDS.filter(word=>!ids.has(word.id)&&!animalIds.has(word.id));
   assert.equal(originalWords.length,baseline.wordCount);
   assert.equal(hash(originalWords),baseline.wordDigest);
-  const previouslyReleased = ([key]) => !/^(?:he-picture-|he-story-animal-|profile-good-luck|journey-give-|journey-apples-left$|number-workshop-|act-out(?:-jump|-feed)?$)/u.test(key);
+  const previouslyReleased = ([key]) => !/^(?:he-picture-|he-story-animal-|profile-good-luck|journey-give-|journey-apples-left$|number-workshop-|act-out(?:-jump|-feed|-move-animal)?$)/u.test(key);
   const originalClips=Object.fromEntries(Object.entries(CLIPS).filter(previouslyReleased));
   assert.equal(Object.keys(originalClips).length,baseline.clipCount);
   assert.equal(hash(originalClips),baseline.clipDigest);
@@ -97,7 +97,7 @@ test('Acting out a sentence tests the correct object detail and its destination'
   }
 });
 
-test('Animal stories check which animal jumps and which food goes to the named animal', () => {
+test('Animal stories check who acts, where they go, and which food they eat', () => {
   const id = 'acbc2aa9-6053-4a28-a509-84bd3a4f503d';
   const passages = [...ANIMAL_STORIES, ...WORDS.filter(word => word.id.startsWith('facts-rabbit-') && word.scene.action === 'jump')];
   for (const word of passages) {
@@ -107,7 +107,7 @@ test('Animal stories check which animal jumps and which food goes to the named a
     assert.equal(CLIPS[actOutPrompt(word)].lang, 'he-IL');
     const plan = actOutPlan(word, id);
     assert.equal(plan.destinations.length, 2);
-    assert.equal(plan.target, word.scene.size || word.scene.object);
+    assert.equal(plan.target, word.scene.anchor || word.scene.size || word.scene.object);
     assert.ok(plan.destinations.includes(plan.target));
     const matching = plan.pieces.flatMap((_, index) => plan.destinations.filter(place => actOutMatches(word, plan, index, place)));
     assert.deepEqual(matching, [plan.target]);
@@ -115,11 +115,29 @@ test('Animal stories check which animal jumps and which food goes to the named a
       assert.equal(new Set(plan.pieces.map(piece => piece.food)).size, 3);
       assert.ok(plan.pieces.every(piece => hasArt(piece.food)));
       const questions = createSession('hebrew', { ...DEFAULT_SETTINGS, reading: 'sentences' }, rng(14));
-      questions[0] = { ...questions[0], word, actOut: true, prompt: actOutPrompt(word), options: ANIMAL_STORIES.filter(w => w.family === word.family) };
+      const alternatives = ANIMAL_STORIES.filter(w => w.family === word.family && w !== word).slice(0, 2);
+      questions[0] = { ...questions[0], word, actOut: true, prompt: actOutPrompt(word), options: [word, ...alternatives] };
       const right = plan.pieces.findIndex(piece => piece.food === word.scene.food);
       const raw = packRound({id, mission:'hebrew', reading:'sentences', questions, index:0, resolved:true, attempted:[], helped:[], counted:[], actOutMoves:[(right + 1) % 3, right]});
       const restored = unpackRound(raw);
       assert.equal(restored.questions[0].prompt, 'act-out-feed');
+      assert.deepEqual(restored.actOutMoves, [right]);
+    } else if (word.scene.anchor) {
+      assert.equal(plan.pieces.length, 2);
+      assert.ok(plan.pieces.every(piece => hasArt(piece.object)));
+      assert.equal(actOutPrompt(word), 'act-out-move-animal');
+      const right = plan.pieces.findIndex(piece => piece.object === word.scene.object);
+      const otherPlace = plan.destinations.find(destination => destination !== plan.target);
+      assert.ok(!actOutMatches(word, plan, right, otherPlace));
+      assert.ok(!actOutMatches(word, plan, 1 - right, plan.target));
+      assert.ok(actOutMatches(word, plan, right, plan.target));
+      const questions = createSession('hebrew', { ...DEFAULT_SETTINGS, reading: 'sentences' }, rng(14));
+      const alternatives = ANIMAL_STORIES.filter(w => w.family === word.family && w !== word).slice(0, 2);
+      questions[0] = { ...questions[0], word, actOut: true, prompt: actOutPrompt(word), options: [word, ...alternatives] };
+      const raw = packRound({ id, mission: 'hebrew', reading: 'sentences', questions, index: 0, resolved: true, attempted: [], helped: [], counted: [], actOutMoves: [1 - right, right] });
+      const restored = unpackRound(raw);
+      assert.equal(restored.questions[0].word.id, word.id);
+      assert.equal(restored.questions[0].prompt, 'act-out-move-animal');
       assert.deepEqual(restored.actOutMoves, [right]);
     } else assert.equal(plan.pieces.length, 1);
   }
@@ -132,8 +150,11 @@ test('New short-story rounds rotate through all animal scenes before repeating t
   const learning = {};
   for (let i = 0; i < ANIMAL_STORIES.length; i++) {
     const questions = createSession('hebrew', { reading: 'sentences', readingRecent: practice.recent.sentences, learning }, rng(i + 22));
+    assert.equal(questions.length, 6);
     const animal = questions.find(q => animalIds.has(q.answer));
     assert.ok(animal && !seen.has(animal.answer));
+    if (i === 0) assert.equal(animal.answer, 'story-animal-duck-swim');
+    if (i === 1) assert.equal(animal.answer, 'story-animal-cat-sleep');
     seen.add(animal.answer);
     learning[`read:${animal.answer}`] = { seen: 1, last: Date.now(), independent: 1, days: [] };
     practice = finishReadingPractice(practice, 'sentences', questions.map(q => q.word));

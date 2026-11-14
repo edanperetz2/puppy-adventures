@@ -2,7 +2,7 @@ import { EXTRA_READING_WORDS } from './vocabulary-phrases.js';
 import { EXPANDED_READING_WORDS } from './reading-expansion.js';
 import { PICTURE_PLACE_PASSAGES } from './reading-picture-places.js';
 import { PICTURE_SCENE_PASSAGES } from './reading-picture-scenes.js';
-import { ANIMAL_STORIES } from './reading-animal-stories.js?v=2.6.1-animal-stories';
+import { ANIMAL_STORIES } from './reading-animal-stories.js?v=2.6.2-swim-bedtime';
 
 // Curated language and scene facts stay together so every picture has one meaning.
 const entry = (id, he, pointed, level, family, scene) => ({ id, he, pointed, level, ...(family ? { family, scene } : {}) });

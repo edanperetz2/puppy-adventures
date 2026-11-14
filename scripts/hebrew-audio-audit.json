@@ -16446,6 +16446,55 @@
       "detected_ipa": "haʔavˈiʁi ʔˈet haʔˈoχel laχajˈa ʃebasipˈuʁ.",
       "phoneme_edit_ratio": 0,
       "seconds": 4.97
+    },
+    "he-story-animal-duck-swim": {
+      "sha256": "5c9c04b310fe93ef65ec183b5c64d639ee0133ebe29ae64b6673c236bd1d8f9c",
+      "expected_ipa": "habaʁvˈaz soχˈe bamˈajim.",
+      "detected_ipa": "habaʁvˈaz soχˈe bamˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.12
+    },
+    "he-story-animal-cat-sleep": {
+      "sha256": "0bb339ecc3682653fd7ccf5277a942517e3eb1b71d5ba21a00752c594a7df532",
+      "expected_ipa": "χatˈul jaʃˈen bamitˈa.",
+      "detected_ipa": "χatˈul jaʃˈen bamitˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 3.99
+    },
+    "he-story-animal-dog-swim": {
+      "sha256": "4d5d6133f0639f8087947743eaa55e5471f7aeeea8e1859ec14032339afca291",
+      "expected_ipa": "hakˈelev soχˈe bemˈajim.",
+      "detected_ipa": "hakˈelev soχˈe bemˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.75
+    },
+    "he-story-animal-rabbit-sleep": {
+      "sha256": "2ce7872ca23549b2e25cbbbb0ddd297d4e48fede76ff2fa382a9ea0bb697ad19",
+      "expected_ipa": "haʔaʁnˈav jaʃˈen basˈal.",
+      "detected_ipa": "haʔaʁnˈav jaʃˈen basˈal.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.05
+    },
+    "he-story-animal-duck-sleep": {
+      "sha256": "99c9c3eeaa8a4fab60ba74a3cdc02b69434806945a0ef79d70efc69db00b124a",
+      "expected_ipa": "habaʁvˈaz jaʃˈen bakˈen.",
+      "detected_ipa": "habaʁvˈaz jaʃˈen bakˈen.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 3.98
+    },
+    "he-story-animal-duck-jump": {
+      "sha256": "fe85f33a81ed16f98e726a210d9e75dfa4c6d943c3f5926a3d3ddc2ec6a24767",
+      "expected_ipa": "habaʁvˈaz kofˈets.",
+      "detected_ipa": "habaʁvˈaz kofˈets.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 3.99
+    },
+    "act-out-move-animal": {
+      "sha256": "6064cd02028b0f62fcf5f184ab06f5120ff98d7af59378a959e078785311b918",
+      "expected_ipa": "haʔavˈiʁi ʔˈet haχajˈa lamakˈom ʃebasipˈuʁ.",
+      "detected_ipa": "haʔavˈiʁi ʔˈet haχajˈa lamakˈom ʃebasipˈuʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.23
     }
   }
 }

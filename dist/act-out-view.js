@@ -1,7 +1,7 @@
-import { art, uiIcon } from './art.js?v=2.6.1-animal-stories';
-import { CLIPS, COLORS, WORDS } from './content.js?v=2.6.1-animal-stories';
-import { paintedReadingObject } from './reading-scenes.js?v=2.6.1-animal-stories';
-import { actOutMatches, actOutPlan, actOutPrompt } from './act-out.js?v=2.6.1-animal-stories';
+import { art, uiIcon } from './art.js?v=2.6.2-swim-bedtime';
+import { CLIPS, COLORS, WORDS } from './content.js?v=2.6.2-swim-bedtime';
+import { paintedReadingObject, sleepingReadingAnimal } from './reading-scenes.js?v=2.6.2-swim-bedtime';
+import { actOutMatches, actOutPlan, actOutPrompt } from './act-out.js?v=2.6.2-swim-bedtime';
 
 const names = new Map([...WORDS, ...COLORS].map(word => [word.id, word.he]));
 const points = {
@@ -12,11 +12,16 @@ const points = {
   basket: { in: [39, 48], near: [76, 55] },
 };
 const travelPoints = [[26, 56], [74, 56]];
+const animalPlaceNames = { pond: 'במים', shore: 'על הדשא', bed: 'במיטה', basket: 'בסל', nest: 'בקן' };
 const groupOffsets = [
   [[-8, 0], [8, 0]],
   [[0, -7], [-8, 5], [8, 5]],
   [[-8, -7], [8, -7], [-8, 5], [8, 5]],
 ];
+const moveInstructions = {
+  object: 'אֶפְשָׁר לִגְרֹר, אוֹ לָגַעַת בַּחֵפֶץ וְאָז בַּמָּקוֹם.',
+  animal: 'אֶפְשָׁר לִגְרֹר, אוֹ לָגַעַת בַּחַיָּה וְאָז בַּמָּקוֹם.',
+};
 const placeNames = {
   box: { on: 'על הקופסה', in: 'בתוך הקופסה', near: 'ליד הקופסה' },
   table: { on: 'על השולחן', under: 'מתחת לשולחן', near: 'ליד השולחן' },
@@ -34,9 +39,12 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
   const animal = spec.kind === 'action';
   const jumping = animal && spec.action === 'jump';
   const feeding = animal && spec.action === 'eat';
+  const movingAnimal = animal && Boolean(spec.anchor);
+  const sceneName = animal ? spec.action : spec.anchor || spec.kind;
   const lane = destination => travelPoints[plan.destinations.indexOf(destination)][0];
   const stopPoint = destination => {
     if (feeding) return [lane(destination), 70];
+    if (movingAnimal) return [lane(destination) - (destination === 'bed' ? 6 : 0), destination === 'pond' ? 56 : destination === 'bed' ? 51 : 46];
     if (travel) return travelPoints[plan.destinations.indexOf(destination)];
     return points[spec.anchor][destination];
   };
@@ -45,9 +53,10 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
   let flight = null;
   const played = [...moves];
   const container = spec.anchor === 'box' || spec.anchor === 'basket';
-  const decorations = animal ? '' : travel
+  const decorations = movingAnimal ? (spec.action === 'sleep' ? `<span class="act-night-moon">${art('moon')}</span>` : '') : animal ? '' : travel
     ? plan.destinations.map((id, index) => `<span class="act-landmark" style="--x:${travelPoints[index][0]}%">${art(id)}</span>`).join('')
     : `<span class="act-anchor act-anchor-${spec.anchor}">${container ? '' : art(spec.anchor)}</span>${container ? '<span class="act-container-rim"></span>' : ''}`;
+  const extraInstructions = jumping ? '' : ` <span>${label(moveInstructions[movingAnimal ? 'animal' : 'object'])}</span>`;
   const animalStops = () => plan.destinations.map(destination => {
     const id = spec.size ? spec.object : destination;
     const name = `${names.get(id)}${spec.size ? destination === 'small' ? ' קטן' : ' גדול' : ''}`;
@@ -61,18 +70,22 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
     const title = travel ? `ליד ${names.get(destination)}` : placeNames[spec.anchor][destination];
     return `<button type="button" class="act-place" data-act-place="${destination}" style="--x:${x}%;--y:${y}%" aria-label="${title}"></button>`;
   }).join('');
+  const animalPlacesMarkup = () => plan.destinations.map(destination => {
+    const picture = destination === 'pond' ? '<i class="act-water-lines"></i>' : art(destination === 'shore' ? 'flower' : destination);
+    return `<button type="button" class="act-destination act-destination-${destination}" data-act-place="${destination}" style="--x:${lane(destination)}%" aria-label="${animalPlaceNames[destination]}">${picture}</button>`;
+  }).join('');
   const piecesMarkup = () => plan.pieces.map((piece, i) => {
-    const id = feeding ? piece.food : spec.object;
+    const id = feeding ? piece.food : piece.object || spec.object;
     const name = `${names.get(id)}${piece.color ? ` · ${names.get(piece.color)}` : piece.size ? piece.size === 'small' ? ' · קטן' : ' · גדול' : group ? ` ${i + 1}` : ''}`;
     return `<button type="button" class="act-piece" data-act-piece="${i}" aria-pressed="false" aria-label="${name}">
         ${paintedReadingObject(id, piece.color, art(id, piece.size === 'small' ? 'act-small' : ''))}
       </button>`;
   }).join('');
 
-  root.innerHTML = `<p class="act-instruction" id="act-instruction">${label(CLIPS[actOutPrompt(word)].text)}${jumping ? '' : ` <span>${label('אֶפְשָׁר לִגְרֹר, אוֹ לָגַעַת בַּחֵפֶץ וְאָז בַּמָּקוֹם.')}</span>`}</p>
-    <div class="act-playfield" data-scene="${spec.anchor || spec.action}" data-kind="${spec.kind}" aria-describedby="act-instruction" role="group" aria-label="תמונת הסיפור">
+  root.innerHTML = `<p class="act-instruction" id="act-instruction">${label(CLIPS[actOutPrompt(word)].text)}${extraInstructions}</p>
+    <div class="act-playfield" data-scene="${sceneName}" data-kind="${spec.kind}" aria-describedby="act-instruction" role="group" aria-label="תמונת הסיפור">
       <div class="act-scenery" aria-hidden="true">${decorations}</div>
-      ${animal ? animalStops() : placesMarkup()}
+      ${movingAnimal ? animalPlacesMarkup() : animal ? animalStops() : placesMarkup()}
       <div class="act-landed" aria-hidden="true"></div>
       ${jumping ? '' : `<div class="act-tray" role="group" aria-label="חלקים להזזה">${piecesMarkup()}</div>`}
     </div>`;
@@ -82,7 +95,7 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
   const places = [...root.querySelectorAll('[data-act-place]')];
   const jumpers = [...root.querySelectorAll('[data-act-jump]')];
   const tray = root.querySelector('.act-tray');
-  const animalButton = animal ? (jumping ? jumpers : places)[plan.destinations.indexOf(plan.target)] : null;
+  const animalButton = jumping || feeding ? (jumping ? jumpers : places)[plan.destinations.indexOf(plan.target)] : null;
   const canAnimate = node => motion() && !matchMedia('(prefers-reduced-motion: reduce)').matches && typeof node.animate === 'function';
   let complete = resolved;
   let preview = null;
@@ -105,6 +118,13 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
     field.classList.toggle('act-finished', complete);
   }
 
+  function showAnimalAtDestination(item) {
+    item.dataset.animalAction = spec.action;
+    if (spec.action === 'sleep') {
+      item.innerHTML = `<span class="act-sleepy-animal">${sleepingReadingAnimal(art(spec.object))}</span><span class="act-sleep-stars" dir="ltr">z<span>z</span></span>`;
+    } else item.insertAdjacentHTML('beforeend', '<span class="act-swim-wake"></span>');
+  }
+
   function land(index, origin) {
     if (jumping) {
       const jumper = animalButton.querySelector('.act-animal-picture');
@@ -119,13 +139,14 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
     const [x, y] = stopPoint(plan.target);
     const [dx, dy] = group ? groupOffsets[plan.count - 2][played.indexOf(index)] : [0, 0];
     const item = document.createElement('span');
-    item.className = `act-placed${group || feeding ? ' act-placed-small' : ''}`;
+    item.className = `act-placed${group || feeding ? ' act-placed-small' : ''}${movingAnimal ? ' act-placed-animal' : ''}`;
     item.dataset.actLanded = index;
     item.style.left = `${x + dx}%`;
     item.style.top = `${y + dy}%`;
     item.innerHTML = pieces[index].innerHTML;
     landed.append(item);
     if (!origin || !canAnimate(item)) {
+      if (movingAnimal) showAnimalAtDestination(item);
       if (feeding) item.hidden = true;
       return null;
     }
@@ -135,6 +156,15 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
     const from = `translate(-50%, -50%) translate(${dxFrom}px, ${dyFrom}px)`;
     const scale = `scale(${origin.width / bounds.width})`;
     const arrive = [{ transform: `${from} ${scale}` }, { transform: 'translate(-50%, -50%)' }];
+    if (movingAnimal) {
+      const [start, end] = arrive;
+      if (spec.action === 'sleep') return item.animate([start, { ...end, offset: .64 }, { transform: 'translate(-50%, -42%) scale(.92)' }], { duration: 460, easing: 'ease-out' });
+      return item.animate([
+        start, { ...end, offset: .27 },
+        { transform: 'translate(calc(-50% - 20px), calc(-50% + 4px)) rotate(-6deg)', offset: .47 },
+        { transform: 'translate(calc(-50% + 23px), calc(-50% - 4px)) rotate(6deg)', offset: .73 }, end,
+      ], { duration: 880, easing: 'ease-in-out' });
+    }
     if (!feeding) return item.animate(arrive, { duration: 320, easing: 'ease-out' });
     const eater = animalButton.querySelector('.act-animal-picture');
     eater.animate([{ transform: 'none' }, { transform: 'translateY(9px) rotate(7deg)' }, { transform: 'none' }], { delay: 140, duration: 420 });
@@ -169,6 +199,7 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
           landed.lastElementChild.hidden = true;
           animation.cancel();
         }
+        if (movingAnimal) showAnimalAtDestination(landed.lastElementChild);
         onFinish();
       }, () => {});
     }
@@ -206,6 +237,7 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
 
   function clearDrag() {
     drag?.ghost?.remove();
+    drag?.button.classList.remove('act-dragging-piece');
     drag = null;
     preview = null;
     showMoves();
@@ -237,6 +269,7 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
       drag.ghost.innerHTML = drag.button.innerHTML;
       drag.ghost.style.width = `${drag.width}px`;
       document.body.append(drag.ghost);
+      drag.button.classList.add('act-dragging-piece');
     }
     drag.ghost.style.left = `${event.clientX}px`;
     drag.ghost.style.top = `${event.clientY}px`;

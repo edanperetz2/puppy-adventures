@@ -36828,6 +36828,111 @@
       "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
       "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
       "sha256": "2a1778754a94d676abab3277bb899bd671edf4e28cd00ad1d9d373d67ad65138"
+    },
+    "he-story-animal-duck-swim": {
+      "take": 0,
+      "segments": [
+        "habaʁvˈaz soχˈe bamˈajim."
+      ],
+      "lang": "he-IL",
+      "speech": "habaʁvˈaz soχˈe bamˈajim.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "5c9c04b310fe93ef65ec183b5c64d639ee0133ebe29ae64b6673c236bd1d8f9c"
+    },
+    "he-story-animal-cat-sleep": {
+      "take": 0,
+      "segments": [
+        "χatˈul jaʃˈen bamitˈa."
+      ],
+      "lang": "he-IL",
+      "speech": "χatˈul jaʃˈen bamitˈa.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "0bb339ecc3682653fd7ccf5277a942517e3eb1b71d5ba21a00752c594a7df532"
+    },
+    "he-story-animal-dog-swim": {
+      "lang": "he-IL",
+      "speech": "hakˈelev soχˈe bemˈajim.",
+      "segments": [
+        "hakˈelev soχˈe bemˈajim."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "4d5d6133f0639f8087947743eaa55e5471f7aeeea8e1859ec14032339afca291"
+    },
+    "he-story-animal-rabbit-sleep": {
+      "take": 0,
+      "segments": [
+        "haʔaʁnˈav jaʃˈen basˈal."
+      ],
+      "lang": "he-IL",
+      "speech": "haʔaʁnˈav jaʃˈen basˈal.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "2ce7872ca23549b2e25cbbbb0ddd297d4e48fede76ff2fa382a9ea0bb697ad19"
+    },
+    "he-story-animal-duck-sleep": {
+      "take": 0,
+      "segments": [
+        "habaʁvˈaz jaʃˈen bakˈen."
+      ],
+      "lang": "he-IL",
+      "speech": "habaʁvˈaz jaʃˈen bakˈen.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "99c9c3eeaa8a4fab60ba74a3cdc02b69434806945a0ef79d70efc69db00b124a"
+    },
+    "he-story-animal-duck-jump": {
+      "take": 0,
+      "segments": [
+        "habaʁvˈaz kofˈets."
+      ],
+      "lang": "he-IL",
+      "speech": "habaʁvˈaz kofˈets.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "fe85f33a81ed16f98e726a210d9e75dfa4c6d943c3f5926a3d3ddc2ec6a24767"
+    },
+    "act-out-move-animal": {
+      "take": 0,
+      "segments": [
+        "haʔavˈiʁi ʔˈet haχajˈa lamakˈom ʃebasipˈuʁ."
+      ],
+      "lang": "he-IL",
+      "speech": "haʔavˈiʁi ʔˈet haχajˈa lamakˈom ʃebasipˈuʁ.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "6064cd02028b0f62fcf5f184ab06f5120ff98d7af59378a959e078785311b918"
     }
   }
 }

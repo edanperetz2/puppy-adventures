@@ -1,4 +1,4 @@
-import { READING_SCENES } from './reading-advanced.js?v=2.6.1-animal-stories';
+import { READING_SCENES } from './reading-advanced.js?v=2.6.2-swim-bedtime';
 
 const palette = {
   red: ['#e47176', '#f5bec1'], blue: ['#579dce', '#badced'], green: ['#65a575', '#c3dfb9'],
@@ -17,6 +17,14 @@ export function paintedReadingObject(object, color, body) {
   return body;
 }
 
+export function sleepingReadingAnimal(markup) {
+  return markup
+    .replace(/<ellipse cx="(\d+)" cy="(\d+)" rx="5" ry="7" fill="#343247"\/><circle[^>]*\/>/gu, (_, x, y) => `<path d="M${Number(x) - 7} ${y}q7 7 14 0" stroke="#625664" stroke-width="4" stroke-linecap="round"/>`)
+    .replace(/<circle cx="151" cy="64" r="5"[^>]*\/>/u, '<path d="M144 63q7 8 14 0" stroke="#625664" stroke-width="4" stroke-linecap="round"/>')
+    .replace('<circle cx="145" cy="62" r="5" fill="#423a37"/>', '<path d="M139 61q6 7 12 0" stroke="#625664" stroke-width="4" stroke-linecap="round"/>')
+    .replaceAll('class="pup-tail"', '');
+}
+
 export function readingScene(id, baseArt) {
   if (!hasReadingScene(id)) return null;
   const spec = READING_SCENES[id];
@@ -27,15 +35,14 @@ export function readingScene(id, baseArt) {
   };
   const place = (body, x, y, size, cls = '') => `<g transform="translate(${x} ${y}) scale(${size / 200})"><g class="${cls}">${body}</g></g>`;
   const at = (object, x, y, size, color, cls) => place(raw(object, color), x, y, size, cls);
-  const sleepEyes = body => body.replace(/<ellipse cx="(\d+)" cy="(\d+)" rx="5" ry="7" fill="#343247"\/><circle[^>]*\/>/gu, (_, x, y) => `<path d="M${Number(x)-7} ${y}q7 7 14 0" stroke="#625664" stroke-width="4" stroke-linecap="round"/>`).replace(/<circle cx="151" cy="64" r="5"[^>]*\/>/u, '<path d="M144 63q7 8 14 0" stroke="#625664" stroke-width="4" stroke-linecap="round"/>').replaceAll('class="pup-tail"', '');
   const actor = (object, asleep) => {
     if (object === 'cat' || object === 'rabbit') {
       const color = object === 'cat' ? '#dfb381' : '#d9cec6';
-      return `<path d="M139 139q35-4 28-31" stroke="${color}" stroke-width="14" stroke-linecap="round"/><ellipse cx="111" cy="137" rx="49" ry="28" fill="${color}"/><path d="M89 151l-18 25m56-24 18 24" stroke="${color}" stroke-width="14" stroke-linecap="round"/>${place(asleep ? sleepEyes(raw(object)) : raw(object), 7, 6, 128)}`;
+      return `<path d="M139 139q35-4 28-31" stroke="${color}" stroke-width="14" stroke-linecap="round"/><ellipse cx="111" cy="137" rx="49" ry="28" fill="${color}"/><path d="M89 151l-18 25m56-24 18 24" stroke="${color}" stroke-width="14" stroke-linecap="round"/>${place(asleep ? sleepingReadingAnimal(raw(object)) : raw(object), 7, 6, 128)}`;
     }
     let body = raw(object);
     if (object === 'bird' && spec.action === 'fly') body = body.replace('M83 94Q139 94 105 136Q75 138 73 110', 'M81 104Q35 68 52 30Q93 46 112 103Q120 126 101 134Z');
-    return asleep ? sleepEyes(body) : body;
+    return asleep ? sleepingReadingAnimal(body) : body;
   };
   let body = '';
   if (spec.kind === 'color') body = at(spec.object, 14, 12, 172, spec.color);
@@ -114,6 +121,14 @@ export function readingScene(id, baseArt) {
         const food = spec.food || (spec.object === 'rabbit' ? 'carrot' : spec.object === 'bird' ? 'apple' : 'bone');
         body += at(food, 86, 116, 31);
       }
+    } else if (spec.action === 'swim') {
+      body += '<ellipse cx="102" cy="158" rx="89" ry="32" fill="#80c5d9" stroke="#5ea4c4" stroke-width="4"/>';
+      body += at(spec.object, 45, spec.object === 'dog' ? 62 : 53, 108, undefined, 'scene-flying');
+      body += '<path d="M33 147q13-8 26 0m78 7q14-8 28 0M72 171q17-9 34 0m19 1q13-6 26 0" stroke="#d9f5fa" stroke-width="4" stroke-linecap="round"/>';
+    } else if (spec.action === 'sleep' && spec.anchor) {
+      body += moon + at(spec.anchor, 25, spec.anchor === 'bed' ? 41 : 75, 155);
+      const [x, y, width] = spec.anchor === 'bed' ? [43, 74, 73] : spec.anchor === 'nest' ? [60, 73, 75] : [63, 82, 69];
+      body += place(sleepingReadingAnimal(raw(spec.object)), x, y, width, 'scene-sleeping');
     } else if (spec.action === 'sleep') {
       body += '<ellipse cx="102" cy="168" rx="78" ry="17" fill="#d8e4e6"/>' + moon;
       const pose = spec.object === 'dog' ? `<g transform="rotate(-75 100 103)">${actor(spec.object, true)}</g>` : actor(spec.object, true);

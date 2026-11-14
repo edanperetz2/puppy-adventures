@@ -1,9 +1,9 @@
-import { WORDS, ANIMALS, COLORS, NUMBERS, CLIPS, MISSIONS, READING_LEVELS } from './content.js?v=2.6.1-animal-stories';
+import { WORDS, ANIMALS, COLORS, NUMBERS, CLIPS, MISSIONS, READING_LEVELS } from './content.js?v=2.6.2-swim-bedtime';
 import { LETTERS } from './letters.js';
 import { clockTime, CLOCK_LEVELS } from './clock.js';
 import { CHARACTERS, CHARACTER_LEVELS, CHARACTER_MODES } from './characters.js?v=2.2.2-six';
 import { adventurePhase, isSessionLength } from './adventure.js?v=2.2.2-six';
-import { actOutPrompt, canActOut, cleanActOutMoves } from './act-out.js?v=2.6.1-animal-stories';
+import { actOutPrompt, canActOut, cleanActOutMoves } from './act-out.js?v=2.6.2-swim-bedtime';
 
 export const roundKey = (mission,settings) => `${mission}:${mission==='hebrew'?settings.reading:mission==='letters'?settings.letterLanguage:mission==='clock'?settings.clockLevel:mission==='characters'?`${settings.characterLevel}:${settings.characterMode}`:'default'}`;
 export function packRound(round) {

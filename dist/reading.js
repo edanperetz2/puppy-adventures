@@ -1,4 +1,4 @@
-import { ADVANCED_WORDS } from './reading-advanced.js?v=2.6.1-animal-stories';
+import { ADVANCED_WORDS } from './reading-advanced.js?v=2.6.2-swim-bedtime';
 import { VOCABULARY_WORDS } from './vocabulary.js';
 import { MAX_ASSISTED_TO_ADVANCE } from './adventure.js?v=2.2.2-six';
 import { EXPANDED_READING_WORDS } from './reading-expansion.js';
