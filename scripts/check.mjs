@@ -44,7 +44,10 @@ JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
 const offlineAssets = JSON.parse(await readFile(new URL('offline.json', root), 'utf8'));
 const entryHtml = await readFile(new URL('index.html', root), 'utf8');
 const entryModule = await readFile(new URL('app.js', root), 'utf8');
-const installedEntries = [...entryHtml.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["']/g)].map(match => match[1]);
+const installedEntries = [
+  ...entryHtml.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["']/g),
+  ...entryHtml.matchAll(/<link\b[^>]*\brel=["']stylesheet["'][^>]*\bhref=["']([^"']+)["']/g),
+].map(match => match[1]);
 installedEntries.push(...[...entryModule.matchAll(/\bfrom\s+["'](\.\/[^"']+\?[^"']+)["']/g)].map(match => match[1]));
 for (const entry of installedEntries) {
   if (!offlineAssets.includes(entry)) throw new Error(`The installed entry URL must work offline: ${entry}`);

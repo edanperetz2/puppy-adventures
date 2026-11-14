@@ -7,10 +7,13 @@ const assets = await readdir(new URL('assets/', root));
 const shell = files.filter(file => /\.(html|js|css|webmanifest)$/.test(file) && file !== 'sw.js').map(file => `./${file}`);
 const staticAssets = assets.filter(file => /\.(svg|png|jpe?g|webp|ttf|woff2|txt)$/.test(file)).map(file => `./assets/${file}`);
 const voiceRuntime = (await readdir(new URL('voice-runtime/', root))).filter(file => /\.(json|mjs)$/.test(file)).map(file => `./voice-runtime/${file}`);
-// Versioned entry URLs bypass an older worker's cached app.js on an online visit.
-// Cache those exact URLs too, so the same installed entry remains usable offline.
+// Versioned scripts and styles bypass older caches online. Cache their exact
+// URLs too so an installed copy can use the same assets offline.
 const html = await readFile(new URL('index.html', root), 'utf8');
-const entries = [...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["']/g)].map(match => match[1]);
+const entries = [
+  ...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["']/g),
+  ...html.matchAll(/<link\b[^>]*\brel=["']stylesheet["'][^>]*\bhref=["']([^"']+)["']/g),
+].map(match => match[1]);
 const manifest = [...new Set(['./', ...shell, ...entries, ...voiceRuntime, ...staticAssets, ...Object.keys(CLIPS).map(key => `./assets/audio/${key}.mp3`)])];
 for (const url of manifest) {
   if (!url.split('?')[0].endsWith('.js')) continue;

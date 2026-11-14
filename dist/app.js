@@ -373,13 +373,13 @@ function activityCount(id) { return id === 'characters' ? Object.values(characte
 function renderHome() {
   app.innerHTML = `${header()}<main id="main" class="home-page">${resumeCard()}
     <section class="hero" aria-labelledby="hero-title">
-      <div class="hero-copy"><div class="eyebrow"><span class="tiny-sun">✦</span><span>שלום <bdi>${ARIEL.name}</bdi>!</span></div>
+      <div class="hero-copy"><div class="eyebrow"><img class="home-pikachu" src="./assets/home-pikachu.png" alt="פיקאצ׳ו" width="144" height="144"><span>שלום <bdi>${ARIEL.name}</bdi>!</span></div>
         <h1 id="hero-title" tabindex="-1">הרפתקה קטנה,<br><span>מגלות עולם!</span></h1>
         <p class="hero-description">לולי, בובי וטופי מחכים לך.<br>בואי נשחק, נגלה ונלמד ביחד.</p>
         <button class="primary-button hero-start" data-action="recommended">יוצאות להרפתקה ${uiIcon('arrow')}</button>
         <button class="text-button welcome-listen" data-action="welcome">${uiIcon('sound')} לחצי ונכיר את החברים</button>
         <p id="audio-notice" class="audio-notice" role="status" hidden></p>
-      </div><div class="hero-world">${scene()}<img class="home-pikachu" src="./assets/home-pikachu.png" alt="פיקאצ׳ו" width="68" height="68"><div class="world-caption"><span class="status-dot"></span> בית החברים · תמיד שמחים לראות אותך</div></div>
+      </div><div class="hero-world">${scene()}<div class="world-caption"><span class="status-dot"></span> בית החברים · תמיד שמחים לראות אותך</div></div>
     </section>
     <section class="missions" aria-labelledby="missions-title"><div class="section-heading"><div><span class="section-kicker">כל פעם מגלות משהו חדש</span><h2 id="missions-title">לאן נצא היום?</h2></div><span class="rounds-note">${SESSION_LENGTH} צעדים · מתחילות בקל ומתקדמות ${art('paw')}</span></div>
       <div class="mission-grid">${Object.values(MISSIONS).map(m => `<button class="mission-card ${m.color}" data-action="mission" data-mission="${m.id}" aria-label="${m.name} — ${m.description}">
