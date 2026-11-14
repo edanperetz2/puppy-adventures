@@ -162,16 +162,15 @@
 
 .number-writing-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
-  align-items: center;
-  gap: 10px 24px;
+  gap: 10px;
   max-width: 650px;
   margin: 12px auto 0;
 }
 .number-writing-tools {
-  display: grid;
-  justify-items: center;
-  gap: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 12px;
 }
 .number-writing-tools > div {
   display: flex;
@@ -182,13 +181,14 @@
 .number-writing-example {
   display: grid;
   place-items: center;
-  width: clamp(74px, 15vw, 130px);
-  aspect-ratio: 1;
+  min-width: 64px;
+  min-height: 54px;
+  padding: 2px 10px;
   border: 1px solid #e2d3ec;
-  border-radius: 21px;
+  border-radius: 14px;
   background: #f4edf9;
   color: #60457d;
-  font-size: clamp(44px, 10vw, 80px);
+  font-size: clamp(35px, 7vw, 57px);
   font-weight: 600;
   line-height: 1;
 }
@@ -196,24 +196,43 @@
 .number-writing-tools .secondary-button { gap: 6px; padding-inline: 10px; }
 .number-writing-surface { min-width: 0; }
 .number-writing-surface .number-writing-pad {
-  width: min(100%, 340px);
+  width: min(100%, var(--writing-pad-width, 165px));
   height: auto;
+  aspect-ratio: auto;
   margin-inline: auto;
   background: #fcfefb;
   border-color: #cad9d2;
 }
+.number-writing-surface[data-digit-count="2"] { --writing-pad-width: 310px; }
+.number-writing-surface[data-digit-count="3"] { --writing-pad-width: 455px; }
 .number-writing-pad .letter-guide { color: #b7c7be; }
 .number-writing-pad .letter-ink { color: #247764; }
 .number-writing-pad .letter-start circle { fill: #247764; }
 .number-writing-pad .writing-lines { stroke: #d1ddd4; }
 .number-writing-surface .letter-pad-caption {
-  min-height: 1.65em;
+  min-height: 2.8em;
   margin: 8px 0 0;
   font-size: 14px;
+  line-height: 1.4;
   color: var(--green-dark);
 }
-.number-writing-navigation { grid-column: 1 / -1; text-align: center; }
+.number-writing-navigation { text-align: center; }
 .number-writing-count { margin: 10px 0 8px; font-size: 14px; }
+.number-writing-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-block: 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.number-writing-picker select {
+  min-width: 86px;
+  min-height: 44px;
+  padding-inline: 9px;
+  color: var(--ink);
+  font-size: 16px;
+}
 .number-writing-digits {
   display: grid;
   grid-template-columns: repeat(10, minmax(0, 1fr));
@@ -221,6 +240,7 @@
 }
 .number-writing-digits button {
   position: relative;
+  padding: 3px;
   border-radius: 12px;
   border: 1px solid #cddbd5;
   background: #f7fbf9;
@@ -233,6 +253,7 @@
   background: #e0f1e7;
   color: var(--green-dark);
 }
+.number-writing-digits[data-start="100"] button { grid-column: 1 / 3; }
 .number-writing-check {
   position: absolute;
   right: 3px;
@@ -242,10 +263,6 @@
 .number-writing-check svg { width: 12px; }
 
 @media (max-width: 570px) {
-  .number-writing-layout { grid-template-columns: 1fr; }
-  .number-writing-tools { grid-template-columns: auto minmax(0, 1fr); align-items: center; justify-items: start; }
-  .number-writing-example { width: 64px; border-radius: 14px; }
-  .number-writing-tools > div { justify-content: flex-start; }
   .number-writing-digits { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
 @media (max-width: 420px) {

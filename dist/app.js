@@ -7,11 +7,11 @@ import { mountJourney } from './journey-view.js?v=2.2.5-practice';
 import { mountPark } from './park.js';
 import { mountFreeWriting, WRITING_STEPS } from './free-writing.js';
 import { parentLearning, learningStatus } from './learning-parent.js?v=2.3.1-number-writing';
-import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.3.1-number-writing';
+import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.3.2-writing-100';
 import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.2.4-practice';
 import { ADVENTURE_PHASES, adventurePhase } from './adventure.js?v=2.2.2-six';
 import { art, pup, scene, uiIcon } from './art.js';
-import { Narrator } from './audio.js?v=2.3.1-number-writing';
+import { Narrator } from './audio.js?v=2.3.2-writing-100';
 import { GameAnnouncements } from './announcements.js';
 import { SharedAlbum, normalizeCode } from './sync.js?v=2.2.6-album';
 import { SYNC_CONFIG } from './sync-config.js';
@@ -31,8 +31,8 @@ import { ARIEL, openAriel, readArielInvitation, GAME_KEY } from './profiles.js?v
 import { profileSpeech } from './profile-speech.js?v=2.2.0-voices';
 import { openGameGuide, GUIDE_ICON } from './guide.js?v=2.2.3-ariel';
 import { NUMBER_PATHS, cleanNumberRound, newNumberRound, numberClip } from './number-workshop.js?v=2.3.0-numbers';
-import { NUMBER_WORKSHOP_TITLE, numberMenu, mountNumberRound, numberComplete } from './number-workshop-view.js?v=2.3.1-number-writing';
-import { digitWritingKey, mountNumberWriting } from './number-writing.js?v=2.3.1-number-writing';
+import { NUMBER_WORKSHOP_TITLE, numberMenu, mountNumberRound, numberComplete } from './number-workshop-view.js?v=2.3.2-writing-100';
+import { numberWritingKey, mountNumberWriting } from './number-writing.js?v=2.3.2-writing-100';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -876,8 +876,8 @@ function renderNumberWriting() {
   app.innerHTML = `${header()}<main id="main" class="number-workshop"><div id="number-writing-root"></div></main>${footer()}`;
   numberController = mountNumberWriting(document.querySelector('#number-writing-root'), {
     getItems: () => learner.items, motion: settings.motion, speak: clips => announcements.say(clips),
-    onPractice: digit => {
-      learner.record({ item: digitWritingKey(digit), domain: 'math' }, 'practice', 'trace');
+    onPractice: number => {
+      learner.record({ item: numberWritingKey(number), domain: 'math' }, 'practice', 'trace');
       celebrate(12);
     },
   });

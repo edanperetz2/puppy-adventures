@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CLIPS } from '../dist/content.js';
 import { NUMBER_PATHS, cleanNumberRound, newNumberRound, numberModel, numberPrompt, numberQuestion, numberQuestionClip, spokenNumber } from '../dist/number-workshop.js';
-import { digitWritingKey, digitWritingPad, nextWritingDigit, WRITING_DIGITS } from '../dist/number-writing.js';
+import { numberWritingKey, numberWritingPad, nextWritingNumber, WRITING_NUMBERS } from '../dist/number-writing.js';
 import { applyObservation, learningStage } from '../dist/learning.js';
 import { SESSION_LENGTH } from '../dist/adventure.js';
 
@@ -84,31 +84,50 @@ test('Every prompt and hint has Hebrew narration and each hint arrives at the ri
   assert.deepEqual(spokenNumber(100), ['number-workshop-100']);
 });
 
-test('Number writing provides ten distinct trace models and starts at an unpracticed digit', () => {
-  assert.deepEqual(WRITING_DIGITS, [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]);
+test('Writing models for 0 through 100 draw each complete number in left-to-right digit order', () => {
+  assert.deepEqual([...WRITING_NUMBERS].sort((a, b) => a - b), Array.from({ length: 101 }, (_, number) => number));
+  const guideStrokes = markup => [...markup.matchAll(/d="([^"]+)" data-stroke="(\d+)" data-digit-column="(\d+)"/gu)];
+  const digitModels = Array.from({ length: 10 }, (_, digit) => guideStrokes(numberWritingPad(digit)).map(match => match[1]));
   const models = new Set();
-  let items = {};
-  for (const digit of WRITING_DIGITS) {
-    assert.equal(nextWritingDigit(items), digit);
-    const markup = digitWritingPad(digit);
+  for (const number of WRITING_NUMBERS) {
+    const markup = numberWritingPad(number);
     assert.match(markup, /dir="ltr"/u);
-    const paths = [...markup.matchAll(/d="([^"]+)" data-stroke="(\d+)"/gu)];
-    assert.ok(paths.length > 0);
-    for (const [index, [, path, marker]] of paths.entries()) {
-      assert.match(path, /^M\d+ \d+/u);
-      assert.equal(path.split('M').length, 2, 'Each stroke has one continuous path');
-      assert.equal(Number(marker), index);
+    const paths = guideStrokes(markup);
+    const expected = Array.from(String(number), (digit, column) => digitModels[digit].map(path => ({ path, column }))).flat();
+    assert.equal(paths.length, expected.length);
+    for (const [index, [, path, stroke, column]] of paths.entries()) {
+      const model = expected[index];
+      assert.equal(Number(stroke), index);
+      assert.equal(Number(column), model.column);
+      const [, startX, rest] = path.match(/^M(\d+)( .+)$/u);
+      const [, digitX, digitRest] = model.path.match(/^M(\d+)( .+)$/u);
+      assert.equal(Number(startX) - Number(digitX), model.column * 116);
+      assert.equal(rest, digitRest);
     }
     models.add(paths.map(entry => entry[1]).join('|'));
-    const item = digitWritingKey(digit);
+    assert.ok(spokenNumber(number).every(clip => CLIPS[clip]?.lang === 'he-IL'), `Missing number audio for ${number}`);
+  }
+  assert.equal(models.size, 101);
+});
+
+test('Number writing keeps saved single digits, continues into tens and wraps after 100', () => {
+  let items = {
+    'math:write:1': { practice: 2 },
+    'math:write:2': { practice: 1 },
+  };
+  assert.equal(numberWritingKey(1), 'math:write:1');
+  assert.equal(numberWritingKey(100), 'math:write:100');
+  for (const number of WRITING_NUMBERS.slice(2)) {
+    assert.equal(nextWritingNumber(items), number);
+    const item = numberWritingKey(number);
     items = applyObservation(items, { item, domain: 'math', kind: 'practice', mode: 'trace', at: Date.UTC(2026, 10, 14) });
     assert.equal(learningStage(items[item]), 'practice');
     assert.equal(items[item].independent, 0);
   }
-  assert.equal(models.size, WRITING_DIGITS.length);
-  assert.equal(nextWritingDigit(items, 0), 1);
-  const incomplete = { ...items }; delete incomplete[digitWritingKey(4)];
-  assert.equal(nextWritingDigit(incomplete, 5), 4);
+  assert.equal(nextWritingNumber(items, 99), 100);
+  assert.equal(nextWritingNumber(items, 100), 1);
+  delete items[numberWritingKey(4)];
+  assert.equal(nextWritingNumber(items, 100), 4);
 });
 
 test('Unfinished Number Workshop rounds retain their current pictures, options and help on reload', () => {

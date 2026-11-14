@@ -16278,6 +16278,13 @@
       "detected_ipa": "kˈol hakavˈod, katˈavt ʔˈet hamispˈaʁ.",
       "phoneme_edit_ratio": 0,
       "seconds": 1.83
+    },
+    "number-workshop-write-left": {
+      "sha256": "baf4f8e1a35e39c36ea75bed0d5320423fe2648b1d7156629d72266cff7ab299",
+      "expected_ipa": "matχilˈot mismˈol, banekudˈa hajeʁukˈa.",
+      "detected_ipa": "matχilˈot mismˈol banekudˈa hajeʁukˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.86
     }
   }
 }

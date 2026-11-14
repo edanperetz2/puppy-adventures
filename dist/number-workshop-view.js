@@ -1,7 +1,7 @@
 import { art, pup, uiIcon } from './art.js';
-import { CLIPS } from './content.js?v=2.3.1-number-writing';
+import { CLIPS } from './content.js?v=2.3.2-writing-100';
 import { NUMBER_PATHS, numberQuestion, numberQuestionClip, numberPrompt, numberModel, spokenNumber } from './number-workshop.js?v=2.3.0-numbers';
-import { NUMBER_WRITING_TITLE } from './number-writing.js?v=2.3.1-number-writing';
+import { NUMBER_WRITING_TITLE } from './number-writing.js?v=2.3.2-writing-100';
 
 export const NUMBER_WORKSHOP_TITLE = 'סַדְנַת הַמִּסְפָּרִים';
 const labelFor = (key, nikud) => nikud ? CLIPS[key].text : CLIPS[key].text.replace(/[\u0591-\u05bd\u05bf-\u05c7]/gu, '');
