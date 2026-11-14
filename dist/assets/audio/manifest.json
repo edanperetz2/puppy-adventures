@@ -36423,6 +36423,51 @@
       "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
       "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
       "sha256": "7c70f41f0f0f0ce9d047439439d65ba5e24ad8d4d90a95f268d4379fe7f79344"
+    },
+    "number-workshop-write-intro": {
+      "lang": "he-IL",
+      "speech": "ʔaχʃˈav niχtˈov mispaʁˈim. liχtsˈi ʔˈal haʔipaʁˈon.",
+      "segments": [
+        "ʔaχʃˈav niχtˈov mispaʁˈim. liχtsˈi ʔˈal haʔipaʁˈon."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "8d34da68b8a00dce5e1dbd0b2ddcc0692e98c4ad4963de2606754886c1cc158e"
+    },
+    "number-workshop-write-trace": {
+      "lang": "he-IL",
+      "speech": "hatχˈili banekudˈa hajeʁukˈa. hamʃˈiχi ʔˈal hakˈav.",
+      "segments": [
+        "hatχˈili banekudˈa hajeʁukˈa. hamʃˈiχi ʔˈal hakˈav."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "5e137f023e9ad0b5d3ddc2c6bdf4bb63594e8b14be6f4e0830f215068ee91a56"
+    },
+    "number-workshop-write-done": {
+      "take": 0,
+      "segments": [
+        "kˈol hakavˈod! katˈavt ʔˈet hamispˈaʁ."
+      ],
+      "lang": "he-IL",
+      "speech": "kˈol hakavˈod! katˈavt ʔˈet hamispˈaʁ.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "28ce6f8ffe46e2a388ec3bdd2e6fb78467e43ebb538a3d2f1fb89e8f5f10db27"
     }
   }
 }

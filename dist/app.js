@@ -6,12 +6,12 @@ import { STORIES } from './journey-content.js';
 import { mountJourney } from './journey-view.js?v=2.2.5-practice';
 import { mountPark } from './park.js';
 import { mountFreeWriting, WRITING_STEPS } from './free-writing.js';
-import { parentLearning, learningStatus } from './learning-parent.js?v=2.1.3-sync';
-import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.3.0-numbers';
+import { parentLearning, learningStatus } from './learning-parent.js?v=2.3.1-number-writing';
+import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.3.1-number-writing';
 import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.2.4-practice';
 import { ADVENTURE_PHASES, adventurePhase } from './adventure.js?v=2.2.2-six';
 import { art, pup, scene, uiIcon } from './art.js';
-import { Narrator } from './audio.js?v=2.3.0-numbers';
+import { Narrator } from './audio.js?v=2.3.1-number-writing';
 import { GameAnnouncements } from './announcements.js';
 import { SharedAlbum, normalizeCode } from './sync.js?v=2.2.6-album';
 import { SYNC_CONFIG } from './sync-config.js';
@@ -20,7 +20,7 @@ import { analogClock, CLOCK_LEVELS } from './clock.js';
 import { mountClockSchool } from './clock-school.js?v=2.2.4-practice';
 import { sanitizeClockPosition, recordClockLesson } from './clock-learning.js?v=2.2.4-practice';
 import { LETTERS, WRITING_FORMS, writingLetter, writingMode, writingPositionKey, letterGroup, letterShape } from './letters.js';
-import { mountLetterPad } from './letter-pad.js';
+import { mountLetterPad } from './letter-pad.js?v=2.3.1-number-writing';
 import { nextReadingStage, sanitizeReadingPractice, finishReadingPractice } from './reading.js?v=2.2.2-six';
 import { stickerPage, stickerDefinition } from './stickers.js';
 import { suggestedLetters, practicedLetterCount, recordLetters, recognitionTargets } from './letter-progress.js';
@@ -31,7 +31,8 @@ import { ARIEL, openAriel, readArielInvitation, GAME_KEY } from './profiles.js?v
 import { profileSpeech } from './profile-speech.js?v=2.2.0-voices';
 import { openGameGuide, GUIDE_ICON } from './guide.js?v=2.2.3-ariel';
 import { NUMBER_PATHS, cleanNumberRound, newNumberRound, numberClip } from './number-workshop.js?v=2.3.0-numbers';
-import { NUMBER_WORKSHOP_TITLE, numberMenu, mountNumberRound, numberComplete } from './number-workshop-view.js?v=2.3.0-numbers';
+import { NUMBER_WORKSHOP_TITLE, numberMenu, mountNumberRound, numberComplete } from './number-workshop-view.js?v=2.3.1-number-writing';
+import { digitWritingKey, mountNumberWriting } from './number-writing.js?v=2.3.1-number-writing';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -97,6 +98,7 @@ learner = new LearningStore({ storage:gameStorage, config:SYNC_CONFIG, getCode:(
   const status=dialog.querySelector('.learning-sync-status');if(status)status.textContent=learningStatus(learner);
   if(view==='park')parkController?.update();
   if(view==='letters-lesson')updateWritingStatus();
+  if (view === 'number-writing') numberController?.updateProgress();
 } });
 
 const narrator = new Narrator(status => {
@@ -542,6 +544,7 @@ function render() {
   else if (view === 'learning-hub') renderLearningHub();
   else if (view === 'number-menu') app.innerHTML = header() + numberMenu(numberDrafts) + footer();
   else if (view === 'number-round') renderNumberRound();
+  else if (view === 'number-writing') renderNumberWriting();
   else if (view === 'number-complete') app.innerHTML = header() + numberComplete(numberRound, numberSticker) + footer();
   else if (view === 'park') renderPark();
   else if (view === 'journey-complete') renderJourneyComplete();
@@ -603,7 +606,7 @@ function leaveTo(destination) {
 function replay() {
   if (!settings.sound) { settings.sound = true; save(); narrator.enabled = true; renderSoundButton(); }
   if(view==='journey'){journeyController?.replay();return;}
-  if (view === 'number-round') { numberController?.replay(); return; }
+  if (view === 'number-round' || view === 'number-writing') { numberController?.replay(); return; }
   if (view === 'number-menu') { announcements.say(numberClip('menu')); return; }
   if(view==='park'){clockSpeak('journey-park-intro');return;}
   if (view === 'clock-school') { clockSchool.replay(true); return; }
@@ -863,6 +866,23 @@ function startNumberRound(path) {
   numberController.replay();
 }
 
+function openNumberWriting() {
+  narrator.stop();
+  view = 'number-writing'; render(); focusTitle();
+  numberController.replay();
+}
+
+function renderNumberWriting() {
+  app.innerHTML = `${header()}<main id="main" class="number-workshop"><div id="number-writing-root"></div></main>${footer()}`;
+  numberController = mountNumberWriting(document.querySelector('#number-writing-root'), {
+    getItems: () => learner.items, motion: settings.motion, speak: clips => announcements.say(clips),
+    onPractice: digit => {
+      learner.record({ item: digitWritingKey(digit), domain: 'math' }, 'practice', 'trace');
+      celebrate(12);
+    },
+  });
+}
+
 function renderNumberRound() {
   app.innerHTML = `${header()}<main id="main" class="number-workshop"><div id="number-root"></div></main>${footer()}`;
   const active = numberRound;
@@ -943,6 +963,7 @@ app.addEventListener('click', event => {
     case 'learning-hub': openLearningHub(button.dataset.hub); break;
     case 'number-menu': openNumberMenu(); break;
     case 'number-start': startNumberRound(button.dataset.path); break;
+    case 'number-write': openNumberWriting(); break;
     case 'garden': openReadingLevels(); break;
     case 'mission-direct': startMission(button.dataset.mission,true); break;
     case 'journey-start': startJourney(button.dataset.journey,button.dataset.level); break;

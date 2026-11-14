@@ -3,7 +3,10 @@ import { advanceTrace } from './letters.js';
 export const PEN_LIFT_MS = 650;
 export function writingDuration(length) { return Math.max(650, Math.min(6500, length * 12)); }
 
-export function mountLetterPad(container, { motion = true, onComplete = () => {}, onStartNeeded = () => {} } = {}) {
+export function mountLetterPad(container, {
+  motion = true, completeMessage = 'כל הכבוד! כתבת את האות!',
+  onComplete = () => {}, onStartNeeded = () => {}, onDemoComplete = () => {},
+} = {}) {
   const svg = container.querySelector('svg');
   const guides = [...svg.querySelectorAll('[data-stroke]')];
   const layer = svg.querySelector('.letter-ink');
@@ -73,6 +76,7 @@ export function mountLetterPad(container, { motion = true, onComplete = () => {}
         if (index === guides.length) {
           pencil.setAttribute('hidden', ''); startMarker(0);
           caption.textContent = 'עכשיו תורך! התחילי בנקודה הירוקה';
+          onDemoComplete();
           return;
         }
         startMarker(index); pauseUntil = now + PEN_LIFT_MS;
@@ -116,7 +120,7 @@ export function mountLetterPad(container, { motion = true, onComplete = () => {}
     if (progress < points[stroke].length - 3) { startMarker(stroke, progress); caption.textContent = 'אפשר להמשיך מהנקודה הירוקה'; return; }
     ink[stroke].style.strokeDashoffset = '0'; ink[stroke].style.opacity = '1'; stroke++; progress = 0; previousTracePoint = null;
     if (stroke === guides.length) {
-      marker.setAttribute('hidden', ''); direction.setAttribute('hidden', ''); caption.textContent = 'כל הכבוד! כתבת את האות!'; onComplete();
+      marker.setAttribute('hidden', ''); direction.setAttribute('hidden', ''); caption.textContent = completeMessage; onComplete();
     } else { startMarker(stroke); caption.textContent = `נהדר! עכשיו קו ${stroke + 1} מתוך ${guides.length}`; }
   }, { signal: events.signal });
   function releasePointer() {

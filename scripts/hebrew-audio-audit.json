@@ -16257,6 +16257,27 @@
       "detected_ipa": "meʔˈa",
       "phoneme_edit_ratio": 0.0,
       "seconds": 2.53
+    },
+    "number-workshop-write-intro": {
+      "sha256": "8d34da68b8a00dce5e1dbd0b2ddcc0692e98c4ad4963de2606754886c1cc158e",
+      "expected_ipa": "ʔaχʃˈav niχtˈov mispaʁˈim. liχtsˈi ʔˈal haʔipaʁˈon.",
+      "detected_ipa": "ʔaχʃˈav niχtˈov mispaʁˈim, liχtsˈi ʔˈal haʔipaʁˈon.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.95
+    },
+    "number-workshop-write-trace": {
+      "sha256": "5e137f023e9ad0b5d3ddc2c6bdf4bb63594e8b14be6f4e0830f215068ee91a56",
+      "expected_ipa": "hatχˈili banekudˈa hajeʁukˈa. hamʃˈiχi ʔˈal hakˈav.",
+      "detected_ipa": "hatχˈili banekudˈa hajeʁukˈa, hamʃˈiχi ʔˈal hakˈav.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.86
+    },
+    "number-workshop-write-done": {
+      "sha256": "28ce6f8ffe46e2a388ec3bdd2e6fb78467e43ebb538a3d2f1fb89e8f5f10db27",
+      "expected_ipa": "kˈol hakavˈod! katˈavt ʔˈet hamispˈaʁ.",
+      "detected_ipa": "kˈol hakavˈod, katˈavt ʔˈet hamispˈaʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.83
     }
   }
 }

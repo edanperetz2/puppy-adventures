@@ -35,6 +35,15 @@
 .number-path-tens { background: #e6eaf7; }
 .number-path > svg { width: clamp(50px, 12vw, 78px); }
 .number-path small { font-size: 13px; color: var(--green-dark); }
+.number-path.number-path-write {
+  grid-column: 1 / -1;
+  grid-auto-flow: column;
+  justify-content: center;
+  min-height: 76px;
+  background: #f1e6f7;
+  border-color: #e2d3ec;
+}
+.number-path-write > svg { width: 31px; color: #60457d; }
 
 .number-round-top { margin-bottom: 8px; }
 .number-round-top > span { direction: ltr; color: var(--muted); font-size: 14px; }
@@ -151,6 +160,94 @@
 .number-workshop .hint-button { min-height: 44px; }
 .number-workshop button:focus-visible { outline: 3px solid var(--green-dark); outline-offset: 3px; }
 
+.number-writing-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  align-items: center;
+  gap: 10px 24px;
+  max-width: 650px;
+  margin: 12px auto 0;
+}
+.number-writing-tools {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+}
+.number-writing-tools > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 10px;
+}
+.number-writing-example {
+  display: grid;
+  place-items: center;
+  width: clamp(74px, 15vw, 130px);
+  aspect-ratio: 1;
+  border: 1px solid #e2d3ec;
+  border-radius: 21px;
+  background: #f4edf9;
+  color: #60457d;
+  font-size: clamp(44px, 10vw, 80px);
+  font-weight: 600;
+  line-height: 1;
+}
+.number-writing-tools button, .number-writing-navigation button { min-height: 44px; }
+.number-writing-tools .secondary-button { gap: 6px; padding-inline: 10px; }
+.number-writing-surface { min-width: 0; }
+.number-writing-surface .number-writing-pad {
+  width: min(100%, 340px);
+  height: auto;
+  margin-inline: auto;
+  background: #fcfefb;
+  border-color: #cad9d2;
+}
+.number-writing-pad .letter-guide { color: #b7c7be; }
+.number-writing-pad .letter-ink { color: #247764; }
+.number-writing-pad .letter-start circle { fill: #247764; }
+.number-writing-pad .writing-lines { stroke: #d1ddd4; }
+.number-writing-surface .letter-pad-caption {
+  min-height: 1.65em;
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--green-dark);
+}
+.number-writing-navigation { grid-column: 1 / -1; text-align: center; }
+.number-writing-count { margin: 10px 0 8px; font-size: 14px; }
+.number-writing-digits {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 6px;
+}
+.number-writing-digits button {
+  position: relative;
+  border-radius: 12px;
+  border: 1px solid #cddbd5;
+  background: #f7fbf9;
+  color: var(--ink);
+  font-size: 23px;
+  font-weight: 600;
+}
+.number-writing-digits button[aria-pressed="true"] {
+  border-color: var(--green);
+  background: #e0f1e7;
+  color: var(--green-dark);
+}
+.number-writing-check {
+  position: absolute;
+  right: 3px;
+  top: 2px;
+  color: var(--green-dark);
+}
+.number-writing-check svg { width: 12px; }
+
+@media (max-width: 570px) {
+  .number-writing-layout { grid-template-columns: 1fr; }
+  .number-writing-tools { grid-template-columns: auto minmax(0, 1fr); align-items: center; justify-items: start; }
+  .number-writing-example { width: 64px; border-radius: 14px; }
+  .number-writing-tools > div { justify-content: flex-start; }
+  .number-writing-digits { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
 @media (max-width: 420px) {
   .number-workshop { margin-inline: 12px; }
   .number-left-scene { --number-tile: 20px; }
