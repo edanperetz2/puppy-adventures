@@ -1,7 +1,7 @@
-import { art } from './art.js';
-import { COLORS, WORDS } from './content.js?v=2.6.0-stories';
-import { paintedReadingObject } from './reading-scenes.js?v=2.6.0-stories';
-import { ACT_OUT_INSTRUCTION, actOutMatches, actOutPlan } from './act-out.js?v=2.6.0-stories';
+import { art, uiIcon } from './art.js?v=2.6.1-animal-stories';
+import { CLIPS, COLORS, WORDS } from './content.js?v=2.6.1-animal-stories';
+import { paintedReadingObject } from './reading-scenes.js?v=2.6.1-animal-stories';
+import { actOutMatches, actOutPlan, actOutPrompt } from './act-out.js?v=2.6.1-animal-stories';
 
 const names = new Map([...WORDS, ...COLORS].map(word => [word.id, word.he]));
 const points = {
@@ -31,36 +31,59 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
   const plan = actOutPlan(word, roundId);
   const travel = spec.kind === 'travel';
   const group = spec.kind === 'arrangement';
-  const stopPoint = destination => travel ? travelPoints[plan.destinations.indexOf(destination)] : points[spec.anchor][destination];
+  const animal = spec.kind === 'action';
+  const jumping = animal && spec.action === 'jump';
+  const feeding = animal && spec.action === 'eat';
+  const lane = destination => travelPoints[plan.destinations.indexOf(destination)][0];
+  const stopPoint = destination => {
+    if (feeding) return [lane(destination), 70];
+    if (travel) return travelPoints[plan.destinations.indexOf(destination)];
+    return points[spec.anchor][destination];
+  };
   const label = text => nikud ? text : text.replace(/[\u0591-\u05bd\u05bf-\u05c7]/gu, '');
   let selected = null, drag = null, suppressClick = null;
   let flight = null;
   const played = [...moves];
   const container = spec.anchor === 'box' || spec.anchor === 'basket';
-  const decorations = travel
+  const decorations = animal ? '' : travel
     ? plan.destinations.map((id, index) => `<span class="act-landmark" style="--x:${travelPoints[index][0]}%">${art(id)}</span>`).join('')
     : `<span class="act-anchor act-anchor-${spec.anchor}">${container ? '' : art(spec.anchor)}</span>${container ? '<span class="act-container-rim"></span>' : ''}`;
+  const animalStops = () => plan.destinations.map(destination => {
+    const id = spec.size ? spec.object : destination;
+    const name = `${names.get(id)}${spec.size ? destination === 'small' ? ' קטן' : ' גדול' : ''}`;
+    const action = jumping ? 'jump' : 'place';
+    return `<button type="button" class="act-animal${destination === 'small' ? ' act-animal-small' : ''}" data-act-${action}="${destination}" style="--x:${lane(destination)}%" aria-label="${jumping ? 'קפיצה' : 'האכלה'} · ${name}">
+      <span class="act-animal-picture">${art(id)}</span>${feeding ? `<span class="act-animal-plate">${art('plate')}</span>` : ''}<span class="act-animal-check" hidden>${uiIcon('check')}</span>
+    </button>`;
+  }).join('');
+  const placesMarkup = () => plan.destinations.map(destination => {
+    const [x, y] = stopPoint(destination);
+    const title = travel ? `ליד ${names.get(destination)}` : placeNames[spec.anchor][destination];
+    return `<button type="button" class="act-place" data-act-place="${destination}" style="--x:${x}%;--y:${y}%" aria-label="${title}"></button>`;
+  }).join('');
+  const piecesMarkup = () => plan.pieces.map((piece, i) => {
+    const id = feeding ? piece.food : spec.object;
+    const name = `${names.get(id)}${piece.color ? ` · ${names.get(piece.color)}` : piece.size ? piece.size === 'small' ? ' · קטן' : ' · גדול' : group ? ` ${i + 1}` : ''}`;
+    return `<button type="button" class="act-piece" data-act-piece="${i}" aria-pressed="false" aria-label="${name}">
+        ${paintedReadingObject(id, piece.color, art(id, piece.size === 'small' ? 'act-small' : ''))}
+      </button>`;
+  }).join('');
 
-  root.innerHTML = `<p class="act-instruction" id="act-instruction">${label(ACT_OUT_INSTRUCTION)} <span>${label('אֶפְשָׁר לִגְרֹר, אוֹ לָגַעַת בַּחֵפֶץ וְאָז בַּמָּקוֹם.')}</span></p>
-    <div class="act-playfield" data-scene="${spec.anchor}" data-kind="${spec.kind}" aria-describedby="act-instruction" role="group" aria-label="תמונת הסיפור">
+  root.innerHTML = `<p class="act-instruction" id="act-instruction">${label(CLIPS[actOutPrompt(word)].text)}${jumping ? '' : ` <span>${label('אֶפְשָׁר לִגְרֹר, אוֹ לָגַעַת בַּחֵפֶץ וְאָז בַּמָּקוֹם.')}</span>`}</p>
+    <div class="act-playfield" data-scene="${spec.anchor || spec.action}" data-kind="${spec.kind}" aria-describedby="act-instruction" role="group" aria-label="תמונת הסיפור">
       <div class="act-scenery" aria-hidden="true">${decorations}</div>
-      ${plan.destinations.map(destination => {
-        const [x, y] = stopPoint(destination);
-        const title = travel ? `ליד ${names.get(destination)}` : placeNames[spec.anchor][destination];
-        return `<button type="button" class="act-place" data-act-place="${destination}" style="--x:${x}%;--y:${y}%" aria-label="${title}"></button>`;
-      }).join('')}
+      ${animal ? animalStops() : placesMarkup()}
       <div class="act-landed" aria-hidden="true"></div>
-      <div class="act-tray" role="group" aria-label="חלקים להזזה">
-        ${plan.pieces.map((piece, i) => `<button type="button" class="act-piece" data-act-piece="${i}" aria-pressed="false" aria-label="${names.get(spec.object)}${piece.color ? ` · ${names.get(piece.color)}` : piece.size ? piece.size === 'small' ? ' · קטן' : ' · גדול' : ` ${i + 1}`}">
-          ${paintedReadingObject(spec.object, piece.color, art(spec.object, piece.size === 'small' ? 'act-small' : ''))}
-        </button>`).join('')}
-      </div>
+      ${jumping ? '' : `<div class="act-tray" role="group" aria-label="חלקים להזזה">${piecesMarkup()}</div>`}
     </div>`;
   const field = root.querySelector('.act-playfield');
   const landed = root.querySelector('.act-landed');
   const pieces = [...root.querySelectorAll('.act-piece')];
-  const places = [...root.querySelectorAll('.act-place')];
+  const places = [...root.querySelectorAll('[data-act-place]')];
+  const jumpers = [...root.querySelectorAll('[data-act-jump]')];
   const tray = root.querySelector('.act-tray');
+  const animalButton = animal ? (jumping ? jumpers : places)[plan.destinations.indexOf(plan.target)] : null;
+  const canAnimate = node => motion() && !matchMedia('(prefers-reduced-motion: reduce)').matches && typeof node.animate === 'function';
   let complete = resolved;
   let preview = null;
   let placementTap = null;
@@ -71,38 +94,61 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
       button.classList.toggle('act-used', played.includes(index));
       button.setAttribute('aria-pressed', String(selected === index));
     }
-    tray.hidden = complete;
+    if (tray) tray.hidden = complete;
     for (const button of places) {
-      button.disabled = complete || (selected === null && !drag?.active);
+      button.disabled = complete || (!feeding && selected === null && !drag?.active);
       button.classList.toggle('act-over', preview === button.dataset.actPlace);
     }
+    for (const button of jumpers) button.disabled = complete;
+    if (animalButton && complete) animalButton.querySelector('.act-animal-check').hidden = false;
     field.classList.toggle('act-active', selected !== null || Boolean(drag?.active));
     field.classList.toggle('act-finished', complete);
   }
 
   function land(index, origin) {
+    if (jumping) {
+      const jumper = animalButton.querySelector('.act-animal-picture');
+      animalButton.classList.add('act-jumped');
+      if (!origin || !canAnimate(jumper)) return null;
+      return jumper.animate([
+        { transform: 'translateY(22px) scaleY(.86)' },
+        { transform: `translateY(${spec.object === 'cat' ? -36 : -26}px) rotate(-6deg)`, offset: .50 },
+        { transform: 'none' },
+      ], { duration: 480, easing: 'ease-out' });
+    }
     const [x, y] = stopPoint(plan.target);
     const [dx, dy] = group ? groupOffsets[plan.count - 2][played.indexOf(index)] : [0, 0];
     const item = document.createElement('span');
-    item.className = `act-placed${group ? ' act-placed-small' : ''}`;
+    item.className = `act-placed${group || feeding ? ' act-placed-small' : ''}`;
     item.dataset.actLanded = index;
     item.style.left = `${x + dx}%`;
     item.style.top = `${y + dy}%`;
     item.innerHTML = pieces[index].innerHTML;
     landed.append(item);
-    if (!origin || !motion() || matchMedia('(prefers-reduced-motion: reduce)').matches || typeof item.animate !== 'function') return null;
+    if (!origin || !canAnimate(item)) {
+      if (feeding) item.hidden = true;
+      return null;
+    }
     const bounds = item.getBoundingClientRect();
     const dxFrom = origin.x - bounds.left - bounds.width / 2;
     const dyFrom = origin.y - bounds.top - bounds.height / 2;
     const from = `translate(-50%, -50%) translate(${dxFrom}px, ${dyFrom}px)`;
     const scale = `scale(${origin.width / bounds.width})`;
-    return item.animate([{ transform: `${from} ${scale}` }, { transform: 'translate(-50%, -50%)' }], { duration: 320, easing: 'ease-out' });
+    const arrive = [{ transform: `${from} ${scale}` }, { transform: 'translate(-50%, -50%)' }];
+    if (!feeding) return item.animate(arrive, { duration: 320, easing: 'ease-out' });
+    const eater = animalButton.querySelector('.act-animal-picture');
+    eater.animate([{ transform: 'none' }, { transform: 'translateY(9px) rotate(7deg)' }, { transform: 'none' }], { delay: 140, duration: 420 });
+    const bite = item.animate([
+      arrive[0], { ...arrive[1], offset: .56 }, { opacity: 1, transform: 'translate(-50%, -50%) scale(.8)', offset: .79 },
+      { opacity: 0, transform: 'translate(-50%, -90%) scale(.35)' },
+    ], { duration: 540, easing: 'ease-out', fill: 'forwards' });
+    return bite;
   }
 
   function move(index, destination, origin) {
     if (complete || played.includes(index)) return;
     if (!actOutMatches(word, plan, index, destination)) {
-      selected = index;
+      selected = jumping ? null : index;
       showMoves();
       onRetry();
       return;
@@ -117,8 +163,14 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
     onMove([...played], complete);
     if (complete) {
       flight = animation;
-      if (animation) void animation.finished.then(onFinish, () => {});
-      else onFinish();
+      if (!animation) onFinish();
+      else void animation.finished.then(() => {
+        if (feeding && landed.lastElementChild) {
+          landed.lastElementChild.hidden = true;
+          animation.cancel();
+        }
+        onFinish();
+      }, () => {});
     }
   }
 
@@ -139,7 +191,11 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
       showMoves();
       if (selected !== null && !event.detail) places[0].focus({ preventScroll: true });
     } else if (button.hasAttribute('data-act-place')) {
-      if (button !== suppressClick || !event.detail) place(button);
+      if (button === suppressClick && event.detail) return;
+      if (feeding && selected === null) pieces.find(piece => !piece.disabled)?.focus({ preventScroll: true });
+      else place(button);
+    } else if (button.hasAttribute('data-act-jump')) {
+      move(0, button.dataset.actJump, true);
     }
   }, { signal: events.signal });
 

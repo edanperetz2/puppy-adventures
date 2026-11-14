@@ -1,4 +1,4 @@
-import { CLIPS } from './content.js?v=2.6.0-stories';
+import { CLIPS } from './content.js?v=2.6.1-animal-stories';
 
 export class Narrator {
   constructor(onStatus = () => {}) {

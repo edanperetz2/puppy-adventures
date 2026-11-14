@@ -1,4 +1,4 @@
-import { READING_SCENES } from './reading-advanced.js';
+import { READING_SCENES } from './reading-advanced.js?v=2.6.1-animal-stories';
 
 const palette = {
   red: ['#e47176', '#f5bec1'], blue: ['#579dce', '#badced'], green: ['#65a575', '#c3dfb9'],
@@ -98,6 +98,7 @@ export function readingScene(id, baseArt) {
   }
   if (spec.kind === 'action') {
     body = ground;
+    if (id.startsWith('story-animal-')) body += at('flower', 154, 132, 39);
     if (spec.reference) body += at('flower', 127, 112, 76);
     const size = spec.size === 'small' ? 104 : spec.size === 'big' ? 165 : 164;
     const x = spec.reference ? 3 : 19;
@@ -110,7 +111,7 @@ export function readingScene(id, baseArt) {
         body += '<ellipse cx="100" cy="153" rx="34" ry="8" fill="#65b6df"/><path d="M89 117q-11 13-4 17q7 3 7-5M114 115q-11 13-4 17q7 3 7-5" fill="#65b6df"/>';
       } else {
         body += '<g fill="#ac825c"><circle cx="76" cy="153" r="5"/><circle cx="91" cy="150" r="5"/><circle cx="108" cy="153" r="5"/><circle cx="123" cy="150" r="5"/></g>';
-        const food = spec.object === 'rabbit' ? 'carrot' : spec.object === 'bird' ? 'apple' : 'bone';
+        const food = spec.food || (spec.object === 'rabbit' ? 'carrot' : spec.object === 'bird' ? 'apple' : 'bone');
         body += at(food, 86, 116, 31);
       }
     } else if (spec.action === 'sleep') {

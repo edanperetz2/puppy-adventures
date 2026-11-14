@@ -16369,6 +16369,83 @@
       "detected_ipa": "kiʁʔˈi ʔˈet hamiʃpˈat, hazˈizi ʔˈet mˈa ʃematʔˈim.",
       "phoneme_edit_ratio": 0,
       "seconds": 4.66
+    },
+    "he-story-animal-rabbit-jump": {
+      "sha256": "714fcda4de364be7a124bbbb121a086f0e0b407eb2f3b760fe4887db787fabac",
+      "expected_ipa": "haʔaʁnˈav kofˈets.",
+      "detected_ipa": "haʔaʁnˈav kofˈets.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.34
+    },
+    "he-story-animal-rabbit-carrot": {
+      "sha256": "1538689abfa384f162ab381acfefc0c0ec10276ed286970deadebaf0b7cb6a04",
+      "expected_ipa": "haʔaʁnˈav ʔoχˈel ɡˈezeʁ.",
+      "detected_ipa": "haʔaʁnˈav ʔoχˈel ɡˈezeʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.39
+    },
+    "he-story-animal-rabbit-lettuce": {
+      "sha256": "18b880a634053b845204cb5f967d11fb8301437237806282cf9ff1f873f8a1c7",
+      "expected_ipa": "haʔaʁnˈav ʔoχˈel χasˈa.",
+      "detected_ipa": "haʔaʁnˈav ʔoχˈel χasˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.5
+    },
+    "he-story-animal-dog-jump": {
+      "sha256": "053d66fef3595f4b66755a5af280f22689babf8b8f88a3f6fa7dc48bbefef1b7",
+      "expected_ipa": "hakˈelev kofˈets.",
+      "detected_ipa": "hakˈelev kofˈets.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.17
+    },
+    "he-story-animal-dog-meat": {
+      "sha256": "305f4e38b3b4f49c3b514cd0be6861defd896fbc5f236bb9f48680d9dcfb33eb",
+      "expected_ipa": "hakˈelev ʔoχˈel basˈaʁ.",
+      "detected_ipa": "hakˈelev ʔoχˈel basˈaʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.27
+    },
+    "he-story-animal-dog-chicken-leg": {
+      "sha256": "84b456b4ea83fb7e5d7a479938d4d4b85cef3d08fd0d0c21d2204f5975429db9",
+      "expected_ipa": "hakˈelev ʔoχˈel ʃˈok ʔˈof.",
+      "detected_ipa": "hakˈelev ʔoχˈel ʃˈok ʔˈof.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.42
+    },
+    "he-story-animal-cat-jump": {
+      "sha256": "1a4d1e6427bd6c2b199dbcce54893734c8528ff89630af54e024b48a21d0f34e",
+      "expected_ipa": "χatˈul kofˈets ɡavˈoaχ.",
+      "detected_ipa": "χatˈul kofˈets ɡavˈoaχ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.33
+    },
+    "he-story-animal-cat-fish": {
+      "sha256": "2232ac356ba87fdecbb23847f31534ee9ddb99b88643da9640a6bb416764f477",
+      "expected_ipa": "χatˈul ʔoχˈel dˈaɡ.",
+      "detected_ipa": "χatˈul ʔoχˈel dˈaɡ",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.74
+    },
+    "he-story-animal-cat-meat": {
+      "sha256": "7d15e0d32762b9a49919a2232741a8507244d9a4f608b8c37c7dd4a37ff3a769",
+      "expected_ipa": "χatˈul ʔoχˈel basˈaʁ.",
+      "detected_ipa": "χatˈul ʔoχˈel basˈaʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.78
+    },
+    "act-out-jump": {
+      "sha256": "bb854117e45610f193e64f360f3c974ac833c1d3c05df29bcd939207738b4814",
+      "expected_ipa": "liχtsˈi ʔˈal haχajˈa ʃekofˈetset.",
+      "detected_ipa": "liχtsˈi ʔˈal haχajˈa ʃekofˈetset.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.83
+    },
+    "act-out-feed": {
+      "sha256": "2a1778754a94d676abab3277bb899bd671edf4e28cd00ad1d9d373d67ad65138",
+      "expected_ipa": "haʔavˈiʁi ʔˈet haʔˈoχel laχajˈa ʃebasipˈuʁ.",
+      "detected_ipa": "haʔavˈiʁi ʔˈet haʔˈoχel laχajˈa ʃebasipˈuʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.97
     }
   }
 }

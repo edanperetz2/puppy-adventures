@@ -1,8 +1,8 @@
 import { choosePractice } from './learning.js';
-import { ANIMALS, COLORS, NUMBERS, STICKERS, MISSIONS, MISSION_IDS } from './content.js';
+import { ANIMALS, COLORS, NUMBERS, STICKERS, MISSIONS, MISSION_IDS } from './content.js?v=2.6.1-animal-stories';
 import { CLOCK_LEVELS, clockTime, clockConceptRank } from './clock.js';
 import { LETTERS, letterGroup } from './letters.js';
-import { READING_LEVELS, mixedReadingTargets, readingWords, readingTargets } from './reading.js?v=2.2.2-six';
+import { READING_LEVELS, mixedReadingTargets, readingWords, readingTargets } from './reading.js?v=2.6.1-animal-stories';
 import { isSticker } from './stickers.js';
 import { sanitizeLetterPractice, recordLetters, recognitionTargets } from './letter-progress.js';
 import { distinctWordPictures } from './vocabulary.js';
@@ -10,6 +10,7 @@ import { SESSION_LENGTH, adventurePhase, choiceCount } from './adventure.js?v=2.
 import { sanitizeClockLessons } from './clock-learning.js?v=2.2.4-practice';
 import { CHARACTER_MODES, createCharacterSession, sanitizeCharacterSelection } from './characters.js?v=2.2.2-six';
 import { answerShuffler, shuffle } from './answer-order.js';
+import { ANIMAL_STORIES } from './reading-animal-stories.js?v=2.6.1-animal-stories';
 export { SESSION_LENGTH } from './adventure.js?v=2.2.2-six';
 export { shuffle };
 
@@ -30,6 +31,14 @@ export function numberOptions(answer, max, rng = Math.random, count = 3) {
 const readingSize = word => [...word.pointed.matchAll(/[א-ת]/gu)].length;
 function readingOrder(a, b) {
   return a.level - b.level || (a.scene?.count || 0) - (b.scene?.count || 0) || a.he.split(' ').length - b.he.split(' ').length || readingSize(a) - readingSize(b);
+}
+
+function chooseReadingWords(pool, settings, count, rng) {
+  const recent = settings.readingRecent || [];
+  if (!settings.learning || Object.keys(settings.learning).length === 0) return readingTargets(pool, recent, count, rng);
+  const justPlayed = new Set(recent.slice(-SESSION_LENGTH));
+  const fresh = pool.filter(word => !justPlayed.has(word.id));
+  return choosePractice(fresh.length >= count ? fresh : pool, settings.learning, word => `read:${word.id}`, count, Date.now(), rng);
 }
 
 export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Math.random) {
@@ -58,9 +67,16 @@ function buildSession(mission, rawSettings, rng) {
   }
   if (mission === 'hebrew') {
     const pool = readingWords(settings.reading);
-    const targets = settings.reading === 'all'
-      ? mixedReadingTargets(pool, settings.readingRecent, rng)
-      : (settings.learning && Object.keys(settings.learning).length ? choosePractice(pool, settings.learning, word => `read:${word.id}`, SESSION_LENGTH, Date.now(), rng) : readingTargets(pool, settings.readingRecent, SESSION_LENGTH, rng)).sort(readingOrder);
+    let targets;
+    if (settings.reading === 'all') targets = mixedReadingTargets(pool, settings.readingRecent, rng);
+    else if (settings.reading === 'sentences') {
+      const others = pool.filter(word => !word.id.startsWith('story-animal-'));
+      targets = [...chooseReadingWords(ANIMAL_STORIES, settings, 1, rng), ...chooseReadingWords(others, settings, SESSION_LENGTH - 1, rng)].sort(readingOrder);
+    } else {
+      targets = (settings.learning && Object.keys(settings.learning).length
+        ? choosePractice(pool, settings.learning, word => `read:${word.id}`, SESSION_LENGTH, Date.now(), rng)
+        : readingTargets(pool, settings.readingRecent, SESSION_LENGTH, rng)).sort(readingOrder);
+    }
     // Prefer unseen reading targets before reviewing the oldest practiced ones.
     return Array.from({ length: SESSION_LENGTH }, (_, i) => {
       const word = targets[i % targets.length];

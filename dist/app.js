@@ -1,17 +1,17 @@
 import { LearningStore } from './learning-sync.js?v=2.2.2-six';
 import { questionLearning, learningSummary } from './learning.js';
-import { packRound, unpackRound, cleanDrafts, roundKey } from './session-state.js?v=2.6.0-stories';
+import { packRound, unpackRound, cleanDrafts, roundKey } from './session-state.js?v=2.6.1-animal-stories';
 import { JOURNEYS, newJourney, cleanJourney, resumeJourney, englishPairsReady, journeyLength } from './journey.js?v=2.2.5-practice';
 import { STORIES } from './journey-content.js';
 import { mountJourney } from './journey-view.js?v=2.2.5-practice';
 import { mountPark } from './park.js';
 import { mountFreeWriting, WRITING_STEPS } from './free-writing.js?v=2.3.3-dictation';
 import { parentLearning, learningStatus } from './learning-parent.js?v=2.3.3-dictation';
-import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.6.0-stories';
-import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.2.4-practice';
+import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.6.1-animal-stories';
+import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.6.1-animal-stories';
 import { ADVENTURE_PHASES, adventurePhase } from './adventure.js?v=2.2.2-six';
-import { art, pup, scene, uiIcon } from './art.js';
-import { Narrator } from './audio.js?v=2.6.0-stories';
+import { art, pup, scene, uiIcon } from './art.js?v=2.6.1-animal-stories';
+import { Narrator } from './audio.js?v=2.6.1-animal-stories';
 import { GameAnnouncements } from './announcements.js';
 import { SharedAlbum, normalizeCode } from './sync.js?v=2.2.6-album';
 import { SYNC_CONFIG } from './sync-config.js';
@@ -21,7 +21,7 @@ import { mountClockSchool } from './clock-school.js?v=2.2.4-practice';
 import { sanitizeClockPosition, recordClockLesson } from './clock-learning.js?v=2.2.4-practice';
 import { LETTERS, WRITING_FORMS, writingLetter, writingMode, writingPositionKey, letterGroup, letterShape } from './letters.js';
 import { mountLetterPad } from './letter-pad.js?v=2.3.1-number-writing';
-import { nextReadingStage, sanitizeReadingPractice, finishReadingPractice } from './reading.js?v=2.2.2-six';
+import { nextReadingStage, sanitizeReadingPractice, finishReadingPractice } from './reading.js?v=2.6.1-animal-stories';
 import { stickerPage, stickerDefinition } from './stickers.js';
 import { suggestedLetters, practicedLetterCount, recordLetters, recognitionTargets } from './letter-progress.js';
 import { CHARACTERS, CHARACTER_COLLECTIONS, CHARACTER_LEVELS, CHARACTER_MODES, characterCollection, selectCharacterLevel, sanitizeCharacterPractice, finishCharacterPractice, nextCharacterLevel } from './characters.js?v=2.2.2-six';
@@ -36,8 +36,8 @@ import { numberWritingKey, mountNumberWriting } from './number-writing.js?v=2.3.
 import { mountNumberDictation, numberDictationKey } from './number-dictation.js?v=2.3.3-dictation';
 import { mountFruitCutting } from './fruit-cutting.js?v=2.5.0-play';
 import { mountPikachu, pikachuImage, PIKACHU_TITLE } from './pikachu-game.js?v=2.5.1-pikachu-greeting';
-import { ACT_OUT_PROMPT, actOutSteps } from './act-out.js?v=2.6.0-stories';
-import { mountActOut } from './act-out-view.js?v=2.6.0-stories';
+import { actOutPrompt, actOutSteps } from './act-out.js?v=2.6.1-animal-stories';
+import { mountActOut } from './act-out-view.js?v=2.6.1-animal-stories';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -612,7 +612,10 @@ function startMission(mission, skipLesson = false) {
   const letterIds = mission === 'letters' ? recognitionGroup().map(letter => letter.id) : null;
   const questions = createSession(mission, { ...settings, learning:learner.items, readingRecent: readingPractice.recent[settings.reading], letterPractice: progress.letterPractice, letterIds, characterPractice });
   if (mission === 'hebrew' && settings.reading === 'sentences') {
-    for (const index of actOutSteps(questions)) Object.assign(questions[index], { actOut: true, prompt: ACT_OUT_PROMPT });
+    for (const index of actOutSteps(questions)) {
+      const question = questions[index];
+      Object.assign(question, { actOut: true, prompt: actOutPrompt(question.word) });
+    }
   }
   round = { id:crypto.randomUUID(), key, observed:new Set(), mission, questions, letterIds, letterLanguage: settings.letterLanguage, reading: settings.reading, clockLevel: settings.clockLevel, characterLevel: settings.characterLevel, characterMode: settings.characterMode, index: 0, resolved: false, attempted: new Set(), counted: new Set(), helped: new Set(questions.flatMap((q, i) => q.showModel ? [i] : [])), sticker: null, awarded: false };
   view = 'game'; checkpoint();
@@ -676,7 +679,7 @@ function hint() {
     face.classList.remove('highlight-hour', 'highlight-minute'); face.classList.add(q.time.minute === 0 ? 'highlight-hour' : 'highlight-minute');
     announcements.say(q.hint); return;
   }
-  document.querySelector('#feedback').textContent = q.actOut ? 'נשמע מה כתוב ונזיז את מה שמתאים.' : q.type === 'read' ? 'נשמע מה כתוב, ואז נחפש את התמונה.' : q.type === 'listen' ? 'נקשיב שוב לאט. איזו תמונה מתאימה?' : 'געי בפריטים אחד־אחד. נמשיך לספור יחד.';
+  document.querySelector('#feedback').textContent = q.actOut ? 'נקשיב למשפט ונשחק את מה שקורה בו.' : q.type === 'read' ? 'נשמע מה כתוב, ואז נחפש את התמונה.' : q.type === 'listen' ? 'נקשיב שוב לאט. איזו תמונה מתאימה?' : 'געי בפריטים אחד־אחד. נמשיך לספור יחד.';
   announcements.say([q.hint, ...(q.type === 'read' ? [`he-${q.word.id}`] : q.targetClip ? [q.targetClip] : [])], { slow: true });
 }
 

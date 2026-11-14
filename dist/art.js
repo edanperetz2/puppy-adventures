@@ -3,7 +3,7 @@ import { MORE_READING_ART } from './reading-more-art.js';
 import { VOCABULARY_ART } from './vocabulary-art.js';
 import { EXPANDED_ART } from './expanded-art.js';
 import { PRACTICE_EXTRA_ART } from './practice-extra-art.js';
-import { readingScene, hasReadingScene } from './reading-scenes.js';
+import { readingScene, hasReadingScene } from './reading-scenes.js?v=2.6.1-animal-stories';
 import { stickerScene } from './sticker-art.js';
 import { stickerDefinition } from './stickers.js';
 

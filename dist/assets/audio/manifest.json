@@ -36663,6 +36663,171 @@
       "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
       "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
       "sha256": "c5d9a7fd52445c35a78c0aca98258e86f682f70dfb5a93fb4bbb8e4dfa9a83d8"
+    },
+    "he-story-animal-rabbit-jump": {
+      "take": 0,
+      "segments": [
+        "haʔaʁnˈav kofˈets."
+      ],
+      "lang": "he-IL",
+      "speech": "haʔaʁnˈav kofˈets.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "714fcda4de364be7a124bbbb121a086f0e0b407eb2f3b760fe4887db787fabac"
+    },
+    "he-story-animal-rabbit-carrot": {
+      "take": 0,
+      "segments": [
+        "haʔaʁnˈav ʔoχˈel ɡˈezeʁ."
+      ],
+      "lang": "he-IL",
+      "speech": "haʔaʁnˈav ʔoχˈel ɡˈezeʁ.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "1538689abfa384f162ab381acfefc0c0ec10276ed286970deadebaf0b7cb6a04"
+    },
+    "he-story-animal-rabbit-lettuce": {
+      "take": 0,
+      "segments": [
+        "haʔaʁnˈav ʔoχˈel χasˈa."
+      ],
+      "lang": "he-IL",
+      "speech": "haʔaʁnˈav ʔoχˈel χasˈa.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "18b880a634053b845204cb5f967d11fb8301437237806282cf9ff1f873f8a1c7"
+    },
+    "he-story-animal-dog-jump": {
+      "take": 0,
+      "segments": [
+        "hakˈelev kofˈets."
+      ],
+      "lang": "he-IL",
+      "speech": "hakˈelev kofˈets.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "053d66fef3595f4b66755a5af280f22689babf8b8f88a3f6fa7dc48bbefef1b7"
+    },
+    "he-story-animal-dog-meat": {
+      "take": 0,
+      "segments": [
+        "hakˈelev ʔoχˈel basˈaʁ."
+      ],
+      "lang": "he-IL",
+      "speech": "hakˈelev ʔoχˈel basˈaʁ.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "305f4e38b3b4f49c3b514cd0be6861defd896fbc5f236bb9f48680d9dcfb33eb"
+    },
+    "he-story-animal-dog-chicken-leg": {
+      "take": 0,
+      "segments": [
+        "hakˈelev ʔoχˈel ʃˈok ʔˈof."
+      ],
+      "lang": "he-IL",
+      "speech": "hakˈelev ʔoχˈel ʃˈok ʔˈof.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "84b456b4ea83fb7e5d7a479938d4d4b85cef3d08fd0d0c21d2204f5975429db9"
+    },
+    "he-story-animal-cat-jump": {
+      "lang": "he-IL",
+      "speech": "χatˈul kofˈets ɡavˈoaχ.",
+      "segments": [
+        "χatˈul kofˈets ɡavˈoaχ."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "1a4d1e6427bd6c2b199dbcce54893734c8528ff89630af54e024b48a21d0f34e"
+    },
+    "he-story-animal-cat-fish": {
+      "lang": "he-IL",
+      "speech": "χatˈul ʔoχˈel dˈaɡ.",
+      "segments": [
+        "χatˈul ʔoχˈel dˈaɡ."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "2232ac356ba87fdecbb23847f31534ee9ddb99b88643da9640a6bb416764f477"
+    },
+    "he-story-animal-cat-meat": {
+      "lang": "he-IL",
+      "speech": "χatˈul ʔoχˈel basˈaʁ.",
+      "segments": [
+        "χatˈul ʔoχˈel basˈaʁ."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "7d15e0d32762b9a49919a2232741a8507244d9a4f608b8c37c7dd4a37ff3a769"
+    },
+    "act-out-jump": {
+      "lang": "he-IL",
+      "speech": "liχtsˈi ʔˈal haχajˈa ʃekofˈetset.",
+      "segments": [
+        "liχtsˈi ʔˈal haχajˈa ʃekofˈetset."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "bb854117e45610f193e64f360f3c974ac833c1d3c05df29bcd939207738b4814"
+    },
+    "act-out-feed": {
+      "take": 0,
+      "segments": [
+        "haʔavˈiʁi ʔˈet haʔˈoχel laχajˈa ʃebasipˈuʁ."
+      ],
+      "lang": "he-IL",
+      "speech": "haʔavˈiʁi ʔˈet haʔˈoχel laχajˈa ʃebasipˈuʁ.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "2a1778754a94d676abab3277bb899bd671edf4e28cd00ad1d9d373d67ad65138"
     }
   }
 }

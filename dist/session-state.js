@@ -1,9 +1,9 @@
-import { WORDS, ANIMALS, COLORS, NUMBERS, CLIPS, MISSIONS, READING_LEVELS } from './content.js?v=2.6.0-stories';
+import { WORDS, ANIMALS, COLORS, NUMBERS, CLIPS, MISSIONS, READING_LEVELS } from './content.js?v=2.6.1-animal-stories';
 import { LETTERS } from './letters.js';
 import { clockTime, CLOCK_LEVELS } from './clock.js';
 import { CHARACTERS, CHARACTER_LEVELS, CHARACTER_MODES } from './characters.js?v=2.2.2-six';
 import { adventurePhase, isSessionLength } from './adventure.js?v=2.2.2-six';
-import { ACT_OUT_PROMPT, canActOut, cleanActOutMoves } from './act-out.js?v=2.6.0-stories';
+import { actOutPrompt, canActOut, cleanActOutMoves } from './act-out.js?v=2.6.1-animal-stories';
 
 export const roundKey = (mission,settings) => `${mission}:${mission==='hebrew'?settings.reading:mission==='letters'?settings.letterLanguage:mission==='clock'?settings.clockLevel:mission==='characters'?`${settings.characterLevel}:${settings.characterMode}`:'default'}`;
 export function packRound(round) {
@@ -24,7 +24,7 @@ export function unpackRound(raw) {
         q.answer = q.word.id;
         if (d.actOut === true && raw.mission === 'hebrew' && raw.reading === 'sentences' && canActOut(q.word)) {
           q.actOut = true;
-          q.prompt = ACT_OUT_PROMPT;
+          q.prompt = actOutPrompt(q.word);
         }
       }
       else if(d.type==='letter'){q.letter=LETTERS[d.letter?.language]?.find(l=>l.id===d.letter.id);if(!q.letter)throw Error();pool=LETTERS[d.letter.language];q.answer=q.letter.id;q.showModel=d.showModel===true;q.targetClip=q.letter.clip;}
