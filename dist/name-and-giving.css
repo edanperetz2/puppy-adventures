@@ -1,9 +1,24 @@
+.hero-greeting {
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 1vw, 14px);
+}
+.hero .hero-greeting h1 {
+  font-size: clamp(34px, 5vw, 60px);
+  line-height: 1.08;
+}
+.hero-greeting bdi { color: var(--green-dark); }
+
 .home-pikachu {
   display: block;
   flex-shrink: 0;
   width: clamp(112px, 13vw, 176px);
   height: auto;
   filter: drop-shadow(0 2px 2px #344a3833);
+}
+
+@media (max-width: 570px) {
+  .hero .hero-greeting h1 { font-size: clamp(31px, 9vw, 52px); }
 }
 
 .profile-pronunciation {

@@ -373,8 +373,11 @@ function activityCount(id) { return id === 'characters' ? Object.values(characte
 function renderHome() {
   app.innerHTML = `${header()}<main id="main" class="home-page">${resumeCard()}
     <section class="hero" aria-labelledby="hero-title">
-      <div class="hero-copy"><div class="eyebrow"><img class="home-pikachu" src="./assets/home-pikachu.png" alt="פיקאצ׳ו" width="144" height="144"><span>שלום <bdi>${ARIEL.name}</bdi>!</span></div>
-        <h1 id="hero-title" tabindex="-1">הרפתקה קטנה,<br><span>מגלות עולם!</span></h1>
+      <div class="hero-copy">
+        <div class="hero-greeting">
+          <img class="home-pikachu" src="./assets/home-pikachu.png" alt="פיקאצ׳ו" width="144" height="144">
+          <h1 id="hero-title" tabindex="-1">שלום <bdi>${ARIEL.name}</bdi>!</h1>
+        </div>
         <p class="hero-description">לולי, בובי וטופי מחכים לך.<br>בואי נשחק, נגלה ונלמד ביחד.</p>
         <button class="primary-button hero-start" data-action="recommended">יוצאות להרפתקה ${uiIcon('arrow')}</button>
         <button class="text-button welcome-listen" data-action="welcome">${uiIcon('sound')} לחצי ונכיר את החברים</button>
