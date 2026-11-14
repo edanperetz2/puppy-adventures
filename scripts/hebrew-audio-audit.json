@@ -16047,6 +16047,216 @@
       "detected_ipa": "behatslaχˈa, natχˈil lesaχˈek.",
       "phoneme_edit_ratio": 0,
       "seconds": 2.14
+    },
+    "number-workshop-menu": {
+      "sha256": "7511b5f4330d04242ea885741f8d43a32ea489ad7e3a66882ba27da62066bfeb",
+      "expected_ipa": "baχaʁˈi misχˈak ʔˈim mispaʁˈim.",
+      "detected_ipa": "baχaʁˈi, misχˈak ʔˈim mispaʁˈim.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.88
+    },
+    "number-workshop-choose": {
+      "sha256": "310462999e0af4f32318518e4feae9ba66b564f2b2a411cf3baa2a47540ef75d",
+      "expected_ipa": "baχaʁˈi ʔˈet hamispˈaʁ.",
+      "detected_ipa": "baχaʁˈi ʔˈet hamispˈaʁ.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.8
+    },
+    "number-workshop-count": {
+      "sha256": "dab1fa15345cc5747350110e569e66458059d842787d26309f639257e6ea4951",
+      "expected_ipa": "kˈama jˈeʃ?",
+      "detected_ipa": "kˈama jˈeʃ?",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.83
+    },
+    "number-workshop-add": {
+      "sha256": "58876fbc67537834973be40366f998b5763362761c41f429ed95f7042f01248a",
+      "expected_ipa": "kˈama bejˈaχad?",
+      "detected_ipa": "kˈama bejˈaχad?",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.67
+    },
+    "number-workshop-take-1": {
+      "sha256": "e3e629abc5fa6c667f583aa5cacccf976c78c06d31442f7b3048dd8ca1def0d7",
+      "expected_ipa": "lˈuli lakχˈa tapˈuaχ ʔeχˈad.",
+      "detected_ipa": "lˈuli lakχˈa tapˈuaχ ʔeχˈad.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.86
+    },
+    "number-workshop-take-2": {
+      "sha256": "d4573bc4f0f4c2c5e6ebecd43ef418d33371a5ac489f2b0c348525865321e106",
+      "expected_ipa": "lˈuli lakχˈa ʃnˈej tapuχˈim.",
+      "detected_ipa": "lˈuli lakχˈa ʃnˈej tapuχˈim.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.76
+    },
+    "number-workshop-take-3": {
+      "sha256": "17e2f739ada0403bba621baabe50f94d9bc045b8363d218f4776293a2b7d95ee",
+      "expected_ipa": "lˈuli lakχˈa ʃloʃˈa tapuχˈim.",
+      "detected_ipa": "lˈuli lakχˈa ʃloʃˈa tapuχˈim.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.77
+    },
+    "number-workshop-left": {
+      "sha256": "651a84abc6f44301d0e2571fc1b83879080cbad187cf39849988b006093e05bd",
+      "expected_ipa": "kˈama niʃʔaʁˈu basˈal?",
+      "detected_ipa": "kˈama niʃʔaʁˈu basˈal?",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 2.19
+    },
+    "number-workshop-ten": {
+      "sha256": "86d4a90614611779e4322a5a05bdbf1392951b5572f7d0cc60318a6f2c991309",
+      "expected_ipa": "kˈol mˈot ʃavˈe ʔˈeseʁ.",
+      "detected_ipa": "kˈol mˈot ʃavˈe ʔˈeseʁ.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 2.22
+    },
+    "number-workshop-count-hint": {
+      "sha256": "9a299020255b0771312b1a8690237d95efa8a0e3d74d3bae8abc0d388f3d8e85",
+      "expected_ipa": "bˈoʔi nispˈoʁ bejˈaχad.",
+      "detected_ipa": "bˈoʔi nispˈoʁ bejˈaχad.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 2.25
+    },
+    "number-workshop-add-hint": {
+      "sha256": "0856abe304ddf5b0567012371bb65312b0f461793077f589efa64ebb5a861d34",
+      "expected_ipa": "natχˈil mehakvutsˈa haɡdolˈa.",
+      "detected_ipa": "natχˈil mehakvutsˈa haɡdolˈa.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.76
+    },
+    "number-workshop-left-hint": {
+      "sha256": "ec76b138f3d0c491b795b790687d78fb5d9a91ff98187780cf35e5559242692b",
+      "expected_ipa": "nispˈoʁ ʁˈak ʔˈet mˈa ʃeniʃʔˈaʁ basˈal.",
+      "detected_ipa": "nispˈoʁ ʁˈak ʔˈet mˈa ʃeniʃʔˈaʁ basˈal.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.91
+    },
+    "number-workshop-tens-hint": {
+      "sha256": "d4a46b2c067f61d2a93ec9890e6a7c6b441523822cd063a2f8b329644e8f2e97",
+      "expected_ipa": "nispˈoʁ baʔasaʁˈot.",
+      "detected_ipa": "nispˈoʁ baʔasaʁˈot.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.75
+    },
+    "number-workshop-and-1": {
+      "sha256": "d9540096716c2047c74ac310efbcef96393a28137ac530af732613bf498da2ec",
+      "expected_ipa": "veʔaχˈat",
+      "detected_ipa": "veʔaχˈat.",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 2.28
+    },
+    "number-workshop-and-2": {
+      "sha256": "7f1159eb8ff2e007039042206839247b9c2c6d0dcb5e885b7723afa71696c0ea",
+      "expected_ipa": "uʃtˈajim",
+      "detected_ipa": "uʃtˈajim",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 5.58
+    },
+    "number-workshop-and-3": {
+      "sha256": "1a46e7145e435b09cc67e0bdc3ccd4833e48359950bfaa87942a1a2d870f4d5b",
+      "expected_ipa": "veʃalˈoʃ",
+      "detected_ipa": "veʃalˈoʃ",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.66
+    },
+    "number-workshop-and-4": {
+      "sha256": "9340356c53d6be875aba0a8f5b2f07932b39287bad9b9e66dfccde3aae2f7e99",
+      "expected_ipa": "veʔˈaʁba",
+      "detected_ipa": "veʔˈaʁba",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.67
+    },
+    "number-workshop-and-5": {
+      "sha256": "85d591d05d1ba914b4a68487a977ae6535b092320c07c6241ba0f30ced5d21b4",
+      "expected_ipa": "veχamˈeʃ",
+      "detected_ipa": "veχamˈeʃ",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.67
+    },
+    "number-workshop-and-6": {
+      "sha256": "e18173c62a721ca9a1219739c9c0d62588266f3040c21aad9bd3202b779fb22f",
+      "expected_ipa": "veʃˈeʃ",
+      "detected_ipa": "veʃˈeʃ",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.7
+    },
+    "number-workshop-and-7": {
+      "sha256": "1df89d1cd1793f1f3e7e420802bb26e50ae9693bc3e8526b67e83efc09aaffba",
+      "expected_ipa": "veʃˈeva",
+      "detected_ipa": "veʃˈeva",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.66
+    },
+    "number-workshop-and-8": {
+      "sha256": "532be8a23a3f555246a85504730730212568f42ebe99f04ab9abd6f6a60902a1",
+      "expected_ipa": "veʃmonˈe",
+      "detected_ipa": "veʃmonˈe",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 2.2
+    },
+    "number-workshop-and-9": {
+      "sha256": "7a637f59b10c966d980bff0aa622e9feb1b56e568b81dd19a9c85fef10f95ada",
+      "expected_ipa": "vetˈeʃa",
+      "detected_ipa": "vetˈeʃa",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.66
+    },
+    "number-workshop-30": {
+      "sha256": "5d8c1fa8edfe3ad1bbf9ecbf96118a05fb97e744e4830384b338f43851e14977",
+      "expected_ipa": "ʃloʃˈim",
+      "detected_ipa": "ʃloʃˈim",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.66
+    },
+    "number-workshop-40": {
+      "sha256": "d93eef3dbcc7365849dbd4819f8aaac9338a7e3dab256afd694b67f0e6e7669f",
+      "expected_ipa": "ʔaʁbaʔˈim",
+      "detected_ipa": "ʔaʁbaʔˈim",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.66
+    },
+    "number-workshop-50": {
+      "sha256": "8b6c83c14db570a7c7c0234890c17cb64ec8752dae8166c58d23bdaf466f0049",
+      "expected_ipa": "χamiʃˈim",
+      "detected_ipa": "χamiʃˈim",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.62
+    },
+    "number-workshop-60": {
+      "sha256": "dc71bd7a4011a48a7560fe32750d8b237097d458f89648f85263933563628b69",
+      "expected_ipa": "ʃiʃˈim",
+      "detected_ipa": "ʃiʃˈim",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.62
+    },
+    "number-workshop-70": {
+      "sha256": "82c8405a2f3ad9026e88552f5ceb963b03d39a458f67c1bdc19544af2cb390ef",
+      "expected_ipa": "ʃivʔˈim",
+      "detected_ipa": "ʃivʔˈim",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 1.94
+    },
+    "number-workshop-80": {
+      "sha256": "60ee30f3d9795c550e78d4c866b499a79cffcd34b758044fc7e5955931257ed5",
+      "expected_ipa": "ʃmonˈim",
+      "detected_ipa": "ʃmonˈim",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 2.16
+    },
+    "number-workshop-90": {
+      "sha256": "99bbfe39f120cd4554d52b3f01d99857a2e2cb769c682801197d38ff803e9c28",
+      "expected_ipa": "tiʃʔˈim",
+      "detected_ipa": "tiʃʔˈim",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 2.62
+    },
+    "number-workshop-100": {
+      "sha256": "7c70f41f0f0f0ce9d047439439d65ba5e24ad8d4d90a95f268d4379fe7f79344",
+      "expected_ipa": "meʔˈa",
+      "detected_ipa": "meʔˈa",
+      "phoneme_edit_ratio": 0.0,
+      "seconds": 2.53
     }
   }
 }

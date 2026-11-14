@@ -59,7 +59,7 @@ test('Every previous reading target and all 2114 original voice records remain u
   const originalWords=WORDS.filter(word=>!ids.has(word.id));
   assert.equal(originalWords.length,baseline.wordCount);
   assert.equal(hash(originalWords),baseline.wordDigest);
-  const previouslyReleased = ([key]) => !/^(?:he-picture-|profile-good-luck|journey-give-|journey-apples-left$)/u.test(key);
+  const previouslyReleased = ([key]) => !/^(?:he-picture-|profile-good-luck|journey-give-|journey-apples-left$|number-workshop-)/u.test(key);
   const originalClips=Object.fromEntries(Object.entries(CLIPS).filter(previouslyReleased));
   assert.equal(Object.keys(originalClips).length,baseline.clipCount);
   assert.equal(hash(originalClips),baseline.clipDigest);

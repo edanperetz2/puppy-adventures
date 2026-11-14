@@ -7,11 +7,11 @@ import { mountJourney } from './journey-view.js?v=2.2.5-practice';
 import { mountPark } from './park.js';
 import { mountFreeWriting, WRITING_STEPS } from './free-writing.js';
 import { parentLearning, learningStatus } from './learning-parent.js?v=2.1.3-sync';
-import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.2.0-voices';
+import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.3.0-numbers';
 import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.2.4-practice';
 import { ADVENTURE_PHASES, adventurePhase } from './adventure.js?v=2.2.2-six';
 import { art, pup, scene, uiIcon } from './art.js';
-import { Narrator } from './audio.js?v=2.2.0-voices';
+import { Narrator } from './audio.js?v=2.3.0-numbers';
 import { GameAnnouncements } from './announcements.js';
 import { SharedAlbum, normalizeCode } from './sync.js?v=2.2.6-album';
 import { SYNC_CONFIG } from './sync-config.js';
@@ -30,6 +30,8 @@ import { letterExampleCards } from './letter-examples.js';
 import { ARIEL, openAriel, readArielInvitation, GAME_KEY } from './profiles.js?v=2.2.3-ariel';
 import { profileSpeech } from './profile-speech.js?v=2.2.0-voices';
 import { openGameGuide, GUIDE_ICON } from './guide.js?v=2.2.3-ariel';
+import { NUMBER_PATHS, cleanNumberRound, newNumberRound, numberClip } from './number-workshop.js?v=2.3.0-numbers';
+import { NUMBER_WORKSHOP_TITLE, numberMenu, mountNumberRound, numberComplete } from './number-workshop-view.js?v=2.3.0-numbers';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -56,6 +58,7 @@ let albumPageIndex = null;
 let characterPractice = sanitizeCharacterPractice(null);
 let drafts = {}, journeyDrafts = {}, awardedRounds = [], writingPractice = { mode:'trace', drafts:{} };
 let learner = null, journeyController = null, journeyPlan = null, parkController = null, freeWriting = null, hub = 'hebrew';
+let numberRound = null, numberDrafts = {}, numberController = null, numberSticker = null;
 
 try {
   const saved = JSON.parse(gameStorage.getItem(STORAGE_KEY) || 'null');
@@ -65,6 +68,10 @@ try {
     readingPractice=sanitizeReadingPractice(saved.readingPractice);clockSchoolPosition=sanitizeClockPosition(saved.clockSchoolPosition);characterPractice=sanitizeCharacterPractice(saved.characterPractice);
     drafts=cleanDrafts(saved.drafts);
     journeyDrafts=Object.fromEntries(Object.values(saved.journeyDrafts||{}).slice(0,40).map(cleanJourney).filter(Boolean).map(p=>[`${p.mode}:${p.level}`,p]));
+    numberDrafts = Object.fromEntries(Object.keys(NUMBER_PATHS).flatMap(path => {
+      const savedRound = cleanNumberRound(saved.numberDrafts?.[path]);
+      return savedRound?.path === path ? [[path, savedRound]] : [];
+    }));
     awardedRounds=(Array.isArray(saved.awardedRounds)?saved.awardedRounds:[]).filter(id=>/^[0-9a-f-]{36}$/i.test(id)).slice(-10000);
     if(Object.hasOwn(WRITING_STEPS,saved.writingPractice?.mode))writingPractice={mode:saved.writingPractice.mode,drafts:saved.writingPractice.drafts&&typeof saved.writingPractice.drafts==='object'&&!Array.isArray(saved.writingPractice.drafts)?saved.writingPractice.drafts:{}};
   }
@@ -116,7 +123,7 @@ function welcome() {
 
 function save() {
   try {
-    gameStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition, characterPractice, drafts, journeyDrafts, awardedRounds, writingPractice }));
+    gameStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition, characterPractice, drafts, journeyDrafts, awardedRounds, writingPractice, ...(Object.keys(numberDrafts).length ? { numberDrafts } : {}) }));
     storageAvailable = true;
   } catch { storageAvailable = false; }
 }
@@ -525,6 +532,7 @@ function turnAlbumPage(index) {
 function render() {
   freeWriting?.destroy(); freeWriting=null;
   journeyController?.destroy(); journeyController=null;
+  numberController?.destroy(); numberController=null;
   parkController?.destroy(); parkController=null;
   letterPad?.destroy(); letterPad = null;
   clockSchool?.destroy(); clockSchool = null;
@@ -532,6 +540,9 @@ function render() {
   document.body.classList.toggle('playing', view === 'game');
   if (view === 'journey') renderJourney();
   else if (view === 'learning-hub') renderLearningHub();
+  else if (view === 'number-menu') app.innerHTML = header() + numberMenu(numberDrafts) + footer();
+  else if (view === 'number-round') renderNumberRound();
+  else if (view === 'number-complete') app.innerHTML = header() + numberComplete(numberRound, numberSticker) + footer();
   else if (view === 'park') renderPark();
   else if (view === 'journey-complete') renderJourneyComplete();
   else if (view === 'game') { renderGame(); restoreQuestionState(); }
@@ -554,7 +565,8 @@ function focusTitle() {
 
 function startMission(mission, skipLesson = false) {
   if (mission === 'characters' && !skipLesson) { openCharacters(); return; }
-  if (['hebrew','english','math'].includes(mission) && !skipLesson) { openLearningHub(mission); return; }
+  if (mission === 'math') { openNumberMenu(); return; }
+  if (['hebrew','english'].includes(mission) && !skipLesson) { openLearningHub(mission); return; }
   if (mission === 'clock' && !skipLesson) { openClockLesson(); return; }
   if (mission === 'letters' && !skipLesson) { openLetterMenu(); return; }
   narrator.stop();
@@ -573,7 +585,7 @@ function startMission(mission, skipLesson = false) {
 
 function recommended() {
   const due=learningSummary(learner.items).review[0];
-  if(due){if(due.startsWith('workshop:')){openLearningHub('hebrew');return;}if(due.startsWith('english:')){openLearningHub('english');return;}if(due.startsWith('objects:')){openLearningHub('math');return;}}
+  if(due){if(due.startsWith('workshop:')){openLearningHub('hebrew');return;}if(due.startsWith('english:')){openLearningHub('english');return;}if(due.startsWith('objects:')||due.startsWith('math:')){openNumberMenu();return;}}
   const next = Object.keys(MISSIONS).reduce((a, b) => activityCount(a) <= activityCount(b) ? a : b);
   startMission(next);
 }
@@ -591,6 +603,8 @@ function leaveTo(destination) {
 function replay() {
   if (!settings.sound) { settings.sound = true; save(); narrator.enabled = true; renderSoundButton(); }
   if(view==='journey'){journeyController?.replay();return;}
+  if (view === 'number-round') { numberController?.replay(); return; }
+  if (view === 'number-menu') { announcements.say(numberClip('menu')); return; }
   if(view==='park'){clockSpeak('journey-park-intro');return;}
   if (view === 'clock-school') { clockSchool.replay(true); return; }
   if (view === 'game') {
@@ -775,7 +789,7 @@ function renderSettings() {
   dialog.querySelector('[data-dialog="reset"]').onclick = () => {
     openDialog(`<h2 id="parent-title">לאפס את המכשיר הזה?</h2><p>המדבקות וההתקדמות בדפדפן הזה יימחקו. הגדרות המשחק יישמרו.${album.linked ? ' החיבור לאלבום המשפחתי יוסר. האלבום שכבר סונכרן יישמר עבור המכשירים האחרים.' : ''}</p><div class="dialog-actions"><button class="secondary-button" data-dialog="cancel-reset">ביטול</button><button class="primary-button" data-dialog="confirm-reset">איפוס ההתקדמות</button></div>`);
     dialog.querySelector('[data-dialog="cancel-reset"]').onclick = renderSettings;
-    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); learner.reset(); drafts={};journeyDrafts={};awardedRounds=[];writingPractice={mode:'trace',drafts:{}}; progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
+    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); learner.reset(); drafts={};journeyDrafts={};numberDrafts={};numberRound=null;awardedRounds=[];writingPractice={mode:'trace',drafts:{}}; progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
   };
 }
 
@@ -800,15 +814,22 @@ function awardRound(mission,helped,letters,id,length){
   if(awardedRounds.includes(id))return {progress,sticker:null};
   const result=finishSession(progress,mission,helped,letters,length);awardedRounds=[...awardedRounds,id].slice(-10000);return result;
 }
-function latestDraft(){return [...Object.values(drafts).map(d=>({kind:'classic',value:d,at:d.at})),...Object.values(journeyDrafts).map(d=>({kind:'journey',value:d,at:d.at}))].sort((a,b)=>b.at-a.at)[0];}
+function latestDraft() {
+  return [
+    ...Object.values(drafts).filter(d => d.mission !== 'math').map(d => ({ kind: 'classic', value: d, at: d.at })),
+    ...Object.values(journeyDrafts).filter(d => d.mode !== 'objects').map(d => ({ kind: 'journey', value: d, at: d.at })),
+    ...Object.values(numberDrafts).map(d => ({ kind: 'numbers', value: d, at: d.at })),
+  ].sort((a, b) => b.at - a.at)[0];
+}
 function resumeCard(){
   const draft=latestDraft();if(!draft)return '';
-  const name=draft.kind==='journey'?JOURNEYS[draft.value.mode].title:MISSIONS[draft.value.mission].name;
+  const name=draft.kind==='numbers'?NUMBER_WORKSHOP_TITLE:draft.kind==='journey'?JOURNEYS[draft.value.mode].title:MISSIONS[draft.value.mission].name;
   const length = draft.kind === 'journey' ? journeyLength(draft.value) : draft.value.questions.length;
   return `<section class="resume-card"><span>${uiIcon('again')}</span><div><strong>מַמְשִׁיכִים מֵאֵיפֹה שֶׁעָצַרְנוּ?</strong><small>${name} · צַעַד ${draft.value.index+1} מִתּוֹךְ ${length}</small></div><button class="primary-button" data-action="resume">מַמְשִׁיכִים ${uiIcon('arrow')}</button></section>`;
 }
 function resumeLatest(){
   const draft=latestDraft();if(!draft)return;
+  if (draft.kind === 'numbers') { startNumberRound(draft.value.path); return; }
   narrator.stop();
   if(draft.kind==='classic'){const restored=unpackRound(draft.value);if(!restored)return;round=restored;view='game';}
   else {journeyPlan=resumeJourney(draft.value);if(!journeyPlan)return;round=null;view='journey';}
@@ -828,13 +849,45 @@ function restoreQuestionState(){
   const feedback=document.querySelector('#feedback');feedback.classList.add('success');feedback.textContent='כָּל הַכָּבוֹד! הַצַּעַד הַזֶּה כְּבָר הֻשְׁלַם.';
   const clockLink=document.querySelector('[data-action="clock-learn"]');if(clockLink)clockLink.disabled=true;
 }
-function openLearningHub(subject){checkpoint();narrator.stop();round=null;journeyPlan=null;hub=['hebrew','english','math'].includes(subject)?subject:'hebrew';view='learning-hub';render();focusTitle();announcements.say(hub==='english'?'journey-english-one':hub==='math'?'journey-count-all':'journey-workshop-intro');}
+function openNumberMenu() {
+  checkpoint(); narrator.stop(); round = null; journeyPlan = null; numberRound = null;
+  view = 'number-menu'; render(); focusTitle();
+  announcements.say(numberClip('menu'));
+}
+
+function startNumberRound(path) {
+  if (!Object.hasOwn(NUMBER_PATHS, path)) return;
+  checkpoint(); narrator.stop(); round = null; journeyPlan = null;
+  numberRound = numberDrafts[path] || newNumberRound(path, settings.mathMax, learner.items);
+  view = 'number-round'; render(); focusTitle();
+  numberController.replay();
+}
+
+function renderNumberRound() {
+  app.innerHTML = `${header()}<main id="main" class="number-workshop"><div id="number-root"></div></main>${footer()}`;
+  const active = numberRound;
+  numberController = mountNumberRound(document.querySelector('#number-root'), {
+    round: active, nikud: settings.nikud, motion: settings.motion, speak: clips => announcements.say(clips),
+    audioEnabled: () => settings.sound, stopSpeaking: () => narrator.stop(),
+    onSave: draft => { numberDrafts[draft.path] = draft; save(); },
+    onObservation: (item, kind, index) => learner.record({ item, domain: 'math', eventId: `${active.id}:${kind === 'seen' ? 'seen:' : ''}${index}` }, kind),
+    onSuccess: () => { narrator.chime(); celebrate(12); },
+    onComplete: draft => {
+      const result = awardRound('math', draft.helped.length, null, draft.id, draft.questions.length);
+      progress = result.progress; numberSticker = result.sticker;
+      delete numberDrafts[draft.path]; view = 'number-complete'; save(); render(); focusTitle();
+      celebrate(32); announcements.say(numberSticker ? 'complete' : 'complete-all');
+    },
+  });
+}
+
+function openLearningHub(subject){checkpoint();narrator.stop();round=null;journeyPlan=null;hub=subject==='english'?'english':'hebrew';view='learning-hub';render();focusTitle();announcements.say(hub==='english'?'journey-english-one':'journey-workshop-intro');}
 function journeyChoice(mode,level,label,description,icon,tag=''){
   const saved=journeyDrafts[`${mode}:${level}`];
   return `<button class="learning-path-card" data-action="journey-start" data-journey="${mode}" data-level="${level}"><span class="learning-path-art">${art(icon)}</span>${tag?`<small class="learning-path-tag">${tag}</small>`:''}<h2>${label}</h2><p>${description}</p><strong>${saved?`מַמְשִׁיכִים מִצַּעַד ${saved.index+1}`:`${SESSION_LENGTH} צְעָדִים · בַּקֶּצֶב שֶׁלָּנוּ`} ${uiIcon('arrow')}</strong></button>`;
 }
 function renderLearningHub(){
-  const names={hebrew:'מַגְלִים מִלִּים וְסִפּוּרִים',english:'מִלָּה קְטַנָּה, הַצְלָחָה גְּדוֹלָה',math:'מַעְבֶּדֶת הַמִּסְפָּרִים'};
+  const names={hebrew:'מַגְלִים מִלִּים וְסִפּוּרִים',english:'מִלָּה קְטַנָּה, הַצְלָחָה גְּדוֹלָה'};
   let cards='';
   if(hub==='hebrew')cards=`<button class="learning-path-card" data-action="garden"><span class="learning-path-art">${art('flower')}</span><h2>גִּנַּת הַמִּלִּים</h2><p>כָּל שִׁלְבֵי הַקְּרִיאָה הַמֻּכָּרִים</p><strong>בּוֹחֲרִים שָׁלָב ${uiIcon('arrow')}</strong></button>`+
     [1,2,3,4].map(level=>journeyChoice('workshop',level,`סַדְנַת מִלִּים · ${level}`,['חֲלָקִים קְטַנִּים וּמִלִּים מֻכָּרוֹת','מִלִּים אֲרֻכּוֹת יוֹתֵר','עוֹד אוֹתִיּוֹת וְצֵרוּפִים','אֶתְגָּר לְבוֹנֵי מִלִּים'][level-1],'pencil',level===1?'מַתְחִילִים כָּאן':'')).join('')+
@@ -848,12 +901,7 @@ function renderLearningHub(){
       journeyChoice('sounds','sounds','מַגְלִים צְלִילִים','אוֹת גְּדוֹלָה, אוֹת קְטַנָּה וְצָלִיל בְּתוֹךְ מִלָּה.','bird','מַסְלוּל בְּחִירָה · בְּעֶזְרַת הוֹרֶה')+
       journeyChoice('sounds','blend','מְחַבְּרִים צְלִילִים','רַק כְּשֶׁמוּכָנִים: מִלִּים קְצָרוֹת מִצְּלִילִים מֻכָּרִים.','fish','לְאַחַר מַסְלוּל הַצְּלִילִים');
   }
-  if(hub==='math')cards=journeyChoice('objects','quantity','בּוֹנִים כַּמּוּיוֹת','תַּפּוּחַ אַחַד לְכָל מָקוֹם. מַגְלִים עֶשֶׂרֶת.','apple','מַתְחִילִים בַּמֻּכָּר')+
-    journeyChoice('objects','bonds','כַּמָּה חֲסֵרִים?','מַשְׁלִימִים קְבוּצָה וּמְגַלִּים חִבּוּר.','flower')+
-    journeyChoice('objects','tens','עֲשָׂרוֹת וִיחִידוֹת','כָּל מוֹט הוּא עֶשֶׂר יְחִידוֹת. בּוֹנִים עַד 100.','house')+
-    journeyChoice('objects','takeaway','נוֹתְנִים לַחֲבֵרִים','חִסּוּר רִאשׁוֹן בִּתְמוּנוֹת: כַּמָּה נִשְׁאַר?','berry','מַסְלוּל בְּחִירָה · אֶפְשָׁר לְנַסּוֹת יַחַד')+
-    `<button class="learning-path-card" data-action="mission-direct" data-mission="math"><span class="learning-path-art">${art('star')}</span><h2>סוֹפְרִים וּמְחַבְּרִים</h2><p>מַמְשִׁיכִים בַּמִּשְׂחָק הַמֻּכָּר</p></button>`;
-  app.innerHTML=`${header()}<main id="main" class="learning-hub"><button class="text-button" data-action="home">${uiIcon('home')} לְבֵית הַחֲבֵרִים</button><section class="learning-hub-heading"><div><span class="section-kicker">בּוֹחֲרִים אֵיךְ לְגַלּוֹת הַיּוֹם</span><h1 tabindex="-1">${names[hub]}</h1><p>${hub==='english'?'לֹא צָרִיךְ לָדַעַת לִקְרֹא בְּאַנְגְּלִית. מַקְשִׁיבִים, נוֹגְעִים וּמַצְלִיחִים.':'כָּל הַדְּרָכִים פְּתוּחוֹת. מַתְחִילִים יַחַד, וּמַמְשִׁיכִים בַּקֶּצֶב שֶׁלָּנוּ.'}</p></div>${pup(hub==='math'?'tofi':hub==='english'?'bobi':'luli')}</section><div class="learning-paths">${cards}</div></main>${footer()}`;
+  app.innerHTML=`${header()}<main id="main" class="learning-hub"><button class="text-button" data-action="home">${uiIcon('home')} לְבֵית הַחֲבֵרִים</button><section class="learning-hub-heading"><div><span class="section-kicker">בּוֹחֲרִים אֵיךְ לְגַלּוֹת הַיּוֹם</span><h1 tabindex="-1">${names[hub]}</h1><p>${hub==='english'?'לֹא צָרִיךְ לָדַעַת לִקְרֹא בְּאַנְגְּלִית. מַקְשִׁיבִים, נוֹגְעִים וּמַצְלִיחִים.':'כָּל הַדְּרָכִים פְּתוּחוֹת. מַתְחִילִים יַחַד, וּמַמְשִׁיכִים בַּקֶּצֶב שֶׁלָּנוּ.'}</p></div>${pup(hub==='english'?'bobi':'luli')}</section><div class="learning-paths">${cards}</div></main>${footer()}`;
 }
 function startJourney(mode,level){
   if(!JOURNEYS[mode])return;checkpoint();narrator.stop();round=null;
@@ -893,6 +941,8 @@ app.addEventListener('click', event => {
     case 'home': leaveTo('home'); break;
     case 'guide': narrator.stop(); openGameGuide(button); break;
     case 'learning-hub': openLearningHub(button.dataset.hub); break;
+    case 'number-menu': openNumberMenu(); break;
+    case 'number-start': startNumberRound(button.dataset.path); break;
     case 'garden': openReadingLevels(); break;
     case 'mission-direct': startMission(button.dataset.mission,true); break;
     case 'journey-start': startJourney(button.dataset.journey,button.dataset.level); break;

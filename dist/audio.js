@@ -1,4 +1,4 @@
-import { CLIPS } from './content.js?v=2.2.0-voices';
+import { CLIPS } from './content.js?v=2.3.0-numbers';
 
 export class Narrator {
   constructor(onStatus = () => {}) {

@@ -35973,6 +35973,456 @@
       "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
       "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
       "sha256": "ad0bdbd96c3731f837b8a72cdb231a0a43b5e2c723cdd84750546e23eed4191a"
+    },
+    "number-workshop-menu": {
+      "take": 0,
+      "segments": [
+        "baχaʁˈi misχˈak ʔˈim mispaʁˈim."
+      ],
+      "lang": "he-IL",
+      "speech": "baχaʁˈi misχˈak ʔˈim mispaʁˈim.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "7511b5f4330d04242ea885741f8d43a32ea489ad7e3a66882ba27da62066bfeb"
+    },
+    "number-workshop-choose": {
+      "take": 0,
+      "segments": [
+        "baχaʁˈi ʔˈet hamispˈaʁ."
+      ],
+      "lang": "he-IL",
+      "speech": "baχaʁˈi ʔˈet hamispˈaʁ.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "310462999e0af4f32318518e4feae9ba66b564f2b2a411cf3baa2a47540ef75d"
+    },
+    "number-workshop-count": {
+      "take": 0,
+      "segments": [
+        "kˈama jˈeʃ?"
+      ],
+      "lang": "he-IL",
+      "speech": "kˈama jˈeʃ?",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "dab1fa15345cc5747350110e569e66458059d842787d26309f639257e6ea4951"
+    },
+    "number-workshop-add": {
+      "take": 0,
+      "segments": [
+        "kˈama bejˈaχad?"
+      ],
+      "lang": "he-IL",
+      "speech": "kˈama bejˈaχad?",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "58876fbc67537834973be40366f998b5763362761c41f429ed95f7042f01248a"
+    },
+    "number-workshop-take-1": {
+      "take": 0,
+      "segments": [
+        "lˈuli lakχˈa tapˈuaχ ʔeχˈad."
+      ],
+      "lang": "he-IL",
+      "speech": "lˈuli lakχˈa tapˈuaχ ʔeχˈad.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "e3e629abc5fa6c667f583aa5cacccf976c78c06d31442f7b3048dd8ca1def0d7"
+    },
+    "number-workshop-take-2": {
+      "take": 0,
+      "segments": [
+        "lˈuli lakχˈa ʃnˈej tapuχˈim."
+      ],
+      "lang": "he-IL",
+      "speech": "lˈuli lakχˈa ʃnˈej tapuχˈim.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "d4573bc4f0f4c2c5e6ebecd43ef418d33371a5ac489f2b0c348525865321e106"
+    },
+    "number-workshop-take-3": {
+      "take": 0,
+      "segments": [
+        "lˈuli lakχˈa ʃloʃˈa tapuχˈim."
+      ],
+      "lang": "he-IL",
+      "speech": "lˈuli lakχˈa ʃloʃˈa tapuχˈim.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "17e2f739ada0403bba621baabe50f94d9bc045b8363d218f4776293a2b7d95ee"
+    },
+    "number-workshop-left": {
+      "take": 0,
+      "segments": [
+        "kˈama niʃʔaʁˈu basˈal?"
+      ],
+      "lang": "he-IL",
+      "speech": "kˈama niʃʔaʁˈu basˈal?",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "651a84abc6f44301d0e2571fc1b83879080cbad187cf39849988b006093e05bd"
+    },
+    "number-workshop-ten": {
+      "take": 0,
+      "segments": [
+        "kˈol mˈot ʃavˈe ʔˈeseʁ."
+      ],
+      "lang": "he-IL",
+      "speech": "kˈol mˈot ʃavˈe ʔˈeseʁ.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "86d4a90614611779e4322a5a05bdbf1392951b5572f7d0cc60318a6f2c991309"
+    },
+    "number-workshop-count-hint": {
+      "take": 0,
+      "segments": [
+        "bˈoʔi nispˈoʁ bejˈaχad."
+      ],
+      "lang": "he-IL",
+      "speech": "bˈoʔi nispˈoʁ bejˈaχad.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "9a299020255b0771312b1a8690237d95efa8a0e3d74d3bae8abc0d388f3d8e85"
+    },
+    "number-workshop-add-hint": {
+      "take": 0,
+      "segments": [
+        "natχˈil mehakvutsˈa haɡdolˈa."
+      ],
+      "lang": "he-IL",
+      "speech": "natχˈil mehakvutsˈa haɡdolˈa.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "0856abe304ddf5b0567012371bb65312b0f461793077f589efa64ebb5a861d34"
+    },
+    "number-workshop-left-hint": {
+      "take": 0,
+      "segments": [
+        "nispˈoʁ ʁˈak ʔˈet mˈa ʃeniʃʔˈaʁ basˈal."
+      ],
+      "lang": "he-IL",
+      "speech": "nispˈoʁ ʁˈak ʔˈet mˈa ʃeniʃʔˈaʁ basˈal.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "ec76b138f3d0c491b795b790687d78fb5d9a91ff98187780cf35e5559242692b"
+    },
+    "number-workshop-tens-hint": {
+      "take": 0,
+      "segments": [
+        "nispˈoʁ baʔasaʁˈot."
+      ],
+      "lang": "he-IL",
+      "speech": "nispˈoʁ baʔasaʁˈot.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "d4a46b2c067f61d2a93ec9890e6a7c6b441523822cd063a2f8b329644e8f2e97"
+    },
+    "number-workshop-and-1": {
+      "take": 0,
+      "segments": [
+        "veʔaχˈat"
+      ],
+      "lang": "he-IL",
+      "speech": "veʔaχˈat",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "d9540096716c2047c74ac310efbcef96393a28137ac530af732613bf498da2ec"
+    },
+    "number-workshop-and-2": {
+      "take": 1,
+      "segments": [
+        "uʃtˈajim"
+      ],
+      "lang": "he-IL",
+      "speech": "uʃtˈajim",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "7f1159eb8ff2e007039042206839247b9c2c6d0dcb5e885b7723afa71696c0ea"
+    },
+    "number-workshop-and-3": {
+      "take": 0,
+      "segments": [
+        "veʃalˈoʃ"
+      ],
+      "lang": "he-IL",
+      "speech": "veʃalˈoʃ",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "1a46e7145e435b09cc67e0bdc3ccd4833e48359950bfaa87942a1a2d870f4d5b"
+    },
+    "number-workshop-and-4": {
+      "take": 0,
+      "segments": [
+        "veʔˈaʁba"
+      ],
+      "lang": "he-IL",
+      "speech": "veʔˈaʁba",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "9340356c53d6be875aba0a8f5b2f07932b39287bad9b9e66dfccde3aae2f7e99"
+    },
+    "number-workshop-and-5": {
+      "take": 0,
+      "segments": [
+        "veχamˈeʃ"
+      ],
+      "lang": "he-IL",
+      "speech": "veχamˈeʃ",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "85d591d05d1ba914b4a68487a977ae6535b092320c07c6241ba0f30ced5d21b4"
+    },
+    "number-workshop-and-6": {
+      "take": 0,
+      "segments": [
+        "veʃˈeʃ"
+      ],
+      "lang": "he-IL",
+      "speech": "veʃˈeʃ",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "e18173c62a721ca9a1219739c9c0d62588266f3040c21aad9bd3202b779fb22f"
+    },
+    "number-workshop-and-7": {
+      "take": 0,
+      "segments": [
+        "veʃˈeva"
+      ],
+      "lang": "he-IL",
+      "speech": "veʃˈeva",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "1df89d1cd1793f1f3e7e420802bb26e50ae9693bc3e8526b67e83efc09aaffba"
+    },
+    "number-workshop-and-8": {
+      "lang": "he-IL",
+      "speech": "veʃmonˈe",
+      "segments": [
+        "veʃmonˈe"
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "532be8a23a3f555246a85504730730212568f42ebe99f04ab9abd6f6a60902a1"
+    },
+    "number-workshop-and-9": {
+      "take": 0,
+      "segments": [
+        "vetˈeʃa"
+      ],
+      "lang": "he-IL",
+      "speech": "vetˈeʃa",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "7a637f59b10c966d980bff0aa622e9feb1b56e568b81dd19a9c85fef10f95ada"
+    },
+    "number-workshop-30": {
+      "take": 0,
+      "segments": [
+        "ʃloʃˈim"
+      ],
+      "lang": "he-IL",
+      "speech": "ʃloʃˈim",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "5d8c1fa8edfe3ad1bbf9ecbf96118a05fb97e744e4830384b338f43851e14977"
+    },
+    "number-workshop-40": {
+      "take": 0,
+      "segments": [
+        "ʔaʁbaʔˈim"
+      ],
+      "lang": "he-IL",
+      "speech": "ʔaʁbaʔˈim",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "d93eef3dbcc7365849dbd4819f8aaac9338a7e3dab256afd694b67f0e6e7669f"
+    },
+    "number-workshop-50": {
+      "take": 0,
+      "segments": [
+        "χamiʃˈim"
+      ],
+      "lang": "he-IL",
+      "speech": "χamiʃˈim",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "8b6c83c14db570a7c7c0234890c17cb64ec8752dae8166c58d23bdaf466f0049"
+    },
+    "number-workshop-60": {
+      "take": 0,
+      "segments": [
+        "ʃiʃˈim"
+      ],
+      "lang": "he-IL",
+      "speech": "ʃiʃˈim",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "dc71bd7a4011a48a7560fe32750d8b237097d458f89648f85263933563628b69"
+    },
+    "number-workshop-70": {
+      "take": 0,
+      "segments": [
+        "ʃivʔˈim"
+      ],
+      "lang": "he-IL",
+      "speech": "ʃivʔˈim",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "82c8405a2f3ad9026e88552f5ceb963b03d39a458f67c1bdc19544af2cb390ef"
+    },
+    "number-workshop-80": {
+      "take": 0,
+      "segments": [
+        "ʃmonˈim"
+      ],
+      "lang": "he-IL",
+      "speech": "ʃmonˈim",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "60ee30f3d9795c550e78d4c866b499a79cffcd34b758044fc7e5955931257ed5"
+    },
+    "number-workshop-90": {
+      "take": 0,
+      "segments": [
+        "tiʃʔˈim"
+      ],
+      "lang": "he-IL",
+      "speech": "tiʃʔˈim",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "99bbfe39f120cd4554d52b3f01d99857a2e2cb769c682801197d38ff803e9c28"
+    },
+    "number-workshop-100": {
+      "take": 0,
+      "segments": [
+        "meʔˈa"
+      ],
+      "lang": "he-IL",
+      "speech": "meʔˈa",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "7c70f41f0f0f0ce9d047439439d65ba5e24ad8d4d90a95f268d4379fe7f79344"
     }
   }
 }

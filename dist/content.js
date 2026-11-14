@@ -10,6 +10,7 @@ import { installJourneyClips } from './journey-audio.js?v=2.2.0-voices';
 import { installProfileClips } from './profile-content.js?v=2.2.0-voices';
 import { MORE_ANIMALS, MORE_COLORS, ENGLISH_OBJECTS } from './english-expansion.js';
 import { LETTER_EXAMPLE_CLIPS } from './word-practice-expansion.js';
+import { NUMBER_WORKSHOP_CLIPS } from './number-workshop-content.js';
 export { ENGLISH_OBJECTS } from './english-expansion.js';
 export { WORDS, READING_LEVELS } from './reading.js';
 
@@ -141,3 +142,4 @@ for (const letter of LETTERS.english) CLIPS[letter.clip] = { lang: 'en-US', text
 installJourneyClips(CLIPS);
 Object.assign(CLIPS, LETTER_EXAMPLE_CLIPS);
 installProfileClips(CLIPS);
+Object.assign(CLIPS, NUMBER_WORKSHOP_CLIPS);
