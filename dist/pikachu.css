@@ -1,0 +1,196 @@
+.home-pika-link {
+  display: block;
+  flex: 0 0 auto;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+}
+.home-pika-start.secondary-button {
+  min-height: 44px;
+  margin-block-start: 8px;
+  padding: 8px 14px;
+  gap: 9px;
+  border-color: #d8b963;
+  background: #fff0bd;
+  color: #573712;
+  font-size: clamp(14px, 2vw, 17px);
+}
+.home-pika-start > svg { width: 19px; }
+
+.pikachu-page {
+  max-width: 800px;
+  padding-block: 14px 33px;
+}
+.pika-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-block-end: 6px;
+}
+.pika-top button { min-height: 44px; }
+.pika-step { color: #5d634d; font-size: 14px; }
+.pika-board {
+  padding: clamp(12px, 3vw, 24px);
+  border: 1px solid #e7dcb7;
+  border-radius: 26px;
+  background: #fffdf5;
+  text-align: center;
+}
+.pika-heading { position: relative; display: grid; place-items: center; min-height: 44px; }
+.pika-heading:has(.circle-button:not([hidden])) { padding-inline: 46px; }
+.pika-heading .circle-button { position: absolute; inset-inline-end: 0; width: 44px; height: 44px; }
+.pika-heading .circle-button.is-speaking { outline: 2px solid var(--green); }
+.pika-board h1 {
+  font-size: clamp(24px, 5vw, 40px);
+  color: #473a29;
+}
+.pika-stage {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: end center;
+  min-height: clamp(121px, 25vw, 182px);
+  margin-block: 9px;
+  border-radius: 22px;
+  background: radial-gradient(ellipse at 50% 74%, #fff3c5 16%, transparent 67%),
+    linear-gradient(#fff8de 66%, #eef3d9 66%);
+}
+.pika-shadow {
+  position: absolute;
+  inset: auto auto 8% 50%;
+  width: clamp(76px, 13vw, 123px);
+  height: 10px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: #53532626;
+}
+.pika-character {
+  position: relative;
+  z-index: 1;
+  justify-self: center;
+  display: block;
+  width: clamp(138px, 26vw, 205px);
+  padding: 0;
+  margin-block: -12px -1px;
+  border-radius: 24px;
+  background: transparent;
+}
+.pika-face {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 5px 4px #5e46252c);
+  transform-origin: 50% 84%;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+.pika-motion .pika-character.pika-talking { animation: pikachu-talk 400ms ease-in-out infinite alternate; }
+.pika-character.pika-talking:after {
+  position: absolute;
+  top: 21%;
+  inset-inline-start: -3px;
+  width: 12px;
+  height: 20px;
+  border-inline-start: 3px solid #987020;
+  border-radius: 50%;
+  box-shadow: -4px 0 #ffd05e;
+  content: '';
+}
+@keyframes pikachu-talk {
+  from { transform: translateY(0) rotate(-1deg); }
+  to { transform: translateY(-3px) rotate(1.5deg); }
+}
+.pika-cheer {
+  position: absolute;
+  inset: 21% 22% auto auto;
+  color: #aa6714;
+  font-size: clamp(23px, 5vw, 37px);
+  line-height: 1;
+}
+.pika-cheer-second { inset: 39% auto auto 22%; font-size: clamp(20px, 4vw, 29px); }
+.pika-flying {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  direction: ltr;
+  pointer-events: none;
+}
+.pika-flying > span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 48px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fff7d8;
+  box-shadow: 0 2px 9px #7e572d49;
+}
+.pika-clue {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  padding: 5px 13px;
+  border: 1px solid #e9d99e;
+  border-radius: 16px;
+  background: #fff5d0;
+  font-size: clamp(20px, 4.6vw, 29px);
+  font-weight: 600;
+}
+.pika-progress.step-track { margin: 4px auto 12px; }
+.pika-choices {
+  display: flex;
+  justify-content: center;
+  gap: clamp(5px, 2vw, 14px);
+}
+.pika-choice {
+  position: relative;
+  flex: 0 1 clamp(86px, 29vw, 137px);
+  min-width: 0;
+  min-height: 72px;
+  padding: 4px;
+  border: 2px solid #e2d4af;
+  border-radius: 18px;
+  background: #fffefa;
+}
+.pika-choice:disabled:not(.pika-found) { opacity: .52; border-style: dashed; }
+.pika-choice.pika-found { border-color: #418d63; background: #ebf6e8; }
+.pika-choice svg { width: 100%; }
+.pika-check {
+  position: absolute;
+  top: 3px;
+  inset-inline-start: 3px;
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: var(--green-dark);
+  color: white;
+}
+.pika-check > svg { width: 16px; height: 16px; }
+.pika-feedback {
+  margin-block: 4px;
+  min-height: 1.55em;
+  color: var(--green-dark);
+  font-size: clamp(15px, 3.7vw, 18px);
+  font-weight: 600;
+}
+.pika-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 14px;
+}
+.pika-actions button { min-height: 44px; }
+.pika-board .audio-notice { margin-block-start: 12px; }
+
+@media (max-width: 570px) {
+  .pikachu-page { margin-inline: 12px; padding-block-start: 4px; }
+  .pika-board { padding: 12px 9px; }
+  .pika-board h1 { font-size: clamp(21px, 5.6vw, 28px); }
+}

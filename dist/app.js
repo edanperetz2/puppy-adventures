@@ -7,11 +7,11 @@ import { mountJourney } from './journey-view.js?v=2.2.5-practice';
 import { mountPark } from './park.js';
 import { mountFreeWriting, WRITING_STEPS } from './free-writing.js?v=2.3.3-dictation';
 import { parentLearning, learningStatus } from './learning-parent.js?v=2.3.3-dictation';
-import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.3.3-dictation';
+import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.4.0-pikachu';
 import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.2.4-practice';
 import { ADVENTURE_PHASES, adventurePhase } from './adventure.js?v=2.2.2-six';
 import { art, pup, scene, uiIcon } from './art.js';
-import { Narrator } from './audio.js?v=2.3.3-dictation';
+import { Narrator } from './audio.js?v=2.4.0-pikachu';
 import { GameAnnouncements } from './announcements.js';
 import { SharedAlbum, normalizeCode } from './sync.js?v=2.2.6-album';
 import { SYNC_CONFIG } from './sync-config.js';
@@ -34,6 +34,7 @@ import { NUMBER_PATHS, cleanNumberRound, newNumberRound, numberClip } from './nu
 import { NUMBER_WORKSHOP_TITLE, numberMenu, mountNumberRound, numberComplete } from './number-workshop-view.js?v=2.3.3-dictation';
 import { numberWritingKey, mountNumberWriting } from './number-writing.js?v=2.3.3-dictation';
 import { mountNumberDictation, numberDictationKey } from './number-dictation.js?v=2.3.3-dictation';
+import { mountPikachu, pikachuImage, PIKACHU_TITLE } from './pikachu-game.js?v=2.4.0-pikachu';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -61,6 +62,7 @@ let characterPractice = sanitizeCharacterPractice(null);
 let drafts = {}, journeyDrafts = {}, awardedRounds = [], writingPractice = { mode:'trace', drafts:{} };
 let learner = null, journeyController = null, journeyPlan = null, parkController = null, freeWriting = null, hub = 'hebrew';
 let numberRound = null, numberDrafts = {}, numberController = null, numberSticker = null;
+let pikachuController = null;
 
 try {
   const saved = JSON.parse(gameStorage.getItem(STORAGE_KEY) || 'null');
@@ -385,11 +387,12 @@ function renderHome() {
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
         <div class="hero-greeting">
-          <img class="home-pikachu" src="./assets/home-pikachu.png" alt="פיקאצ׳ו" width="144" height="144">
+          <button type="button" class="home-pika-link" data-action="pikachu" aria-label="${PIKACHU_TITLE}">${pikachuImage('home-pikachu')}</button>
           <h1 id="hero-title" tabindex="-1">שלום <bdi>${ARIEL.name}</bdi>!</h1>
         </div>
         <p class="hero-description">לולי, בובי וטופי מחכים לך.<br>בואי נשחק, נגלה ונלמד ביחד.</p>
         <button class="primary-button hero-start" data-action="recommended">יוצאות להרפתקה ${uiIcon('arrow')}</button>
+        <button type="button" class="secondary-button home-pika-start" data-action="pikachu">${PIKACHU_TITLE} ${uiIcon('arrow')}</button>
         <button class="text-button welcome-listen" data-action="welcome">${uiIcon('sound')} לחצי ונכיר את החברים</button>
         <p id="audio-notice" class="audio-notice" role="status" hidden></p>
       </div><div class="hero-world">${scene()}<div class="world-caption"><span class="status-dot"></span> בית החברים · תמיד שמחים לראות אותך</div></div>
@@ -537,6 +540,7 @@ function render() {
   journeyController?.destroy(); journeyController=null;
   numberController?.destroy(); numberController=null;
   parkController?.destroy(); parkController=null;
+  pikachuController?.destroy(); pikachuController=null;
   letterPad?.destroy(); letterPad = null;
   clockSchool?.destroy(); clockSchool = null;
   applyPreferences();
@@ -548,6 +552,7 @@ function render() {
   else if (view === 'number-writing') renderNumberWriting();
   else if (view === 'number-dictation') renderNumberDictation();
   else if (view === 'number-complete') app.innerHTML = header() + numberComplete(numberRound, numberSticker) + footer();
+  else if (view === 'pikachu') renderPikachu();
   else if (view === 'park') renderPark();
   else if (view === 'journey-complete') renderJourneyComplete();
   else if (view === 'game') { renderGame(); restoreQuestionState(); }
@@ -608,6 +613,7 @@ function leaveTo(destination) {
 function replay() {
   if (!settings.sound) { settings.sound = true; save(); narrator.enabled = true; renderSoundButton(); }
   if(view==='journey'){journeyController?.replay();return;}
+  if (view === 'pikachu') { void pikachuController?.replay(); return; }
   if (['number-round', 'number-writing', 'number-dictation'].includes(view)) { numberController?.replay(); return; }
   if (view === 'number-menu') { announcements.say(numberClip('menu')); return; }
   if(view==='park'){clockSpeak('journey-park-intro');return;}
@@ -789,7 +795,9 @@ function renderSettings() {
     settings = sanitizeSettings({ ...settings, nikud: form.has('nikud'), sound: form.has('sound'), motion: form.has('motion'), reading: form.get('reading'), mathMax: Number(form.get('mathMax')), englishMax: Number(form.get('englishMax')), clockLevel: form.get('clockLevel'), letterLanguage: settings.letterLanguage, letterWriting: settings.letterWriting });
     save(); narrator.stop(); applyPreferences(); closeDialog();
     // Keep a running question and its answer state intact until the next round.
-    if (view === 'game') renderSoundButton(); else render();
+    if (view === 'game') renderSoundButton();
+    else if (view === 'pikachu') { renderSoundButton(); pikachuController?.update(); }
+    else render();
   };
   dialog.querySelector('[data-dialog="reset"]').onclick = () => {
     openDialog(`<h2 id="parent-title">לאפס את המכשיר הזה?</h2><p>המדבקות וההתקדמות בדפדפן הזה יימחקו. הגדרות המשחק יישמרו.${album.linked ? ' החיבור לאלבום המשפחתי יוסר. האלבום שכבר סונכרן יישמר עבור המכשירים האחרים.' : ''}</p><div class="dialog-actions"><button class="secondary-button" data-dialog="cancel-reset">ביטול</button><button class="primary-button" data-dialog="confirm-reset">איפוס ההתקדמות</button></div>`);
@@ -899,6 +907,23 @@ function renderNumberDictation() {
   });
 }
 
+function openPikachu() {
+  narrator.stop();
+  view = 'pikachu'; render(); focusTitle();
+  void pikachuController.start();
+}
+
+function renderPikachu() {
+  app.innerHTML = `${header()}<main id="main" class="pikachu-page"><div id="pikachu-root"></div></main>${footer()}`;
+  pikachuController = mountPikachu(document.querySelector('#pikachu-root'), {
+    nikud: () => settings.nikud, motion: () => settings.motion,
+    speak: (clips, onStart) => announcements.say(clips, {
+      onClipStart: key => { if (key !== 'welcome') onStart(); },
+    }),
+    stopSpeaking: () => narrator.stop(),
+  });
+}
+
 function renderNumberRound() {
   app.innerHTML = `${header()}<main id="main" class="number-workshop"><div id="number-root"></div></main>${footer()}`;
   const active = numberRound;
@@ -981,6 +1006,7 @@ app.addEventListener('click', event => {
     case 'number-start': startNumberRound(button.dataset.path); break;
     case 'number-write': openNumberWriting(); break;
     case 'number-dictation': openNumberDictation(); break;
+    case 'pikachu': openPikachu(); break;
     case 'garden': openReadingLevels(); break;
     case 'mission-direct': startMission(button.dataset.mission,true); break;
     case 'journey-start': startJourney(button.dataset.journey,button.dataset.level); break;

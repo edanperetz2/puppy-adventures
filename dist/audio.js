@@ -1,4 +1,4 @@
-import { CLIPS } from './content.js?v=2.3.3-dictation';
+import { CLIPS } from './content.js?v=2.4.0-pikachu';
 
 export class Narrator {
   constructor(onStatus = () => {}) {
@@ -23,7 +23,7 @@ export class Narrator {
     this.onStatus('idle');
   }
 
-  async say(keys, { slow = false, quietFailure = false, onClipEnd = () => {} } = {}) {
+  async say(keys, { slow = false, quietFailure = false, onClipStart = () => {}, onClipEnd = () => {} } = {}) {
     this.stop();
     if (!this.enabled) return false;
     const sequence = this.sequence;
@@ -31,7 +31,7 @@ export class Narrator {
     for (const logicalKey of Array.isArray(keys) ? keys : [keys]) {
       for (const key of this.resolveKey(logicalKey)) {
         if (sequence !== this.sequence || !this.enabled) return false;
-        const ok = await this.play(key, slow, sequence);
+        const ok = await this.play(key, slow, sequence, () => onClipStart(logicalKey));
         if (sequence !== this.sequence) return false;
         if (!ok) {
           const fallback = await this.deviceVoice(key, slow, sequence);
@@ -46,7 +46,7 @@ export class Narrator {
     return true;
   }
 
-  play(key, slow, sequence) {
+  play(key, slow, sequence, onStart) {
     const clip = typeof key === 'string' ? CLIPS[key] :
       typeof key?.source === 'string' && key.source.startsWith('blob:') ? key : null;
     if (!clip) return Promise.resolve(false);
@@ -70,7 +70,9 @@ export class Narrator {
         finish(false);
       }, 30000);
       // Invoked immediately from the child's tap; reuse the same media element.
-      this.audio.play().catch(() => finish(false));
+      this.audio.play().then(() => {
+        if (!finished && sequence === this.sequence) onStart();
+      }).catch(() => finish(false));
     });
   }
 
