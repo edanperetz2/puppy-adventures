@@ -16306,6 +16306,62 @@
       "detected_ipa": "ʃmonˈe",
       "phoneme_edit_ratio": 0,
       "seconds": 1.67
+    },
+    "number-workshop-fruit-intro": {
+      "sha256": "722cf811d52adc68e9a6d293c318faa9553aabc8e92c7eb9739bccf5485cd9af",
+      "expected_ipa": "haʔavˈiʁi ʔˈetsba ʔˈal hapʁˈi, ʔˈo liχtsˈi ʔalˈav.",
+      "detected_ipa": "haʔavˈiʁi ʔetsbˈa ʔˈal hapʁˈi, ʔˈo liχtsˈi ʔalˈav.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.27
+    },
+    "number-workshop-fruit-half": {
+      "sha256": "7f329c11b9b500aba74bfa1c63f6f60a4144a83d01820f32470c937eab364959",
+      "expected_ipa": "pʁˈi ʃalˈem hafˈaχ liʃnˈej χatsaʔˈim.",
+      "detected_ipa": "pʁˈi ʃalˈem hafˈaχ liʃnˈej χatsaʔˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.38
+    },
+    "number-workshop-fruit-two": {
+      "sha256": "1920b1a0aac517ada3d6ba4ebab11b1ed5fc330682cee9fa876006383cfc786a",
+      "expected_ipa": "χitχˈi ʃnˈej peʁˈot. kˈama χatsaʔˈim kibˈalt?",
+      "detected_ipa": "χitχˈi ʃnˈej peʁˈot, kˈama χatsaʔˈim kibˈalt?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.44
+    },
+    "number-workshop-fruit-four-made": {
+      "sha256": "ce532fff8b69d2311fa0570762bcf206c6c7523b69bc382aa5cb1440dfe7786d",
+      "expected_ipa": "ʔaχʃˈav jˈeʃ ʔaʁbaʔˈa χatsaʔˈim.",
+      "detected_ipa": "ʔaχʃˈav jˈeʃ ʔaʁbaʔˈa χatsaʔˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.22
+    },
+    "number-workshop-fruit-four": {
+      "sha256": "44bfc2627a175e6b47df5428a5a26bed9da3d070e22530b002d3969a71c268e3",
+      "expected_ipa": "haχˈini ʔaʁbaʔˈa χatsaʔˈim.",
+      "detected_ipa": "haχˈini ʔaʁbaʔˈa χatsaʔˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 3.97
+    },
+    "number-workshop-fruit-six": {
+      "sha256": "5531f95dae9dcb1f5f04ceb5189e3674eba41d4cfab37446152d0a54874f86d7",
+      "expected_ipa": "haχˈini ʃiʃˈa χatsaʔˈim.",
+      "detected_ipa": "haχˈini ʃiʃˈa χatsaʔˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.3
+    },
+    "number-workshop-fruit-eight": {
+      "sha256": "e36eae86773962e1eb71c3cd47d1094f47e4a6619b59025b3abbaa11d80db37d",
+      "expected_ipa": "haχˈini ʃmonˈa χatsaʔˈim.",
+      "detected_ipa": "haχˈini ʃmonˈa χatsaʔˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.24
+    },
+    "number-workshop-fruit-ten": {
+      "sha256": "1f7dacfee6f0f697d85a2161f224366601f8e022718f3457cdfa5c060e900aed",
+      "expected_ipa": "jˈeʃ ʃnˈej χatsaʔˈim. hosˈifi ʔˈad ʃejihjˈu ʔasaʁˈa.",
+      "detected_ipa": "jˈeʃ ʃnˈej χatsaʔˈim, hosˈifi ʔˈad ʃejihjˈu ʔasaʁˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 5.2
     }
   }
 }

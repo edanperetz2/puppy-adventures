@@ -21,6 +21,8 @@ test('Pikachu has six varied picture clues that progress from objects to details
   for (let seed = 1; seed <= 60; seed++) {
     const questions = pikachuQuestions(seeded(seed));
     assert.deepEqual(questions.map(q => q.choices.length), [2, 2, 3, 3, 3, 3]);
+    assert.deepEqual(questions.map(q => q.animal), [false, false, true, false, false, false]);
+    assert.ok(questions[2].choices.every(id => ['rabbit', 'frog', 'duck', 'dog', 'cat', 'bird'].includes(id)));
     assert.equal(new Set(questions.map(q => q.target)).size, 6);
     for (const [index, { target, choices }] of questions.entries()) {
       assert.equal(new Set(choices).size, choices.length);

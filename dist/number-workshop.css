@@ -33,6 +33,15 @@
 .number-path-add { background: #e3f0e5; }
 .number-path-left { background: #f7e5dd; }
 .number-path-tens { background: #e6eaf7; }
+.number-path.number-path-fruit {
+  grid-column: 1 / -1;
+  grid-auto-flow: column;
+  justify-content: center;
+  min-height: 76px;
+  border-color: #edc9a9;
+  background: #ffeedc;
+}
+.number-path-fruit > svg { width: 46px; }
 .number-path > svg { width: clamp(50px, 12vw, 78px); }
 .number-path small { font-size: 13px; color: var(--green-dark); }
 .number-writing-paths {
@@ -64,6 +73,113 @@
   padding: clamp(12px, 3vw, 24px);
 }
 .number-question-heading h1 { font-size: clamp(24px, 5vw, 38px); line-height: 1.3; margin: 0; }
+.fruit-board { text-align: center; }
+.fruit-prompt {
+  margin-block: 12px;
+  font-size: clamp(17px, 4.5vw, 25px);
+  font-weight: 700;
+}
+.fruit-tray {
+  --fruit-size: clamp(74px, 23vw, 124px);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  width: min(100%, 440px);
+  margin-inline: auto;
+  padding: clamp(6px, 2vw, 16px);
+  border: 1px solid #ddba91;
+  border-bottom: 4px solid #d0a87b;
+  border-radius: 22px;
+  background: repeating-linear-gradient(0deg, #f5dfbc 0 36px, #f8e6c8 36px 72px);
+}
+.fruit-piece {
+  flex: 0 0 var(--fruit-size);
+  min-height: 68px;
+  aspect-ratio: 1;
+  padding: 3px;
+  border: 1px solid #d3a976;
+  border-radius: 18px;
+  background: #fff6e5;
+  touch-action: none;
+  user-select: none;
+}
+.fruit-piece:disabled { cursor: default; }
+.fruit-picture {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.fruit-half { position: absolute; inset: 0; }
+.fruit-half svg { width: 100%; height: 100%; }
+.fruit-left { clip-path: inset(0 50% 0 0); }
+.fruit-right { clip-path: inset(0 0 0 50%); }
+html:not(.still) .fruit-half { transition: transform .24s cubic-bezier(.2, .7, .3, 1.4); }
+.fruit-cut { border-color: #85b18f; background: #f1f9e9; }
+.fruit-cut .fruit-left { transform: translateX(-7%); }
+.fruit-cut .fruit-right { transform: translateX(7%); }
+.fruit-cut-line {
+  position: absolute;
+  top: 27%;
+  bottom: 13%;
+  left: calc(50% - 1px);
+  border-left: 2px dashed #fffbe8;
+  filter: drop-shadow(0 0 1px #603319);
+}
+.fruit-fraction {
+  display: none;
+  position: absolute;
+  bottom: 0;
+  width: 23px;
+  height: 23px;
+  border: 1px solid #a7c6a8;
+  border-radius: 50%;
+  background: #fafff6;
+  color: var(--green-dark);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 21px;
+  text-align: center;
+}
+.fruit-fraction-left { left: calc(25% - 11px); }
+.fruit-fraction-right { left: calc(75% - 11px); }
+.fruit-cut .fruit-fraction { display: block; }
+.fruit-cut .fruit-cut-line { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.still) .fruit-sliced .fruit-cut-line {
+    top: 16%;
+    bottom: 6%;
+    border-left: 3px solid #fffbe8;
+    animation: fruit-slice .27s ease-out;
+  }
+}
+@keyframes fruit-slice {
+  from { opacity: .9; transform: scaleY(.1); transform-origin: top; }
+  40% { opacity: 1; transform: scaleY(1); transform-origin: top; }
+  to { opacity: 0; }
+}
+.fruit-counter {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  width: fit-content;
+  margin: 10px auto;
+  padding: 3px 12px;
+  border-radius: 99px;
+  background: #f5efe2;
+  font-weight: 700;
+}
+.fruit-counter b { font-size: clamp(19px, 5vw, 25px); font-variant-numeric: tabular-nums; }
+.fruit-counter.fruit-goal-met { background: #e4f3e4; color: var(--green-dark); }
+.fruit-actions { display: flex; justify-content: center; min-height: 56px; }
+.fruit-actions button, #fruit-root .number-round-top button { min-height: 44px; }
+@media (prefers-reduced-motion: reduce) {
+  html:not(.still) .fruit-half { transition: none; }
+}
 .number-scene { display: grid; justify-items: center; gap: 8px; margin-block: 12px 18px; user-select: none; }
 .number-pair { display: grid; grid-template-columns: minmax(0, auto) auto minmax(0, auto); align-items: center; gap: clamp(4px, 1.8vw, 14px); max-width: 100%; }
 .number-tray {

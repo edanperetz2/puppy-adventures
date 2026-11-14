@@ -1,8 +1,9 @@
 import { art, pup, uiIcon } from './art.js';
-import { CLIPS } from './content.js?v=2.3.3-dictation';
+import { CLIPS } from './content.js?v=2.5.0-play';
 import { NUMBER_PATHS, numberQuestion, numberQuestionClip, numberPrompt, numberModel, spokenNumber } from './number-workshop.js?v=2.3.0-numbers';
 import { NUMBER_WRITING_TITLE } from './number-writing.js?v=2.3.3-dictation';
 import { NUMBER_DICTATION_TITLE } from './number-dictation.js?v=2.3.3-dictation';
+import { FRUIT_CUTTING_TITLE } from './fruit-cutting.js?v=2.5.0-play';
 
 export const NUMBER_WORKSHOP_TITLE = 'סַדְנַת הַמִּסְפָּרִים';
 const labelFor = (key, nikud) => nikud ? CLIPS[key].text : CLIPS[key].text.replace(/[\u0591-\u05bd\u05bf-\u05c7]/gu, '');
@@ -23,6 +24,9 @@ export function numberMenu(drafts) {
           ${draft ? '<small>מַמְשִׁיכוֹת</small>' : ''}
         </button>`;
       }).join('')}
+      <button type="button" class="number-path number-path-fruit" data-action="fruit-cutting">
+        ${art('apple')}<span>${FRUIT_CUTTING_TITLE}</span>
+      </button>
       <div class="number-writing-paths">
         <button type="button" class="number-path number-path-write" data-action="number-write">
           ${uiIcon('pencil')}<span>${NUMBER_WRITING_TITLE}</span>

@@ -36528,6 +36528,126 @@
       "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
       "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
       "sha256": "46bb0dcd44f8d285dc8b1120210151e3fad6cd074e35583246ed58310b6e6b0f"
+    },
+    "number-workshop-fruit-intro": {
+      "lang": "he-IL",
+      "speech": "haʔavˈiʁi ʔˈetsba ʔˈal hapʁˈi, ʔˈo liχtsˈi ʔalˈav.",
+      "segments": [
+        "haʔavˈiʁi ʔˈetsba ʔˈal hapʁˈi, ʔˈo liχtsˈi ʔalˈav."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "722cf811d52adc68e9a6d293c318faa9553aabc8e92c7eb9739bccf5485cd9af"
+    },
+    "number-workshop-fruit-half": {
+      "take": 0,
+      "segments": [
+        "pʁˈi ʃalˈem hafˈaχ liʃnˈej χatsaʔˈim."
+      ],
+      "lang": "he-IL",
+      "speech": "pʁˈi ʃalˈem hafˈaχ liʃnˈej χatsaʔˈim.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "7f329c11b9b500aba74bfa1c63f6f60a4144a83d01820f32470c937eab364959"
+    },
+    "number-workshop-fruit-two": {
+      "take": 0,
+      "segments": [
+        "χitχˈi ʃnˈej peʁˈot. kˈama χatsaʔˈim kibˈalt?"
+      ],
+      "lang": "he-IL",
+      "speech": "χitχˈi ʃnˈej peʁˈot. kˈama χatsaʔˈim kibˈalt?",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "1920b1a0aac517ada3d6ba4ebab11b1ed5fc330682cee9fa876006383cfc786a"
+    },
+    "number-workshop-fruit-four-made": {
+      "lang": "he-IL",
+      "speech": "ʔaχʃˈav jˈeʃ ʔaʁbaʔˈa χatsaʔˈim.",
+      "segments": [
+        "ʔaχʃˈav jˈeʃ ʔaʁbaʔˈa χatsaʔˈim."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "ce532fff8b69d2311fa0570762bcf206c6c7523b69bc382aa5cb1440dfe7786d"
+    },
+    "number-workshop-fruit-four": {
+      "take": 0,
+      "segments": [
+        "haχˈini ʔaʁbaʔˈa χatsaʔˈim."
+      ],
+      "lang": "he-IL",
+      "speech": "haχˈini ʔaʁbaʔˈa χatsaʔˈim.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "44bfc2627a175e6b47df5428a5a26bed9da3d070e22530b002d3969a71c268e3"
+    },
+    "number-workshop-fruit-six": {
+      "take": 0,
+      "segments": [
+        "haχˈini ʃiʃˈa χatsaʔˈim."
+      ],
+      "lang": "he-IL",
+      "speech": "haχˈini ʃiʃˈa χatsaʔˈim.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "5531f95dae9dcb1f5f04ceb5189e3674eba41d4cfab37446152d0a54874f86d7"
+    },
+    "number-workshop-fruit-eight": {
+      "take": 0,
+      "segments": [
+        "haχˈini ʃmonˈa χatsaʔˈim."
+      ],
+      "lang": "he-IL",
+      "speech": "haχˈini ʃmonˈa χatsaʔˈim.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "e36eae86773962e1eb71c3cd47d1094f47e4a6619b59025b3abbaa11d80db37d"
+    },
+    "number-workshop-fruit-ten": {
+      "take": 0,
+      "segments": [
+        "jˈeʃ ʃnˈej χatsaʔˈim. hosˈifi ʔˈad ʃejihjˈu ʔasaʁˈa."
+      ],
+      "lang": "he-IL",
+      "speech": "jˈeʃ ʃnˈej χatsaʔˈim. hosˈifi ʔˈad ʃejihjˈu ʔasaʁˈa.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "1f7dacfee6f0f697d85a2161f224366601f8e022718f3457cdfa5c060e900aed"
     }
   }
 }

@@ -180,6 +180,53 @@
   color: white;
 }
 .pika-check > svg { width: 16px; height: 16px; }
+.pika-animal-prompt {
+  margin-block: 4px 7px;
+  color: var(--green-dark);
+  font-size: clamp(16px, 4vw, 22px);
+  font-weight: 700;
+}
+.pika-animal-trail {
+  --hops: 0;
+  position: relative;
+  width: min(100%, 480px);
+  height: clamp(82px, 18vw, 114px);
+  margin-inline: auto;
+  border: 1px solid #c9dcbe;
+  border-radius: 19px;
+  background: linear-gradient(#f1f9e6 69%, #e1efd3 69%);
+}
+.pika-animal-stones {
+  position: absolute;
+  inset: auto 0 11px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  justify-items: center;
+}
+.pika-animal-stones span {
+  width: 63%;
+  height: 16px;
+  border: 1px solid #94ac8c;
+  border-radius: 50%;
+  background: #fcfff8;
+}
+.pika-animal-stones span:last-child { border: 2px solid #418d63; }
+.pika-animal-stones .pika-landed { background: #a7cf89; }
+.pika-animal {
+  position: absolute;
+  inset-block-end: 10px;
+  inset-inline-start: calc(var(--hops) * 25%);
+  display: grid;
+  place-items: center;
+  width: 25%;
+  height: calc(100% - 18px);
+  min-height: 48px;
+  padding: 0;
+  border-radius: 14px;
+  background: transparent;
+}
+.pika-animal svg { width: min(91%, 91px); height: 100%; pointer-events: none; }
+.pika-animal:disabled { cursor: default; }
 .pika-feedback {
   margin-block: 4px;
   min-height: 1.55em;

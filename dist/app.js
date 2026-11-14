@@ -7,11 +7,11 @@ import { mountJourney } from './journey-view.js?v=2.2.5-practice';
 import { mountPark } from './park.js';
 import { mountFreeWriting, WRITING_STEPS } from './free-writing.js?v=2.3.3-dictation';
 import { parentLearning, learningStatus } from './learning-parent.js?v=2.3.3-dictation';
-import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.4.1-pikachu-reading';
+import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.5.0-play';
 import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.2.4-practice';
 import { ADVENTURE_PHASES, adventurePhase } from './adventure.js?v=2.2.2-six';
 import { art, pup, scene, uiIcon } from './art.js';
-import { Narrator } from './audio.js?v=2.4.1-pikachu-reading';
+import { Narrator } from './audio.js?v=2.5.0-play';
 import { GameAnnouncements } from './announcements.js';
 import { SharedAlbum, normalizeCode } from './sync.js?v=2.2.6-album';
 import { SYNC_CONFIG } from './sync-config.js';
@@ -31,10 +31,11 @@ import { ARIEL, openAriel, readArielInvitation, GAME_KEY } from './profiles.js?v
 import { profileSpeech } from './profile-speech.js?v=2.2.0-voices';
 import { openGameGuide, GUIDE_ICON } from './guide.js?v=2.2.3-ariel';
 import { NUMBER_PATHS, cleanNumberRound, newNumberRound, numberClip } from './number-workshop.js?v=2.3.0-numbers';
-import { NUMBER_WORKSHOP_TITLE, numberMenu, mountNumberRound, numberComplete } from './number-workshop-view.js?v=2.3.3-dictation';
+import { NUMBER_WORKSHOP_TITLE, numberMenu, mountNumberRound, numberComplete } from './number-workshop-view.js?v=2.5.0-play';
 import { numberWritingKey, mountNumberWriting } from './number-writing.js?v=2.3.3-dictation';
 import { mountNumberDictation, numberDictationKey } from './number-dictation.js?v=2.3.3-dictation';
-import { mountPikachu, pikachuImage, PIKACHU_TITLE } from './pikachu-game.js?v=2.4.1-pikachu-reading';
+import { mountFruitCutting } from './fruit-cutting.js?v=2.5.0-play';
+import { mountPikachu, pikachuImage, PIKACHU_TITLE } from './pikachu-game.js?v=2.5.0-play';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -551,6 +552,7 @@ function render() {
   else if (view === 'number-round') renderNumberRound();
   else if (view === 'number-writing') renderNumberWriting();
   else if (view === 'number-dictation') renderNumberDictation();
+  else if (view === 'fruit-cutting') renderFruitCutting();
   else if (view === 'number-complete') app.innerHTML = header() + numberComplete(numberRound, numberSticker) + footer();
   else if (view === 'pikachu') renderPikachu();
   else if (view === 'park') renderPark();
@@ -613,7 +615,7 @@ function leaveTo(destination) {
 function replay() {
   if (!settings.sound) { settings.sound = true; save(); narrator.enabled = true; renderSoundButton(); }
   if(view==='journey'){journeyController?.replay();return;}
-  if (['number-round', 'number-writing', 'number-dictation'].includes(view)) { numberController?.replay(); return; }
+  if (['number-round', 'number-writing', 'number-dictation', 'fruit-cutting'].includes(view)) { numberController?.replay(); return; }
   if (view === 'number-menu') { announcements.say(numberClip('menu')); return; }
   if(view==='park'){clockSpeak('journey-park-intro');return;}
   if (view === 'clock-school') { clockSchool.replay(true); return; }
@@ -906,6 +908,19 @@ function renderNumberDictation() {
   });
 }
 
+function openFruitCutting() {
+  narrator.stop();
+  view = 'fruit-cutting'; render(); focusTitle();
+  numberController.replay();
+}
+
+function renderFruitCutting() {
+  app.innerHTML = `${header()}<main id="main" class="number-workshop"><div id="fruit-root"></div></main>${footer()}`;
+  numberController = mountFruitCutting(document.querySelector('#fruit-root'), {
+    nikud: settings.nikud, speak: clips => announcements.say(clips),
+  });
+}
+
 function openPikachu() {
   narrator.stop();
   view = 'pikachu'; render(); focusTitle();
@@ -1002,6 +1017,7 @@ app.addEventListener('click', event => {
     case 'number-start': startNumberRound(button.dataset.path); break;
     case 'number-write': openNumberWriting(); break;
     case 'number-dictation': openNumberDictation(); break;
+    case 'fruit-cutting': openFruitCutting(); break;
     case 'pikachu': openPikachu(); break;
     case 'garden': openReadingLevels(); break;
     case 'mission-direct': startMission(button.dataset.mission,true); break;

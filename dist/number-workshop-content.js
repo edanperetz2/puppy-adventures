@@ -36,6 +36,14 @@ const clips = [
   ['dictation-intro', 'הַקְשִׁיבִי. כִּתְבִי אֶת הַמִּסְפָּר.', 'hakʃˈivi. kitvˈi ʔˈet hamispˈaʁ.'],
   ['dictation-compare', 'זֶה הַמִּסְפָּר שֶׁשָּׁמַעְתְּ.', 'zˈe hamispˈaʁ ʃeʃamˈat.'],
   ['dictation-8', 'שְׁמוֹנֶה.', 'ʃmonˈe.'],
+  ['fruit-intro', 'הַעֲבִירִי אֶצְבַּע עַל הַפְּרִי, אוֹ לִחְצִי עָלָיו.', 'haʔavˈiʁi ʔˈetsba ʔˈal hapʁˈi, ʔˈo liχtsˈi ʔalˈav.'],
+  ['fruit-half', 'פְּרִי שָׁלֵם הָפַךְ לִשְׁנֵי חֲצָאִים.', 'pʁˈi ʃalˈem hafˈaχ liʃnˈej χatsaʔˈim.'],
+  ['fruit-two', 'חִתְכִי שְׁנֵי פֵּרוֹת. כַּמָּה חֲצָאִים קִבַּלְתְּ?', 'χitχˈi ʃnˈej peʁˈot. kˈama χatsaʔˈim kibˈalt?'],
+  ['fruit-four-made', 'עַכְשָׁו יֵשׁ אַרְבָּעָה חֲצָאִים.', 'ʔaχʃˈav jˈeʃ ʔaʁbaʔˈa χatsaʔˈim.'],
+  ['fruit-four', 'הָכִינִי אַרְבָּעָה חֲצָאִים.', 'haχˈini ʔaʁbaʔˈa χatsaʔˈim.'],
+  ['fruit-six', 'הָכִינִי שִׁשָּׁה חֲצָאִים.', 'haχˈini ʃiʃˈa χatsaʔˈim.'],
+  ['fruit-eight', 'הָכִינִי שְׁמוֹנָה חֲצָאִים.', 'haχˈini ʃmonˈa χatsaʔˈim.'],
+  ['fruit-ten', 'יֵשׁ שְׁנֵי חֲצָאִים. הוֹסִיפִי עַד שֶׁיִּהְיוּ עֲשָׂרָה.', 'jˈeʃ ʃnˈej χatsaʔˈim. hosˈifi ʔˈad ʃejihjˈu ʔasaʁˈa.'],
 ];
 
 export const NUMBER_WORKSHOP_CLIPS = Object.fromEntries(clips.map(([key, text, speech]) => [
