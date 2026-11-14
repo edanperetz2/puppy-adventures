@@ -33,6 +33,9 @@ const clips = [
   ['write-trace', 'הַתְחִילִי בַּנְּקֻדָּה הַיְּרֻקָּה. הַמְשִׁיכִי עַל הַקַּו.', 'hatχˈili banekudˈa hajeʁukˈa. hamʃˈiχi ʔˈal hakˈav.'],
   ['write-done', 'כָּל הַכָּבוֹד! כָּתַבְתְּ אֶת הַמִּסְפָּר.', 'kˈol hakavˈod! katˈavt ʔˈet hamispˈaʁ.'],
   ['write-left', 'מַתְחִילוֹת מִשְּׂמֹאל, בַּנְּקֻדָּה הַיְּרֻקָּה.', 'matχilˈot mismˈol, banekudˈa hajeʁukˈa.'],
+  ['dictation-intro', 'הַקְשִׁיבִי. כִּתְבִי אֶת הַמִּסְפָּר.', 'hakʃˈivi. kitvˈi ʔˈet hamispˈaʁ.'],
+  ['dictation-compare', 'זֶה הַמִּסְפָּר שֶׁשָּׁמַעְתְּ.', 'zˈe hamispˈaʁ ʃeʃamˈat.'],
+  ['dictation-8', 'שְׁמוֹנֶה.', 'ʃmonˈe.'],
 ];
 
 export const NUMBER_WORKSHOP_CLIPS = Object.fromEntries(clips.map(([key, text, speech]) => [

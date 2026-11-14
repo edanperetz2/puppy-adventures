@@ -1,4 +1,4 @@
-import { CLIPS } from './content.js?v=2.3.2-writing-100';
+import { CLIPS } from './content.js?v=2.3.3-dictation';
 
 export class Narrator {
   constructor(onStatus = () => {}) {

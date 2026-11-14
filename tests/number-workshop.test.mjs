@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { CLIPS } from '../dist/content.js';
 import { NUMBER_PATHS, cleanNumberRound, newNumberRound, numberModel, numberPrompt, numberQuestion, numberQuestionClip, spokenNumber } from '../dist/number-workshop.js';
 import { numberWritingKey, numberWritingPad, nextWritingNumber, WRITING_NUMBERS } from '../dist/number-writing.js';
+import { dictationNumberClips, numberDictationDraw, numberDictationKey } from '../dist/number-dictation.js';
 import { applyObservation, learningStage } from '../dist/learning.js';
 import { SESSION_LENGTH } from '../dist/adventure.js';
 
@@ -128,6 +129,29 @@ test('Number writing keeps saved single digits, continues into tens and wraps af
   assert.equal(nextWritingNumber(items, 100), 1);
   delete items[numberWritingKey(4)];
   assert.equal(nextWritingNumber(items, 100), 4);
+});
+
+test('Number dictation shuffles every number without repeats and has Hebrew audio throughout', () => {
+  const draw = numberDictationDraw(seeded(42));
+  const sorted = [...WRITING_NUMBERS].sort((a, b) => a - b);
+  let previous;
+  for (let round = 0; round < 3; round++) {
+    const numbers = Array.from({ length: 101 }, draw);
+    assert.notEqual(numbers[0], previous);
+    assert.notDeepEqual(numbers, sorted);
+    assert.deepEqual([...numbers].sort((a, b) => a - b), sorted);
+    previous = numbers.at(-1);
+  }
+  for (const number of sorted) {
+    const clips = dictationNumberClips(number);
+    assert.ok(clips.length && clips.every(clip => CLIPS[clip]?.lang === 'he-IL'), `Number ${number}`);
+  }
+  assert.deepEqual(dictationNumberClips(0), ['number-0']);
+  assert.deepEqual(dictationNumberClips(8), ['number-workshop-dictation-8']);
+  assert.deepEqual(dictationNumberClips(47), ['number-workshop-40', 'number-workshop-and-7']);
+  assert.deepEqual(dictationNumberClips(98), ['number-workshop-90', 'number-workshop-and-8']);
+  assert.deepEqual(dictationNumberClips(100), ['number-workshop-100']);
+  assert.notEqual(numberDictationKey(47), numberWritingKey(47));
 });
 
 test('Unfinished Number Workshop rounds retain their current pictures, options and help on reload', () => {

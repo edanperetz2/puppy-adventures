@@ -10,7 +10,7 @@ import { installJourneyClips } from './journey-audio.js?v=2.2.0-voices';
 import { installProfileClips } from './profile-content.js?v=2.2.0-voices';
 import { MORE_ANIMALS, MORE_COLORS, ENGLISH_OBJECTS } from './english-expansion.js';
 import { LETTER_EXAMPLE_CLIPS } from './word-practice-expansion.js';
-import { NUMBER_WORKSHOP_CLIPS } from './number-workshop-content.js?v=2.3.2-writing-100';
+import { NUMBER_WORKSHOP_CLIPS } from './number-workshop-content.js?v=2.3.3-dictation';
 export { ENGLISH_OBJECTS } from './english-expansion.js';
 export { WORDS, READING_LEVELS } from './reading.js';
 

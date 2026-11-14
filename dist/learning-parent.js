@@ -12,6 +12,7 @@ export function itemLabel(id){
   if(parts[0]==='clock')return `שעון · ${parts[1]}:${parts[2].padStart(2,'0')}`;
   if(parts[0]==='objects')return `כמויות · ${parts[1]==='tens'?'עשרות':parts[1]==='bonds'?'מה חסר':parts[1]==='takeaway'?'נותנים ונשאר':'בונים'} · ${parts[2]}`;
   if(parts[0]==='math'&&parts[1]==='write')return `כתיבת מספרים · ${last}`;
+  if(parts[0]==='math'&&parts[1]==='dictation')return `כתיבת מספרים משמיעה · ${last}`;
   if(parts[0]==='math')return `חשבון · ${parts[1]==='count'?'ספירה':`${parts[2]} + ${parts[3]}`}`;
   if(parts[0]==='story')return `סיפור ${parts[1]==='picnic'?'הפיקניק':'הכדור'} · צעד ${Number(parts[2])+1}`;
   if(parts[0]==='phonics')return `צלילי אנגלית · ${last.toUpperCase()}`;

@@ -63,6 +63,7 @@ export function mountNumberWriting(root, { getItems, motion, speak, onPractice }
 
   root.innerHTML = `<div class="number-round-top">
     <button type="button" class="text-button" data-action="number-menu">${uiIcon('arrow')} לַסַּדְנָה</button>
+    <button type="button" class="text-button" data-action="number-dictation">${uiIcon('sound')} מַקְשִׁיבוֹת וְכוֹתְבוֹת</button>
   </div>
   <section class="number-board number-writing-board" aria-labelledby="number-writing-title">
     <div class="number-question-heading">

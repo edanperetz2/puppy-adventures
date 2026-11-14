@@ -16285,6 +16285,27 @@
       "detected_ipa": "matχilˈot mismˈol banekudˈa hajeʁukˈa.",
       "phoneme_edit_ratio": 0,
       "seconds": 1.86
+    },
+    "number-workshop-dictation-intro": {
+      "sha256": "de9df3657c926f2d7a142c3a4a8384f152d2125d905c9bc14ca9ea1443730506",
+      "expected_ipa": "hakʃˈivi. kitvˈi ʔˈet hamispˈaʁ.",
+      "detected_ipa": "hakʃˈivi, kitvˈi ʔˈet hamispˈaʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.8
+    },
+    "number-workshop-dictation-compare": {
+      "sha256": "d1bf9e4130915b60835b0f8f3b3ae4df0518fde83e886fe3d5354c9bb974c0b6",
+      "expected_ipa": "zˈe hamispˈaʁ ʃeʃamˈat.",
+      "detected_ipa": "zˈe hamispˈaʁ ʃeʃamˈat.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.86
+    },
+    "number-workshop-dictation-8": {
+      "sha256": "46bb0dcd44f8d285dc8b1120210151e3fad6cd074e35583246ed58310b6e6b0f",
+      "expected_ipa": "ʃmonˈe.",
+      "detected_ipa": "ʃmonˈe",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.67
     }
   }
 }

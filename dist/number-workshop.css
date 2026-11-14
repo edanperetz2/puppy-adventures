@@ -35,15 +35,24 @@
 .number-path-tens { background: #e6eaf7; }
 .number-path > svg { width: clamp(50px, 12vw, 78px); }
 .number-path small { font-size: 13px; color: var(--green-dark); }
-.number-path.number-path-write {
+.number-writing-paths {
+  display: grid;
   grid-column: 1 / -1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.number-path.number-path-write {
   grid-auto-flow: column;
   justify-content: center;
   min-height: 76px;
+  font-size: clamp(16px, 3.3vw, 23px);
   background: #f1e6f7;
   border-color: #e2d3ec;
 }
-.number-path-write > svg { width: 31px; color: #60457d; }
+.number-path.number-path-dictation { background: #e4f1eb; border-color: #c7dcce; }
+.number-path-write > svg { width: 26px; color: #60457d; }
+.number-path-dictation > svg { color: var(--green-dark); }
+.number-workshop [data-action="number-dictation"].text-button { min-height: 44px; }
 
 .number-round-top { margin-bottom: 8px; }
 .number-round-top > span { direction: ltr; color: var(--muted); font-size: 14px; }
@@ -261,6 +270,50 @@
   color: var(--green-dark);
 }
 .number-writing-check svg { width: 12px; }
+
+.number-dictation-layout {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  max-width: 420px;
+  margin: 16px auto 0;
+}
+.number-dictation-listen {
+  min-height: 48px;
+  background: #e4f1eb;
+  color: var(--green-dark);
+}
+.number-dictation-listen.is-speaking { outline: 2px solid var(--green); outline-offset: 2px; }
+.number-dictation-pad.free-writing-pad {
+  margin: 0;
+  max-height: none;
+  background: #fbfdf9;
+  border-color: #cad9d2;
+  color: var(--green-dark);
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: crosshair;
+}
+.number-dictation-pad.is-locked { cursor: default; }
+.number-dictation-pad .writing-lines { stroke: #b9ccc1; }
+.number-dictation-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 14px;
+}
+.number-dictation-controls button { min-height: 44px; }
+.number-dictation-answer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 13px;
+  border-radius: 13px;
+  color: #60457d;
+  background: #f4edf9;
+  font-weight: 600;
+}
+.number-dictation-answer bdi { font-size: clamp(34px, 8vw, 48px); line-height: 1.2; }
 
 @media (max-width: 570px) {
   .number-writing-digits { grid-template-columns: repeat(5, minmax(0, 1fr)); }

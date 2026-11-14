@@ -36483,6 +36483,51 @@
       "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
       "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
       "sha256": "baf4f8e1a35e39c36ea75bed0d5320423fe2648b1d7156629d72266cff7ab299"
+    },
+    "number-workshop-dictation-intro": {
+      "take": 0,
+      "segments": [
+        "hakʃˈivi. kitvˈi ʔˈet hamispˈaʁ."
+      ],
+      "lang": "he-IL",
+      "speech": "hakʃˈivi. kitvˈi ʔˈet hamispˈaʁ.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "de9df3657c926f2d7a142c3a4a8384f152d2125d905c9bc14ca9ea1443730506"
+    },
+    "number-workshop-dictation-compare": {
+      "take": 0,
+      "segments": [
+        "zˈe hamispˈaʁ ʃeʃamˈat."
+      ],
+      "lang": "he-IL",
+      "speech": "zˈe hamispˈaʁ ʃeʃamˈat.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "d1bf9e4130915b60835b0f8f3b3ae4df0518fde83e886fe3d5354c9bb974c0b6"
+    },
+    "number-workshop-dictation-8": {
+      "lang": "he-IL",
+      "speech": "ʃmonˈe.",
+      "segments": [
+        "ʃmonˈe."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "46bb0dcd44f8d285dc8b1120210151e3fad6cd074e35583246ed58310b6e6b0f"
     }
   }
 }

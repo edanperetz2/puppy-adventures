@@ -1,7 +1,8 @@
 import { art, pup, uiIcon } from './art.js';
-import { CLIPS } from './content.js?v=2.3.2-writing-100';
+import { CLIPS } from './content.js?v=2.3.3-dictation';
 import { NUMBER_PATHS, numberQuestion, numberQuestionClip, numberPrompt, numberModel, spokenNumber } from './number-workshop.js?v=2.3.0-numbers';
-import { NUMBER_WRITING_TITLE } from './number-writing.js?v=2.3.2-writing-100';
+import { NUMBER_WRITING_TITLE } from './number-writing.js?v=2.3.3-dictation';
+import { NUMBER_DICTATION_TITLE } from './number-dictation.js?v=2.3.3-dictation';
 
 export const NUMBER_WORKSHOP_TITLE = 'סַדְנַת הַמִּסְפָּרִים';
 const labelFor = (key, nikud) => nikud ? CLIPS[key].text : CLIPS[key].text.replace(/[\u0591-\u05bd\u05bf-\u05c7]/gu, '');
@@ -22,9 +23,14 @@ export function numberMenu(drafts) {
           ${draft ? '<small>מַמְשִׁיכוֹת</small>' : ''}
         </button>`;
       }).join('')}
-      <button type="button" class="number-path number-path-write" data-action="number-write">
-        ${uiIcon('pencil')}<span>${NUMBER_WRITING_TITLE}</span>
-      </button>
+      <div class="number-writing-paths">
+        <button type="button" class="number-path number-path-write" data-action="number-write">
+          ${uiIcon('pencil')}<span>${NUMBER_WRITING_TITLE}</span>
+        </button>
+        <button type="button" class="number-path number-path-write number-path-dictation" data-action="number-dictation">
+          ${uiIcon('sound')}<span>${NUMBER_DICTATION_TITLE}</span>
+        </button>
+      </div>
     </div>
   </main>`;
 }
