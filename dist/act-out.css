@@ -329,6 +329,127 @@
 .act-sleepy-animal { display: grid; place-items: center; width: 94%; height: 94%; transform: rotate(-13deg) scale(.88); }
 .act-sleep-stars { position: absolute; top: -4%; right: -13%; color: #6b538f; font-size: 17px; font-weight: 700; line-height: 1; }
 .act-sleep-stars span { display: inline-block; transform: translate(2px, -8px); font-size: 1.22em; }
+
+.act-playfield[data-scene="water"] {
+  background: linear-gradient(#e1f3ed 0 40%, #e5efcb 40% 100%);
+}
+.act-garden-pot { top: 48%; height: 56%; }
+.act-garden-pot .act-plant {
+  position: absolute;
+  display: grid;
+  place-items: end center;
+  width: 84%;
+  height: 88%;
+  bottom: 23%;
+  transform: scale(.53);
+  transform-origin: 50% 94%;
+  pointer-events: none;
+}
+.act-garden-pot .act-pot {
+  position: absolute;
+  bottom: 6%;
+  width: 43%;
+  height: 25%;
+  clip-path: polygon(0 0,100% 0,84% 100%,16% 100%);
+  background: linear-gradient(#aa654e 0 19%, #d08b70 19% 100%);
+}
+.act-finished .act-garden-pot { z-index: 1; }
+.act-finished .act-garden-pot.act-watered { background: #fffbe377; border-color: #69936a; }
+.act-watered .act-plant { transform: scale(1); }
+.act-raindrops {
+  position: absolute;
+  top: 5%;
+  left: 49%;
+  width: 4px;
+  height: 43%;
+  border-inline-start: 4px dotted #3987b3;
+  opacity: 0;
+  transform: rotate(-12deg);
+}
+.act-grow .act-plant { animation: act-flower-grow 450ms 510ms ease-out both; }
+.act-grow .act-raindrops { animation: act-water-fall 500ms 330ms ease-in-out both; }
+@keyframes act-flower-grow {
+  0% { transform: scale(.53); }
+  75% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+@keyframes act-water-fall {
+  0% { opacity: 0; transform: translateY(-17px) rotate(-12deg); }
+  30%, 75% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(13px) rotate(-12deg); }
+}
+
+.act-playfield[data-scene="enter"] {
+  background: linear-gradient(#f4e9dc 0 69%, #ddbe9e 69% 100%);
+  border-color: #d2bdaa;
+}
+.act-playfield[data-scene="enter"] .act-scenery::before { content: none; }
+.act-entry {
+  position: absolute;
+  z-index: 3;
+  display: block;
+  left: calc(var(--x) - min(21.5%, 96px));
+  top: 14%;
+  width: min(43%, 192px);
+  height: 70%;
+  padding: 0;
+  border: 2px dashed #a88878;
+  border-radius: 19px;
+  background: #fffcf46b;
+}
+.act-entry:disabled { cursor: default; }
+.act-entry.act-entered { border-style: solid; border-color: #69936a; background: #f7f7d9; }
+.act-doorway {
+  position: absolute;
+  inset: 9% auto 11% 6%;
+  width: 48%;
+  border: 5px solid #ac7565;
+  border-radius: 27% 27% 5px 5px;
+  background: linear-gradient(#6b576c 0 78%, #b68b76 78%);
+  perspective: 230px;
+  pointer-events: none;
+}
+.act-door-panel {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #bd7c6b 0 13%, #e3ab92 13% 87%, #c78a75 87%);
+  transform-origin: left center;
+}
+.act-door-panel::before {
+  position: absolute;
+  inset: 12% 13% 9%;
+  border: 2px solid #b77a66;
+  border-radius: 25% 25% 3px 3px;
+  content: '';
+}
+.act-door-panel::after {
+  position: absolute;
+  top: 53%;
+  right: 13%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff1b1;
+  box-shadow: 0 0 0 1px #9b6542;
+  content: '';
+}
+.act-entered .act-door-panel { transform: rotateY(-76deg); }
+.act-walking-in .act-door-panel { animation: act-open-door 320ms ease-out both; }
+.act-entry-animal {
+  position: absolute;
+  left: 74%;
+  bottom: 9%;
+  width: 49%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.act-entry-animal svg { display: block; width: 100%; }
+.act-entered .act-entry-animal { left: 29%; transform: translate(-50%, -5%) scale(.83); }
+@keyframes act-open-door {
+  from { transform: rotateY(0); }
+  to { transform: rotateY(-76deg); }
+}
 @media (max-width: 395px) {
   .act-playfield { --piece: 44px; height: 230px; }
   .act-tray { gap: 3px; padding: 3px; }

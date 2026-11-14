@@ -1,4 +1,4 @@
-import { READING_SCENES } from './reading-advanced.js?v=2.6.2-swim-bedtime';
+import { READING_SCENES } from './reading-advanced.js?v=2.7.0-science';
 
 const palette = {
   red: ['#e47176', '#f5bec1'], blue: ['#579dce', '#badced'], green: ['#65a575', '#c3dfb9'],
@@ -133,6 +133,16 @@ export function readingScene(id, baseArt) {
       body += '<ellipse cx="102" cy="168" rx="78" ry="17" fill="#d8e4e6"/>' + moon;
       const pose = spec.object === 'dog' ? `<g transform="rotate(-75 100 103)">${actor(spec.object, true)}</g>` : actor(spec.object, true);
       body += place(pose, x, 185 - size * .78, size, 'scene-sleeping');
+    } else if (spec.action === 'water') {
+      body += at(spec.object, 101, 60, 96);
+      body += '<path d="M119 137H181L174 181H126Z" fill="#c8866c"/><path d="M115 137H184" stroke="#aa634f" stroke-width="6" stroke-linecap="round"/>';
+      body += at('watering-can', 7, 31, 103);
+      body += '<path d="M101 78Q132 80 140 119" stroke="#5dadc7" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 10"/>';
+    } else if (spec.action === 'enter') {
+      body += '<path d="M89 182V38H175V182Z" fill="#756075" stroke="#b9715c" stroke-width="10" stroke-linejoin="round"/>';
+      body += '<path d="M174 38L195 55V167L174 182Z" fill="#e0a387"/><circle cx="182" cy="108" r="3" fill="#fff1ba"/>';
+      body += at(spec.object, 78, 77, 105);
+      body += '<path d="M38 146h24m-15 15h21" stroke="#bfa79a" stroke-width="5" stroke-linecap="round"/>';
     } else {
       if (spec.action === 'run') body += '<path d="M8 103H26M2 117H23M8 133H27" stroke="#c9b7cc" stroke-width="5" stroke-linecap="round"/>';
       if (spec.action === 'jump') body += '<path d="M14 151q-4-33 13-53M17 165v-7" stroke="#cbb9d1" stroke-width="4" stroke-linecap="round" stroke-dasharray="5 6"/>';

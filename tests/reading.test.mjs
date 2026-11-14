@@ -11,7 +11,7 @@ function seeded(seed) { seed = Math.imul(seed + 1, 0x9e3779b1) >>> 0; return () 
 const lettersIn = text => [...text.matchAll(/[א-ת]/gu)].length;
 
 test('Ten reading stages have illustrated words, phrases and sentences with complete Hebrew pronunciation', () => {
-  assert.equal(WORDS.length, 1473);
+  assert.equal(WORDS.length, 1477);
   assert.equal(WORDS.filter(word => !word.scene).length, 389);
   assert.equal(new Set(WORDS.map(word => word.he)).size, WORDS.length, 'Repeated spellings must not inflate the vocabulary');
   assert.equal(new Set(WORDS.map(word => word.id)).size, WORDS.length);
@@ -45,7 +45,8 @@ test('Phrase choices require the color, quantity, position or action, with no no
     for (const word of pool) {
       const family = pool.filter(item => item.family === word.family);
       assert.ok(family.length >= 3);
-      assert.ok(family.every(item => item.scene.object === word.scene.object));
+      if (word.playOnly) assert.ok(family.every(item => item.playOnly));
+      else assert.ok(family.every(item => item.scene.object === word.scene.object));
       assert.equal(new Set(family.map(item => JSON.stringify(item.scene))).size, family.length);
     }
     for (let seed = 0; seed < 40; seed++) for (const q of createSession('hebrew', { ...DEFAULT_SETTINGS, reading: key }, seeded(seed))) {
@@ -61,6 +62,7 @@ test('Phrase choices require the color, quantity, position or action, with no no
   assert.match(CLIPS['he-place-ball-under'].speech, /mitˈaχat/u);
   // A single-word "dog" question must not also offer a valid sleeping-dog picture.
   for (let seed = 0; seed < 120; seed++) for (const q of createSession('hebrew', { ...DEFAULT_SETTINGS, reading: 'all' }, seeded(seed))) {
+    assert.ok(!q.word.playOnly);
     if (q.word.scene) assert.ok(q.options.every(option => option.family === q.word.family));
     else assert.ok(q.options.every(option => !option.scene));
   }
@@ -109,7 +111,7 @@ test('Advancement offers only the immediately following stage after eight indepe
 
 test('Chosen stages keep targets and distractors at that stage, with six varied questions', () => {
   for (const [key, stage] of Object.entries(READING_LEVELS)) {
-    const pool = readingWords(key), seen = new Set();
+    const pool = readingWords(key).filter(word => key !== 'all' || !word.playOnly), seen = new Set();
     let practice = sanitizeReadingPractice(null);
     const rounds=stage.level===null?2*Math.max(...Array.from({length:10},(_,i)=>WORDS.filter(w=>w.level===i+1).length))+2:Math.ceil(pool.length/(key==='sentences'?SESSION_LENGTH-1:SESSION_LENGTH))+2;
     for (let seed = 0; seed < rounds; seed++) {

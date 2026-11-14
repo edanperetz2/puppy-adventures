@@ -1,17 +1,17 @@
 import { LearningStore } from './learning-sync.js?v=2.2.2-six';
 import { questionLearning, learningSummary } from './learning.js';
-import { packRound, unpackRound, cleanDrafts, roundKey } from './session-state.js?v=2.6.2-swim-bedtime';
+import { packRound, unpackRound, cleanDrafts, roundKey } from './session-state.js?v=2.7.0-science';
 import { JOURNEYS, newJourney, cleanJourney, resumeJourney, englishPairsReady, journeyLength } from './journey.js?v=2.2.5-practice';
 import { STORIES } from './journey-content.js';
 import { mountJourney } from './journey-view.js?v=2.2.5-practice';
 import { mountPark } from './park.js';
 import { mountFreeWriting, WRITING_STEPS } from './free-writing.js?v=2.3.3-dictation';
 import { parentLearning, learningStatus } from './learning-parent.js?v=2.3.3-dictation';
-import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.6.2-swim-bedtime';
-import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.6.2-swim-bedtime';
+import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.7.0-science';
+import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.7.0-science';
 import { ADVENTURE_PHASES, adventurePhase } from './adventure.js?v=2.2.2-six';
-import { art, pup, scene, uiIcon } from './art.js?v=2.6.2-swim-bedtime';
-import { Narrator } from './audio.js?v=2.6.2-swim-bedtime';
+import { art, pup, scene, uiIcon } from './art.js?v=2.7.0-science';
+import { Narrator } from './audio.js?v=2.7.0-science';
 import { GameAnnouncements } from './announcements.js';
 import { SharedAlbum, normalizeCode } from './sync.js?v=2.2.6-album';
 import { SYNC_CONFIG } from './sync-config.js';
@@ -21,7 +21,7 @@ import { mountClockSchool } from './clock-school.js?v=2.2.4-practice';
 import { sanitizeClockPosition, recordClockLesson } from './clock-learning.js?v=2.2.4-practice';
 import { LETTERS, WRITING_FORMS, writingLetter, writingMode, writingPositionKey, letterGroup, letterShape } from './letters.js';
 import { mountLetterPad } from './letter-pad.js?v=2.3.1-number-writing';
-import { nextReadingStage, sanitizeReadingPractice, finishReadingPractice } from './reading.js?v=2.6.2-swim-bedtime';
+import { nextReadingStage, sanitizeReadingPractice, finishReadingPractice } from './reading.js?v=2.7.0-science';
 import { stickerPage, stickerDefinition } from './stickers.js';
 import { suggestedLetters, practicedLetterCount, recordLetters, recognitionTargets } from './letter-progress.js';
 import { CHARACTERS, CHARACTER_COLLECTIONS, CHARACTER_LEVELS, CHARACTER_MODES, characterCollection, selectCharacterLevel, sanitizeCharacterPractice, finishCharacterPractice, nextCharacterLevel } from './characters.js?v=2.2.2-six';
@@ -36,8 +36,10 @@ import { numberWritingKey, mountNumberWriting } from './number-writing.js?v=2.3.
 import { mountNumberDictation, numberDictationKey } from './number-dictation.js?v=2.3.3-dictation';
 import { mountFruitCutting } from './fruit-cutting.js?v=2.5.0-play';
 import { mountPikachu, pikachuImage, PIKACHU_TITLE } from './pikachu-game.js?v=2.5.1-pikachu-greeting';
-import { actOutPrompt, actOutSteps } from './act-out.js?v=2.6.2-swim-bedtime';
-import { mountActOut } from './act-out-view.js?v=2.6.2-swim-bedtime';
+import { actOutPrompt, actOutSteps } from './act-out.js?v=2.7.0-science';
+import { mountActOut } from './act-out-view.js?v=2.7.0-science';
+import { SCIENCE_TITLE, SCIENCE_EXPERIMENTS, cleanScienceRound, scienceClip } from './science-content.js?v=2.7.0-science';
+import { mountScience, scienceArt, scienceMenu } from './science-view.js?v=2.7.0-science';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -67,6 +69,7 @@ let learner = null, journeyController = null, journeyPlan = null, parkController
 let numberRound = null, numberDrafts = {}, numberController = null, numberSticker = null;
 let pikachuController = null;
 let actOutController = null;
+let sciencePath = null, scienceDrafts = {}, scienceController = null;
 
 try {
   const saved = JSON.parse(gameStorage.getItem(STORAGE_KEY) || 'null');
@@ -80,6 +83,10 @@ try {
       const savedRound = cleanNumberRound(saved.numberDrafts?.[path]);
       return savedRound?.path === path ? [[path, savedRound]] : [];
     }));
+    for (const path of Object.keys(SCIENCE_EXPERIMENTS)) {
+      const draft = cleanScienceRound(path, saved.scienceDrafts?.[path]);
+      if (draft) scienceDrafts[path] = draft;
+    }
     awardedRounds=(Array.isArray(saved.awardedRounds)?saved.awardedRounds:[]).filter(id=>/^[0-9a-f-]{36}$/i.test(id)).slice(-10000);
     if(Object.hasOwn(WRITING_STEPS,saved.writingPractice?.mode))writingPractice={mode:saved.writingPractice.mode,drafts:saved.writingPractice.drafts&&typeof saved.writingPractice.drafts==='object'&&!Array.isArray(saved.writingPractice.drafts)?saved.writingPractice.drafts:{}};
   }
@@ -132,7 +139,7 @@ function welcome() {
 
 function save() {
   try {
-    gameStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition, characterPractice, drafts, journeyDrafts, awardedRounds, writingPractice, ...(Object.keys(numberDrafts).length ? { numberDrafts } : {}) }));
+    gameStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition, characterPractice, drafts, journeyDrafts, awardedRounds, writingPractice, ...(Object.keys(numberDrafts).length ? { numberDrafts } : {}), ...(Object.keys(scienceDrafts).length ? { scienceDrafts } : {}) }));
     storageAvailable = true;
   } catch { storageAvailable = false; }
 }
@@ -408,6 +415,7 @@ function renderHome() {
         ${activityCount(m.id) ? `<span class="mission-done" aria-label="כבר סיימת ${activityCount(m.id)} הרפתקאות">${uiIcon('check')}</span>` : ''}
       </button>`).join('')}</div>
     </section>
+    <section class="home-feature-card science-feature"><div aria-hidden="true"><span class="lab-picture">${scienceArt('oil')}</span></div><span><h3>${SCIENCE_TITLE}</h3><p>מְנַסּוֹת וּמְגַלּוֹת מָה קוֹרֶה</p></span><button class="primary-button" data-action="science-menu">לַמַּעְבָּדָה ${uiIcon('arrow')}</button></section>
     <section class="home-feature-card park-feature"><div>${pup('tofi')}</div><span><h3>הַפָּארְק שֶׁלִּי</h3><p>קִשּׁוּטִים, חֲבֵרִים וּמָקוֹם לַדִּמְיוֹן</p></span><button class="primary-button" data-action="park">בּוֹנִים וּמְשַׂחֲקִים ${uiIcon('arrow')}</button></section>
     <section class="home-feature-card album-feature"><div>${art(progress.stickers.at(-1) || 'star')}</div><span><h3>הָאַלְבּוֹם שֶׁלִּי</h3><p>${progress.stickers.length ? `${progress.stickers.length} מדבקות מחכות לך באלבום` : 'בכל הרפתקה שלמה מגלות מדבקה חדשה'}</p></span><button class="primary-button" data-action="album">לאלבום שלי ${uiIcon('arrow')}</button></section>
   </main>${footer()}`;
@@ -472,13 +480,20 @@ function renderGame() {
     nikud: settings.nikud, motion: () => settings.motion,
     onMove: (moves, complete) => {
       round.actOutMoves = moves;
-      if (complete) resolveAnswer(q);
+      if (complete) {
+        resolveAnswer(q);
+        if (q.word.playOnly) document.querySelector('.next-button').hidden = true;
+      }
       else {
         checkpoint();
         document.querySelector('#feedback').textContent = settings.nikud ? `הֻנְּחוּ ${moves.length}. הַמְשִׁיכִי לְפִי הַמִּשְׁפָּט.` : `הונחו ${moves.length}. המשיכי לפי המשפט.`;
       }
     },
-    onFinish: () => document.querySelector('.next-button')?.focus({ preventScroll: false }),
+    onFinish: () => {
+      const next = document.querySelector('.next-button');
+      next.hidden = false;
+      next.focus({ preventScroll: false });
+    },
     onRetry: () => {
       round.helped.add(round.index);
       document.querySelector('#feedback').textContent = settings.nikud ? 'נַסִּי שׁוּב. אֶפְשָׁר לִקְרֹא עוֹד פַּעַם.' : 'נסי שוב. אפשר לקרוא עוד פעם.';
@@ -566,6 +581,7 @@ function render() {
   parkController?.destroy(); parkController=null;
   pikachuController?.destroy(); pikachuController=null;
   actOutController?.destroy(); actOutController=null;
+  scienceController?.destroy(); scienceController=null;
   letterPad?.destroy(); letterPad = null;
   clockSchool?.destroy(); clockSchool = null;
   applyPreferences();
@@ -579,6 +595,8 @@ function render() {
   else if (view === 'fruit-cutting') renderFruitCutting();
   else if (view === 'number-complete') app.innerHTML = header() + numberComplete(numberRound, numberSticker) + footer();
   else if (view === 'pikachu') renderPikachu();
+  else if (view === 'science-menu') app.innerHTML = header() + scienceMenu(scienceDrafts, settings.nikud) + footer();
+  else if (view === 'science-round') renderScience();
   else if (view === 'park') renderPark();
   else if (view === 'journey-complete') renderJourneyComplete();
   else if (view === 'game') { renderGame(); restoreQuestionState(); }
@@ -647,6 +665,8 @@ function replay() {
   if(view==='journey'){journeyController?.replay();return;}
   if (['number-round', 'number-writing', 'number-dictation', 'fruit-cutting'].includes(view)) { numberController?.replay(); return; }
   if (view === 'number-menu') { announcements.say(numberClip('menu')); return; }
+  if (view === 'science-menu') { announcements.say(scienceClip('menu')); return; }
+  if (view === 'science-round') { scienceController.replay(); return; }
   if(view==='park'){clockSpeak('journey-park-intro');return;}
   if (view === 'clock-school') { clockSchool.replay(true); return; }
   if (view === 'game') {
@@ -838,7 +858,7 @@ function renderSettings() {
   dialog.querySelector('[data-dialog="reset"]').onclick = () => {
     openDialog(`<h2 id="parent-title">לאפס את המכשיר הזה?</h2><p>המדבקות וההתקדמות בדפדפן הזה יימחקו. הגדרות המשחק יישמרו.${album.linked ? ' החיבור לאלבום המשפחתי יוסר. האלבום שכבר סונכרן יישמר עבור המכשירים האחרים.' : ''}</p><div class="dialog-actions"><button class="secondary-button" data-dialog="cancel-reset">ביטול</button><button class="primary-button" data-dialog="confirm-reset">איפוס ההתקדמות</button></div>`);
     dialog.querySelector('[data-dialog="cancel-reset"]').onclick = renderSettings;
-    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); learner.reset(); drafts={};journeyDrafts={};numberDrafts={};numberRound=null;awardedRounds=[];writingPractice={mode:'trace',drafts:{}}; progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
+    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); learner.reset(); drafts={};journeyDrafts={};numberDrafts={};numberRound=null;scienceDrafts={};awardedRounds=[];writingPractice={mode:'trace',drafts:{}}; progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
   };
 }
 
@@ -868,17 +888,19 @@ function latestDraft() {
     ...Object.values(drafts).filter(d => d.mission !== 'math').map(d => ({ kind: 'classic', value: d, at: d.at })),
     ...Object.values(journeyDrafts).filter(d => d.mode !== 'objects').map(d => ({ kind: 'journey', value: d, at: d.at })),
     ...Object.values(numberDrafts).map(d => ({ kind: 'numbers', value: d, at: d.at })),
+    ...Object.entries(scienceDrafts).filter(([, draft]) => !draft.complete).map(([path, value]) => ({ kind: 'science', path, value, at: value.at })),
   ].sort((a, b) => b.at - a.at)[0];
 }
 function resumeCard(){
   const draft=latestDraft();if(!draft)return '';
-  const name=draft.kind==='numbers'?NUMBER_WORKSHOP_TITLE:draft.kind==='journey'?JOURNEYS[draft.value.mode].title:MISSIONS[draft.value.mission].name;
-  const length = draft.kind === 'journey' ? journeyLength(draft.value) : draft.value.questions.length;
+  const name=draft.kind==='science'?SCIENCE_EXPERIMENTS[draft.path].title:draft.kind==='numbers'?NUMBER_WORKSHOP_TITLE:draft.kind==='journey'?JOURNEYS[draft.value.mode].title:MISSIONS[draft.value.mission].name;
+  const length = draft.kind === 'science' ? SCIENCE_EXPERIMENTS[draft.path].steps.length : draft.kind === 'journey' ? journeyLength(draft.value) : draft.value.questions.length;
   return `<section class="resume-card"><span>${uiIcon('again')}</span><div><strong>מַמְשִׁיכִים מֵאֵיפֹה שֶׁעָצַרְנוּ?</strong><small>${name} · צַעַד ${draft.value.index+1} מִתּוֹךְ ${length}</small></div><button class="primary-button" data-action="resume">מַמְשִׁיכִים ${uiIcon('arrow')}</button></section>`;
 }
 function resumeLatest(){
   const draft=latestDraft();if(!draft)return;
   if (draft.kind === 'numbers') { startNumberRound(draft.value.path); return; }
+  if (draft.kind === 'science') { startScience(draft.path); return; }
   narrator.stop();
   if(draft.kind==='classic'){const restored=unpackRound(draft.value);if(!restored)return;round=restored;view='game';}
   else {journeyPlan=resumeJourney(draft.value);if(!journeyPlan)return;round=null;view='journey';}
@@ -970,6 +992,35 @@ function renderPikachu() {
   });
 }
 
+function openScienceMenu() {
+  narrator.stop();
+  checkpoint();
+  round = null;
+  view = 'science-menu'; render(); focusTitle();
+  announcements.say(scienceClip('menu'));
+}
+
+function startScience(path, restart = false) {
+  if (!Object.hasOwn(SCIENCE_EXPERIMENTS, path)) return;
+  narrator.stop();
+  sciencePath = path;
+  if (restart || !scienceDrafts[path]) scienceDrafts[path] = { index: 0, actions: [], complete: false, at: Date.now() };
+  save();
+  view = 'science-round'; render(); focusTitle();
+  scienceController.replay();
+}
+
+function renderScience() {
+  app.innerHTML = `${header()}<main id="main" class="lab-page"><div id="science-root"></div></main>${footer()}`;
+  scienceController = mountScience(document.querySelector('#science-root'), {
+    path: sciencePath, saved: scienceDrafts[sciencePath], nikud: settings.nikud, motion: settings.motion,
+    speak: key => announcements.say(key),
+    onSave: draft => { scienceDrafts[sciencePath] = draft; save(); },
+    onFinish: () => celebrate(28),
+    onRestart: () => startScience(sciencePath, true),
+  });
+}
+
 function renderNumberRound() {
   app.innerHTML = `${header()}<main id="main" class="number-workshop"><div id="number-root"></div></main>${footer()}`;
   const active = numberRound;
@@ -1054,6 +1105,8 @@ app.addEventListener('click', event => {
     case 'number-dictation': openNumberDictation(); break;
     case 'fruit-cutting': openFruitCutting(); break;
     case 'pikachu': openPikachu(); break;
+    case 'science-menu': openScienceMenu(); break;
+    case 'science-start': startScience(button.dataset.path, scienceDrafts[button.dataset.path]?.complete); break;
     case 'garden': openReadingLevels(); break;
     case 'mission-direct': startMission(button.dataset.mission,true); break;
     case 'journey-start': startJourney(button.dataset.journey,button.dataset.level); break;

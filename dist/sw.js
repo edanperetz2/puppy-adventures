@@ -1,5 +1,5 @@
 // Classic workers also support browsers without module service workers.
-const CACHE = 'puppy-adventures-2.6.2-swim-bedtime';
+const CACHE = 'puppy-adventures-2.7.0-science';
 const BASE = new URL('./', self.location.href);
 
 self.addEventListener('install', event => {

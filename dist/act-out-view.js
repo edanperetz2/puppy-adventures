@@ -1,7 +1,7 @@
-import { art, uiIcon } from './art.js?v=2.6.2-swim-bedtime';
-import { CLIPS, COLORS, WORDS } from './content.js?v=2.6.2-swim-bedtime';
-import { paintedReadingObject, sleepingReadingAnimal } from './reading-scenes.js?v=2.6.2-swim-bedtime';
-import { actOutMatches, actOutPlan, actOutPrompt } from './act-out.js?v=2.6.2-swim-bedtime';
+import { art, uiIcon } from './art.js?v=2.7.0-science';
+import { CLIPS, COLORS, WORDS } from './content.js?v=2.7.0-science';
+import { paintedReadingObject, sleepingReadingAnimal } from './reading-scenes.js?v=2.7.0-science';
+import { actOutMatches, actOutPlan, actOutPrompt } from './act-out.js?v=2.7.0-science';
 
 const names = new Map([...WORDS, ...COLORS].map(word => [word.id, word.he]));
 const points = {
@@ -40,10 +40,14 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
   const jumping = animal && spec.action === 'jump';
   const feeding = animal && spec.action === 'eat';
   const movingAnimal = animal && Boolean(spec.anchor);
+  const watering = animal && spec.action === 'water';
+  const entering = animal && spec.action === 'enter';
+  const direct = jumping || entering;
   const sceneName = animal ? spec.action : spec.anchor || spec.kind;
   const lane = destination => travelPoints[plan.destinations.indexOf(destination)][0];
   const stopPoint = destination => {
     if (feeding) return [lane(destination), 70];
+    if (watering) return [lane(destination) - 4, 27];
     if (movingAnimal) return [lane(destination) - (destination === 'bed' ? 6 : 0), destination === 'pond' ? 56 : destination === 'bed' ? 51 : 46];
     if (travel) return travelPoints[plan.destinations.indexOf(destination)];
     return points[spec.anchor][destination];
@@ -56,7 +60,7 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
   const decorations = movingAnimal ? (spec.action === 'sleep' ? `<span class="act-night-moon">${art('moon')}</span>` : '') : animal ? '' : travel
     ? plan.destinations.map((id, index) => `<span class="act-landmark" style="--x:${travelPoints[index][0]}%">${art(id)}</span>`).join('')
     : `<span class="act-anchor act-anchor-${spec.anchor}">${container ? '' : art(spec.anchor)}</span>${container ? '<span class="act-container-rim"></span>' : ''}`;
-  const extraInstructions = jumping ? '' : ` <span>${label(moveInstructions[movingAnimal ? 'animal' : 'object'])}</span>`;
+  const extraInstructions = direct ? '' : ` <span>${label(moveInstructions[movingAnimal ? 'animal' : 'object'])}</span>`;
   const animalStops = () => plan.destinations.map(destination => {
     const id = spec.size ? spec.object : destination;
     const name = `${names.get(id)}${spec.size ? destination === 'small' ? ' קטן' : ' גדול' : ''}`;
@@ -74,9 +78,15 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
     const picture = destination === 'pond' ? '<i class="act-water-lines"></i>' : art(destination === 'shore' ? 'flower' : destination);
     return `<button type="button" class="act-destination act-destination-${destination}" data-act-place="${destination}" style="--x:${lane(destination)}%" aria-label="${animalPlaceNames[destination]}">${picture}</button>`;
   }).join('');
+  const gardenMarkup = () => plan.destinations.map(destination => `<button type="button" class="act-destination act-garden-pot" data-act-place="${destination}" style="--x:${lane(destination)}%" aria-label="${names.get(destination)}">
+    <span class="act-plant">${art(destination)}</span><i class="act-pot"></i><i class="act-raindrops"></i>
+  </button>`).join('');
+  const doorsMarkup = () => plan.destinations.map(destination => `<button type="button" class="act-entry" data-act-open="${destination}" style="--x:${lane(destination)}%" aria-label="פתיחת דלת · ${names.get(destination)}">
+    <span class="act-doorway"><i class="act-door-panel"></i></span><span class="act-entry-animal">${art(destination)}</span>
+  </button>`).join('');
   const piecesMarkup = () => plan.pieces.map((piece, i) => {
-    const id = feeding ? piece.food : piece.object || spec.object;
-    const name = `${names.get(id)}${piece.color ? ` · ${names.get(piece.color)}` : piece.size ? piece.size === 'small' ? ' · קטן' : ' · גדול' : group ? ` ${i + 1}` : ''}`;
+    const id = watering ? 'watering-can' : feeding ? piece.food : piece.object || spec.object;
+    const name = `${watering ? 'משפך' : names.get(id)}${piece.color ? ` · ${names.get(piece.color)}` : piece.size ? piece.size === 'small' ? ' · קטן' : ' · גדול' : group ? ` ${i + 1}` : ''}`;
     return `<button type="button" class="act-piece" data-act-piece="${i}" aria-pressed="false" aria-label="${name}">
         ${paintedReadingObject(id, piece.color, art(id, piece.size === 'small' ? 'act-small' : ''))}
       </button>`;
@@ -85,17 +95,18 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
   root.innerHTML = `<p class="act-instruction" id="act-instruction">${label(CLIPS[actOutPrompt(word)].text)}${extraInstructions}</p>
     <div class="act-playfield" data-scene="${sceneName}" data-kind="${spec.kind}" aria-describedby="act-instruction" role="group" aria-label="תמונת הסיפור">
       <div class="act-scenery" aria-hidden="true">${decorations}</div>
-      ${movingAnimal ? animalPlacesMarkup() : animal ? animalStops() : placesMarkup()}
+      ${watering ? gardenMarkup() : entering ? doorsMarkup() : movingAnimal ? animalPlacesMarkup() : animal ? animalStops() : placesMarkup()}
       <div class="act-landed" aria-hidden="true"></div>
-      ${jumping ? '' : `<div class="act-tray" role="group" aria-label="חלקים להזזה">${piecesMarkup()}</div>`}
+      ${direct ? '' : `<div class="act-tray" role="group" aria-label="חלקים להזזה">${piecesMarkup()}</div>`}
     </div>`;
   const field = root.querySelector('.act-playfield');
   const landed = root.querySelector('.act-landed');
   const pieces = [...root.querySelectorAll('.act-piece')];
   const places = [...root.querySelectorAll('[data-act-place]')];
-  const jumpers = [...root.querySelectorAll('[data-act-jump]')];
+  const triggers = [...root.querySelectorAll('[data-act-jump], [data-act-open]')];
   const tray = root.querySelector('.act-tray');
-  const animalButton = jumping || feeding ? (jumping ? jumpers : places)[plan.destinations.indexOf(plan.target)] : null;
+  const targetIndex = plan.destinations.indexOf(plan.target);
+  const animalButton = jumping || feeding ? (jumping ? triggers : places)[targetIndex] : null;
   const canAnimate = node => motion() && !matchMedia('(prefers-reduced-motion: reduce)').matches && typeof node.animate === 'function';
   let complete = resolved;
   let preview = null;
@@ -112,7 +123,7 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
       button.disabled = complete || (!feeding && selected === null && !drag?.active);
       button.classList.toggle('act-over', preview === button.dataset.actPlace);
     }
-    for (const button of jumpers) button.disabled = complete;
+    for (const button of triggers) button.disabled = complete;
     if (animalButton && complete) animalButton.querySelector('.act-animal-check').hidden = false;
     field.classList.toggle('act-active', selected !== null || Boolean(drag?.active));
     field.classList.toggle('act-finished', complete);
@@ -136,6 +147,20 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
         { transform: 'none' },
       ], { duration: 480, easing: 'ease-out' });
     }
+    if (entering) {
+      const door = triggers[targetIndex];
+      const animate = origin && canAnimate(door);
+      door.classList.toggle('act-walking-in', Boolean(animate));
+      door.classList.add('act-entered');
+      if (!animate) return null;
+      return door.querySelector('.act-entry-animal').animate([
+        { left: '74%', transform: 'translate(-50%, 0)' },
+        { left: '74%', transform: 'translate(-50%, 0)', offset: .26 },
+        { left: '55%', transform: 'translate(-50%, -8%) rotate(-5deg)', offset: .50 },
+        { left: '41%', transform: 'translate(-50%, 0) scale(.92)', offset: .70 },
+        { left: '29%', transform: 'translate(-50%, -5%) scale(.83)' },
+      ], { duration: 920, easing: 'ease-in-out' });
+    }
     const [x, y] = stopPoint(plan.target);
     const [dx, dy] = group ? groupOffsets[plan.count - 2][played.indexOf(index)] : [0, 0];
     const item = document.createElement('span');
@@ -145,6 +170,13 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
     item.style.top = `${y + dy}%`;
     item.innerHTML = pieces[index].innerHTML;
     landed.append(item);
+    if (watering) {
+      const pot = places[targetIndex];
+      const animate = origin && canAnimate(item);
+      pot.classList.toggle('act-grow', Boolean(animate));
+      pot.classList.add('act-watered');
+      if (!animate) { item.hidden = true; return null; }
+    }
     if (!origin || !canAnimate(item)) {
       if (movingAnimal) showAnimalAtDestination(item);
       if (feeding) item.hidden = true;
@@ -156,6 +188,12 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
     const from = `translate(-50%, -50%) translate(${dxFrom}px, ${dyFrom}px)`;
     const scale = `scale(${origin.width / bounds.width})`;
     const arrive = [{ transform: `${from} ${scale}` }, { transform: 'translate(-50%, -50%)' }];
+    if (watering) return item.animate([
+      arrive[0], { ...arrive[1], offset: .25 },
+      { transform: 'translate(-50%, -50%) rotate(65deg)', offset: .44 },
+      { transform: 'translate(-50%, -50%) rotate(72deg)', offset: .77 },
+      { transform: 'translate(-50%, -64%) rotate(35deg)', opacity: 0 },
+    ], { duration: 980, easing: 'ease-in-out' });
     if (movingAnimal) {
       const [start, end] = arrive;
       if (spec.action === 'sleep') return item.animate([start, { ...end, offset: .64 }, { transform: 'translate(-50%, -42%) scale(.92)' }], { duration: 460, easing: 'ease-out' });
@@ -178,7 +216,7 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
   function move(index, destination, origin) {
     if (complete || played.includes(index)) return;
     if (!actOutMatches(word, plan, index, destination)) {
-      selected = jumping ? null : index;
+      selected = direct ? null : index;
       showMoves();
       onRetry();
       return;
@@ -195,7 +233,7 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
       flight = animation;
       if (!animation) onFinish();
       else void animation.finished.then(() => {
-        if (feeding && landed.lastElementChild) {
+        if ((feeding || watering) && landed.lastElementChild) {
           landed.lastElementChild.hidden = true;
           animation.cancel();
         }
@@ -225,8 +263,8 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
       if (button === suppressClick && event.detail) return;
       if (feeding && selected === null) pieces.find(piece => !piece.disabled)?.focus({ preventScroll: true });
       else place(button);
-    } else if (button.hasAttribute('data-act-jump')) {
-      move(0, button.dataset.actJump, true);
+    } else if (button.hasAttribute('data-act-jump') || button.hasAttribute('data-act-open')) {
+      move(0, button.dataset.actJump || button.dataset.actOpen, true);
     }
   }, { signal: events.signal });
 

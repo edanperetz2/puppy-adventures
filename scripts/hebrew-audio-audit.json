@@ -16495,6 +16495,293 @@
       "detected_ipa": "haʔavˈiʁi ʔˈet haχajˈa lamakˈom ʃebasipˈuʁ.",
       "phoneme_edit_ratio": 0,
       "seconds": 4.23
+    },
+    "he-story-action-luli-waters-flower": {
+      "sha256": "8ffba0e3cedbbea98336fd2d6aa98843b1985a21539b01afd313defd13017a1d",
+      "expected_ipa": "lˈuli maʃkˈa pˈeʁaχ.",
+      "detected_ipa": "lˈuli maʃkˈa pˈeʁaχ",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.88
+    },
+    "he-story-action-dog-comes-in": {
+      "sha256": "512ced49830be290ff813780aa7ad75cfb1eeee7d6741b5d583aeec37372283a",
+      "expected_ipa": "hakˈelev niχnˈas habˈajta.",
+      "detected_ipa": "hakˈelev niχnˈas habˈajta.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.17
+    },
+    "he-story-action-luli-waters-tree": {
+      "sha256": "c6a940806b9f3ae4911cbc6283a0a4448627788d344523c0467ecf2f8c592d14",
+      "expected_ipa": "lˈuli maʃkˈa ʔˈets.",
+      "detected_ipa": "lˈuli maʃkˈa ʔˈets",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.83
+    },
+    "he-story-action-cat-comes-in": {
+      "sha256": "00067f4f43031029d99e22c18625887a2b8ec4da2d415fd5109ea04a64054f79",
+      "expected_ipa": "χatˈul niχnˈas habˈajta.",
+      "detected_ipa": "χatˈul niχnˈas habˈajta.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.73
+    },
+    "act-out-water": {
+      "sha256": "bb193ce2d975414aa38ee2cd1be9ff04bd8a9a0ee095f23bc527f9e4671f4e3c",
+      "expected_ipa": "tnˈi mˈajim latsˈemaχ ʃebasipˈuʁ.",
+      "detected_ipa": "tnˈi mˈajim latsˈemaχ ʃebasipˈuʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.8
+    },
+    "act-out-door": {
+      "sha256": "a315d9d62e6e43320d663332b67a820b36c961623cf822342417fcbca044b3f5",
+      "expected_ipa": "pitχˈi ʔˈet hadˈelet laχajˈa ʃebasipˈuʁ.",
+      "detected_ipa": "pitχˈi ʔˈet hadˈelet laχajˈa ʃebasipˈuʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.83
+    },
+    "science-menu": {
+      "sha256": "87e067bece84296128e8a5d1513500bf78f3a7454a0fed346bcb19dd09abf4b6",
+      "expected_ipa": "bʁuχˈa habaʔˈa lemaʔabˈedet hamadˈa! bˈoʔi naʔasˈe nisˈuj.",
+      "detected_ipa": "bʁuχˈa habaʔˈa lemaʔabˈedet hamadˈa, bˈoʔi naʔasˈe nisˈuj.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.12
+    },
+    "science-done": {
+      "sha256": "27ee2b589c2b10ff9664c8cabeb8283e13b252e70ff71c5d43ab39fc3b5fd350",
+      "expected_ipa": "kˈol hakavˈod, sijˈamt ʔˈet hanisˈuj!",
+      "detected_ipa": "kˈol hakavˈod, sijˈamt ʔˈet hanisˈuj.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.75
+    },
+    "science-test-idea": {
+      "sha256": "4770ec358d689644a098335292bf36a44216d99fc2739a29ef6a62e2ed514e1b",
+      "expected_ipa": "bˈoʔi nivdˈok!",
+      "detected_ipa": "bˈoʔi nivdˈok.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.7
+    },
+    "science-water-pour": {
+      "sha256": "7f459424ec92df7112ba97896352005a92c16d393a83f6357fd4367d6a81642e",
+      "expected_ipa": "mizɡˈi mˈajim lakˈos.",
+      "detected_ipa": "mizɡˈi mˈajim lakˈos.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.74
+    },
+    "science-water-ready": {
+      "sha256": "67e61a05730b2450f799eb575ab29dc3cce231640ed755e93c9ac0c92b3be7b9",
+      "expected_ipa": "jˈeʃ mˈajim bakˈos.",
+      "detected_ipa": "jˈeʃ mˈajim bakˈos.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.89
+    },
+    "science-oil-guess": {
+      "sha256": "dfaf85baab0f938e810eb800a2d55e4f1a778ab337c460b0093c0c15920cafd9",
+      "expected_ipa": "haʃˈemen jatsˈuf ʔˈo jitaʁbˈev?",
+      "detected_ipa": "haʃˈemen jatsˈuf ʔˈo jitaʁbˈev?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.81
+    },
+    "science-oil-pour": {
+      "sha256": "f1406e2f55b335be1d07faa604d56b8f315b5b7c5d855785e4fcdd75d4a173cc",
+      "expected_ipa": "ʔaχʃˈav mizɡˈi ʃˈemen.",
+      "detected_ipa": "ʔaχʃˈav mizɡˈi ʃˈemen.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.76
+    },
+    "science-oil-top": {
+      "sha256": "4cb575a1ce1991f6b8c8317df5a42157843971bf0f4a7e5b594347aac72c9317",
+      "expected_ipa": "haʃˈemen tsˈaf meʔˈal hamˈajim.",
+      "detected_ipa": "haʃˈemen tsˈaf meʔˈal hamˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.27
+    },
+    "science-stir": {
+      "sha256": "293118496989dc8dabb7c293dabbebee5e8c7bec6e83e0a8cabdc8a8f158f231",
+      "expected_ipa": "ʔaʁbevˈi ʔˈim hakˈaf. mˈa koʁˈe?",
+      "detected_ipa": "ʔaʁbevˈi ʔˈim hakˈaf, mˈa koʁˈe?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.73
+    },
+    "science-oil-back": {
+      "sha256": "e92af9906a389064bcb6a63489235b181921463decd0ad5a89f5b27d9a0e49b9",
+      "expected_ipa": "haʃˈemen χazˈaʁ lemˈala.",
+      "detected_ipa": "haʃˈemen χazˈaʁ lemˈaʔla.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.09
+    },
+    "science-soap-add": {
+      "sha256": "1447f19f8a74e3423a2b078c217d1edb6451165ad1818a0c75034792adac39ef",
+      "expected_ipa": "hosˈifi tipˈa ʃˈel sabˈon kelˈim.",
+      "detected_ipa": "hosˈifi tipˈa ʃˈel sabˈon kelˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.09
+    },
+    "science-soap-ready": {
+      "sha256": "209cbcffa64b8a1dda158256c2c71fb99f604f4ea9d18becee9ebf206aa0c833",
+      "expected_ipa": "ʁˈak bekˈos ʔaχˈat jˈeʃ sabˈon.",
+      "detected_ipa": "ʁˈak bekˈos ʔaχˈat jˈeʃ sabˈon.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.25
+    },
+    "science-stir-again": {
+      "sha256": "6c6186c0dd18ebfded993f3732dec89d8eedd093cbc449e46e474c1fe854b8c5",
+      "expected_ipa": "ʔaʁbevˈi ʃˈuv. mˈa hiʃtanˈa?",
+      "detected_ipa": "ʔaʁbevˈi ʃˈuv, mˈa hiʃtanˈa?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.25
+    },
+    "science-oil-droplets": {
+      "sha256": "17d7353a856dbe5743870c74a266925c449aba2c549338dbd475d8df0a6b6526",
+      "expected_ipa": "ʔˈim sabˈon, haʃˈemen mitpazˈeʁ letipˈot ktanˈot.",
+      "detected_ipa": "ʔˈim sabˈon, haʃˈemen mitpazˈeʁ letipˈot ktanˈot.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.25
+    },
+    "science-cork-guess": {
+      "sha256": "4477bf3f16c3923c67b80f8e973d16c70a680f96325558894918e45e2a4eeda1",
+      "expected_ipa": "hapkˈak jatsˈuf ʔˈo jiʃkˈa?",
+      "detected_ipa": "hapkˈak jatsˈuf ʔˈo jiʃkˈa",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.8
+    },
+    "science-cork-drop": {
+      "sha256": "aee7fdab06009ada7df1aabc7c03dbc50b0fc58c2f6da40219604410f3dd6ff1",
+      "expected_ipa": "haχnˈisi ʔˈet hapkˈak lamˈajim.",
+      "detected_ipa": "haχnˈisi ʔˈet hapkˈak lamˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.11
+    },
+    "science-cork-floats": {
+      "sha256": "f6bb0c19fc0d9ec7e5d968f8f3991152deb67ea02af7a1192db2ae3d214c9d16",
+      "expected_ipa": "hapkˈak tsˈaf ʔˈal hamˈajim.",
+      "detected_ipa": "hapkˈak tsˈaf ʔˈal hamˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.74
+    },
+    "science-rock-guess": {
+      "sha256": "9721997aa2786f7e79084c3b342c5045f1b98796d86dd0f190e0d252c365cef1",
+      "expected_ipa": "vehaʔˈeven? hˈi tatsˈuf ʔˈo tiʃkˈa?",
+      "detected_ipa": "vehaʔˈeven hˈi tatsˈuf ʔˈo tiʃkˈa?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.19
+    },
+    "science-rock-drop": {
+      "sha256": "35c1cd770d804d49448e714936f7f3205194736be53febd5b083c2592c722bca",
+      "expected_ipa": "haχnˈisi ʔˈet haʔˈeven lamˈajim.",
+      "detected_ipa": "haχnˈisi ʔˈet haʔˈeven lamˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.11
+    },
+    "science-rock-sinks": {
+      "sha256": "c6947802a159249afc42ed5781262239569865adef9541e93d412a04323e8de2",
+      "expected_ipa": "haʔˈeven ʃakʔˈa lataχtˈit.",
+      "detected_ipa": "haʔˈeven ʃakʔˈa lataχtˈit.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.14
+    },
+    "science-wood-drop": {
+      "sha256": "00b1d453a3863133299e0e4ee6508bc9324dc4590a82e7bb47423e39ac3f19ed",
+      "expected_ipa": "nasˈi ɡˈam χatiχˈat ʔˈets.",
+      "detected_ipa": "nasˈi ɡˈam χatiχˈat ʔˈets.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.3
+    },
+    "science-wood-floats": {
+      "sha256": "4b6bd625d6bcb1202ebd8978e8acf63d5bdee3236d060f2d1ae3630b7af40e9e",
+      "expected_ipa": "χatiχˈat haʔˈets tsafˈa.",
+      "detected_ipa": "χatiχˈat haʔˈets tsafˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.72
+    },
+    "science-float-look": {
+      "sha256": "18718ea15ebdf17e56dc7a7ce132af0041d42e72d98665e28e7c92a70cead322",
+      "expected_ipa": "mˈa tsˈaf? mˈa ʃakˈa?",
+      "detected_ipa": "mˈa tsˈaf? mˈa ʃakˈa?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.09
+    },
+    "science-float-compare": {
+      "sha256": "4715d11193aacc7cb2e0b7c7c39ea5e23a3f446f664035061163a207544617f4",
+      "expected_ipa": "hapkˈak vehaʔˈets tsafˈim. haʔˈeven lemˈata.",
+      "detected_ipa": "hapkˈak vehaʔˈets tsafˈim, haʔˈeven lemˈata.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.2
+    },
+    "science-ice-cold": {
+      "sha256": "b45d55e43520c40d805a3005f67467e0d6b6bef4b8337f0d0102cd906e79e874",
+      "expected_ipa": "hosˈifi kˈeʁaχ lamˈajim hakaʁˈim.",
+      "detected_ipa": "hosˈifi kˈeʁaχ lamˈajim hakaʁˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.84
+    },
+    "science-cold-ready": {
+      "sha256": "3808aacf19bd0f6ae20e6329ae93f3d33580f0968d27184bc5f2de0d05bb4849",
+      "expected_ipa": "jˈeʃ kˈeʁaχ bamˈajim hakaʁˈim.",
+      "detected_ipa": "jˈeʃ kˈeʁaχ bamˈajim hakaʁˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.47
+    },
+    "science-ice-warm": {
+      "sha256": "16d3010fdb73b8bcfb312a6b85bdc6fb06ee788c45e8b8df7bbe7e5500c4e12c",
+      "expected_ipa": "hosˈifi kˈeʁaχ ɡˈam lamˈajim haχamˈim.",
+      "detected_ipa": "hosˈifi kˈeʁaχ ɡˈam lamˈajim haχamˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.19
+    },
+    "science-both-ready": {
+      "sha256": "dec8044c15378430d10b31ee4d77985d59ea54af49eb7008c376df4512ad2cde",
+      "expected_ipa": "jˈeʃ kˈeʁaχ biʃtˈej hakosˈot.",
+      "detected_ipa": "jˈeʃ kˈeʁaχ biʃtˈej hakosˈot.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.94
+    },
+    "science-ice-guess": {
+      "sha256": "997ff7d19ffe6556d920266add697a678f38351844c233b6284e20fc612f2dc9",
+      "expected_ipa": "ʔˈejfo hakˈeʁaχ jimˈes kˈodem?",
+      "detected_ipa": "ʔejfˈo hakˈeʁaχ jimˈes kˈodem?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.83
+    },
+    "science-time-turn": {
+      "sha256": "2da8ace8c04fa4560f3bb284e796152b58debd10213dcc3282f99d609cd46fb1",
+      "expected_ipa": "liχtsˈi ʔˈal haʃaʔˈon. hazmˈan jaʔavˈoʁ.",
+      "detected_ipa": "liχtsˈi ʔˈal haʃaʔˈon, hazmˈan jaʔavˈoʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.31
+    },
+    "science-warm-melts": {
+      "sha256": "b284219a1481ad84962f4aef87be5ccaa16b6675d2cc6058d99a6891e15787d4",
+      "expected_ipa": "bamˈajim haχamˈim hakˈeʁaχ namˈes mahˈeʁ jotˈeʁ.",
+      "detected_ipa": "bamˈajim haχamˈim hakˈeʁaχ namˈes mahˈeʁ jotˈeʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.25
+    },
+    "science-ice-look": {
+      "sha256": "a488b871bc0aa7fe174f2beb2722a7a0f904088a1bd332237439ccc9a117d6fc",
+      "expected_ipa": "ʔˈejfo ʔˈod jˈeʃ kˈeʁaχ?",
+      "detected_ipa": "ʔejfˈo ʔˈod jˈeʃ kˈeʁaχ?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.25
+    },
+    "science-ice-compare": {
+      "sha256": "78becabc8515973cb06db9b41293500667c9d4a467e56a00d39d3b35b4cd0c10",
+      "expected_ipa": "bakˈos hakaʁˈa ʔˈod jˈeʃ kˈeʁaχ.",
+      "detected_ipa": "bakˈos hakaʁˈa ʔˈod jˈeʃ kˈeʁaχ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.24
+    },
+    "science-time-more": {
+      "sha256": "1f6da137290a91fd433e0abcb0f8fd2db32166f2b7b2aec10f47f4bfae3dee88",
+      "expected_ipa": "naʔavˈiʁ ʔˈod ktsˈat zmˈan.",
+      "detected_ipa": "naʔavˈiʁ ʔˈod ktsˈat zmˈan.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.19
+    },
+    "science-both-melt": {
+      "sha256": "8ec735ff037159840fba7b2608541193c16163c607af7e004f606f1875a3f6a9",
+      "expected_ipa": "ɡˈam bamˈajim hakaʁˈim hakˈeʁaχ namˈes. hakˈeʁaχ hafˈaχ lemˈajim.",
+      "detected_ipa": "ɡˈam bamˈajim hakaʁˈim hakˈeʁaχ namˈes, hakˈeʁaχ hafˈaχ lemˈajim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.95
     }
   }
 }

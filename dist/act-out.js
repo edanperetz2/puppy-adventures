@@ -1,5 +1,6 @@
 import { SESSION_LENGTH } from './adventure.js?v=2.2.2-six';
 import { shuffle } from './answer-order.js';
+import { PLAYABLE_STORIES } from './reading-animal-stories.js?v=2.7.0-science';
 
 export const ACT_OUT_PROMPT = 'act-out';
 export const ACT_OUT_INSTRUCTION = 'קִרְאִי אֶת הַמִּשְׁפָּט. הַזִּיזִי אֶת מָה שֶׁמַּתְאִים.';
@@ -18,11 +19,15 @@ const animals = ['rabbit', 'dog', 'cat'];
 const foods = ['meat', 'chicken-leg', 'fish', 'carrot', 'lettuce'];
 const storyAnimals = [...animals, 'duck'];
 const otherRestingPlace = { bed: 'basket', basket: 'bed', nest: 'basket' };
+const actionTargets = { water: ['flower', 'tree'], enter: ['dog', 'cat'] };
+const playableStoryIds = new Set(PLAYABLE_STORIES.map(word => word.id));
 
 export function actOutPrompt(word) {
   if (word.scene.kind !== 'action') return ACT_OUT_PROMPT;
   if (word.scene.action === 'jump') return 'act-out-jump';
   if (word.scene.action === 'eat') return 'act-out-feed';
+  if (word.scene.action === 'water') return 'act-out-water';
+  if (word.scene.action === 'enter') return 'act-out-door';
   return 'act-out-move-animal';
 }
 
@@ -30,6 +35,7 @@ export function canActOut(word) {
   const scene = word?.scene;
   if (word?.level !== 10 || !scene) return false;
   if (scene.kind === 'action') {
+    if (actionTargets[scene.action]) return actionTargets[scene.action].includes(scene.object);
     if (!storyAnimals.includes(scene.object)) return false;
     if (scene.action === 'swim') return scene.anchor === 'pond';
     if (scene.action === 'sleep') return Object.hasOwn(otherRestingPlace, scene.anchor);
@@ -44,8 +50,8 @@ export function actOutSteps(questions) {
   if (questions.length !== SESSION_LENGTH) return [];
   const eligible = questions.flatMap((q, index) => q.type === 'read' && canActOut(q.word) ? [index] : []);
   const kind = index => questions[index].word.scene.kind;
-  const animal = eligible.find(index => questions[index].word.id.startsWith('story-animal-')) ?? eligible.find(index => kind(index) === 'action');
-  const first = animal ?? eligible[0];
+  const story = eligible.find(index => playableStoryIds.has(questions[index].word.id)) ?? eligible.find(index => kind(index) === 'action');
+  const first = story ?? eligible[0];
   const spaced = eligible.filter(index => Math.abs(index - first) > 1);
   const second = spaced.find(index => kind(index) !== kind(first)) ?? spaced[0];
   return [first, second].filter(index => index !== undefined).sort((a, b) => a - b);
@@ -57,6 +63,9 @@ export function actOutPlan(word, roundId) {
   let seed = parseInt(roundId.slice(0, 8), 16) ^ word.id.split('').reduce((hash, char) => Math.imul(hash, 31) + char.charCodeAt(0), 0);
   const rng = () => ((seed = (Math.imul(1664525, seed) + 1013904223) >>> 0) / 2 ** 32);
   if (scene.kind === 'action') {
+    if (actionTargets[scene.action]) {
+      return { pieces: [{}], destinations: shuffle(actionTargets[scene.action], rng), target: scene.object, count: 1 };
+    }
     if (scene.anchor) {
       const alternatives = scene.action === 'swim' ? ['duck', 'dog'] : storyAnimals;
       const [other] = shuffle(alternatives.filter(animal => animal !== scene.object), rng);
@@ -87,7 +96,10 @@ export function actOutMatches(word, plan, pieceIndex, destination) {
   const piece = plan.pieces[pieceIndex];
   if (!piece || destination !== plan.target) return false;
   const { kind, anchor, object, food, size, color } = word.scene;
-  if (kind === 'action') return anchor ? object === piece.object : food === piece.food;
+  if (kind === 'action') {
+    if (actionTargets[word.scene.action]) return true;
+    return anchor ? object === piece.object : food === piece.food;
+  }
   return (!color || color === piece.color) && (!size || size === piece.size);
 }
 

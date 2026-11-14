@@ -22,8 +22,22 @@ export const ANIMAL_STORIES = rows.map(([object, action, food, he, pointed, spok
   scene: { kind: 'action', object, action, ...(food ? { food } : {}), ...(anchor ? { anchor } : {}) },
 }));
 
-export const ANIMAL_STORY_INSTRUCTIONS = {
+const gardenAndHome = [
+  ['luli-waters-flower', 'water', 'flower', 'לולי משקה פרח.', 'לוּלִי מַשְׁקָה פֶּרַח.', 'lˈuli maʃkˈa pˈeʁaχ.'],
+  ['dog-comes-in', 'enter', 'dog', 'הכלב נכנס הביתה.', 'הַכֶּלֶב נִכְנָס הַבַּיְתָה.', 'hakˈelev niχnˈas habˈajta.'],
+  ['luli-waters-tree', 'water', 'tree', 'לולי משקה עץ.', 'לוּלִי מַשְׁקָה עֵץ.', 'lˈuli maʃkˈa ʔˈets.'],
+  ['cat-comes-in', 'enter', 'cat', 'חתול נכנס הביתה.', 'חָתוּל נִכְנָס הַבַּיְתָה.', 'χatˈul niχnˈas habˈajta.'],
+].map(([id, action, object, he, pointed, spoken]) => ({
+  id: `story-action-${id}`, he, pointed, spoken, level: 10, family: 'story-home-and-garden', playOnly: true,
+  scene: { kind: 'action', action, object },
+}));
+
+export const PLAYABLE_STORIES = [...ANIMAL_STORIES, ...gardenAndHome];
+
+export const ACTION_STORY_INSTRUCTIONS = {
   'act-out-jump': { text: 'לִחְצִי עַל הַחַיָּה שֶׁקּוֹפֶצֶת.', speech: 'liχtsˈi ʔˈal haχajˈa ʃekofˈetset.' },
   'act-out-feed': { text: 'הַעֲבִירִי אֶת הָאֹכֶל לַחַיָּה שֶׁבַּסִּפּוּר.', speech: 'haʔavˈiʁi ʔˈet haʔˈoχel laχajˈa ʃebasipˈuʁ.' },
   'act-out-move-animal': { text: 'הַעֲבִירִי אֶת הַחַיָּה לַמָּקוֹם שֶׁבַּסִּפּוּר.', speech: 'haʔavˈiʁi ʔˈet haχajˈa lamakˈom ʃebasipˈuʁ.' },
+  'act-out-water': { text: 'תְּנִי מַיִם לַצֶּמַח שֶׁבַּסִּפּוּר.', speech: 'tnˈi mˈajim latsˈemaχ ʃebasipˈuʁ.' },
+  'act-out-door': { text: 'פִּתְחִי אֶת הַדֶּלֶת לַחַיָּה שֶׁבַּסִּפּוּר.', speech: 'pitχˈi ʔˈet hadˈelet laχajˈa ʃebasipˈuʁ.' },
 };
