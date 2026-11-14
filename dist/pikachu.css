@@ -37,10 +37,7 @@
   background: #fffdf5;
   text-align: center;
 }
-.pika-heading { position: relative; display: grid; place-items: center; min-height: 44px; }
-.pika-heading:has(.circle-button:not([hidden])) { padding-inline: 46px; }
-.pika-heading .circle-button { position: absolute; inset-inline-end: 0; width: 44px; height: 44px; }
-.pika-heading .circle-button.is-speaking { outline: 2px solid var(--green); }
+.pika-heading { display: grid; place-items: center; min-height: 44px; }
 .pika-board h1 {
   font-size: clamp(24px, 5vw, 40px);
   color: #473a29;
@@ -86,6 +83,17 @@
   user-select: none;
 }
 .pika-motion .pika-character.pika-talking { animation: pikachu-talk 400ms ease-in-out infinite alternate; }
+.pika-character > .ui-icon {
+  position: absolute;
+  inset: auto 9% 11% auto;
+  width: 27px;
+  height: 27px;
+  padding: 4px;
+  border-radius: 50%;
+  color: #644414;
+  background: #fff9df;
+  box-shadow: 0 0 0 1px #dbc586;
+}
 .pika-character.pika-talking:after {
   position: absolute;
   top: 21%;

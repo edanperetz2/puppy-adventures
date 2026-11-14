@@ -11,7 +11,6 @@ import { installProfileClips } from './profile-content.js?v=2.2.0-voices';
 import { MORE_ANIMALS, MORE_COLORS, ENGLISH_OBJECTS } from './english-expansion.js';
 import { LETTER_EXAMPLE_CLIPS } from './word-practice-expansion.js';
 import { NUMBER_WORKSHOP_CLIPS } from './number-workshop-content.js?v=2.3.3-dictation';
-import { PIKACHU_CLIPS } from './pikachu-audio.js?v=2.4.0-pikachu';
 export { ENGLISH_OBJECTS } from './english-expansion.js';
 export { WORDS, READING_LEVELS } from './reading.js';
 
@@ -144,4 +143,3 @@ installJourneyClips(CLIPS);
 Object.assign(CLIPS, LETTER_EXAMPLE_CLIPS);
 installProfileClips(CLIPS);
 Object.assign(CLIPS, NUMBER_WORKSHOP_CLIPS);
-Object.assign(CLIPS, PIKACHU_CLIPS);

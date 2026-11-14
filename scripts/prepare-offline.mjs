@@ -18,8 +18,9 @@ const manifest = [...new Set(['./', ...shell, ...entries, ...voiceRuntime, ...st
 for (const url of manifest) {
   if (!url.split('?')[0].endsWith('.js')) continue;
   const module = await readFile(new URL(url, root), 'utf8');
-  for (const match of module.matchAll(/(?:\bfrom\s+|\bnew URL\(\s*)["'](\.\/[^"']+\?[^"']+)["']/g)) {
-    if (!manifest.includes(match[1])) manifest.push(match[1]);
+  for (const match of module.matchAll(/\bfrom\s+["'](\.\/[^"']+\?[^"']+)["']|\bnew URL\(\s*["'](\.\/[^"']+)["']\s*,\s*import\.meta\.url\s*\)/g)) {
+    const path = match[1] || match[2];
+    if (!manifest.includes(path)) manifest.push(path);
   }
 }
 await writeFile(new URL('offline.json', root), JSON.stringify(manifest, null, 2) + '\n');

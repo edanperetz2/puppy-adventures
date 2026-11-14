@@ -2,7 +2,8 @@ import { choiceCount, SESSION_LENGTH } from './adventure.js?v=2.2.2-six';
 import { answerShuffler, shuffle } from './answer-order.js';
 import { art, uiIcon } from './art.js';
 import { WORDS } from './reading.js';
-import { pikaClip } from './pikachu-audio.js?v=2.4.0-pikachu';
+
+export const PIKACHU_CALL_URL = new URL('./assets/audio/pikachu-call.mp3', import.meta.url);
 
 export const PIKACHU_TITLE = 'מְחַפְּשׂוֹת עִם פִּיקָאצ׳וּ';
 const FINISH = 'כָּל הַכָּבוֹד! מָצָאתְ אֶת כָּל הַתְּמוּנוֹת';
@@ -37,12 +38,14 @@ export function pikachuImage(className) {
   return `<img class="${className}" src="./assets/home-pikachu.png" alt="" width="215" height="215" draggable="false">`;
 }
 
-export function mountPikachu(root, { nikud, motion, speak, stopSpeaking }) {
+export function mountPikachu(root, { nikud, motion, sound }) {
   const events = new AbortController();
   const animations = new Set();
+  const call = new Audio();
+  call.preload = 'none';
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-  const allowMotion = () => motion() && !reducedMotion.matches;
-  let questions = pikachuQuestions(), index = 0, finished = false, solved = false, feedback = '', speaking = false, phrase = 0;
+  const allowMotion = () => motion() && !reducedMotion.matches && typeof Element.prototype.animate === 'function';
+  let questions = pikachuQuestions(), index = 0, finished = false, solved = false, feedback = '';
   const tried = new Set();
   const question = () => questions[index];
   const label = text => nikud() ? text : text.replace(/[\u0591-\u05bd\u05bf-\u05c7]/gu, '');
@@ -54,36 +57,30 @@ export function mountPikachu(root, { nikud, motion, speak, stopSpeaking }) {
   <section class="pika-board" aria-labelledby="pika-title">
     <div class="pika-heading">
       <h1 id="pika-title" tabindex="-1">${PIKACHU_TITLE}</h1>
-      <button type="button" class="circle-button" data-action="replay" aria-label="שמיעת הרמז שוב">${uiIcon('sound')}</button>
     </div>
     <div class="pika-stage">
       <span class="pika-shadow" aria-hidden="true"></span>
-      <button type="button" class="pika-character" data-pika="greet" aria-label="לשמוע את פיקאצ׳ו">${pikachuImage('pika-face')}</button>
+      <button type="button" class="pika-character" data-pika="greet" aria-label="פיקאצ׳ו">${pikachuImage('pika-face')}${uiIcon('sound')}</button>
       <span class="pika-cheer" aria-hidden="true" hidden>✦</span>
       <span class="pika-cheer pika-cheer-second" aria-hidden="true" hidden>✦</span>
       <div class="pika-flying" aria-hidden="true"></div>
     </div>
-    <div class="pika-clue">
-      <span class="pika-word"></span>
-    </div>
+    <p class="pika-word pika-clue" id="pika-word" tabindex="-1"></p>
     <div class="step-track pika-progress" aria-hidden="true"></div>
-    <div class="pika-choices" role="group" aria-label="בחירת תמונה"></div>
+    <div class="pika-choices" role="group" aria-labelledby="pika-word"></div>
     <p class="pika-feedback" role="status"></p>
     <div class="pika-actions">
       <button type="button" class="primary-button" data-pika="next" hidden></button>
       <button type="button" class="primary-button" data-pika="again" hidden>עוֹד סִיבּוּב ${uiIcon('again')}</button>
       <button type="button" class="text-button" data-action="home" hidden>לְבֵית הַחֲבֵרִים</button>
     </div>
-    <p id="audio-notice" class="audio-notice" role="status" hidden></p>
   </section>`;
 
   const step = root.querySelector('.pika-step');
   const stage = root.querySelector('.pika-stage');
   const title = root.querySelector('#pika-title');
-  const listen = root.querySelector('[data-action="replay"]');
   const character = root.querySelector('.pika-character');
   const face = character.querySelector('img');
-  const clue = root.querySelector('.pika-clue');
   const word = root.querySelector('.pika-word');
   const track = root.querySelector('.pika-progress');
   const choices = root.querySelector('.pika-choices');
@@ -93,6 +90,7 @@ export function mountPikachu(root, { nikud, motion, speak, stopSpeaking }) {
   const home = root.querySelector('.pika-actions [data-action="home"]');
   const cheers = [...root.querySelectorAll('.pika-cheer')];
   const flyer = root.querySelector('.pika-flying');
+  const soundIcon = character.querySelector('.ui-icon');
 
   function playMotion(element, frames, options) {
     const animation = element.animate(frames, options);
@@ -134,28 +132,31 @@ export function mountPikachu(root, { nikud, motion, speak, stopSpeaking }) {
     ], { duration: 490, easing: 'ease-in-out' }).then(() => piece.remove());
   }
 
-  async function say(clips) {
-    const id = ++phrase;
-    speaking = true;
-    character.classList.remove('pika-talking');
-    try {
-      await speak(clips, () => {
-        if (id !== phrase) return;
-        character.classList.add('pika-talking');
-      });
-    }
-    finally {
-      if (id === phrase) { speaking = false; character.classList.remove('pika-talking'); }
-    }
+  function greet() {
+    hop();
+    if (!sound()) return;
+    if (!call.src) call.src = PIKACHU_CALL_URL.href;
+    else call.currentTime = 0;
+    void call.play().catch(() => {});
+  }
+  const stopped = () => character.classList.remove('pika-talking');
+  call.addEventListener('playing', () => character.classList.add('pika-talking'), { signal: events.signal });
+  for (const event of ['ended', 'pause', 'error']) call.addEventListener(event, stopped, { signal: events.signal });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) call.pause(); }, { signal: events.signal });
+
+  function updateSound() {
+    const enabled = sound();
+    soundIcon.toggleAttribute('hidden', !enabled);
+    character.setAttribute('aria-label', enabled ? 'לשמוע את פיקאצ׳ו' : 'פיקאצ׳ו');
+    if (!enabled) call.pause();
   }
 
   function render() {
     const q = question();
     root.classList.toggle('pika-motion', allowMotion());
     title.textContent = label(finished ? FINISH : PIKACHU_TITLE);
-    listen.hidden = finished;
     step.textContent = finished ? '' : `צַעַד ${index + 1} מִתּוֹךְ ${SESSION_LENGTH}`;
-    clue.hidden = finished;
+    word.hidden = finished;
     word.textContent = label(words.get(q.target).pointed);
     track.innerHTML = questions.map((_, i) => `<span class="step-dot ${finished || i < index || i === index && solved ? 'done' : i === index ? 'current' : ''}">${i + 1}</span>`).join('');
     for (const cheer of cheers) cheer.hidden = !solved && !finished;
@@ -172,8 +173,6 @@ export function mountPikachu(root, { nikud, motion, speak, stopSpeaking }) {
     again.hidden = home.hidden = !finished;
   }
 
-  const replay = () => finished ? say(pikaClip('finish')) : say(`he-${question().target}`);
-
   root.addEventListener('click', event => {
     const button = event.target.closest('button');
     if (!button || button.disabled) return;
@@ -184,32 +183,27 @@ export function mountPikachu(root, { nikud, motion, speak, stopSpeaking }) {
         feedback = 'נַסִּי שׁוּב';
         render();
         choices.querySelector('button:not(:disabled)')?.focus({ preventScroll: true });
-        void say(['try-again', `he-${question().target}`]);
         return;
       }
       flyPicture(button, id);
       solved = true; feedback = 'כָּל הַכָּבוֹד!';
       render(); hop(true);
       next.focus({ preventScroll: true });
-      void say(`correct-${1 + index % 3}`);
       return;
     }
 
     if (button.dataset.pika === 'greet') {
-      hop();
-      void say(pikaClip('hello'));
+      greet();
     } else if (button.dataset.pika === 'next' && solved && !finished) {
       clearMotion();
       if (index === SESSION_LENGTH - 1) {
         finished = true;
         render(); hop(true);
         title.focus({ preventScroll: true });
-        void say(pikaClip('finish'));
       } else {
         index++; solved = false; feedback = ''; tried.clear();
         render();
-        listen.focus({ preventScroll: true });
-        void replay();
+        word.focus({ preventScroll: true });
       }
     } else if (button.dataset.pika === 'again' && finished) {
       clearMotion();
@@ -217,16 +211,18 @@ export function mountPikachu(root, { nikud, motion, speak, stopSpeaking }) {
       index = 0; finished = solved = false; feedback = ''; tried.clear();
       render();
       title.focus({ preventScroll: true });
-      void replay();
     }
   }, { signal: events.signal });
   reducedMotion.addEventListener('change', () => { clearMotion(); root.classList.toggle('pika-motion', allowMotion()); }, { signal: events.signal });
 
   render();
+  updateSound();
   return {
-    start() { hop(); return say([pikaClip('intro'), `he-${question().target}`]); },
-    replay() { hop(); return replay(); },
-    update() { if (!allowMotion()) clearMotion(); render(); },
-    destroy() { events.abort(); clearMotion(); if (speaking) stopSpeaking(); },
+    greet, updateSound,
+    update() { if (!allowMotion()) clearMotion(); updateSound(); render(); },
+    destroy() {
+      events.abort(); clearMotion(); call.pause();
+      if (call.src) { call.removeAttribute('src'); call.load(); }
+    },
   };
 }

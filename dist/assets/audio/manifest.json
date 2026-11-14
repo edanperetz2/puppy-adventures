@@ -36528,51 +36528,6 @@
       "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
       "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
       "sha256": "46bb0dcd44f8d285dc8b1120210151e3fad6cd074e35583246ed58310b6e6b0f"
-    },
-    "pikachu-intro": {
-      "take": 0,
-      "segments": [
-        "jˈeʃ lˈi ʁˈemez. baχaʁˈi ʔˈet hatmunˈa ʃematʔimˈa."
-      ],
-      "lang": "he-IL",
-      "speech": "jˈeʃ lˈi ʁˈemez. baχaʁˈi ʔˈet hatmunˈa ʃematʔimˈa.",
-      "voice": "Ava reference",
-      "engine": "BlueTTS phonemes",
-      "rate": 0.95,
-      "steps": 16,
-      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
-      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
-      "sha256": "36f73a2852bd4d471fd8e7216cd2dfc72de812159aacc4faeb47ea26ed1852d5"
-    },
-    "pikachu-hello": {
-      "lang": "he-IL",
-      "speech": "pˈika pˈika! ʃalˈom ʔaʁiʔˈel.",
-      "segments": [
-        "pˈika pˈika! ʃalˈom ʔaʁiʔˈel."
-      ],
-      "voice": "Ava reference",
-      "engine": "BlueTTS phonemes",
-      "rate": 0.95,
-      "steps": 16,
-      "take": 0,
-      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
-      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
-      "sha256": "f4de398a0dfc68c8f6c410d3b65e4d3fc1f9527c1adfaf56359e5bb04a06318c"
-    },
-    "pikachu-finish": {
-      "lang": "he-IL",
-      "speech": "kˈol hakavˈod, ʔaʁiʔˈel! kˈol hatmunˈot kˈan.",
-      "segments": [
-        "kˈol hakavˈod, ʔaʁiʔˈel! kˈol hatmunˈot kˈan."
-      ],
-      "voice": "Ava reference",
-      "engine": "BlueTTS phonemes",
-      "rate": 0.95,
-      "steps": 16,
-      "take": 0,
-      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
-      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
-      "sha256": "d4c5abd263a3a0bac9b8678af2a36538a5ba6fbd150cec1ac4a3cf13328494ae"
     }
   }
 }

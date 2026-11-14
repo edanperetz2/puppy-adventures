@@ -7,11 +7,11 @@ import { mountJourney } from './journey-view.js?v=2.2.5-practice';
 import { mountPark } from './park.js';
 import { mountFreeWriting, WRITING_STEPS } from './free-writing.js?v=2.3.3-dictation';
 import { parentLearning, learningStatus } from './learning-parent.js?v=2.3.3-dictation';
-import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.4.0-pikachu';
+import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.4.1-pikachu-reading';
 import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.2.4-practice';
 import { ADVENTURE_PHASES, adventurePhase } from './adventure.js?v=2.2.2-six';
 import { art, pup, scene, uiIcon } from './art.js';
-import { Narrator } from './audio.js?v=2.4.0-pikachu';
+import { Narrator } from './audio.js?v=2.4.1-pikachu-reading';
 import { GameAnnouncements } from './announcements.js';
 import { SharedAlbum, normalizeCode } from './sync.js?v=2.2.6-album';
 import { SYNC_CONFIG } from './sync-config.js';
@@ -34,7 +34,7 @@ import { NUMBER_PATHS, cleanNumberRound, newNumberRound, numberClip } from './nu
 import { NUMBER_WORKSHOP_TITLE, numberMenu, mountNumberRound, numberComplete } from './number-workshop-view.js?v=2.3.3-dictation';
 import { numberWritingKey, mountNumberWriting } from './number-writing.js?v=2.3.3-dictation';
 import { mountNumberDictation, numberDictationKey } from './number-dictation.js?v=2.3.3-dictation';
-import { mountPikachu, pikachuImage, PIKACHU_TITLE } from './pikachu-game.js?v=2.4.0-pikachu';
+import { mountPikachu, pikachuImage, PIKACHU_TITLE } from './pikachu-game.js?v=2.4.1-pikachu-reading';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -613,7 +613,6 @@ function leaveTo(destination) {
 function replay() {
   if (!settings.sound) { settings.sound = true; save(); narrator.enabled = true; renderSoundButton(); }
   if(view==='journey'){journeyController?.replay();return;}
-  if (view === 'pikachu') { void pikachuController?.replay(); return; }
   if (['number-round', 'number-writing', 'number-dictation'].includes(view)) { numberController?.replay(); return; }
   if (view === 'number-menu') { announcements.say(numberClip('menu')); return; }
   if(view==='park'){clockSpeak('journey-park-intro');return;}
@@ -910,17 +909,14 @@ function renderNumberDictation() {
 function openPikachu() {
   narrator.stop();
   view = 'pikachu'; render(); focusTitle();
-  void pikachuController.start();
+  pikachuController.greet();
 }
 
 function renderPikachu() {
   app.innerHTML = `${header()}<main id="main" class="pikachu-page"><div id="pikachu-root"></div></main>${footer()}`;
   pikachuController = mountPikachu(document.querySelector('#pikachu-root'), {
     nikud: () => settings.nikud, motion: () => settings.motion,
-    speak: (clips, onStart) => announcements.say(clips, {
-      onClipStart: key => { if (key !== 'welcome') onStart(); },
-    }),
-    stopSpeaking: () => narrator.stop(),
+    sound: () => settings.sound,
   });
 }
 
@@ -1058,7 +1054,11 @@ app.addEventListener('click', event => {
     case 'tally': tally(button); break;
     case 'next': nextQuestion(); break;
     case 'parents': parentGate(); break;
-    case 'sound': settings.sound = !settings.sound; narrator.stop(); narrator.enabled = settings.sound; save(); renderSoundButton(); if (settings.sound) replay(); break;
+    case 'sound':
+      settings.sound = !settings.sound; narrator.stop(); narrator.enabled = settings.sound; save(); renderSoundButton();
+      if (view === 'pikachu') pikachuController?.updateSound();
+      else if (settings.sound) replay();
+      break;
     case 'break': checkpoint(); narrator.stop(); round = null; view = 'home'; render(); focusTitle(); announcements.say('break'); break;
   }
 });

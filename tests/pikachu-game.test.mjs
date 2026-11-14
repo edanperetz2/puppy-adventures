@@ -1,8 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { hasArt } from '../dist/art.js';
-import { CLIPS } from '../dist/content.js';
-import { pikachuQuestions } from '../dist/pikachu-game.js';
+import { WORDS } from '../dist/content.js';
+import { PIKACHU_CALL_URL, pikachuQuestions } from '../dist/pikachu-game.js';
+
+const readingWords = new Map(WORDS.map(word => [word.id, word.pointed]));
 
 function seeded(seed) {
   return () => {
@@ -23,7 +27,7 @@ test('Pikachu has six varied picture clues that progress from objects to details
       assert.ok(choices.includes(target));
       for (const id of choices) {
         assert.ok(hasArt(id), id);
-        assert.equal(CLIPS[`he-${id}`].lang, 'he-IL');
+        assert.ok(readingWords.get(id), id);
       }
       correctSlots[index].add(choices.indexOf(target));
       seen.add(target);
@@ -36,4 +40,11 @@ test('Pikachu has six varied picture clues that progress from objects to details
   }
   assert.ok(correctSlots.every(set => set.size > 1));
   assert.ok(seen.size > 30);
+});
+
+test('The Pokémon Yellow character sound is bundled for offline play', async () => {
+  const offline = JSON.parse(await readFile(new URL('../dist/offline.json', import.meta.url), 'utf8'));
+  assert.ok(offline.includes('./assets/audio/pikachu-call.mp3'));
+  const bytes = await readFile(PIKACHU_CALL_URL);
+  assert.equal(createHash('sha256').update(bytes).digest('hex'), '93489c8e64b379282340f486c80c704efb65ae9fd4dc97fcf3cbf41de1aad347');
 });

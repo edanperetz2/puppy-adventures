@@ -16306,27 +16306,6 @@
       "detected_ipa": "ʃmonˈe",
       "phoneme_edit_ratio": 0,
       "seconds": 1.67
-    },
-    "pikachu-intro": {
-      "sha256": "36f73a2852bd4d471fd8e7216cd2dfc72de812159aacc4faeb47ea26ed1852d5",
-      "expected_ipa": "jˈeʃ lˈi ʁˈemez. baχaʁˈi ʔˈet hatmunˈa ʃematʔimˈa.",
-      "detected_ipa": "jˈeʃ lˈi ʁˈemez, baχaʁˈi ʔˈet hatmunˈa ʃematʔimˈa.",
-      "phoneme_edit_ratio": 0,
-      "seconds": 4
-    },
-    "pikachu-hello": {
-      "sha256": "f4de398a0dfc68c8f6c410d3b65e4d3fc1f9527c1adfaf56359e5bb04a06318c",
-      "expected_ipa": "pˈika pˈika! ʃalˈom ʔaʁiʔˈel.",
-      "detected_ipa": "pˈika pˈika ʃalˈom ʔaʁiˈel",
-      "phoneme_edit_ratio": 0,
-      "seconds": 4.42
-    },
-    "pikachu-finish": {
-      "sha256": "d4c5abd263a3a0bac9b8678af2a36538a5ba6fbd150cec1ac4a3cf13328494ae",
-      "expected_ipa": "kˈol hakavˈod, ʔaʁiʔˈel! kˈol hatmunˈot kˈan.",
-      "detected_ipa": "kˈol hakavˈod, ʔaʁiʔˈel, kˈol hatmunˈot kˈan.",
-      "phoneme_edit_ratio": 0,
-      "seconds": 4.34
     }
   }
 }
