@@ -78,6 +78,32 @@ function getChoices(path, task, cap, count, order, rng, previousChoices) {
   return order(options, answer);
 }
 
+function selectPractice(group, path, count, items, now, rng, previous) {
+  const rank = (pool, size) => choosePractice(pool, items, task => keyFor(path, task), size, now, rng);
+  if (path === 'add') {
+    // Preserve different facts such as 4 + 1 and 3 + 2 when the pool is small,
+    // while preferring a new total when the range gives us room to choose it.
+    const ranked = rank(group, group.length);
+    const totals = new Set(previous ? [previous.total] : []);
+    const varied = ranked.filter(task => {
+      if (totals.has(task.total)) return false;
+      totals.add(task.total);
+      return true;
+    });
+    return [...new Set([...varied, ...ranked])].slice(0, count).sort(byDifficulty);
+  }
+  if (path !== 'left') return rank(group, count).sort(byDifficulty);
+  const previousAnswer = previous && correctNumber(path, previous);
+  const available = group.filter(task => correctNumber(path, task) !== previousAnswer);
+  const answers = new Set();
+  return rank(available, available.length).filter(task => {
+    const answer = correctNumber(path, task);
+    if (answers.has(answer)) return false;
+    answers.add(answer);
+    return true;
+  }).slice(0, count).sort(byDifficulty);
+}
+
 export function newNumberRound(path, limit, items = {}, rng = Math.random) {
   const cap = supportedCaps.includes(limit) ? limit : 10;
   const order = answerShuffler(rng);
@@ -89,17 +115,7 @@ export function newNumberRound(path, limit, items = {}, rng = Math.random) {
   const slots = path === 'tens' ? [2, 2, 1, 1] : path === 'left' ? [1, 3, 2] : [2, 2, 2];
   const questions = [];
   for (const [i, group] of groups.entries()) {
-    const previous = questions.at(-1);
-    const available = path === 'left' && previous ? group.filter(task => correctNumber(path, task) !== correctNumber(path, previous)) : group;
-    const ranked = choosePractice(available, items, task => keyFor(path, task), available.length, now, rng);
-    const answers = new Set();
-    const distinct = path === 'left' ? ranked.filter(task => {
-      const answer = correctNumber(path, task);
-      if (answers.has(answer)) return false;
-      answers.add(answer);
-      return true;
-    }) : ranked;
-    const selected = distinct.slice(0, slots[i]).sort(byDifficulty);
+    const selected = selectPractice(group, path, slots[i], items, now, rng, questions.at(-1));
     for (const task of selected) {
       const before = questions.at(-1);
       questions.push({

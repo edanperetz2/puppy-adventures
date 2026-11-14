@@ -22,6 +22,7 @@ test('Each Number Workshop path gives six distinct, progressively harder questio
         assert.deepEqual(cleanNumberRound(JSON.parse(JSON.stringify(round))), round);
         const questions = round.questions.map((_, index) => numberQuestion({ ...round, index }));
         assert.equal(new Set(questions.map(q => q.itemKey)).size, SESSION_LENGTH);
+        if (path === 'add' && cap > 5) assert.equal(new Set(questions.map(q => q.answer)).size, SESSION_LENGTH);
         for (const [index, q] of questions.entries()) {
           assert.equal(q.choices.length, index < 2 ? 2 : 3);
           assert.equal(new Set(q.choices).size, q.choices.length);

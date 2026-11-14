@@ -1,7 +1,7 @@
 .number-workshop {
   max-width: 880px;
   padding-block: 18px 36px;
-  --number-tile: clamp(22px, 4.8vw, 42px);
+  --number-tile: clamp(24px, 5.4vw, 44px);
   --number-gold: #faedcc;
 }
 .number-workshop-heading,
@@ -155,4 +155,10 @@
   .number-workshop { margin-inline: 12px; }
   .number-left-scene { --number-tile: 20px; }
   .number-path { min-height: 124px; }
+}
+@media (max-width: 570px) and (max-height: 700px) {
+  .number-workshop { padding-block-start: 10px; }
+  .number-board { padding: 12px; }
+  .number-scene { margin-block: 8px 12px; }
+  .number-tens-scene .number-rods { grid-template-rows: repeat(2, auto); grid-auto-flow: column; }
 }
