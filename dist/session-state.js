@@ -5,6 +5,7 @@ import { CHARACTERS, CHARACTER_LEVELS, CHARACTER_MODES } from './characters.js?v
 import { adventurePhase, isSessionLength } from './adventure.js?v=2.2.2-six';
 import { actOutPrompt, canActOut, cleanActOutMoves } from './act-out.js?v=2.7.0-science';
 import { LITTLE_STORIES } from './activities.js';
+import { storyClue } from './story-practice.js';
 
 export const roundKey = (mission,settings) => `${mission}:${mission==='hebrew'?settings.reading:mission==='letters'?settings.letterLanguage:mission==='clock'?settings.clockLevel:mission==='characters'?`${settings.characterLevel}:${settings.characterMode}`:'default'}`;
 export function packRound(round) {
@@ -40,6 +41,15 @@ export function unpackRound(raw) {
     const restored = {id:raw.id,key:typeof raw.key==='string'&&/^[a-z0-9:_-]{1,96}$/.test(raw.key)?raw.key:`${raw.mission}:default`,mission:raw.mission,questions,index:raw.index,resolved:raw.resolved===true,attempted:new Set((raw.attempted||[]).filter(id=>questions[raw.index].options.some(o=>o.id===id))),counted:new Set((raw.counted||[]).filter(n=>/^(\d{1,2})$/.test(String(n))&&Number(n)<40).map(String)),helped:ints(raw.helped),observed:ints(raw.observed),letterIds:Array.isArray(raw.letterIds)?raw.letterIds.filter(id=>LETTERS[raw.letterLanguage]?.some(l=>l.id===id)).slice(0,3):null,letterLanguage:raw.letterLanguage==='english'?'english':'hebrew',reading:Object.hasOwn(READING_LEVELS,raw.reading)?raw.reading:'short',clockLevel:Object.hasOwn(CLOCK_LEVELS,raw.clockLevel)?raw.clockLevel:'hours',characterLevel:Object.hasOwn(CHARACTER_LEVELS,raw.characterLevel)?raw.characterLevel:'friends',characterMode:Object.hasOwn(CHARACTER_MODES,raw.characterMode)?raw.characterMode:'mixed',sticker:null,awarded:false,at:Number.isSafeInteger(raw.at)?raw.at:0};
     const current = questions[restored.index];
     if (current.actOut) restored.actOutMoves = cleanActOutMoves(current.word, restored.id, raw.actOutMoves, restored.resolved);
+    if (restored.mission === 'hebrew' && restored.reading === LITTLE_STORIES.route.level) {
+      if (!restored.resolved && restored.helped.has(restored.index) && storyClue(current.word, raw.storyClue)) {
+        restored.storyClue = raw.storyClue;
+      }
+      if (questions.length === LITTLE_STORIES.steps
+          && Number.isInteger(raw.storyReview) && raw.storyReview > 0 && raw.storyReview < questions.length) {
+        restored.storyReview = raw.storyReview;
+      }
+    }
     return restored;
   }catch{return null;}
 }

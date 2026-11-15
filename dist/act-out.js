@@ -103,6 +103,14 @@ export function actOutMatches(word, plan, pieceIndex, destination) {
   return (!color || color === piece.color) && (!size || size === piece.size);
 }
 
+export function actOutDetails({ scene }) {
+  if (scene.kind === 'travel') return ['anchor', 'color'];
+  if (scene.kind === 'arrangement') return ['position', 'count'];
+  if (scene.kind === 'position') return ['position', scene.color ? 'color' : 'size'];
+  if (scene.anchor) return ['anchor', 'object'];
+  return [scene.size ? 'size' : 'object', ...(scene.food ? ['food'] : [])];
+}
+
 export function cleanActOutMoves(word, roundId, value, resolved = false) {
   const plan = actOutPlan(word, roundId);
   const moves = (Array.isArray(value) ? [...new Set(value)] : [])

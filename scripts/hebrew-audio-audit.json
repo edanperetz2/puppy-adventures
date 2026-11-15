@@ -16859,6 +16859,41 @@
       "detected_ipa": "hasabˈon ʃinˈa ʔˈet mˈetaχ hapanˈim ʃˈel hamˈajim. hamˈajim zˈazu velakχˈu ʔitˈam ʔˈet hapilpˈel.",
       "phoneme_edit_ratio": 0,
       "seconds": 2.67
+    },
+    "story-clue-place": {
+      "sha256": "342e895a5f9f40e117bb3429e9e68547aa8d1c7a018386f5aa99e7362b19b4ad",
+      "expected_ipa": "ʔˈejfo zˈe nimtsˈa?",
+      "detected_ipa": "ʔejfˈo zˈe nimtsˈa?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.36
+    },
+    "story-clue-color": {
+      "sha256": "6b599ec491a788f7e019ea750d313e96f900ea33b5cab0ac4a8f5ad0de992754",
+      "expected_ipa": "ʔˈejze tsˈeva katˈuv?",
+      "detected_ipa": "ʔˈejze tsˈeva katˈuv?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.27
+    },
+    "story-clue-count": {
+      "sha256": "42db3cc1a0acb6062063c68c500507090f62ee044fcec0e0a0a93bb1685adc61",
+      "expected_ipa": "kiʁʔˈi ʃˈuv ʔˈet hamispˈaʁ.",
+      "detected_ipa": "kiʁʔˈi ʃˈuv ʔˈet hamispˈaʁ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.19
+    },
+    "story-clue-action": {
+      "sha256": "d3f1e3a3c6be7a2b05ed321abcf76da10094798a121a59c6e7cabec32ce44c07",
+      "expected_ipa": "mˈa koʁˈe bamiʃpˈat?",
+      "detected_ipa": "mˈa koʁˈe bamiʃpˈat?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.12
+    },
+    "story-clue-detail": {
+      "sha256": "c2a5ef7431d6b431094cca3bb3f501b2babbfe712608df8455a7c71443d50ccf",
+      "expected_ipa": "sˈimi lˈev laχˈelek hamudɡˈaʃ.",
+      "detected_ipa": "sˈimi lˈev laχˈelek hamudɡˈaʃ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.34
     }
   }
 }

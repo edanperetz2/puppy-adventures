@@ -37713,6 +37713,81 @@
       "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
       "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
       "sha256": "644726c6157c8e51cf9904343533c21c988b05f74465f0c8ead1db3d7a9af6cd"
+    },
+    "story-clue-place": {
+      "lang": "he-IL",
+      "speech": "ʔˈejfo zˈe nimtsˈa?",
+      "segments": [
+        "ʔˈejfo zˈe nimtsˈa?"
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "342e895a5f9f40e117bb3429e9e68547aa8d1c7a018386f5aa99e7362b19b4ad"
+    },
+    "story-clue-color": {
+      "take": 0,
+      "segments": [
+        "ʔˈejze tsˈeva katˈuv?"
+      ],
+      "lang": "he-IL",
+      "speech": "ʔˈejze tsˈeva katˈuv?",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "6b599ec491a788f7e019ea750d313e96f900ea33b5cab0ac4a8f5ad0de992754"
+    },
+    "story-clue-count": {
+      "take": 0,
+      "segments": [
+        "kiʁʔˈi ʃˈuv ʔˈet hamispˈaʁ."
+      ],
+      "lang": "he-IL",
+      "speech": "kiʁʔˈi ʃˈuv ʔˈet hamispˈaʁ.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "42db3cc1a0acb6062063c68c500507090f62ee044fcec0e0a0a93bb1685adc61"
+    },
+    "story-clue-action": {
+      "take": 0,
+      "segments": [
+        "mˈa koʁˈe bamiʃpˈat?"
+      ],
+      "lang": "he-IL",
+      "speech": "mˈa koʁˈe bamiʃpˈat?",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "d3f1e3a3c6be7a2b05ed321abcf76da10094798a121a59c6e7cabec32ce44c07"
+    },
+    "story-clue-detail": {
+      "take": 0,
+      "segments": [
+        "sˈimi lˈev laχˈelek hamudɡˈaʃ."
+      ],
+      "lang": "he-IL",
+      "speech": "sˈimi lˈev laχˈelek hamudɡˈaʃ.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "c2a5ef7431d6b431094cca3bb3f501b2babbfe712608df8455a7c71443d50ccf"
     }
   }
 }

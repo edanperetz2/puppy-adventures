@@ -70,6 +70,13 @@
 .home-page .scene-pup, .home-page .scene-butterfly, .home-page .scene-sparkle { animation: none; }
 .game-page .answer-button.try-again { opacity: .58; transform: none; border-color: #a99abc; }
 .game-page .answer-button.correct { border-color: #559581; background: #e9f6ec; }
+.reading-token.story-clue-token {
+  color: #513c26;
+  background: #fbeab0;
+  border-radius: 5px;
+  box-shadow: 0 0 0 3px #fbeab0;
+}
+.game-page .story-clue-feedback { color: #513c26; font-size: clamp(14px, 3.6vw, 17px); font-weight: 600; }
 .game-page .answer-check, .number-answer.number-correct .ui-icon { transform-origin: 50% 60%; }
 
 @media (prefers-reduced-motion: no-preference) {

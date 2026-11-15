@@ -7,8 +7,8 @@ import { mountJourney } from './journey-view.js?v=2.2.5-practice';
 import { mountPark } from './park.js';
 import { mountFreeWriting, WRITING_STEPS } from './free-writing.js?v=2.3.3-dictation';
 import { parentLearning, learningStatus } from './learning-parent.js?v=2.3.3-dictation';
-import { MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.7.1-pepper';
-import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, finishSession, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.7.1-pepper';
+import { CLIPS, MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from './content.js?v=2.7.1-pepper';
+import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.7.1-pepper';
 import { ADVENTURE_PHASES, adventurePhase } from './adventure.js?v=2.2.2-six';
 import { art, pup, scene, uiIcon } from './art.js?v=2.7.0-science';
 import { Narrator } from './audio.js?v=2.7.1-pepper';
@@ -36,13 +36,15 @@ import { numberWritingKey, mountNumberWriting } from './number-writing.js?v=2.3.
 import { mountNumberDictation, numberDictationKey } from './number-dictation.js?v=2.3.3-dictation';
 import { mountFruitCutting } from './fruit-cutting.js?v=2.5.0-play';
 import { mountPikachu, pikachuImage, PIKACHU_TITLE } from './pikachu-game.js?v=2.5.1-pikachu-greeting';
-import { actOutPrompt, actOutSteps } from './act-out.js?v=2.7.0-science';
+import { actOutDetails, actOutPrompt, actOutSteps } from './act-out.js?v=2.7.0-science';
 import { mountActOut } from './act-out-view.js?v=2.7.1-pepper';
 import { SCIENCE_TITLE, SCIENCE_EXPERIMENTS, cleanScienceRound, scienceClip } from './science-content.js?v=2.7.1-pepper';
 import { mountScience, scienceArt, scienceMenu } from './science-view.js?v=2.7.1-pepper';
 import { mountOfflineAudio, registerOffline } from './offline-audio.js';
 import { ENGLISH_LISTENING, LITTLE_STORIES } from './activities.js';
 import { latestPlayedDraft, readingActivity, recommendAdventure } from './home-adventure.js';
+import { firstStoryClue, pictureClue, storyClue, storyReviewQuestion } from './story-practice.js';
+import { awardLocalRound, checkpointScoredRound, finishScoredRound } from './round-lifecycle.js';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -536,7 +538,9 @@ function renderGame() {
       next.hidden = false;
       next.focus({ preventScroll: false });
     },
-    onRetry: () => {
+    onRetry: wrongPlace => {
+      const [place, piece] = actOutDetails(q.word);
+      if (guideStory(wrongPlace ? place : piece)) return;
       round.helped.add(round.index);
       document.querySelector('#feedback').textContent = settings.nikud ? 'נַסִּי שׁוּב. אֶפְשָׁר לִקְרֹא עוֹד פַּעַם.' : 'נסי שוב. אפשר לקרוא עוד פעם.';
       checkpoint();
@@ -721,9 +725,53 @@ function renderSoundButton() {
   if (button) { button.innerHTML = uiIcon(settings.sound ? 'sound' : 'muted'); button.setAttribute('aria-pressed', String(settings.sound)); button.setAttribute('aria-label', settings.sound ? 'כיבוי הקול' : 'הפעלת הקול'); }
 }
 
+function inLittleStories() {
+  return round?.mission === 'hebrew' && round.reading === LITTLE_STORIES.route.level;
+}
+
+function paintStoryClue() {
+  const clue = storyClue(current().word, round.storyClue);
+  if (!clue) return;
+  document.querySelectorAll('.target-word .reading-token').forEach((token, index) => {
+    token.classList.toggle('story-clue-token', index >= clue.start && index < clue.end);
+  });
+  const { text, plain } = CLIPS[clue.clip];
+  const feedback = document.querySelector('#feedback');
+  feedback.textContent = settings.nikud ? text : plain;
+  feedback.classList.add('story-clue-feedback');
+  document.querySelector('.hint-button').innerHTML = `${uiIcon('sound')} שמיעת המשפט`;
+}
+
+function guideStory(field) {
+  if (!inLittleStories()) return false;
+  const clue = storyClue(current().word, field);
+  if (!clue) return false;
+  round.storyClue = field;
+  round.helped.add(round.index);
+  if (round.storyReview === undefined) {
+    const review = storyReviewQuestion(round.questions, round.index, field);
+    if (review) {
+      round.questions[review.slot] = review.question;
+      round.storyReview = review.slot;
+    }
+  }
+  checkpoint();
+  paintStoryClue();
+  document.querySelector('.story-clue-token')?.scrollIntoView({ block: 'nearest' });
+  announcements.say(clue.clip);
+  return true;
+}
+
 function hint() {
   if (round.resolved) return;
   const q = current();
+  if (inLittleStories()) {
+    if (round.storyClue) {
+      announcements.say(`he-${q.word.id}`, { slow: true });
+      return;
+    }
+    if (guideStory(firstStoryClue(q))) return;
+  }
   round.helped.add(round.index); checkpoint();
   if (q.type === 'character') {
     document.querySelector('#feedback').textContent = 'נשמע את השם ביחד, ונמשיך לנסות ♡';
@@ -763,6 +811,7 @@ function answer(button) {
     round.helped.add(round.index);
     button.classList.add('try-again');
     button.disabled = true;
+    if (inLittleStories() && guideStory(pictureClue(q.word, q.options.find(option => option.id === button.dataset.answer)))) return;
     document.querySelector('#feedback').textContent = 'נסי שוב, אריאל. אני כאן איתך ♡';
     checkpoint(); announcements.say('try-again');
     return;
@@ -785,6 +834,7 @@ function resolveAnswer(q, button = null) {
   if (lastQuestion()) next.innerHTML = `למדבקה שלי ${uiIcon('arrow')}`;
   const answerText = q.type === 'character' ? characterName(q.character, settings.nikud) : q.type === 'letter' ? q.letter.familiar : q.type === 'clock' ? `השעה ${q.time.he}` : q.type === 'read' ? wordText(q.word) : q.type === 'listen' ? q.target.en : `${q.total}`;
   feedback.innerHTML = `${uiIcon('check')} <span>כל הכבוד! <b ${q.type === 'listen' ? 'lang="en" dir="ltr"' : ''}>${answerText}</b></span>`;
+  feedback.classList.remove('story-clue-feedback');
   feedback.classList.add('success');
   if(q.type==='letter')document.querySelector('#letter-success-examples').innerHTML=letterExampleCards(q.letter,settings.nikud);
   document.querySelector('.buddy-bar').classList.add('celebrating');
@@ -798,30 +848,41 @@ function resolveAnswer(q, button = null) {
 function nextQuestion() {
   if (!round?.resolved) return;
   if (lastQuestion()) {
-    const length = round.questions.length;
-    if (!round.awarded) {
-      const letterRound = round.mission === 'letters' ? { language: round.letterLanguage, ids: round.letterIds } : null;
-      const result = awardRound(round.mission, round.helped.size, letterRound, round.id, length);
-      progress = result.progress;
-      round.sticker = result.sticker;
-      round.awarded = true;
-      delete drafts[round.key];
-      if (round.mission === 'hebrew') readingPractice = finishReadingPractice(readingPractice, round.reading, round.questions.map(q => q.word));
-      if (round.mission === 'characters') characterPractice = finishCharacterPractice(characterPractice, round.characterLevel, round.questions);
-      if (round.mission === 'letters') recognitionChoice = null;
-      save();
-    }
-    view = 'complete'; render(); focusTitle(); revealWin('.reward-art'); announcements.say([round.sticker ? 'complete' : 'complete-all', ...(round.mission === 'hebrew' ? [nextReadingStage(round.reading, round.helped.size) ? 'reading-next' : 'reading-more'] : round.mission === 'characters' && nextCharacterLevel(round.characterLevel, round.helped.size) ? ['reading-next'] : [])]); return;
+    finishClassicRound();
+    return;
   }
   round.index++;
   round.resolved = false;
   round.attempted = new Set();
   round.counted = new Set();
   delete round.actOutMoves;
+  delete round.storyClue;
   checkpoint(); render(); focusTitle();
   document.querySelector('.game-board')?.classList.add('step-enter');
   const q = current();
   announcements.say([q.prompt, ...(q.showModel ? ['letters-recognition-hint'] : []), ...(q.targetClip ? [q.targetClip] : [])]);
+}
+
+function finishClassicRound() {
+  const mission = round.mission;
+  const letters = mission === 'letters' ? { language: round.letterLanguage, ids: round.letterIds } : null;
+  const reward = finishScoredRound(round, drafts, round.key,
+    (id, length) => awardRound(mission, round.helped.size, letters, id, length));
+  if (!reward) return;
+  progress = reward.progress;
+  round.sticker = reward.sticker;
+  if (mission === 'hebrew') readingPractice = finishReadingPractice(readingPractice, round.reading, round.questions.map(q => q.word));
+  if (mission === 'characters') characterPractice = finishCharacterPractice(characterPractice, round.characterLevel, round.questions);
+  if (letters) recognitionChoice = null;
+  view = 'complete'; save(); render(); focusTitle(); revealWin('.reward-art');
+  const nextReading = mission === 'hebrew' && nextReadingStage(round.reading, round.helped.size);
+  const nextCharacter = mission === 'characters' && nextCharacterLevel(round.characterLevel, round.helped.size);
+  announcements.say([completionClip(round.sticker), ...(nextReading || nextCharacter ? ['reading-next']
+    : mission === 'hebrew' ? ['reading-more'] : [])]);
+}
+
+function completionClip(sticker) {
+  return sticker ? 'complete' : progress.stickers.length === STICKERS.length ? 'complete-all' : 'correct-1';
 }
 
 function revealWin(selector) {
@@ -912,14 +973,15 @@ function updateParentProgress() {
 }
 
 function checkpoint(){
-  if(view==='game'&&round&&!round.awarded){round.at=Date.now();drafts[round.key]=packRound(round);}
+  if (view === 'game' && round) checkpointScoredRound(round, drafts, round.key, packRound);
   if(view==='journey'&&journeyPlan)journeyDrafts[`${journeyPlan.mode}:${journeyPlan.level}`]=journeyPlan;
   save();
 }
 function awardRound(mission,helped,letters,id,length){
   if (album.linked) return album.complete(mission, helped, letters, id, length);
-  if(awardedRounds.includes(id))return {progress,sticker:null};
-  const result=finishSession(progress,mission,helped,letters,length);awardedRounds=[...awardedRounds,id].slice(-10000);return result;
+  const result = awardLocalRound(progress, awardedRounds, mission, helped, letters, id, length);
+  awardedRounds = result.awarded;
+  return result;
 }
 function describeDraft({ kind, path, value }) {
   let title, icon, length;
@@ -963,7 +1025,10 @@ function restoreQuestionState(){
     if(round.counted.has(b.dataset.token)){b.classList.add('counted');b.setAttribute('aria-disabled','true');b.querySelector('.count-bubble').textContent=[...round.counted].indexOf(b.dataset.token)+1;}
   }
   if(round.helped.has(round.index)&&q.type==='letter')document.querySelector('#letter-recognition-model').hidden=false;
-  if(!round.resolved)return;
+  if (!round.resolved) {
+    if (inLittleStories() && round.storyClue) paintStoryClue();
+    return;
+  }
   for(const b of document.querySelectorAll('.answer-button')){b.disabled=true;if(b.dataset.answer===q.answer)b.classList.add('correct');}
   document.querySelector('.hint-button').hidden=true;
   const next=document.querySelector('.next-button');next.hidden=false;if(lastQuestion())next.innerHTML=`למדבקה שלי ${uiIcon('arrow')}`;
@@ -1077,14 +1142,16 @@ function renderNumberRound() {
   numberController = mountNumberRound(document.querySelector('#number-root'), {
     round: active, nikud: settings.nikud, motion: motionEnabled, speak: clips => announcements.say(clips),
     audioEnabled: () => settings.sound, stopSpeaking: () => narrator.stop(),
-    onSave: draft => { numberDrafts[draft.path] = draft; save(); },
+    onSave: draft => { checkpointScoredRound(draft, numberDrafts, draft.path); save(); },
     onObservation: (item, kind, index) => learner.record({ item, domain: 'math', eventId: `${active.id}:${kind === 'seen' ? 'seen:' : ''}${index}` }, kind),
     onSuccess: () => narrator.chime(),
     onComplete: draft => {
-      const result = awardRound('math', draft.helped.length, null, draft.id, draft.questions.length);
+      const result = finishScoredRound(draft, numberDrafts, draft.path,
+        (id, length) => awardRound('math', draft.helped.length, null, id, length));
+      if (!result) return;
       progress = result.progress; numberSticker = result.sticker;
-      delete numberDrafts[draft.path]; view = 'number-complete'; save(); render(); focusTitle();
-      revealWin('.journey-complete-art'); announcements.say(numberSticker ? 'complete' : 'complete-all');
+      view = 'number-complete'; save(); render(); focusTitle();
+      revealWin('.journey-complete-art'); announcements.say(completionClip(numberSticker));
     },
   });
 }

@@ -23,6 +23,8 @@ New scored adventures have six steps. Existing ten-step drafts can be finished a
 
 The home screen offers **ממשיכות** when there’s a round in progress. Otherwise **יוצאות להרפתקה** opens the specific game on the card. The suggestions use recent practice in Hebrew reading, single-word English, and basic numbers. The game map is always available.
 
+In **סיפורים קטנים**, the first clue highlights a detail in the sentence and Ava asks a short question about it. A later step can practice that detail with a different sentence. The clue and picture choices stay with the saved round. Number Workshop remembers which choices were tried and lets Ariel replay a used hint after reopening.
+
 ## Save and play offline
 
 Open **להורים** to change sound, motion, vowel marks and practice ranges. Progress starts in the current browser, and the welcome says Ariel on every device. To share her album, create or open the existing **אלבום משפחתי** in the browser that already shows her stickers, then enter that same family code in the other browser or installed app. Paired devices share earned stickers, progress and park decorations. Unfinished rounds and writing ink stay in their originating browser. Keep the family code and pairing link private. [Album security and server limits](SECURITY.md)

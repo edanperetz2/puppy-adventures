@@ -222,7 +222,7 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
     if (!actOutMatches(word, plan, index, destination)) {
       selected = direct ? null : index;
       showMoves();
-      onRetry();
+      onRetry(destination !== plan.target);
       return;
     }
     const hadFocus = root.contains(document.activeElement);

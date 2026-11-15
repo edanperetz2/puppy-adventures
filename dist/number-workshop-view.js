@@ -105,7 +105,7 @@ export function mountNumberRound(root, {
   const task = () => numberQuestion(round);
   const last = () => round.index === round.questions.length - 1;
   const prompt = () => numberPrompt(round.path, task(), round.index);
-  const persist = () => { round.at = Date.now(); onSave(round); };
+  const persist = () => onSave(round);
   const observe = (kind, index) => onObservation(task().itemKey, kind, index);
   const focus = selector => root.querySelector(selector)?.focus({ preventScroll: true });
   const markHelp = () => { if (!round.helped.includes(round.index)) round.helped.push(round.index); };
@@ -139,10 +139,10 @@ export function mountNumberRound(root, {
           </button>`;
         }).join('')}
       </div>
-      <p class="number-feedback" role="status">${feedback || (round.resolved ? 'כָּל הַכָּבוֹד!' : '')}</p>
+      <p class="number-feedback" role="status">${feedback || (round.resolved ? 'כָּל הַכָּבוֹד!' : round.attempted.length ? 'נַסִּי שׁוּב.' : '')}</p>
       <div class="number-round-actions">
         ${round.resolved ? `<button type="button" class="primary-button" data-number-step="next">${last() ? 'לַמַּדְבֵּקָה שֶׁלִּי' : 'מַמְשִׁיכוֹת'} ${uiIcon('arrow')}</button>`
-          : `<button type="button" class="hint-button" data-number-step="hint">${uiIcon('hint')} רֶמֶז</button>`}
+          : `<button type="button" class="hint-button" data-number-step="hint">${uiIcon('hint')} ${round.hint ? 'נִרְאֶה אֶת הָרֶמֶז שׁוּב' : 'רֶמֶז'}</button>`}
       </div>
       <p id="audio-notice" class="audio-notice" role="status" hidden></p>
     </section>`;
@@ -161,7 +161,10 @@ export function mountNumberRound(root, {
     showing = false;
     demonstration++;
     const hint = root.querySelector('[data-number-step="hint"]');
-    if (hint) hint.disabled = false;
+    if (hint) {
+      hint.disabled = false;
+      hint.innerHTML = `${uiIcon('hint')} נִרְאֶה אֶת הָרֶמֶז שׁוּב`;
+    }
   }
 
   async function showModel() {

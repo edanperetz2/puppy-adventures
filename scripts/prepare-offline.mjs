@@ -3,10 +3,12 @@ import { readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CLIPS } from '../dist/content.js';
+import { STORY_CLUE_CLIPS } from '../dist/story-clue-content.js';
 
 export const styleLinks = /<link\b[^>]*\brel=["']stylesheet["'][^>]*\bhref=["']([^"']+)["'][^>]*>/g;
 export const scriptLinks = /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*><\/script>/g;
-const starter = ['welcome', 'meet-friends', 'choose-activity', 'try-again', 'correct-1', 'correct-2', 'correct-3', 'complete', 'complete-all', 'profile-good-luck-ariel', 'pikachu-greeting'];
+const starter = ['welcome', 'meet-friends', 'choose-activity', 'try-again', 'correct-1', 'correct-2', 'correct-3', 'complete', 'complete-all',
+  'profile-good-luck-ariel', 'pikachu-greeting', ...Object.keys(STORY_CLUE_CLIPS)];
 const archivedAssets = /^(?:game-guide\.png|game-guide-(?:six|ariel)\.webp|rubik-\d+\.ttf)$/;
 const narrationFolder = './assets/audio/';
 

@@ -14,6 +14,7 @@ import { NUMBER_WORKSHOP_CLIPS } from './number-workshop-content.js?v=2.5.0-play
 import { ACT_OUT_INSTRUCTION, ACT_OUT_PROMPT } from './act-out.js?v=2.7.0-science';
 import { ACTION_STORY_INSTRUCTIONS } from './reading-animal-stories.js?v=2.7.0-science';
 import { SCIENCE_CLIPS } from './science-content.js?v=2.7.1-pepper';
+import { STORY_CLUE_CLIPS } from './story-clue-content.js';
 export { ENGLISH_OBJECTS } from './english-expansion.js';
 export { WORDS, READING_LEVELS } from './reading.js?v=2.7.0-science';
 
@@ -149,3 +150,4 @@ Object.assign(CLIPS, NUMBER_WORKSHOP_CLIPS);
 CLIPS[ACT_OUT_PROMPT] = { lang: 'he-IL', text: ACT_OUT_INSTRUCTION, speech: 'kiʁʔˈi ʔˈet hamiʃpˈat. hazˈizi ʔˈet mˈa ʃematʔˈim.' };
 for (const [key, clip] of Object.entries(ACTION_STORY_INSTRUCTIONS)) CLIPS[key] = { lang: 'he-IL', ...clip };
 Object.assign(CLIPS, SCIENCE_CLIPS);
+Object.assign(CLIPS, STORY_CLUE_CLIPS);
