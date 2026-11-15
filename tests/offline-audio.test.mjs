@@ -27,6 +27,24 @@ test('Invalid audio ranges return no misleading audio data', async () => {
   }
 });
 
+test('A navigation can open the saved game when a connection stops responding', async () => {
+  let onTimeout, timedOut, signal;
+  const scenario = vm.createContext({
+    self: { location: { href: 'https://game.example/sw.js' }, addEventListener() {} },
+    URL, Request, Response, Headers, AbortController,
+    fetch: (_request, options) => { signal = options.signal; return new Promise(() => {}); },
+    setTimeout(callback, delay) { assert.ok(delay < 5000); onTimeout = callback; return 7; },
+    clearTimeout(id) { timedOut = id; },
+    caches: { open: async () => ({ match: async url => new Response(new URL(url).pathname) }) },
+  });
+  vm.runInContext(worker, scenario);
+  const navigation = scenario.navigationResponse(new Request('https://game.example/'));
+  onTimeout();
+  assert.equal(await (await navigation).text(), '/index.html');
+  assert.equal(signal.aborted, true);
+  assert.equal(timedOut, 7);
+});
+
 async function offlineFixture(legacyClip) {
   const base = 'https://game.example/';
   const bytes = 'verified Ava MP3';

@@ -4,6 +4,7 @@ import { chapterMissions, chapterText } from './chapter-ui.js';
 import { ANIMALS, CLIPS, COLORS } from './content.js';
 import { advanceDelivery, DELIVERY_AUDIO } from './delivery.js';
 import { mountDrag } from './drag.js';
+import { recordingPreloader } from './offline-audio.js';
 
 const pairTitle = 'מַקְשִׁיבוֹת לִשְׁתֵּי מִלִּים';
 const palette = { blue: '#3685ca', red: '#d75758', yellow: '#f4c73f', green: '#43a16a', pink: '#ed83a6', purple: '#a47aca', orange: '#ed913f' };
@@ -79,19 +80,7 @@ export function deliveryComplete(round, sticker, finished, nikud) {
   </main>`;
 }
 
-let preparedAudio;
-export function prepareDeliveryAudio() {
-  if (preparedAudio || !navigator.onLine || !navigator.serviceWorker?.controller) return;
-  preparedAudio = Promise.allSettled(Array.from({ length: 3 }, async (_, lane) => {
-    for (let i = lane; i < DELIVERY_AUDIO.length; i += 3) {
-      const response = await fetch(`./assets/audio/${DELIVERY_AUDIO[i]}.mp3`);
-      if (!response.ok) throw new Error('Recording unavailable');
-      await response.arrayBuffer();
-    }
-  })).then(results => {
-    if (results.some(result => result.status === 'rejected')) preparedAudio = null;
-  });
-}
+export const prepareDeliveryAudio = recordingPreloader(DELIVERY_AUDIO);
 
 export function mountDeliveryRound(root, { round, nikud, motion, play, onSave, onSuccess, onComplete, focusTitle }) {
   const label = chapterText(nikud);

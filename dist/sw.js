@@ -1,5 +1,5 @@
 // Classic workers also support browsers without module service workers.
-const CACHE = 'puppy-adventures-shell-2.10.0';
+const CACHE = 'puppy-adventures-shell-2.11.0';
 const RECORDINGS = 'puppy-adventures-recordings-v1';
 const BASE = new URL('./', self.location.href);
 const asset = path => new URL(path, BASE).href;
@@ -99,14 +99,27 @@ async function gameAsset(request, url) {
   return fetch(request);
 }
 
+async function navigationResponse(request) {
+  const controller = new AbortController();
+  let timer;
+  try {
+    return await Promise.race([
+      fetch(request, { signal: controller.signal }),
+      new Promise((_, reject) => {
+        timer = setTimeout(() => { controller.abort(); reject(new Error('Navigation timed out')); }, 3200);
+      }),
+    ]);
+  } catch {
+    const shell = await caches.open(CACHE);
+    return await shell.match(asset('index.html')) || Response.error();
+  } finally { clearTimeout(timer); }
+}
+
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.origin !== BASE.origin || !url.pathname.startsWith(BASE.pathname)) return;
   if (event.request.mode === 'navigate') {
-    event.respondWith(fetch(event.request).catch(async () => {
-      const shell = await caches.open(CACHE);
-      return await shell.match(asset('index.html')) || Response.error();
-    }));
+    event.respondWith(navigationResponse(event.request));
     return;
   }
   event.respondWith(gameAsset(event.request, url).catch(() => Response.error()));

@@ -8,7 +8,7 @@ Ariel’s learning game for phones, tablets and computers. Ava gives instruction
 
 | Activity | Practice |
 | --- | --- |
-| **המסע שלי** | Two chapters with three six-step missions each. Read clues, add, and move clock hands at the friends' picnic. Help Bobi move animals, pack supplies, and deliver packages by listening to English words. Hear an optional two-word phrase when both words have been recognized independently on different days. |
+| **המסע שלי** | Three chapters with three six-step missions each. Read, add, and set the clock at the picnic. Listen to English on Bobi’s delivery route. Shape, load, test, and sail boats with Luli. Bobi offers an optional two-word prompt after independent practice with both words on different days. |
 | **גינת המילים** | Ten Hebrew stages, from short words to little stories. Choose a matching picture or act out the sentence. A mixed adventure draws from the stages across replays. |
 | **סדנת המילים** | Build words from parts and letters, fill gaps and finish short sentences across four stages. |
 | **סיפור שמשחקים** | Eight playable Hebrew stories with illustrated choices and actions such as moving objects into place. |
@@ -21,6 +21,8 @@ Ariel’s learning game for phones, tablets and computers. Ava gives instruction
 | **מחפשות עם פיקאצ׳ו** | Match Hebrew words to pictures, make animals hop, and tap Pikachu for his greeting. |
 
 New scored adventures have six steps. Existing ten-step drafts can be finished at their original length. Each scored completion unlocks one sticker until the 1,000-sticker album is full. Stickers unlock decorations for the puppy park. Open-ended activities such as science, tracing and free clock play have their own practice feedback.
+
+In **בונות סירה עם לולי**, every prediction leads to a water test. The simulation holds the clay mass constant and uses the weight of the water displaced to set the boat’s depth until water reaches the rim. Completed missions share the album’s existing number-adventure totals. [Clay-shape experiment](https://www.acs.org/education/resources/k-8/inquiryinaction/fifth-grade/substances-have-characteristic-properties/lesson-2-4--density-and-sinking-and-floating.html) · [Physics of buoyancy](https://openstax.org/books/university-physics-volume-1/pages/14-4-archimedes-principle-and-buoyancy)
 
 The home screen offers **ממשיכות** when there’s a round in progress. Otherwise **יוצאות להרפתקה** opens the specific game on the card. The suggestions use recent practice in Hebrew reading, single-word English, and basic numbers. The game map is always available.
 

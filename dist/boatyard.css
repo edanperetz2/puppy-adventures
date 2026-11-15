@@ -1,0 +1,295 @@
+.yard-page {
+  --picnic-accent: #185967;
+  --picnic-ink: #263f43;
+  --picnic-muted: #456469;
+  --picnic-border: #d8e7e5;
+}
+.yard-map-hero { background: #e8f1ec; }
+.yard-landscape {
+  position: relative;
+  min-height: clamp(175px, 24vw, 280px);
+  overflow: hidden;
+  isolation: isolate;
+  background: #8dbabd;
+}
+.yard-landscape img { position: absolute; width: 100%; height: 100%; inset: 0; object-fit: cover; object-position: 62% 54%; }
+.yard-landscape > span { position: absolute; display: grid; place-items: center; }
+.yard-luli { width: clamp(51px, 13vw, 104px); inset: auto 7% 35% auto; }
+.yard-scene-boat { width: 31%; left: 17%; bottom: 9%; }
+.yard-scene-gift { width: 13%; right: 11%; bottom: 16%; }
+.yard-landscape svg { width: 100%; height: auto; filter: drop-shadow(0 4px 6px #274c3e44); }
+.chapter-choices { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.chapter-choice .yard-landscape { height: clamp(156px, 23vw, 236px); min-height: 0; }
+.chapter-boatyard { --picnic-accent: #185967; }
+.picnic-result .yard-landscape {
+  width: min(100%, 730px);
+  min-height: 180px;
+  aspect-ratio: 2.45;
+  border-radius: 25px;
+}
+.picnic-result .yard-scene-boat { animation: yard-arrive 700ms cubic-bezier(.18,.55,.28,1) both; }
+@keyframes yard-arrive { from { opacity: 0; transform: translateX(25px); } to { opacity: 1; transform: none; } }
+.yard-shape { --picnic-tone: #f4ddc9; }
+.yard-cargo { --picnic-tone: #efe6c6; }
+.yard-crossing { --picnic-tone: #d8eef0; }
+.yard-step { --picnic-tone: #dcefed; }
+.yard-page .picnic-track span { background: #dfedeb; }
+.yard-page .picnic-track .passed { background: #6fa8aa; }
+.yard-page .picnic-track .current { background: var(--picnic-accent); }
+.yard-cue { margin: 8px 0 13px; min-height: 28px; font-size: clamp(17px, 2.9vw, 24px); font-weight: 650; line-height: 1.55; }
+.yard-clay { display: flex; align-items: center; gap: 6px; color: #655246; font-size: 14px; margin: 0 0 9px; }
+.yard-clay span { width: 13px; height: 13px; background: #d7976f; border: 1px solid #a76449; border-radius: 50%; }
+.yard-board { display: grid; align-items: stretch; gap: 10px; }
+.yard-board.with-cargo { grid-template-columns: minmax(0, 1fr) minmax(145px, 24%); }
+.yard-pond { position: relative; min-width: 0; }
+.yard-tank {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: clamp(245px, 39vw, 330px);
+  border: 1px solid #5f9ea2;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #d4e9df;
+  --waterline: 50%;
+}
+.yard-tank.is-drop-target { box-shadow: inset 0 0 0 3px #247983; }
+.yard-sky, .yard-water, .yard-glass, .yard-waterline { position: absolute; inset-inline: 0; pointer-events: none; }
+.yard-sky {
+  top: 0;
+  bottom: 49%;
+  background: linear-gradient(180deg, #fff2d126, #a7d6d241), url('./assets/boatyard-harbor.webp') center 36% / cover;
+}
+.yard-water { top: var(--waterline); bottom: 0; background: linear-gradient(180deg, #83bdc4, #438a9b); }
+.yard-water::before {
+  content: '';
+  position: absolute;
+  inset: 8px 8% 12%;
+  opacity: .53;
+  border-radius: 48%;
+  background: repeating-linear-gradient(174deg, #afdee433 0 2px, transparent 2px 27px);
+  transform: rotate(-3deg);
+}
+.yard-glass { top: var(--waterline); bottom: 0; z-index: 2; background: linear-gradient(180deg, #97ced74a, #2e849b80); }
+.yard-waterline {
+  top: var(--waterline);
+  height: 2px;
+  z-index: 4;
+  background: #d7fffae0;
+  box-shadow: 0 1px 0 #21667570;
+}
+.yard-water-tag, .yard-tank-status {
+  position: absolute;
+  z-index: 5;
+  margin: 0;
+  color: #224f59;
+  background: #fafff7ed;
+  font-size: clamp(11px, 1.6vw, 15px);
+  line-height: 1.4;
+  border: 1px solid #5f9ea255;
+  border-radius: 20px;
+  font-weight: 660;
+  pointer-events: none;
+}
+.yard-water-tag { top: 50%; inset-inline-end: 8px; transform: translateY(-50%); padding: 4px 9px; }
+.yard-tank-status { top: 9px; inset-inline-start: 9px; padding: 5px 10px; }
+.yard-craft {
+  position: absolute;
+  left: 50%;
+  top: var(--waterline);
+  width: min(56%, 255px);
+  height: var(--depth);
+  z-index: 1;
+  transform: translate(-50%, var(--offset));
+  transition: transform 560ms cubic-bezier(.22,.72,.28,1), width 260ms ease;
+}
+.yard-craft:has(.is-dragging) { z-index: 6; }
+.yard-tank[data-hull="ball"] .yard-craft { width: var(--depth); }
+.yard-tank[data-hull="narrow"] .yard-craft { width: min(45%, 208px); }
+.yard-tank[data-hull="roomy"] .yard-craft { width: min(70%, 324px); }
+.yard-tank[data-water="sink"] .yard-craft { transform: translate(-50%, var(--offset)) rotate(11deg); }
+.yard-tank[data-water="flooded"] .yard-craft { transform: translate(-50%, var(--offset)) rotate(-10deg); }
+.yard-tank.sailed .yard-craft {
+  transform: translate(-72%, var(--offset));
+  transition-duration: 900ms;
+}
+.yard-destination { position: absolute; z-index: 5; left: 9px; top: 8px; width: clamp(44px, 11vw, 77px); pointer-events: none; }
+.yard-destination::before {
+  content: '';
+  position: absolute;
+  inset: auto -8% 2%;
+  height: 17%;
+  z-index: -1;
+  border-radius: 30% 24% 16% 18%;
+  background: repeating-linear-gradient(100deg, #b9804f 0 2px, #e3b579 2px 11px);
+  box-shadow: 0 4px 0 #8b694f66;
+}
+.yard-destination svg { width: 100%; height: auto; filter: drop-shadow(0 3px 4px #48453c4a); }
+.yard-craft-handle {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+  border-radius: 40%;
+}
+.yard-craft-handle:active:not(:disabled) { transform: none; }
+.yard-ball {
+  position: absolute;
+  inset: 0;
+  border: 2px solid #a96347;
+  border-radius: 50%;
+  background: radial-gradient(circle at 31% 25%, #f0b88d 0 10%, #db8c63 58%, #a35b49 100%);
+  box-shadow: inset 2px 4px 9px #fff2b963, 0 3px 6px #44353123;
+}
+.yard-hull {
+  position: absolute;
+  inset: 6% 0 0;
+  border: 2px solid #975b44;
+  border-radius: 9% 9% 42% 42% / 8% 8% 72% 72%;
+  background: linear-gradient(160deg, #e8ab7e, #c97756 65%, #a95d47);
+  box-shadow: inset 0 8px 0 #ffe4b44d, 0 3px 8px #3d492d44;
+}
+.yard-rim {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 24%;
+  border: 2px solid #a06449;
+  border-radius: 50%;
+  background: #9e624c;
+  box-shadow: inset 0 0 0 4px #f0b286, inset 0 6px 10px #542c2b55;
+}
+.yard-flood {
+  position: absolute;
+  inset: 21% 12% auto;
+  border-radius: 50%;
+  opacity: 0;
+  height: 24%;
+  background: #bde6e9;
+  transition: opacity 230ms;
+}
+[data-water="flooded"] .yard-flood { opacity: .9; }
+.yard-ripple {
+  position: absolute;
+  z-index: 4;
+  width: min(65%, 310px);
+  height: 22px;
+  left: 50%;
+  top: calc(var(--waterline) - 10px);
+  border-radius: 50%;
+  border: 2px solid #d9fffa;
+  opacity: 0;
+  pointer-events: none;
+}
+.yard-shore {
+  display: grid;
+  gap: 7px;
+  align-content: center;
+  padding: 9px;
+  background: #f3e7d6;
+  border: 1px dashed #a4855d;
+  border-radius: 20px;
+}
+.yard-shore[hidden] { display: none; }
+.yard-shore.is-drop-target { border-style: solid; background: #faeccc; }
+.yard-counter { text-align: center; color: #624830; font-size: 14px; font-weight: 650; }
+.yard-counter bdi { display: block; font-size: 21px; padding-block: 3px; }
+.yard-stock { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.yard-parcel {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 50px;
+  padding: 3px 5px;
+  border: 1px solid #b79b744f;
+  border-radius: 12px;
+  background: #fff9ec;
+  cursor: grab;
+  touch-action: none;
+}
+.yard-parcel:active:not(:disabled) { transform: none; }
+.yard-parcel.is-dragging, .yard-craft-handle.is-dragging { z-index: 7; cursor: grabbing; }
+.yard-parcel:disabled { cursor: default; }
+.yard-stock .yard-parcel:disabled { opacity: .6; }
+.yard-weight { display: flex; justify-content: center; align-items: end; flex-wrap: wrap; width: 40px; height: 39px; gap: 2px; }
+.yard-weight svg { width: 100%; height: 31px; pointer-events: none; }
+.yard-weight.heavy svg { filter: hue-rotate(143deg) saturate(.85); }
+.yard-weight i { width: 5px; height: 5px; border-radius: 50%; background: #885844; }
+.yard-weight.light i:last-child { display: none; }
+.yard-onboard {
+  position: absolute;
+  bottom: 66%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  min-width: 100%;
+}
+.yard-onboard .yard-weight { width: 29px; height: 30px; }
+.yard-onboard .yard-weight svg { height: 23px; }
+.yard-onboard .yard-parcel { width: 44px; height: 44px; background: transparent; border: 0; margin-inline: -4px; }
+.yard-samples { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(7px, 2vw, 15px); }
+.yard-sample {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid #d4e5dd;
+  background: #eff6ed;
+  border-radius: 18px;
+  text-align: center;
+}
+.yard-sample.has-clue { outline: 3px solid #d7af56; }
+.yard-sample .yard-tank { height: clamp(158px, 29vw, 226px); border-radius: 14px; }
+.yard-sample .yard-weight { width: 20px; height: 27px; }
+.yard-sample-label { display: grid; align-content: center; min-height: 42px; color: #31514e; margin: 0; font-size: 16px; font-weight: 700; }
+.yard-sample-label small { font-size: 12px; font-weight: 520; }
+.yard-sample-result { min-height: 18px; margin: 0; font-size: clamp(12px, 2vw, 16px); font-weight: 550; }
+.yard-sample button { min-height: 44px; padding: 7px 14px; }
+.yard-actions, .yard-hull-options, .yard-guess {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.yard-actions { margin-block: 12px 6px; }
+.yard-actions:empty { margin: 0; }
+.yard-actions button, .yard-step .picnic-controls button { min-height: 47px; }
+.yard-actions button[aria-pressed="true"] { background: #d6ebe7; border: 1px solid #2f776b; color: #1e5051; box-shadow: 0 0 0 2px #8ca99c66; }
+.yard-hull-icon, .yard-guess-icon {
+  display: block;
+  width: 23px;
+  height: 12px;
+  background: #d08b63;
+  border: 1px solid #9a674f;
+  border-radius: 3px 3px 12px 12px;
+}
+.yard-hull-icon.narrow { width: 15px; }
+.yard-hull-icon.roomy { width: 28px; }
+.yard-guess-icon { position: relative; border: 0; background: linear-gradient(transparent 45%, #80b5be 47%); border-radius: 3px; }
+.yard-guess-icon::before { content: ''; position: absolute; left: 7px; top: -2px; width: 8px; height: 8px; border-radius: 50%; background: #aa654d; }
+.yard-guess-icon.sink::before { top: 8px; }
+.yard-step .picnic-controls { margin-block-start: 6px; }
+.yard-observation { margin: 7px 0 3px; color: #4b6266; font-size: 15px; }
+.yard-review { color: #70562d; font-size: 15px; font-weight: 530; }
+
+@media (max-width: 640px) {
+  .chapter-choices { grid-template-columns: 1fr; }
+  .chapter-choice .yard-landscape { height: 100%; min-height: 145px; }
+}
+@media (max-width: 560px) {
+  .yard-board.with-cargo { grid-template-columns: minmax(0, 1fr); }
+  .yard-shore { padding: 7px; gap: 3px; }
+  .yard-counter bdi { display: inline; padding-inline-start: 4px; font-size: 16px; }
+  .yard-sample { padding: 5px; }
+  .yard-sample-label { font-size: 13px; }
+  .yard-sample .yard-tank { min-height: 158px; }
+  .yard-hull-options button, .yard-guess button { padding-inline: 12px; }
+}

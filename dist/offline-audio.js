@@ -8,6 +8,22 @@ export function registerOffline() {
   else window.addEventListener('load', register, { once: true });
 }
 
+export function recordingPreloader(keys) {
+  let task;
+  return () => {
+    if (task || !navigator.onLine || !navigator.serviceWorker?.controller) return;
+    task = Promise.allSettled(Array.from({ length: 3 }, async (_, lane) => {
+      for (let i = lane; i < keys.length; i += 3) {
+        const response = await fetch(`./assets/audio/${keys[i]}.mp3`);
+        if (!response.ok) throw new Error('Recording unavailable');
+        await response.arrayBuffer();
+      }
+    })).then(results => {
+      if (results.some(result => result.status === 'rejected')) task = null;
+    });
+  };
+}
+
 export function mountOfflineAudio(panel) {
   const button = panel.querySelector('button');
   const status = panel.querySelector('[role="status"]');

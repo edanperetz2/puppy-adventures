@@ -20,8 +20,8 @@ export const ENGLISH_LISTENING = Object.freeze({
 export const MY_JOURNEY = Object.freeze({
   id: 'my-journey',
   route: Object.freeze({ action: 'chapters' }),
-  he: Object.freeze(['הַמַּסָּע שֶׁלִּי', 'פִּיקְנִיק לִקְרִיאָה, חִבּוּר וּשְׁעוֹן. מִשְׁלוֹחִים לְתִרְגּוּל הַקְשָׁבָה בְּאַנְגְּלִית.']),
-  en: Object.freeze(['My Journey', 'Read clues, add, and set the clock at the picnic. Listen to English words to help Bobi make deliveries.']),
+  he: Object.freeze(['הַמַּסָּע שֶׁלִּי', 'קוֹרְאוֹת, מְחַבְּרוֹת וּמְכַוְּנוֹת שָׁעוֹן בַּפִּיקְנִיק. מַקְשִׁיבוֹת לְאַנְגְּלִית עִם בּוֹבִּי. בּוֹנוֹת וּבוֹדְקוֹת סִירוֹת עִם לוּלִי.']),
+  en: Object.freeze(['My Journey', 'Read, add, and set the clock at the picnic. Listen to English on Bobi’s delivery route. Build and test boats with Luli.']),
   icon: 'boat',
 });
 
@@ -54,4 +54,20 @@ export const DELIVERY_MISSIONS = Object.freeze({
   aboard: { title: 'מִי עוֹלֶה לַסִּירָה?', description: 'מַקְשִׁיבוֹת וּמַעֲלוֹת חַיּוֹת לַסִּירָה.', icon: 'duck', prompt: 'delivery-aboard' },
   cargo: { title: 'אוֹסְפוֹת צִיּוּד', description: 'מַקְשִׁיבוֹת וְאוֹרְזוֹת אֶת הַצִּיּוּד בַּסַּל.', icon: 'basket', prompt: 'delivery-pack' },
   route: { title: 'מַגִּיעוֹת לַחֲבֵרִים', description: 'מַקְשִׁיבוֹת וּמְבִיאוֹת חֲבִילָה לַחָבֵר הַנָּכוֹן.', icon: 'gift', prompt: 'delivery-route' },
+});
+
+export const BOATYARD = Object.freeze({
+  id: 'boatyard',
+  route: Object.freeze({ action: 'boatyard' }),
+  chapter: 'בּוֹנוֹת סִירָה עִם לוּלִי',
+  detail: 'מְעַצְּבוֹת סִירָה, בּוֹדְקוֹת מָה צָף וּמַשִּׁיטוֹת חֲבִילוֹת.',
+  intro: 'boatyard-welcome',
+  icon: 'boat',
+  steps: SESSION_LENGTH,
+});
+
+export const BOATYARD_MISSIONS = Object.freeze({
+  shape: { title: 'מְשַׁנּוֹת צוּרָה', description: 'מֵאוֹתוֹ חֹמֶר נַעֲשֶׂה כַּדּוּר וְסִירָה. מָה יִקְרֶה בַּמַּיִם?', icon: 'boat' },
+  cargo: { title: 'מַעֲמִיסוֹת חֲבִילוֹת', description: 'כַּמָּה הַסִּירָה יְכוֹלָה לָשֵׂאת? נוֹסִיף חֲבִילָה וְנִבְדֹּק.', icon: 'gift' },
+  crossing: { title: 'מַשִּׁיטוֹת אֶת הַמִּשְׁלוֹחַ', description: 'בּוֹחֲרוֹת סִירָה שֶׁתּוּכַל לְהָבִיא אֶת כָּל הַחֲבִילוֹת.', icon: 'basket' },
 });
