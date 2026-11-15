@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { MY_JOURNEY, PICNIC, PICNIC_MISSIONS } from '../dist/activities.js';
+import { MY_JOURNEY, PICNIC, PICNIC_MISSIONS, isPicnicReady } from '../dist/activities.js';
+import { CLOCK_ACTIVITIES_ENABLED } from '../dist/availability.js';
+import { chapterMap } from '../dist/chapter-map.js';
 import { actOutMatches, actOutPlan, canActOut } from '../dist/act-out.js?v=2.7.0-science';
 import { clockParts, clockTotal } from '../dist/clock-learning.js?v=2.2.4-practice';
 import { CLIPS } from '../dist/content.js';
@@ -9,7 +11,7 @@ import { latestPlayedDraft } from '../dist/home-adventure.js';
 import {
   cleanPicnic, cleanPicnicRound, createPicnicRound, nextPicnicStep, packPicnicRound, picnicClockCorrect, picnicReadingModel, picnicWord,
 } from '../dist/picnic.js';
-import { picnicPrompt } from '../dist/picnic-view.js';
+import { picnicMap, picnicPrompt } from '../dist/picnic-view.js';
 
 test('the guide and chapter share a six-step curriculum with distinct, solvable challenges and recorded prompts', () => {
   assert.ok(GUIDE_ITEMS.some(item => item.he === MY_JOURNEY.he && item.en === MY_JOURNEY.en));
@@ -93,4 +95,25 @@ test('elapsed time crosses twelve and checks forward minutes rather than matchin
   assert.ok(!picnicClockCorrect(task, target + 720));
   assert.ok(!picnicClockCorrect(task, target - 1));
   assert.ok(picnicClockCorrect({ ...task, duration: 0 }, target - 720));
+});
+
+test('clock drafts remain in storage while the map, guide, and resume card follow availability', () => {
+  const clock = packPicnicRound(createPicnicRound('clock'));
+  const finished = ['reading', 'addition', 'clock'];
+  const picnic = cleanPicnic({ drafts: { clock: { ...clock, at: 30 } }, finished });
+  const empty = { finished: [] };
+  assert.deepEqual(picnic.finished, finished);
+  assert.equal(picnic.drafts.clock.id, clock.id);
+  const map = chapterMap({ picnic, boatyard: empty, delivery: empty, theater: empty }, false);
+  const count = CLOCK_ACTIVITIES_ENABLED ? 3 : 2;
+  assert.match(map, new RegExp(`${count} מתוך ${count} משימות`, 'u'));
+  assert.equal(picnicMap(picnic, false).includes('data-path="clock"'), CLOCK_ACTIVITIES_ENABLED);
+  assert.equal(isPicnicReady(['reading', 'addition']), !CLOCK_ACTIVITIES_ENABLED);
+  assert.equal(GUIDE_ITEMS.some(item => item.en[0] === 'Clock Garden'), CLOCK_ACTIVITIES_ENABLED);
+  const classicClock = { mission: 'clock', index: 1, at: 20 };
+  const classicReading = { mission: 'hebrew', index: 1, at: 10 };
+  const latest = latestPlayedDraft({ drafts: { classicClock, classicReading }, journeyDrafts: {},
+    numberDrafts: {}, scienceDrafts: {}, picnicDrafts: picnic.drafts });
+  assert.equal(latest.kind, CLOCK_ACTIVITIES_ENABLED ? 'picnic' : 'classic');
+  if (!CLOCK_ACTIVITIES_ENABLED) assert.equal(latest.value, classicReading);
 });

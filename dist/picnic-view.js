@@ -1,4 +1,5 @@
-import { MY_JOURNEY, PICNIC, PICNIC_MISSIONS } from './activities.js';
+import { AVAILABLE_PICNIC_MISSIONS, MY_JOURNEY, PICNIC, PICNIC_MISSIONS, isPicnicReady } from './activities.js';
+import { CLOCK_ACTIVITIES_ENABLED } from './availability.js';
 import { art, pup, uiIcon } from './art.js';
 import { mountActOut } from './act-out-view.js?v=2.7.1-pepper';
 import { mountClockDial } from './clock-dial.js?v=2.2.4-practice';
@@ -15,32 +16,33 @@ const time = total => learningTime(total).digital;
 const foodNames = { apple: ['תַּפּוּחַ', 'תַּפּוּחִים'], cookie: ['עוּגִיָּה', 'עוּגִיּוֹת'], bone: ['עֶצֶם', 'עֲצָמוֹת'] };
 
 export function picnicScene(finished = []) {
+  const friendsArrived = CLOCK_ACTIVITIES_ENABLED ? finished.includes('clock') : isPicnicReady(finished);
   return `<div class="picnic-landscape" aria-hidden="true">
     <span class="picnic-sun"></span><span class="picnic-hill"></span>
     ${art('tree', 'picnic-tree')}<div class="picnic-rug"></div>
     ${art('basket', 'picnic-basket')}${pup('luli', 'picnic-luli')}
     ${finished.includes('reading') ? art('star', 'picnic-decoration') : ''}
     ${finished.includes('addition') ? art('apple', 'picnic-fruit') : ''}
-    ${finished.includes('clock') ? pup('bobi', 'picnic-friend') + pup('tofi', 'picnic-tofi') : ''}
+    ${friendsArrived ? pup('bobi', 'picnic-friend') + pup('tofi', 'picnic-tofi') : ''}
   </div>`;
 }
 
 export function picnicMap({ drafts, finished }, nikud) {
   const label = labels(nikud);
-  const ready = finished.length === Object.keys(PICNIC_MISSIONS).length;
+  const ready = isPicnicReady(finished);
   return `<main id="main" class="picnic-page">
     <button class="text-button back-button" data-action="${MY_JOURNEY.route.action}">${uiIcon('arrow')} ${label('לַמַּסָּע שֶׁלִּי')}</button>
     <section class="picnic-map-hero">${picnicScene(finished)}<div class="picnic-map-title">
       <p>${label(MY_JOURNEY.he[0])}</p><h1 tabindex="-1">${label(PICNIC.chapter)}</h1>
       <p>${label(ready ? 'הַפִּיקְנִיק מוּכָן!' : 'בַּחֲרִי אֵיךְ לַעֲזֹר לַחֲבֵרִים.')}</p>
     </div></section>
-    ${chapterMissions(PICNIC_MISSIONS, { drafts, finished }, 'picnic-start', 'picnic', label)}
+    ${chapterMissions(AVAILABLE_PICNIC_MISSIONS, { drafts, finished }, 'picnic-start', 'picnic', label)}
   </main>`;
 }
 
 export function picnicComplete(round, sticker, finished, nikud) {
   const label = labels(nikud);
-  const ready = finished.length === Object.keys(PICNIC_MISSIONS).length;
+  const ready = isPicnicReady(finished);
   const message = sticker ? 'מַדְבֵּקָה חֲדָשָׁה הִצְטָרְפָה לָאַלְבּוֹם.' : 'הַמְּשִׂימָה נִשְׁמְרָה.';
   return `<main id="main" class="picnic-page picnic-result">
     ${picnicScene(finished)}<div class="picnic-sticker" aria-hidden="true">${art(sticker || PICNIC_MISSIONS[round.path].icon)}</div>

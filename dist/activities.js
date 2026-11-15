@@ -1,4 +1,5 @@
 import { SESSION_LENGTH } from './adventure.js?v=2.2.2-six';
+import { CLOCK_ACTIVITIES_ENABLED, isPracticeAvailable } from './availability.js';
 
 export const LITTLE_STORIES = Object.freeze({
   id: 'little-stories',
@@ -18,16 +19,24 @@ export const ENGLISH_LISTENING = Object.freeze({
 });
 
 export const DAILY_ACTIVITY = Object.freeze({
-  icon: 'train',
-  he: Object.freeze(['מְשִׂימָה קְטַנָּה לְהַיּוֹם', 'חוֹזְרוֹת עַל דַּקּוֹת בַּשָּׁעוֹן אוֹ עַל מִלִּים בְּאַנְגְּלִית בְּסִפּוּר חָדָשׁ.']),
-  en: Object.freeze(['A Little Mission Today', 'Revisit telling time or listening to English in a fresh six-step scene.']),
+  icon: CLOCK_ACTIVITIES_ENABLED ? 'train' : 'duck',
+  he: Object.freeze(['מְשִׂימָה קְטַנָּה לְהַיּוֹם', CLOCK_ACTIVITIES_ENABLED
+    ? 'חוֹזְרוֹת עַל דַּקּוֹת בַּשָּׁעוֹן אוֹ עַל מִלִּים בְּאַנְגְּלִית בְּסִפּוּר חָדָשׁ.'
+    : 'מַקְשִׁיבוֹת לְשֵׁמוֹת שֶׁל חַיּוֹת בְּאַנְגְּלִית וּמַעֲבִירוֹת אוֹתָן לַבְּרֵכָה.']),
+  en: Object.freeze(['A Little Mission Today', CLOCK_ACTIVITIES_ENABLED
+    ? 'Revisit telling time or listening to English in a fresh six-step scene.'
+    : 'Listen for animal names in English and move the animals to the pond.']),
 });
 
 export const MY_JOURNEY = Object.freeze({
   id: 'my-journey',
   route: Object.freeze({ action: 'chapters' }),
-  he: Object.freeze(['הַמַּסָּע שֶׁלִּי', 'פִּיקְנִיק שֶׁל קְרִיאָה, חִבּוּר וְשָׁעוֹן. אַנְגְּלִית עִם בּוֹבִּי, סִירוֹת עִם לוּלִי וְהַצָּגוֹת בַּתֵּאַטְרוֹן.']),
-  en: Object.freeze(['My Journey', 'Read, add, and set the clock at the picnic. Listen with Bobi, build boats with Luli, and direct a show.']),
+  he: Object.freeze(['הַמַּסָּע שֶׁלִּי', CLOCK_ACTIVITIES_ENABLED
+    ? 'פִּיקְנִיק שֶׁל קְרִיאָה, חִבּוּר וְשָׁעוֹן. אַנְגְּלִית עִם בּוֹבִּי, סִירוֹת עִם לוּלִי וְהַצָּגוֹת בַּתֵּאַטְרוֹן.'
+    : 'קְרִיאָה וְחִבּוּר בַּפִּיקְנִיק, אַנְגְּלִית עִם בּוֹבִּי, סִירוֹת עִם לוּלִי וְהַצָּגוֹת בַּתֵּאַטְרוֹן.']),
+  en: Object.freeze(['My Journey', CLOCK_ACTIVITIES_ENABLED
+    ? 'Read, add, and set the clock at the picnic. Listen with Bobi, build boats with Luli, and direct a show.'
+    : 'Read and add at the picnic. Listen with Bobi, build boats with Luli, and direct a show.']),
   icon: 'boat',
 });
 
@@ -35,7 +44,7 @@ export const PICNIC = Object.freeze({
   id: 'picnic',
   route: Object.freeze({ action: 'picnic' }),
   chapter: 'הַפִּיקְנִיק שֶׁל הַחֲבֵרִים',
-  detail: 'קוֹרְאוֹת רְמָזִים, מְחַבְּרוֹת וּמְכַוְּנוֹת אֶת הַשָּׁעוֹן.',
+  detail: CLOCK_ACTIVITIES_ENABLED ? 'קוֹרְאוֹת רְמָזִים, מְחַבְּרוֹת וּמְכַוְּנוֹת אֶת הַשָּׁעוֹן.' : 'קוֹרְאוֹת רְמָזִים וּמְחַבְּרוֹת כַּמּוּיוֹת.',
   intro: 'picnic-welcome',
   steps: SESSION_LENGTH,
 });
@@ -45,6 +54,11 @@ export const PICNIC_MISSIONS = Object.freeze({
   addition: { domain: 'math', title: 'מְכִינוֹת אֶת הַכִּבּוּד', description: 'חַבְּרִי שְׁתֵּי קְבוּצוֹת וּמִצְאִי כַּמָּה יֵשׁ בְּיַחַד.', icon: 'apple' },
   clock: { domain: 'clock', title: 'מָתַי הַחֲבֵרִים מַגִּיעִים?', description: 'הַזִּיזִי אֶת הַמְּחוֹגִים וּסְפְרִי דַּקּוֹת.', icon: 'clock' },
 });
+
+export const AVAILABLE_PICNIC_MISSIONS = Object.freeze(Object.fromEntries(
+  Object.entries(PICNIC_MISSIONS).filter(([, mission]) => isPracticeAvailable(mission.domain)),
+));
+export const isPicnicReady = finished => Object.keys(AVAILABLE_PICNIC_MISSIONS).every(path => finished.includes(path));
 
 export const DELIVERY = Object.freeze({
   id: 'delivery',

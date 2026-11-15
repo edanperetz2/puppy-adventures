@@ -4,6 +4,7 @@ import { LETTERS } from './letters.js';
 import { CHARACTERS } from './characters.js';
 import { escapeHtml as esc } from './profiles.js';
 import { CLOCK_MINUTES, CLOCK_TRANSFER, dailyRecall } from './daily.js';
+import { isPracticeAvailable } from './availability.js';
 import { THEATER_PROPS, THEATER_SETS, theaterRecall } from './theater.js';
 export function itemLabel(id){
   const parts=id.split(':'),last=parts.at(-1);
@@ -36,7 +37,8 @@ export function learningStatus(learner){
   return learner.pending?`${learner.pending} עדכוני למידה / פארק שמורים כאן ומחכים לאישור האלבום.${receipt?` אישור אחרון: ${receipt}.`:''}`:learner.status==='syncing'?'בודקים עדכונים באלבום…':receipt?`האלבום אישר את השמירה ב־${receipt}. מכשירים נוספים יקבלו אותה בחיבור הבא.`:'ההיסטוריה שמורה כאן. ממתינים לחיבור לאלבום.';
 }
 export function parentLearning(learner){
-  const items=learner.items,total=learningSummary(items);
+  const items=Object.fromEntries(Object.entries(learner.items).filter(([, item])=>isPracticeAvailable(item.domain)));
+  const total=learningSummary(items);
   const review=Object.entries(items).filter(([,v])=>learningStage(v)!=='practice'&&reviewPriority(v)>=1).sort((a,b)=>reviewPriority(b[1])-reviewPriority(a[1])).slice(0,4);
   const recently=Object.entries(items).sort((a,b)=>b[1].last-a[1].last).slice(0,8);
   const recall=dailyRecall(items);

@@ -4,7 +4,6 @@ import { chapterText } from './chapter-ui.js';
 import { mountClockDial } from './clock-dial.js?v=2.2.4-practice';
 import { learningTime } from './clock-learning.js?v=2.2.4-practice';
 import { ANIMALS, CLIPS } from './content.js';
-import { DAILY_CLIPS } from './daily-content.js';
 import {
   DAILY_PATHS, attemptDaily, dailyQuestion, moveDailyClock, nextDailyStep, renewDailyStep, showDailyExample,
 } from './daily.js';
@@ -23,8 +22,10 @@ let audioId, prepareRoundAudio;
 export function prepareDailyAudio(round) {
   if (round.id !== audioId) {
     audioId = round.id;
-    const prompts = round.questions.flat().flatMap(q => round.path === 'clock' ? trainCue(q) : [targetClip(q)]);
-    const keys = new Set([...Object.keys(DAILY_CLIPS), 'picnic-clock-model', ...prompts]);
+    const clock = round.path === 'clock';
+    const prompts = round.questions.flat().flatMap(q => clock ? trainCue(q) : [targetClip(q)]);
+    const cues = clock ? ['picnic-clock-model', 'daily-train-go'] : ['daily-pond'];
+    const keys = new Set(['daily-example', 'daily-fresh', ...cues, ...prompts]);
     prepareRoundAudio = recordingPreloader([...keys]);
   }
   prepareRoundAudio();

@@ -41,7 +41,8 @@ import { mountActOut } from './act-out-view.js?v=2.7.1-pepper';
 import { SCIENCE_TITLE, SCIENCE_EXPERIMENTS, cleanScienceRound, scienceClip } from './science-content.js?v=2.7.1-pepper';
 import { mountScience, scienceArt, scienceMenu } from './science-view.js?v=2.7.1-pepper';
 import { mountOfflineAudio, registerOffline } from './offline-audio.js';
-import { BOATYARD, BOATYARD_MISSIONS, DELIVERY, DELIVERY_MISSIONS, ENGLISH_LISTENING, LITTLE_STORIES, PICNIC, PICNIC_MISSIONS, THEATER, THEATER_SHOWS } from './activities.js';
+import { AVAILABLE_PICNIC_MISSIONS, BOATYARD, BOATYARD_MISSIONS, DELIVERY, DELIVERY_MISSIONS, ENGLISH_LISTENING, LITTLE_STORIES, PICNIC, PICNIC_MISSIONS, THEATER, THEATER_SHOWS, isPicnicReady } from './activities.js';
+import { CLOCK_ACTIVITIES_ENABLED, isPracticeAvailable } from './availability.js';
 import { latestPlayedDraft, readingActivity, recommendAdventure } from './home-adventure.js';
 import { firstStoryClue, pictureClue, storyClue, storyReviewQuestion } from './story-practice.js';
 import { awardLocalRound, checkpointScoredRound, finishScoredRound } from './round-lifecycle.js';
@@ -52,7 +53,7 @@ import { cleanDelivery, cleanDeliveryRound, createDeliveryBonus, createDeliveryR
 import { deliveryComplete, deliveryMap, mountDeliveryRound, prepareDeliveryAudio } from './delivery-view.js';
 import { boatyardRound, cleanBoatyard, cleanBoatyardRound, packBoatyardRound } from './boatyard.js';
 import { boatyardComplete, boatyardMap, boatyardPrompt, mountBoatyardRound, prepareBoatyardAudio } from './boatyard-view.js';
-import { cleanDaily, cleanDailyRound, createDailyRound, DAILY_PATHS, dailyEvidence, dailySuggestion, finishDailyMemory } from './daily.js';
+import { availableDailyDraft, cleanDaily, cleanDailyRound, createDailyRound, DAILY_PATHS, dailyEvidence, dailySuggestion, finishDailyMemory } from './daily.js';
 import { dailyComplete, dailyHome, mountDaily, prepareDailyAudio } from './daily-view.js';
 import { cleanTheater, cleanTheaterRound, createTheaterRound, packTheaterRound, theaterEvidence } from './theater.js';
 import { prepareTheaterAudio, theaterComplete, theaterMap } from './theater-ui.js';
@@ -93,9 +94,11 @@ let picnic = cleanPicnic(null), picnicRound = null, picnicController = null, pic
 let delivery = cleanDelivery(null), deliveryRound = null, deliveryController = null, deliverySticker = null;
 let boatyard = cleanBoatyard(null), boatRound = null, boatController = null, boatSticker = null;
 let daily = cleanDaily(null), dailyRound = null, dailyController = null, dailySticker = null, homeDailyItems = null;
+let dailyDraftKey = 'today';
 let theater = cleanTheater(null), theaterRound = null, theaterController = null, theaterSticker = null;
 let homeItems = null;
 const progressScreens = ['home', 'album', 'letters-menu', 'letters-writing', 'letters-recognition', 'characters-menu'];
+const availableMissionIds = MISSION_IDS.filter(isPracticeAvailable);
 const preferenceScreens = [...progressScreens, 'learning-hub', 'reading-levels', 'science-menu', 'number-menu', 'theater-map', 'theater-round', 'theater-studio', 'theater-complete'];
 
 try {
@@ -185,7 +188,7 @@ function save() {
     const picnicSave = picnic.finished.length || Object.keys(picnic.drafts).length ? { picnic } : {};
     const deliverySave = delivery.finished.length || Object.keys(delivery.drafts).length ? { delivery } : {};
     const boatyardSave = boatyard.finished.length || Object.keys(boatyard.drafts).length ? { boatyard } : {};
-    const dailySave = daily.drafts.today || daily.finished.clock || daily.finished.english ? { daily } : {};
+    const dailySave = Object.keys(daily.drafts).length || daily.finished.clock || daily.finished.english ? { daily } : {};
     const studio = theater.studio;
     const theaterSave = theater.finished.length || Object.keys(theater.drafts).length || studio.shows.length || studio.draft.script.length
       || studio.draft.actor !== 'bobi' || studio.draft.set !== 'room' ? { theater } : {};
@@ -430,6 +433,7 @@ function renderClockSchool() {
 }
 
 function openClockLesson(returnToGame = false) {
+  if (!CLOCK_ACTIVITIES_ENABLED) return;
   narrator.stop(); clockReturn = returnToGame;
   if (returnToGame) { round.helped.add(round.index);checkpoint(); }
   else round = null;
@@ -471,13 +475,13 @@ function homeAdventureContent() {
 
 function homeDailyContent() {
   homeDailyItems = learner.items;
-  const saved = daily.drafts.today;
+  const saved = availableDailyDraft(daily.drafts)?.draft;
   const path = saved?.path || dailySuggestion(homeDailyItems, daily.finished, progress);
   return dailyHome(path, saved, settings.nikud);
 }
 
 function renderHome() {
-  const cards = Object.values(MISSIONS).map(m => `<button class="mission-card ${m.color}" data-action="mission" data-mission="${m.id}" aria-label="${m.name} — ${m.description}">
+  const cards = Object.values(MISSIONS).filter(m => isPracticeAvailable(m.id)).map(m => `<button class="mission-card ${m.color}" data-action="mission" data-mission="${m.id}" aria-label="${m.name} — ${m.description}">
     <div class="mission-art"><span class="art-orbit"></span>${m.id === 'characters' ? characterMissionArt() : art(m.icon, 'mission-object') + pup(m.pup, 'mission-pup')}</div>
     <div class="mission-body"><span class="subject-tag" ${m.id === 'english' ? 'lang="en" dir="ltr"' : ''}>${m.subject}</span><h3>${m.name}</h3><p>${m.subtitle}</p><span class="mission-go" aria-hidden="true">${uiIcon('arrow')}</span></div>
     ${activityCount(m.id) ? `<span class="mission-done" aria-label="כבר סיימת ${activityCount(m.id)} הרפתקאות">${uiIcon('check')}</span>` : ''}
@@ -728,6 +732,7 @@ function focusTitle() {
 }
 
 function startMission(mission, skipLesson = false) {
+  if (!isPracticeAvailable(mission)) return;
   if (mission === 'characters' && !skipLesson) { openCharacters(); return; }
   if (mission === 'math') { openNumberMenu(); return; }
   if (['hebrew','english'].includes(mission) && !skipLesson) { openLearningHub(mission); return; }
@@ -1001,12 +1006,12 @@ function renderSettings() {
     <label class="setting-row"><span>מילים בעברית</span><select name="reading">${Object.entries(READING_LEVELS).map(([key, stage]) => `<option value="${key}" ${settings.reading === key ? 'selected' : ''}>${stage.number ? `שלב ${stage.number}: ` : ''}${stage.name} · ${stage.range}</option>`).join('')}</select></label>
     <label class="setting-row"><span>ספירה וחיבור עד</span><select name="mathMax">${[5, 10, 20].map(n => `<option value="${n}" ${settings.mathMax === n ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
     <label class="setting-row"><span>מספרים באנגלית עד</span><select name="englishMax">${[10, 20].map(n => `<option value="${n}" ${settings.englishMax === n ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
-    <label class="setting-row"><span>קריאת שעון</span><select name="clockLevel">${Object.entries(CLOCK_LEVELS).map(([key, level]) => `<option value="${key}" ${settings.clockLevel === key ? 'selected' : ''}>${level.name}</option>`).join('')}</select></label>
+    ${CLOCK_ACTIVITIES_ENABLED ? `<label class="setting-row"><span>קריאת שעון</span><select name="clockLevel">${Object.entries(CLOCK_LEVELS).map(([key, level]) => `<option value="${key}" ${settings.clockLevel === key ? 'selected' : ''}>${level.name}</option>`).join('')}</select></label>` : ''}
     <label class="setting-toggle"><span><b>קול והנחיות</b><small>הקלטות בעברית ובאנגלית</small></span><input name="sound" type="checkbox" ${settings.sound ? 'checked' : ''}></label>
     <label class="setting-toggle"><span><b>תנועה וחגיגות</b><small>כיבוי מצמצם אנימציות</small></span><input name="motion" type="checkbox" ${settings.motion ? 'checked' : ''}></label>
     <p class="parent-note">בהרפתקה הבאה יופעלו הגדרות התרגול שבחרתם. באנגלית מתחילים בהקשבה. תרגול קריאה וכתיבה מופיע במסלולים משלו.</p>
     <button class="primary-button" type="submit">שמירת ההגדרות ${uiIcon('check')}</button></form>
-    <section class="parent-progress"><h3>מה כבר גילינו?</h3><p id="parent-progress-summary">${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות</p><table><thead><tr><th>תחום</th><th>תשובות ללא עזרה</th><th>עם הדגמה, רמז או ניסיון נוסף</th></tr></thead><tbody>${MISSION_IDS.map(id => MISSIONS[id]).map(m => `<tr><th>${m.id === 'hebrew' ? 'עברית · מילים ושמות' : m.subject}</th><td data-independent="${m.id}">${progress.skills[m.id].correct - progress.skills[m.id].assisted}</td><td data-assisted="${m.id}">${progress.skills[m.id].assisted}</td></tr>`).join('')}</tbody></table><p class="parent-note">מוצגות רק הרפתקאות שהושלמו. זהו תיעוד משחק, ולא מבחן או הערכת יכולת.</p></section>
+    <section class="parent-progress"><h3>מה כבר גילינו?</h3><p id="parent-progress-summary">${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות</p><table><thead><tr><th>תחום</th><th>תשובות ללא עזרה</th><th>עם הדגמה, רמז או ניסיון נוסף</th></tr></thead><tbody>${availableMissionIds.map(id => MISSIONS[id]).map(m => `<tr><th>${m.id === 'hebrew' ? 'עברית · מילים ושמות' : m.subject}</th><td data-independent="${m.id}">${progress.skills[m.id].correct - progress.skills[m.id].assisted}</td><td data-assisted="${m.id}">${progress.skills[m.id].assisted}</td></tr>`).join('')}</tbody></table><p class="parent-note">מוצגות רק הרפתקאות שהושלמו. זהו תיעוד משחק, ולא מבחן או הערכת יכולת.</p></section>
     <div id="learning-parent">${parentLearning(learner)}</div>
     <section id="family-panel"></section>
     <section class="offline-panel"><h3>משחק בלי אינטרנט</h3><p role="status">מכינות את המשחק לשימוש בלי אינטרנט…</p><button class="secondary-button" type="button" disabled>הורדת ההקלטות</button></section>
@@ -1025,7 +1030,7 @@ function renderSettings() {
   dialog.querySelector('#settings-form').onsubmit = event => {
     event.preventDefault();
     const form = new FormData(event.target);
-    settings = sanitizeSettings({ ...settings, nikud: form.has('nikud'), sound: form.has('sound'), motion: form.has('motion'), reading: form.get('reading'), mathMax: Number(form.get('mathMax')), englishMax: Number(form.get('englishMax')), clockLevel: form.get('clockLevel'), letterLanguage: settings.letterLanguage, letterWriting: settings.letterWriting });
+    settings = sanitizeSettings({ ...settings, nikud: form.has('nikud'), sound: form.has('sound'), motion: form.has('motion'), reading: form.get('reading'), mathMax: Number(form.get('mathMax')), englishMax: Number(form.get('englishMax')), clockLevel: form.get('clockLevel') ?? settings.clockLevel, letterLanguage: settings.letterLanguage, letterWriting: settings.letterWriting });
     save(); narrator.stop(); applyPreferences(); closeDialog(true);
     renderSoundButton();
     clockSchool?.updateProgress();
@@ -1042,7 +1047,7 @@ function renderSettings() {
 function updateParentProgress() {
   const summary = dialog.querySelector('#parent-progress-summary');
   if (summary) summary.textContent = `${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות`;
-  for (const mission of MISSION_IDS) {
+  for (const mission of availableMissionIds) {
     const independent = dialog.querySelector(`[data-independent="${mission}"]`);
     const assisted = dialog.querySelector(`[data-assisted="${mission}"]`);
     if (independent) independent.textContent = progress.skills[mission].correct - progress.skills[mission].assisted;
@@ -1386,12 +1391,15 @@ function renderTheater() {
 }
 
 function startDaily(path) {
-  if (!Object.hasOwn(DAILY_PATHS, path)) return;
+  if (!Object.hasOwn(DAILY_PATHS, path) || !isPracticeAvailable(path)) return;
   checkpoint(); narrator.stop(); round = null; journeyPlan = null;
-  dailyRound = cleanDailyRound(daily.drafts.today);
+  const saved = availableDailyDraft(daily.drafts);
+  // Leave an existing hidden round in the original slot for a future release.
+  dailyDraftKey = saved?.key ?? (daily.drafts.today ? path : 'today');
+  dailyRound = cleanDailyRound(saved?.draft);
   if (!dailyRound) {
     dailyRound = createDailyRound(path, learner.items, daily.recent);
-    checkpointScoredRound(dailyRound, daily.drafts, 'today');
+    checkpointScoredRound(dailyRound, daily.drafts, dailyDraftKey);
     save();
   }
   view = 'daily-round'; render(); focusTitle();
@@ -1399,17 +1407,18 @@ function startDaily(path) {
 }
 
 function renderDailyRound() {
+  const key = dailyDraftKey;
   app.innerHTML = header() + '<main id="main" class="picnic-page picnic-play daily-page"></main>' + footer();
   dailyController = mountDaily(app.querySelector('#main'), {
     round: dailyRound, nikud: settings.nikud, motion: motionEnabled, focusTitle,
     play: (keys, manual) => manual ? clockSpeak(keys) : announcements.say(keys),
-    onSave: draft => { checkpointScoredRound(draft, daily.drafts, 'today'); save(); },
+    onSave: draft => { checkpointScoredRound(draft, daily.drafts, key); save(); },
     onSuccess: draft => {
       learner.record(dailyEvidence(draft), draft.helped.includes(draft.index) ? 'helped' : 'independent');
       narrator.chime();
     },
     onFinish: draft => {
-      const result = finishScoredRound(draft, daily.drafts, 'today',
+      const result = finishScoredRound(draft, daily.drafts, key,
         (id, length) => awardRound(draft.path, draft.helped.length, null, id, length));
       if (!result) return;
       finishDailyMemory(daily, draft);
@@ -1423,7 +1432,7 @@ function renderDailyRound() {
 }
 
 function startPicnicRound(path) {
-  if (!Object.hasOwn(PICNIC_MISSIONS, path)) return;
+  if (!Object.hasOwn(AVAILABLE_PICNIC_MISSIONS, path)) return;
   checkpoint(); narrator.stop(); round = null; journeyPlan = null;
   picnicRound = cleanPicnicRound(path, picnic.drafts[path]) || createPicnicRound(path, settings.mathMax);
   view = 'picnic-round'; render(); focusTitle();
@@ -1451,7 +1460,7 @@ function renderPicnicRound() {
       progress = result.progress; picnicSticker = result.sticker;
       view = 'picnic-complete'; save(); render(); focusTitle();
       revealWin('.picnic-sticker');
-      const picnicReady = newlyFinished && picnic.finished.length === Object.keys(PICNIC_MISSIONS).length;
+      const picnicReady = newlyFinished && isPicnicReady(picnic.finished);
       announcements.say([completionClip(picnicSticker), ...(picnicReady ? ['picnic-finish'] : [])]);
     },
   });
@@ -1593,9 +1602,14 @@ app.addEventListener('click', event => {
     case 'welcome': welcome(); break;
     case 'replay': replay(); break;
     case 'listen-word': if (!settings.sound) { settings.sound = true; narrator.enabled = true; save(); renderSoundButton(); } announcements.say(current().targetClip); break;
-    case 'clock-practice': if (clockReturn && round) { view = 'game'; render(); focusTitle(); replay(); } else startMission('clock', true); break;
-    case 'clock-learn': if (!round.resolved) openClockLesson(true); break;
-    case 'clock-option-audio': clockSpeak(button.dataset.clips.split(' ')); break;
+    case 'clock-practice':
+      if (CLOCK_ACTIVITIES_ENABLED) {
+        if (clockReturn && round) { view = 'game'; render(); focusTitle(); replay(); }
+        else startMission('clock', true);
+      }
+      break;
+    case 'clock-learn': if (round && !round.resolved) openClockLesson(true); break;
+    case 'clock-option-audio': if (CLOCK_ACTIVITIES_ENABLED) clockSpeak(button.dataset.clips.split(' ')); break;
     case 'letters-menu': if (view === 'game') leaveTo('letters-menu'); else openLetterMenu(); break;
     case 'letter-mode': openLetterMode(button.dataset.mode); break;
     case 'letter-language': if (Object.hasOwn(LETTERS, button.dataset.language)) { settings.letterLanguage = button.dataset.language; recognitionChoice = null; save(); if (view === 'letters-lesson') openLetterLesson(); else { render(); announcements.say(view === 'letters-writing' ? `letters-writing-forms-${settings.letterLanguage}` : view === 'letters-recognition' ? 'letters-recognition' : 'letters-paths'); } } break;

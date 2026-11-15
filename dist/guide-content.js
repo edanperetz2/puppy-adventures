@@ -1,4 +1,5 @@
 import { DAILY_ACTIVITY, LITTLE_STORIES, MY_JOURNEY, THEATER } from './activities.js';
+import { CLOCK_ACTIVITIES_ENABLED } from './availability.js';
 
 export const GUIDE_ITEMS = [
   { icon: MY_JOURNEY.icon, he: MY_JOURNEY.he, en: MY_JOURNEY.en },
@@ -17,8 +18,10 @@ export const GUIDE_ITEMS = [
     en: ['English Bay', 'Start by listening to single words. Move on to two-word phrases, initial sounds and short reading when ready.'] },
   { icon: 'apple', he: ['סַדְנַת הַמִּסְפָּרִים', 'סְפִירָה, חִבּוּר, כַּמָּה נִשְׁאֲרוּ, עֲשָׂרוֹת וִיחִידוֹת. כּוֹתְבוֹת מֵ־0 עַד 100 גַּם מִשְּׁמִיעָה, וְחוֹתְכוֹת פֵּרוֹת.'],
     en: ['Number Workshop', 'Count, add, find what is left, and practise tens and ones. Write or hear and write 0–100, or slice fruit into halves.'] },
-  { icon: 'clock', he: ['גַּן הַשְּׁעוֹנִים', 'עֲשָׂרָה שִׁעוּרִים. מְזִיזוֹת אֶת שְׁנֵי הַמְּחוֹגִים וּמְתַרְגְּלוֹת קְרִיאַת שָׁעוֹת וְדַקּוֹת.'],
-    en: ['Clock Garden', 'Ten lessons from minutes and hours to exact times. Move both hands and practise reading the clock.'] },
+  ...(CLOCK_ACTIVITIES_ENABLED ? [
+    { icon: 'clock', he: ['גַּן הַשְּׁעוֹנִים', 'עֲשָׂרָה שִׁעוּרִים. מְזִיזוֹת אֶת שְׁנֵי הַמְּחוֹגִים וּמְתַרְגְּלוֹת קְרִיאַת שָׁעוֹת וְדַקּוֹת.'],
+      en: ['Clock Garden', 'Ten lessons from minutes and hours to exact times. Move both hands and practise reading the clock.'] },
+  ] : []),
   { icon: 'lab', he: ['מַעְבֶּדֶת הַמַּדָּע', 'מְנַסּוֹת עִם מַיִם, שֶׁמֶן, סַבּוֹן וּפִלְפֵּל. בּוֹדְקוֹת מָה צָף וְאֵיךְ קֶרַח נָמֵס.'],
     en: ['Science Lab', 'Try oil and water with soap, float or sink, melting ice, and pepper with a drop of soap.'] },
   { icon: 'dog', he: ['חֲבֵרִים מֵהַמָּסָךְ', 'מַתְאִימוֹת שֵׁמוֹת בְּעִבְרִית לְדַמּוּיוֹת שֶׁל רָאבֶּל וְהַבַּנָּאִים וּמִפְרַץ הַהַרְפַּתְקָאוֹת.'],

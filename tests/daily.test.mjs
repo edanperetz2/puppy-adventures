@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { hasArt } from '../dist/art.js';
+import { CLOCK_ACTIVITIES_ENABLED } from '../dist/availability.js';
 import { CLIPS } from '../dist/content.js';
 import { learningTime } from '../dist/clock-learning.js';
 import {
-  CLOCK_MINUTES, CLOCK_TRANSFER, DAILY_ANIMALS, attemptDaily, cleanDaily, cleanDailyRound, createDailyRound,
+  CLOCK_MINUTES, CLOCK_TRANSFER, DAILY_ANIMALS, attemptDaily, availableDailyDraft, cleanDaily, cleanDailyRound, createDailyRound,
   dailyEvidence, dailyQuestion, dailyRecall, dailySuggestion, finishDailyMemory, moveDailyClock,
   nextDailyStep, renewDailyStep, showDailyExample,
 } from '../dist/daily.js';
@@ -18,15 +19,31 @@ const timeCase = q => `${q.start}/${q.duration}`;
 
 test('daily suggestions use existing practice, with a gentle English start for a new player', () => {
   const state = cleanDaily();
+  const enabled = { clockEnabled: true };
   assert.equal(dailySuggestion({}, state.finished, {}), 'english');
   const items = applyObservations({}, [fixture('picnic:clock:elapsed:two', 'clock')]);
-  assert.equal(dailySuggestion(items, state.finished, {}), 'clock');
-  assert.equal(dailySuggestion({}, state.finished, { missions: { clock: 4 } }), 'clock');
-  assert.equal(dailySuggestion(items, { clock: now, english: 0 }, {}), 'clock');
+  assert.equal(dailySuggestion(items, state.finished, {}), CLOCK_ACTIVITIES_ENABLED ? 'clock' : 'english');
+  assert.equal(dailySuggestion(items, state.finished, {}, enabled), 'clock');
+  assert.equal(dailySuggestion({}, state.finished, { missions: { clock: 4 } }, enabled), 'clock');
+  assert.equal(dailySuggestion(items, { clock: now, english: 0 }, {}, enabled), 'clock');
   const both = applyObservations(items, [fixture('english:single:duck', 'english', now - DAY)]);
-  assert.equal(dailySuggestion(both, { clock: 0, english: 0 }, {}), 'english');
-  assert.equal(dailySuggestion(both, { clock: 0, english: now }, {}), 'clock');
-  assert.equal(dailySuggestion(both, { clock: now, english: 0 }, {}), 'english');
+  assert.equal(dailySuggestion(both, { clock: 0, english: 0 }, {}, enabled), 'english');
+  assert.equal(dailySuggestion(both, { clock: 0, english: now }, {}, enabled), 'clock');
+  assert.equal(dailySuggestion(both, { clock: now, english: 0 }, {}, enabled), 'english');
+});
+
+test('a saved train round can stay in its original slot alongside a resumable pond round', () => {
+  const clock = createDailyRound('clock', {}, []);
+  const english = createDailyRound('english', {}, []);
+  assert.ok(moveDailyClock(clock, clock.state.total + 1));
+  clock.at = now; english.at = now - 1;
+  const parked = cleanDaily({ drafts: { today: clock }, finished: { clock: now - DAY } });
+  assert.deepEqual(parked.drafts.today, clock);
+  assert.equal(availableDailyDraft(parked.drafts)?.draft.path, CLOCK_ACTIVITIES_ENABLED ? 'clock' : undefined);
+  const both = cleanDaily({ ...parked, drafts: { ...parked.drafts, english } });
+  assert.deepEqual(both.drafts, { today: clock, english });
+  assert.equal(availableDailyDraft(both.drafts).key, CLOCK_ACTIVITIES_ENABLED ? 'today' : 'english');
+  assert.equal(both.finished.clock, now - DAY);
 });
 
 test('the train progresses from counting minutes to reaching and crossing a new hour', () => {
@@ -131,6 +148,7 @@ test('the parent view describes independent recall only after success on another
   ]);
   assert.deepEqual(dailyRecall(learner.items), { clock: true, animals: ['duck'] });
   const parent = parentLearning(learner);
-  assert.match(parent, /הזיזה את מחוג הדקות אל מעבר לשעה/);
+  assert.equal(parent.includes('הזיזה את מחוג הדקות אל מעבר לשעה'), CLOCK_ACTIVITIES_ENABLED);
+  assert.equal(parent.includes('דקות מעבר לשעה'), CLOCK_ACTIVITIES_ENABLED);
   assert.match(parent, /<bdi lang="en" dir="ltr">duck<\/bdi>/);
 });

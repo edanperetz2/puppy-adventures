@@ -1,5 +1,6 @@
 import { SESSION_LENGTH } from './adventure.js?v=2.2.2-six';
 import { answerShuffler, shuffle } from './answer-order.js';
+import { CLOCK_ACTIVITIES_ENABLED, isPracticeAvailable } from './availability.js';
 import { clockTotal } from './clock-learning.js?v=2.2.4-practice';
 import { choosePractice, learningStage } from './learning.js';
 
@@ -27,7 +28,8 @@ function animalHistory(items) {
   return known;
 }
 
-export function dailySuggestion(items, finished, progress) {
+export function dailySuggestion(items, finished, progress, { clockEnabled = CLOCK_ACTIVITIES_ENABLED } = {}) {
+  if (!clockEnabled) return 'english';
   const elapsed = Object.entries(items).filter(([key, item]) => experience(item)
     && (/^picnic:clock:elapsed:/u.test(key) || /^clock:/u.test(key) || key === CLOCK_TRANSFER || key === CLOCK_MINUTES));
   const clock = elapsed.length || progress?.missions?.clock || progress?.clockLessons;
@@ -196,8 +198,18 @@ export function cleanDailyRound(saved) {
 }
 
 export function cleanDaily(input) {
-  const draft = cleanDailyRound(input?.drafts?.today);
+  const drafts = {};
+  for (const key of ['today', ...Object.keys(DAILY_PATHS)]) {
+    const draft = cleanDailyRound(input?.drafts?.[key]);
+    if (draft && (key === 'today' || draft.path === key)) drafts[key] = draft;
+  }
   const recent = (Array.isArray(input?.recent) ? input.recent : []).filter(value => typeof value === 'string' && /^\d{1,3}\/(?:[1-9]|10)$/u.test(value)).slice(-24);
-  return { drafts: draft ? { today: draft } : {}, recent,
+  return { drafts, recent,
     finished: { clock: stamp(input?.finished?.clock), english: stamp(input?.finished?.english) } };
+}
+
+export function availableDailyDraft(drafts) {
+  const [key, draft] = Object.entries(drafts).filter(([, draft]) => isPracticeAvailable(draft.path))
+    .sort(([, a], [, b]) => b.at - a.at)[0] || [];
+  return draft ? { key, draft } : null;
 }
