@@ -1,0 +1,139 @@
+.daily-home, .daily-page {
+  --daily-blue: #245f71;
+  --daily-ink: #263f48;
+  --daily-soft: #e2eff0;
+  --picnic-accent: var(--daily-blue);
+}
+.daily-home {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  margin-block-start: 12px;
+  padding: 10px;
+  border: 1px solid #ccdfdf;
+  border-radius: 19px;
+  background: #eff5f2;
+  color: var(--daily-ink);
+}
+.daily-home-art { display: grid; place-items: center; height: 48px; border-radius: 13px; background: #ddecf0; }
+.daily-home-art svg { width: 43px; height: 43px; }
+.daily-home-copy h2 { margin: 0; font-size: clamp(15px, 2vw, 20px); line-height: 1.25; }
+.daily-home .daily-home-copy p { margin: 3px 0 0; color: #4d6770; font-size: 13px; line-height: 1.4; }
+.daily-home .primary-button { min-height: 45px; padding: 7px 12px; background: var(--daily-blue); color: #fff; font-size: 13px; white-space: nowrap; }
+.daily-home .primary-button svg { width: 16px; height: 16px; }
+
+.daily-page { color: var(--daily-ink); }
+.daily-step { --picnic-tone: #e4eef3; }
+.daily-page .picnic-track span { background: #e1edf0; }
+.daily-page .picnic-track .passed { background: #82afbc; }
+.daily-page .picnic-track .current { background: var(--daily-blue); }
+.daily-cue { margin: 8px 0 13px; font-size: clamp(18px, 3.4vw, 28px); font-weight: 690; line-height: 1.5; }
+.daily-feedback { min-height: 23px; }
+.daily-listen { margin-block-end: 10px; gap: 8px; }
+.daily-listen[aria-busy="true"] { box-shadow: 0 0 0 3px #a3cfdb; }
+
+.daily-rail {
+  position: relative;
+  isolation: isolate;
+  container-type: inline-size;
+  height: clamp(88px, 18vw, 156px);
+  overflow: hidden;
+  margin-block-end: 10px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #d7eeec 0 52%, #c6dfaa 52%);
+}
+.daily-rail > * { position: absolute; }
+.daily-hills { inset: 37% -9% 15%; transform: rotate(-3deg); border-radius: 60% 74% 0 0; background: #b3cd9d; }
+.daily-rail.scene-1 { background: linear-gradient(180deg, #dce8ef 0 52%, #c7ddad 52%); }
+.daily-rail.scene-1 .daily-hills { transform: rotate(4deg); background: #a9cdbd; }
+.daily-rail.scene-2 { background: linear-gradient(180deg, #f7e8c8 0 52%, #b7d7af 52%); }
+.daily-rail.scene-2 .daily-hills { background: #c7d597; }
+.daily-tree { inset: 2% auto auto 8%; width: clamp(43px, 12vw, 99px); height: clamp(43px, 12vw, 99px); }
+.daily-platform { inset: auto 4% 20% auto; width: min(38%, 280px); height: 16%; border-radius: 9px; background: #e9c18f; box-shadow: inset 0 -5px 0 #ae7d5e54; }
+.daily-track { inset: auto 0 16%; height: 13%; transform: rotate(-1deg); border-block: 2px solid #576a61; background: repeating-linear-gradient(90deg, #98795f 0 5px, #dec5ab 5px 19px); }
+.daily-engine {
+  width: clamp(72px, 17vw, 138px);
+  height: clamp(72px, 17vw, 138px);
+  inset: auto 9% 4% auto;
+  filter: drop-shadow(0 4px 4px #385a4336);
+}
+.daily-rail.departed .daily-engine {
+  transform: translateX(-1000px);
+  transform: translateX(-100cqw);
+  animation: daily-depart 1100ms cubic-bezier(.5,.04,.63,.63) backwards;
+}
+@keyframes daily-depart { from { transform: translateX(0); } }
+
+.daily-clock-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, .85fr);
+  place-items: center;
+  gap: 12px;
+  padding: clamp(10px, 2.6vw, 22px);
+  border-radius: 18px;
+  background: #eaf3f3;
+}
+.daily-clock-panel { display: grid; width: min(100%, 290px); gap: 8px; text-align: center; }
+.daily-clock-panel p { margin: 0; font-weight: 580; font-size: 15px; color: #496771; }
+.daily-time { font-size: clamp(36px, 6vw, 52px); font-weight: 750; line-height: 1; font-variant-numeric: tabular-nums; }
+.daily-ticks { display: flex; justify-content: center; gap: 5px; }
+.daily-ticks span { width: 13px; height: 13px; border: 1px solid #649696; border-radius: 50%; }
+.daily-ticks .passed { background: #32777b; }
+.daily-minute-row { display: flex; gap: 6px; align-items: center; justify-content: center; color: #255565; font-size: 14px; font-weight: 620; }
+.daily-minute-row > div, .daily-clock-buttons { display: flex; justify-content: center; gap: 6px; }
+.daily-minute-row button { width: 46px; min-height: 46px; padding: 0; font-size: 22px; color: #245f71; }
+.daily-clock-buttons button { min-height: 44px; padding-inline: 12px; }
+
+.daily-animal-board {
+  display: grid;
+  gap: 8px;
+  padding: clamp(8px, 2vw, 16px);
+  border: 1px solid #c7dbcc;
+  border-radius: 20px;
+  background: #f0f4e7;
+}
+.daily-animal-choices { display: flex; justify-content: center; gap: clamp(6px, 2vw, 13px); }
+.daily-animal-choices .delivery-piece { max-width: 150px; touch-action: none; cursor: grab; }
+.daily-animal-choices .daily-placed-choice:disabled { opacity: .34; }
+.daily-animal-choices .delivery-piece:active:not(:disabled) { transform: none; }
+.daily-pond {
+  position: relative;
+  isolation: isolate;
+  min-height: clamp(144px, 23vw, 210px);
+  overflow: hidden;
+  border: 1px dashed #6b9b8d;
+  border-radius: 19px;
+  background: linear-gradient(180deg, #dcf0e8, #cae1aa);
+}
+.daily-pond > * { position: absolute; pointer-events: none; }
+.daily-bank { inset: auto -10% -18% -7%; height: 78%; border-radius: 50% 75% 0 0; background: #a9c995; transform: rotate(-5deg); }
+.daily-water { inset: 30% 9% 9% 10%; background: #a3d3d9; border: 2px solid #85b9c2; border-radius: 46% 52% 52% 38%; box-shadow: inset 0 0 0 7px #c7e8e5b7; }
+.daily-water::after { content: ''; position: absolute; inset: 38% 16%; border-block: 1px solid #e4faf8b6; border-radius: 50%; }
+.daily-pond-plant { width: clamp(37px, 10vw, 87px); height: clamp(37px, 10vw, 87px); right: 8%; top: 3%; }
+.daily-pond.scene-1 .daily-water { inset-inline: 17% 6%; border-radius: 34% 67% 42% 60%; }
+.daily-pond.scene-1 { background: linear-gradient(180deg, #deede7, #d5e7ba); }
+.daily-pond.scene-2 .daily-water { inset-inline: 11% 15%; border-radius: 63% 44% 53% 39%; }
+.daily-pond.scene-2 { background: linear-gradient(180deg, #eaeed9, #c5dfaa); }
+.daily-pond.is-drop-target { border-style: solid; box-shadow: inset 0 0 0 3px #76aa9e; }
+.daily-placed { display: grid; place-items: center; width: clamp(57px, 13vw, 105px); right: 29%; top: 7%; z-index: 1; }
+.daily-placed.swims { top: 34%; }
+.daily-placed svg { width: 100%; height: auto; filter: drop-shadow(0 4px 3px #35584935); }
+.daily-result > :is(.daily-rail, .daily-pond) { width: min(100%, 680px); height: clamp(164px, 23vw, 220px); margin: 0; }
+.daily-result .daily-engine { width: clamp(80px, 18vw, 150px); height: clamp(80px, 18vw, 150px); }
+
+@media (max-width: 440px) {
+  .daily-home { grid-template-columns: 39px minmax(0, 1fr) auto; gap: 7px; padding: 8px; }
+  .daily-home-art { height: 39px; }
+  .daily-home-art svg { width: 36px; height: 36px; }
+  .daily-home .primary-button { padding: 7px 9px; }
+  .daily-clock-board { grid-template-columns: 1fr; }
+  .daily-clock-board .picnic-dial { width: min(100%, 245px); }
+  .daily-clock-panel { gap: 6px; }
+}
+@media (max-width: 340px) {
+  .daily-home { grid-template-columns: 40px minmax(0, 1fr); }
+  .daily-home-art { grid-row: 1 / 3; align-self: start; }
+  .daily-home .primary-button { justify-self: start; }
+}

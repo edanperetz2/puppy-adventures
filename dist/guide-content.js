@@ -1,7 +1,8 @@
-import { LITTLE_STORIES, MY_JOURNEY } from './activities.js';
+import { DAILY_ACTIVITY, LITTLE_STORIES, MY_JOURNEY } from './activities.js';
 
 export const GUIDE_ITEMS = [
   { icon: MY_JOURNEY.icon, he: MY_JOURNEY.he, en: MY_JOURNEY.en },
+  DAILY_ACTIVITY,
   { icon: 'flower', he: ['גִּנַּת הַמִּלִּים', `עֲשָׂרָה שְׁלָבִים עַד ״${LITTLE_STORIES.he[0]}״. ${LITTLE_STORIES.he[1]}`],
     en: ['Word Garden', `Ten stages, from short words to ${LITTLE_STORIES.en[0]}. ${LITTLE_STORIES.en[1]}`] },
   { icon: 'pencil', he: ['סַדְנַת הַמִּלִּים', 'בּוֹנוֹת מִלִּים מֵחֲלָקִים וּמַשְׁלִימוֹת אוֹתִיּוֹת וּמִשְׁפָּטִים.'],

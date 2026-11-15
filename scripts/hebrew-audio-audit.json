@@ -17132,6 +17132,48 @@
       "detected_ipa": "hamiʃlˈoaχ hiɡˈia.",
       "phoneme_edit_ratio": 0,
       "seconds": 4.58
+    },
+    "daily-start": {
+      "sha256": "1304e4d7877e18b0678d315f596f63d7af9b4e9fd513b50353782977bcc1b74e",
+      "expected_ipa": "matχilˈot aχʃˈav.",
+      "detected_ipa": "matχilˈot ʔaχʃˈav.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.06
+    },
+    "daily-train": {
+      "sha256": "23a299251727ff39059419aa885102d4cd1ab25b5c0c535eeeb18930a4d1881f",
+      "expected_ipa": "haʁakˈevet tetsˈe beʔˈod",
+      "detected_ipa": "haʁakˈevet tetsˈe beʔˈod.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.12
+    },
+    "daily-pond": {
+      "sha256": "4f9255f3af81587b6a462db691a0eefde845d38f7d4e8fd46625a13386508305",
+      "expected_ipa": "hakʃˈivi. hazˈizi ʔˈet haχajˈa ʔˈel habʁeχˈa.",
+      "detected_ipa": "hakʃˈivi, hazˈizi ʔˈet haχajˈa ʔˈel habʁeχˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.48
+    },
+    "daily-example": {
+      "sha256": "662f51930023c71fb40b9c22096cca8c6f4ce69568352cf2a19dfb210e4b5b23",
+      "expected_ipa": "boˈi niʁʔˈe duɡmˈa.",
+      "detected_ipa": "bˈoʔi niʁʔˈe duɡmˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.17
+    },
+    "daily-fresh": {
+      "sha256": "266eb66c28951d2a6d8142cc51428fcdcb319a8d81d960c2e1390481a349e7df",
+      "expected_ipa": "aχʃˈav nenasˈe duɡmˈa χadaʃˈa.",
+      "detected_ipa": "ʔaχʃˈav nenasˈe duɡmˈa χadaʃˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.19
+    },
+    "daily-train-go": {
+      "sha256": "d46cea0cb0c559ad9b1e8aa9bf4da4d221f003f7c783f1a0c6756d1f4dc74782",
+      "expected_ipa": "hinˈe haʁakˈevet jotsˈet!",
+      "detected_ipa": "hinˈe haʁakˈevet jotsˈet.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.16
     }
   }
 }

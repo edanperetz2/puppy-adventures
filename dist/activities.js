@@ -17,11 +17,17 @@ export const ENGLISH_LISTENING = Object.freeze({
   icon: 'dog',
 });
 
+export const DAILY_ACTIVITY = Object.freeze({
+  icon: 'train',
+  he: Object.freeze(['מְשִׂימָה קְטַנָּה לְהַיּוֹם', 'חוֹזְרוֹת עַל דַּקּוֹת בַּשָּׁעוֹן אוֹ עַל מִלִּים בְּאַנְגְּלִית בְּסִפּוּר חָדָשׁ.']),
+  en: Object.freeze(['A Little Mission Today', 'Revisit telling time or listening to English in a fresh six-step scene.']),
+});
+
 export const MY_JOURNEY = Object.freeze({
   id: 'my-journey',
   route: Object.freeze({ action: 'chapters' }),
   he: Object.freeze(['הַמַּסָּע שֶׁלִּי', 'קוֹרְאוֹת, מְחַבְּרוֹת וּמְכַוְּנוֹת שָׁעוֹן בַּפִּיקְנִיק. מַקְשִׁיבוֹת לְאַנְגְּלִית עִם בּוֹבִּי. בּוֹנוֹת וּבוֹדְקוֹת סִירוֹת עִם לוּלִי.']),
-  en: Object.freeze(['My Journey', 'Read, add, and set the clock at the picnic. Listen to English on Bobi’s delivery route. Build and test boats with Luli.']),
+  en: Object.freeze(['My Journey', 'Read, add, and set the clock at the picnic. Listen to English with Bobi. Build and test boats with Luli.']),
   icon: 'boat',
 });
 

@@ -1,3 +1,27 @@
+export function mountTouchControls(root, selector, onTap, signal) {
+  let touch, used = false;
+  root.addEventListener('pointerdown', event => {
+    used = false;
+    const button = event.target.closest(selector);
+    if (event.pointerType === 'touch' && event.isPrimary && button && !button.disabled) {
+      touch = { button, id: event.pointerId, x: event.clientX, y: event.clientY };
+    }
+  }, { signal });
+  root.addEventListener('pointerup', event => {
+    if (touch?.id !== event.pointerId) return;
+    const { button, x, y } = touch;
+    touch = null;
+    if (event.target.closest(selector) === button && Math.hypot(event.clientX - x, event.clientY - y) < 12) {
+      used = true;
+      onTap(button);
+    }
+  }, { signal });
+  root.addEventListener('pointercancel', event => {
+    if (touch?.id === event.pointerId) touch = null;
+  }, { signal });
+  return { suppress() { used = true; }, accepts: event => !used || !event.detail };
+}
+
 // Tap and drag share the same placement action. Some touch browsers omit the
 // compatibility click immediately after a drag.
 export function mountDrag(root, { sources, targets, signal, onDrop, onTouchTap }) {

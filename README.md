@@ -8,6 +8,7 @@ Ariel’s learning game for phones, tablets and computers. Ava gives instruction
 
 | Activity | Practice |
 | --- | --- |
+| **משימה קטנה להיום** | A six-step return to one skill. Work out when a train leaves by moving the minute hand, or listen to an English animal name and move the right animal to the pond. A worked example leads to a fresh try at the same step. |
 | **המסע שלי** | Three chapters with three six-step missions each. Read, add, and set the clock at the picnic. Listen to English on Bobi’s delivery route. Shape, load, test, and sail boats with Luli. Bobi offers an optional two-word prompt after independent practice with both words on different days. |
 | **גינת המילים** | Ten Hebrew stages, from short words to little stories. Choose a matching picture or act out the sentence. A mixed adventure draws from the stages across replays. |
 | **סדנת המילים** | Build words from parts and letters, fill gaps and finish short sentences across four stages. |

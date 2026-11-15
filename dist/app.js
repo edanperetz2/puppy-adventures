@@ -52,6 +52,8 @@ import { cleanDelivery, cleanDeliveryRound, createDeliveryBonus, createDeliveryR
 import { deliveryComplete, deliveryMap, mountDeliveryRound, prepareDeliveryAudio } from './delivery-view.js';
 import { boatyardRound, cleanBoatyard, cleanBoatyardRound, packBoatyardRound } from './boatyard.js';
 import { boatyardComplete, boatyardMap, boatyardPrompt, mountBoatyardRound, prepareBoatyardAudio } from './boatyard-view.js';
+import { cleanDaily, cleanDailyRound, createDailyRound, DAILY_PATHS, dailyEvidence, dailySuggestion, finishDailyMemory } from './daily.js';
+import { dailyComplete, dailyHome, mountDaily, prepareDailyAudio } from './daily-view.js';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -86,6 +88,7 @@ let sciencePath = null, scienceDrafts = {}, scienceController = null;
 let picnic = cleanPicnic(null), picnicRound = null, picnicController = null, picnicSticker = null;
 let delivery = cleanDelivery(null), deliveryRound = null, deliveryController = null, deliverySticker = null;
 let boatyard = cleanBoatyard(null), boatRound = null, boatController = null, boatSticker = null;
+let daily = cleanDaily(null), dailyRound = null, dailyController = null, dailySticker = null, homeDailyItems = null;
 let homeItems = null;
 const progressScreens = ['home', 'album', 'letters-menu', 'letters-writing', 'letters-recognition', 'characters-menu'];
 const preferenceScreens = [...progressScreens, 'learning-hub', 'reading-levels', 'science-menu', 'number-menu'];
@@ -111,6 +114,7 @@ try {
     picnic = cleanPicnic(saved.picnic);
     delivery = cleanDelivery(saved.delivery);
     boatyard = cleanBoatyard(saved.boatyard);
+    daily = cleanDaily(saved.daily);
   }
 } catch { /* A corrupt or unavailable save must never prevent play. */ }
 
@@ -142,6 +146,10 @@ learner = new LearningStore({ storage:gameStorage, config:SYNC_CONFIG, getCode:(
     const card = app.querySelector('#home-adventure');
     if (card && !card.contains(document.activeElement)) card.innerHTML = homeAdventureContent();
   }
+  if (view === 'home' && !dialog.open && learner.items !== homeDailyItems) {
+    const dailyCard = app.querySelector('#home-daily');
+    if (dailyCard && !dailyCard.contains(document.activeElement)) dailyCard.innerHTML = homeDailyContent();
+  }
 } });
 
 const narrator = new Narrator(status => {
@@ -171,7 +179,8 @@ function save() {
     const picnicSave = picnic.finished.length || Object.keys(picnic.drafts).length ? { picnic } : {};
     const deliverySave = delivery.finished.length || Object.keys(delivery.drafts).length ? { delivery } : {};
     const boatyardSave = boatyard.finished.length || Object.keys(boatyard.drafts).length ? { boatyard } : {};
-    gameStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition, characterPractice, drafts, journeyDrafts, awardedRounds, writingPractice, ...(Object.keys(numberDrafts).length ? { numberDrafts } : {}), ...(Object.keys(scienceDrafts).length ? { scienceDrafts } : {}), ...picnicSave, ...deliverySave, ...boatyardSave }));
+    const dailySave = daily.drafts.today || daily.finished.clock || daily.finished.english ? { daily } : {};
+    gameStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition, characterPractice, drafts, journeyDrafts, awardedRounds, writingPractice, ...(Object.keys(numberDrafts).length ? { numberDrafts } : {}), ...(Object.keys(scienceDrafts).length ? { scienceDrafts } : {}), ...picnicSave, ...deliverySave, ...boatyardSave, ...dailySave }));
     storageAvailable = true;
   } catch { storageAvailable = false; }
 }
@@ -450,6 +459,13 @@ function homeAdventureContent() {
   </div>`;
 }
 
+function homeDailyContent() {
+  homeDailyItems = learner.items;
+  const saved = daily.drafts.today;
+  const path = saved?.path || dailySuggestion(homeDailyItems, daily.finished, progress);
+  return dailyHome(path, saved, settings.nikud);
+}
+
 function renderHome() {
   const cards = Object.values(MISSIONS).map(m => `<button class="mission-card ${m.color}" data-action="mission" data-mission="${m.id}" aria-label="${m.name} — ${m.description}">
     <div class="mission-art"><span class="art-orbit"></span>${m.id === 'characters' ? characterMissionArt() : art(m.icon, 'mission-object') + pup(m.pup, 'mission-pup')}</div>
@@ -468,6 +484,7 @@ function renderHome() {
           <h1 id="hero-title" tabindex="-1">שלום <bdi>${ARIEL.name}</bdi>!</h1>
         </div>
         <section class="home-adventure" id="home-adventure" aria-labelledby="home-adventure-title">${homeAdventureContent()}</section>
+        <section class="daily-home" id="home-daily" aria-labelledby="daily-home-title">${homeDailyContent()}</section>
         <div class="hero-actions"><button type="button" class="secondary-button home-pika-start" data-action="pikachu">${PIKACHU_TITLE}</button>
         <button class="text-button welcome-listen" data-action="welcome">${uiIcon('sound')} לחצי ונכיר את החברים</button></div>
         <p id="audio-notice" class="audio-notice" role="status" hidden></p>
@@ -648,6 +665,7 @@ function render() {
   picnicController?.destroy(); picnicController=null;
   deliveryController?.destroy(); deliveryController=null;
   boatController?.destroy(); boatController=null;
+  dailyController?.destroy(); dailyController=null;
   letterPad?.destroy(); letterPad = null;
   clockSchool?.destroy(); clockSchool = null;
   applyPreferences();
@@ -673,6 +691,8 @@ function render() {
   else if (view === 'boatyard-map') app.innerHTML = header() + boatyardMap(boatyard, settings.nikud) + footer();
   else if (view === 'boatyard-round') renderBoatyardRound();
   else if (view === 'boatyard-complete') app.innerHTML = header() + boatyardComplete(boatRound, boatSticker, boatyard.finished, settings.nikud) + footer();
+  else if (view === 'daily-round') renderDailyRound();
+  else if (view === 'daily-complete') app.innerHTML = header() + dailyComplete(dailyRound, dailySticker, settings.nikud) + footer();
   else if (view === 'park') renderPark();
   else if (view === 'journey-complete') renderJourneyComplete();
   else if (view === 'game') { renderGame(); restoreQuestionState(); }
@@ -751,6 +771,8 @@ function replay() {
   if (view === 'boatyard-map') { announcements.say(BOATYARD.intro); return; }
   if (view === 'boatyard-round') { boatController?.replay(); return; }
   if (view === 'boatyard-complete') { announcements.say(completionClip(boatSticker)); return; }
+  if (view === 'daily-round') { dailyController?.replay(); return; }
+  if (view === 'daily-complete') { announcements.say(completionClip(dailySticker)); return; }
   if(view==='park'){clockSpeak('journey-park-intro');return;}
   if (view === 'clock-school') { clockSchool.replay(true); return; }
   if (view === 'game') {
@@ -996,7 +1018,7 @@ function renderSettings() {
   dialog.querySelector('[data-dialog="reset"]').onclick = () => {
     openDialog(`<h2 id="parent-title">לאפס את המכשיר הזה?</h2><p>המדבקות וההתקדמות בדפדפן הזה יימחקו. הגדרות המשחק יישמרו.${album.linked ? ' החיבור לאלבום המשפחתי יוסר. האלבום שכבר סונכרן יישמר עבור המכשירים האחרים.' : ''}</p><div class="dialog-actions"><button class="secondary-button" data-dialog="cancel-reset">ביטול</button><button class="primary-button" data-dialog="confirm-reset">איפוס ההתקדמות</button></div>`);
     dialog.querySelector('[data-dialog="cancel-reset"]').onclick = renderSettings;
-    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); learner.reset(); drafts={};journeyDrafts={};numberDrafts={};numberRound=null;scienceDrafts={};picnicController?.destroy({discard:true});picnicController=null;picnic=cleanPicnic(null);picnicRound=null;delivery=cleanDelivery(null);deliveryRound=null;boatyard=cleanBoatyard(null);boatRound=null;awardedRounds=[];writingPractice={mode:'trace',drafts:{}}; progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
+    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); learner.reset(); drafts={};journeyDrafts={};numberDrafts={};numberRound=null;scienceDrafts={};picnicController?.destroy({discard:true});picnicController=null;picnic=cleanPicnic(null);picnicRound=null;delivery=cleanDelivery(null);deliveryRound=null;boatyard=cleanBoatyard(null);boatRound=null;dailyController?.destroy({discard:true});dailyController=null;daily=cleanDaily(null);dailyRound=null;awardedRounds=[];writingPractice={mode:'trace',drafts:{}}; progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
   };
 }
 
@@ -1015,6 +1037,7 @@ function checkpoint(){
   if (view === 'game' && round) checkpointScoredRound(round, drafts, round.key, packRound);
   if(view==='journey'&&journeyPlan)journeyDrafts[`${journeyPlan.mode}:${journeyPlan.level}`]=journeyPlan;
   picnicController?.flush();
+  dailyController?.flush();
   save();
 }
 function awardRound(mission,helped,letters,id,length){
@@ -1287,6 +1310,43 @@ function renderBoatyardRound() {
   });
 }
 
+function startDaily(path) {
+  if (!Object.hasOwn(DAILY_PATHS, path)) return;
+  checkpoint(); narrator.stop(); round = null; journeyPlan = null;
+  dailyRound = cleanDailyRound(daily.drafts.today);
+  if (!dailyRound) {
+    dailyRound = createDailyRound(path, learner.items, daily.recent);
+    checkpointScoredRound(dailyRound, daily.drafts, 'today');
+    save();
+  }
+  view = 'daily-round'; render(); focusTitle();
+  prepareDailyAudio(dailyRound);
+}
+
+function renderDailyRound() {
+  app.innerHTML = header() + '<main id="main" class="picnic-page picnic-play daily-page"></main>' + footer();
+  dailyController = mountDaily(app.querySelector('#main'), {
+    round: dailyRound, nikud: settings.nikud, motion: motionEnabled, focusTitle,
+    play: (keys, manual) => manual ? clockSpeak(keys) : announcements.say(keys),
+    onSave: draft => { checkpointScoredRound(draft, daily.drafts, 'today'); save(); },
+    onSuccess: draft => {
+      learner.record(dailyEvidence(draft), draft.helped.includes(draft.index) ? 'helped' : 'independent');
+      narrator.chime();
+    },
+    onFinish: draft => {
+      const result = finishScoredRound(draft, daily.drafts, 'today',
+        (id, length) => awardRound(draft.path, draft.helped.length, null, id, length));
+      if (!result) return;
+      finishDailyMemory(daily, draft);
+      progress = result.progress; dailySticker = result.sticker;
+      view = 'daily-complete'; save(); render(); focusTitle();
+      revealWin('.picnic-sticker');
+      announcements.say(completionClip(dailySticker));
+    },
+  });
+  dailyController.start();
+}
+
 function startPicnicRound(path) {
   if (!Object.hasOwn(PICNIC_MISSIONS, path)) return;
   checkpoint(); narrator.stop(); round = null; journeyPlan = null;
@@ -1429,6 +1489,7 @@ app.addEventListener('click', event => {
     case 'delivery-bonus': startDeliveryRound('pair'); break;
     case 'boatyard': openBoatyard(); break;
     case 'boatyard-start': startBoatyard(button.dataset.path); break;
+    case 'daily-start': startDaily(button.dataset.path); break;
     case 'garden': openReadingLevels(); break;
     case 'mission-direct': startMission(button.dataset.mission,true); break;
     case 'journey-start': startJourney(button.dataset.journey,button.dataset.level); break;
@@ -1494,11 +1555,12 @@ app.addEventListener('change', event => {
 
 dialog.addEventListener('click', event => { if (event.target === dialog && event.offsetX >= 0 && event.offsetX <= dialog.clientWidth && event.offsetY >= 0 && event.offsetY <= dialog.clientHeight) return; if (event.target === dialog) closeDialog(); });
 dialog.addEventListener('cancel', event => { event.preventDefault(); closeDialog(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden) { picnicController?.flush(); narrator.stop(); } else { void album.flush();void learner.flush(); startOpeningWelcome(); } });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { picnicController?.flush(); dailyController?.flush(); narrator.stop(); } else { void album.flush();void learner.flush(); startOpeningWelcome(); } });
 window.addEventListener('online', () => {
   void album.flush(); void learner.flush();
   if (view === 'delivery-map' || view === 'delivery-round') prepareDeliveryAudio();
   if (view === 'boatyard-map' || view === 'boatyard-round') prepareBoatyardAudio();
+  if (view === 'daily-round') prepareDailyAudio(dailyRound);
 });
 window.addEventListener('hashchange', openAlbumInvite);
 window.addEventListener('focus', () => { void album.flush();void learner.flush(); });
