@@ -1,5 +1,5 @@
 // Classic workers also support browsers without module service workers.
-const CACHE = 'puppy-adventures-shell-2.12.0';
+const CACHE = 'puppy-adventures-shell-2.13.0';
 const RECORDINGS = 'puppy-adventures-recordings-v1';
 const BASE = new URL('./', self.location.href);
 const asset = path => new URL(path, BASE).href;
@@ -95,6 +95,11 @@ async function gameAsset(request, url) {
     const { recordings } = await audioCatalog(shell);
     const sha = recordings[`./${url.href.slice(BASE.href.length)}`];
     if (sha) return serveRange(request, await getRecording(url.href, sha, shell, await caches.open(RECORDINGS)));
+  }
+  if (url.href === asset('./assets/theater-stage.webp')) {
+    const response = await fetch(request);
+    if (response.ok) await shell.put(request, response.clone()).catch(() => {});
+    return response;
   }
   return fetch(request);
 }

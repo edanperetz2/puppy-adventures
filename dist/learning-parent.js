@@ -4,6 +4,7 @@ import { LETTERS } from './letters.js';
 import { CHARACTERS } from './characters.js';
 import { escapeHtml as esc } from './profiles.js';
 import { CLOCK_MINUTES, CLOCK_TRANSFER, dailyRecall } from './daily.js';
+import { THEATER_PROPS, THEATER_SETS, theaterRecall } from './theater.js';
 export function itemLabel(id){
   const parts=id.split(':'),last=parts.at(-1);
   if(['read','workshop'].includes(parts[0]))return `${parts[0]==='workshop'?'בניית מילה':'קריאה'} · ${WORDS.find(w=>w.id===parts[1])?.pointed||parts[1]}`;
@@ -12,6 +13,11 @@ export function itemLabel(id){
   if(id===CLOCK_TRANSFER)return 'משימה קטנה · דקות מעבר לשעה';
   if(id===CLOCK_MINUTES)return 'משימה קטנה · דקות בשעון';
   if(parts[0]==='daily'&&parts[1]==='english')return `משימה קטנה · אנגלית · ${ANIMALS.find(w=>w.id===last)?.en||last}`;
+  if(parts[0]==='theater') {
+    if(parts[1]==='order'&&Object.hasOwn(THEATER_SETS,parts[2]))return `תיאטרון · סדר של ${last} פעולות · ${THEATER_SETS[parts[2]].name}`;
+    if(parts[1]==='prop'&&Object.hasOwn(THEATER_PROPS,last))return `תיאטרון · הבנת רמז · ${THEATER_PROPS[last]}`;
+    return { 'theater:party:combine': 'תיאטרון · חיבור קבוצות', 'theater:party:serve': 'תיאטרון · כוס אחת לכל חבר', 'theater:shadow:fit': 'תיאטרון · התאמת גודל הצל' }[id] || id;
+  }
   if(parts[0]==='english')return `אנגלית · ${parts[1]==='single'?[...ANIMALS,...COLORS].find(w=>w.id===last)?.en||last:last.replaceAll('-',' ')}`;
   if(parts[0]==='clock')return `שעון · ${parts[1]}:${parts[2].padStart(2,'0')}`;
   if(parts[0]==='objects')return `כמויות · ${parts[1]==='tens'?'עשרות':parts[1]==='bonds'?'מה חסר':parts[1]==='takeaway'?'נותנים ונשאר':'בונים'} · ${parts[2]}`;
@@ -35,10 +41,12 @@ export function parentLearning(learner){
   const recently=Object.entries(items).sort((a,b)=>b[1].last-a[1].last).slice(0,8);
   const recall=dailyRecall(items);
   const animal=ANIMALS.find(word=>recall.animals.includes(word.id));
+  const performed=theaterRecall(items);
   return `<section class="learning-parent"><h3>הצעדים הקטנים של הלמידה</h3><p class="learning-sync-status" role="status">${esc(learningStatus(learner))}</p><div class="learning-stat-grid"><div><b>${total.seen}</b><span>פריטים שפגשנו</span></div><div><b>${total.supported}</b><span>עדיין עם תמיכה</span></div><div><b>${total.independent}</b><span>הצלחה ללא רמז</span></div><div><b>${total.remembered}</b><span>הצלחה גם ביום אחר</span></div></div><p class="parent-note">התיעוד מתחיל מהעדכון הזה. ההרפתקאות והמדבקות הקודמות נשמרו, ואין הסקה של הצלחה בפריט מסוים מהמספר הכולל. ״ביום אחר״ דורש שתי הצלחות בימים נפרדים ובמרחק של 20 שעות לפחות.</p>
-    ${recall.clock||animal?`<h4>מה אריאל עשתה בעצמה גם ביום אחר?</h4><ul class="daily-recall">
+    ${recall.clock||animal||performed?`<h4>מה אריאל עשתה בעצמה גם ביום אחר?</h4><ul class="daily-recall">
       ${recall.clock?'<li>הזיזה את מחוג הדקות אל מעבר לשעה במשימת הרכבת.</li>':''}
-      ${animal?`<li>זיהתה את המילה <bdi lang="en" dir="ltr">${esc(animal.en.toLowerCase())}</bdi> במשימת הבריכה.</li>`:''}</ul>`:''}
+      ${animal?`<li>זיהתה את המילה <bdi lang="en" dir="ltr">${esc(animal.en.toLowerCase())}</bdi> במשימת הבריכה.</li>`:''}
+      ${performed?'<li>סידרה פעולות בסדר הנכון בתיאטרון, בשתי סצנות ובימים שונים.</li>':''}</ul>`:''}
     ${review.length?`<h4>מה כדאי לפגוש שוב?</h4><ul>${review.map(([id,v])=>`<li>${esc(itemLabel(id))} <small>· ${v.helped>=v.independent?'חיזוק בעזרת דוגמה':'חזרה קצרה כדי לזכור'}</small></li>`).join('')}</ul>`:'<p>כמה משחקים קצרים יתחילו לבנות המלצות אישיות. אין צורך למהר.</p>'}
     ${recently.length?`<details><summary>מה תרגלנו לאחרונה?</summary><ul>${recently.map(([id,v])=>`<li>${esc(itemLabel(id))} · ${v.independent} ללא רמז, ${v.helped} עם עזרה${v.practice?`, ${v.practice} תרגולי כתיבה`:''}</li>`).join('')}</ul></details>`:''}
     <p class="parent-note">כתיבה חופשית ועל נייר נרשמת כהתנסות בלבד; צורת הציור אינה נבדקת. אפשר להסתכל יחד על האות ולבחור צעד קטן נוסף. ההרפתקה האחרונה נשמרת להמשך באותו מכשיר.</p><button class="secondary-button" type="button" data-learning-refresh>בדיקת שמירה ועדכונים</button></section>`;

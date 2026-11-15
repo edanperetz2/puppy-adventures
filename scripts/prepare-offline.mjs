@@ -10,6 +10,7 @@ export const scriptLinks = /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*><\/script>
 const starter = ['welcome', 'meet-friends', 'choose-activity', 'try-again', 'correct-1', 'correct-2', 'correct-3', 'complete', 'complete-all',
   'profile-good-luck-ariel', 'pikachu-greeting', ...Object.keys(STORY_CLUE_CLIPS)];
 const archivedAssets = /^(?:game-guide\.png|game-guide-(?:six|ariel)\.webp|rubik-\d+\.ttf)$/;
+export const onDemandPictures = ['./assets/theater-stage.webp'];
 const narrationFolder = './assets/audio/';
 
 export async function offlineFiles(root, bundle = []) {
@@ -19,7 +20,7 @@ export async function offlineFiles(root, bundle = []) {
   const sourceModules = bundle.length ? bundle : await findModules(root, entryUrls.filter(url => url.endsWith('.js') || url.includes('.js?')));
   const pictures = (await readdir(new URL('assets/', root)))
     .filter(file => /\.(?:svg|png|jpe?g|webp|woff2|txt)$/.test(file) && !archivedAssets.test(file))
-    .map(file => `./assets/${file}`);
+    .map(file => `./assets/${file}`).filter(url => !onDemandPictures.includes(url));
   const audio = JSON.parse(await readFile(new URL('assets/audio/manifest.json', root), 'utf8')).clips;
   const keys = [...Object.keys(CLIPS), 'pikachu-greeting'];
   const localCall = await readFile(new URL(`${narrationFolder}pikachu-greeting.mp3`, root));
@@ -29,7 +30,7 @@ export async function offlineFiles(root, bundle = []) {
   ]));
   const sizes = await Promise.all(Object.keys(recordings).map(url => stat(new URL(url, root)).then(file => file.size)));
   const core = [...new Set([...explicitlyLoaded, ...sourceModules, ...pictures, ...starter.map(key => `${narrationFolder}${key}.mp3`)])];
-  const assets = [...new Set(['./', ...core, './offline-core.json', './offline-audio.json', ...Object.keys(recordings)])];
+  const assets = [...new Set(['./', ...core, ...onDemandPictures, './offline-core.json', './offline-audio.json', ...Object.keys(recordings)])];
   await Promise.all([
     writeFile(new URL('offline.json', root), JSON.stringify(assets, null, 2) + '\n'),
     writeFile(new URL('offline-core.json', root), JSON.stringify(core, null, 2) + '\n'),

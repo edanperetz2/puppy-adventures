@@ -26,8 +26,8 @@ export const DAILY_ACTIVITY = Object.freeze({
 export const MY_JOURNEY = Object.freeze({
   id: 'my-journey',
   route: Object.freeze({ action: 'chapters' }),
-  he: Object.freeze(['הַמַּסָּע שֶׁלִּי', 'קוֹרְאוֹת, מְחַבְּרוֹת וּמְכַוְּנוֹת שָׁעוֹן בַּפִּיקְנִיק. מַקְשִׁיבוֹת לְאַנְגְּלִית עִם בּוֹבִּי. בּוֹנוֹת וּבוֹדְקוֹת סִירוֹת עִם לוּלִי.']),
-  en: Object.freeze(['My Journey', 'Read, add, and set the clock at the picnic. Listen to English with Bobi. Build and test boats with Luli.']),
+  he: Object.freeze(['הַמַּסָּע שֶׁלִּי', 'פִּיקְנִיק שֶׁל קְרִיאָה, חִבּוּר וְשָׁעוֹן. אַנְגְּלִית עִם בּוֹבִּי, סִירוֹת עִם לוּלִי וְהַצָּגוֹת בַּתֵּאַטְרוֹן.']),
+  en: Object.freeze(['My Journey', 'Read, add, and set the clock at the picnic. Listen with Bobi, build boats with Luli, and direct a show.']),
   icon: 'boat',
 });
 
@@ -76,4 +76,20 @@ export const BOATYARD_MISSIONS = Object.freeze({
   shape: { title: 'מְשַׁנּוֹת צוּרָה', description: 'מֵאוֹתוֹ חֹמֶר נַעֲשֶׂה כַּדּוּר וְסִירָה. מָה יִקְרֶה בַּמַּיִם?', icon: 'boat' },
   cargo: { title: 'מַעֲמִיסוֹת חֲבִילוֹת', description: 'כַּמָּה הַסִּירָה יְכוֹלָה לָשֵׂאת? נוֹסִיף חֲבִילָה וְנִבְדֹּק.', icon: 'gift' },
   crossing: { title: 'מַשִּׁיטוֹת אֶת הַמִּשְׁלוֹחַ', description: 'בּוֹחֲרוֹת סִירָה שֶׁתּוּכַל לְהָבִיא אֶת כָּל הַחֲבִילוֹת.', icon: 'basket' },
+});
+
+export const THEATER = Object.freeze({
+  id: 'theater',
+  route: Object.freeze({ action: 'theater' }),
+  chapter: 'תֵּאַטְרוֹן הַחֲבֵרִים',
+  detail: 'מְסַדְּרוֹת אֶת הַבָּמָה וּמַעֲלוֹת הַצָּגָה.',
+  icon: 'door',
+  intro: 'theater-welcome',
+  steps: SESSION_LENGTH,
+});
+
+export const THEATER_SHOWS = Object.freeze({
+  backstage: { title: 'מֵאֲחוֹרֵי הַקְּלָעִים', description: 'פּוֹתְחוֹת וִילוֹן וּמְסַדְּרוֹת מָה קוֹרֶה קֹדֶם.', icon: 'door', domain: 'hebrew' },
+  party: { title: 'הַמְּסִבָּה', description: 'מְכִינוֹת כּוֹסוֹת לְכָל הַחֲבֵרִים.', icon: 'cup', domain: 'math' },
+  shadow: { title: 'הַצֵּל עַל הַבָּמָה', description: 'מַדְלִיקוֹת מְנוֹרָה וּמְשַׁנּוֹת אֶת גֹּדֶל הַצֵּל.', icon: 'moon', domain: 'math' },
 });

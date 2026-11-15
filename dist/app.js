@@ -41,7 +41,7 @@ import { mountActOut } from './act-out-view.js?v=2.7.1-pepper';
 import { SCIENCE_TITLE, SCIENCE_EXPERIMENTS, cleanScienceRound, scienceClip } from './science-content.js?v=2.7.1-pepper';
 import { mountScience, scienceArt, scienceMenu } from './science-view.js?v=2.7.1-pepper';
 import { mountOfflineAudio, registerOffline } from './offline-audio.js';
-import { BOATYARD, BOATYARD_MISSIONS, DELIVERY, DELIVERY_MISSIONS, ENGLISH_LISTENING, LITTLE_STORIES, PICNIC, PICNIC_MISSIONS } from './activities.js';
+import { BOATYARD, BOATYARD_MISSIONS, DELIVERY, DELIVERY_MISSIONS, ENGLISH_LISTENING, LITTLE_STORIES, PICNIC, PICNIC_MISSIONS, THEATER, THEATER_SHOWS } from './activities.js';
 import { latestPlayedDraft, readingActivity, recommendAdventure } from './home-adventure.js';
 import { firstStoryClue, pictureClue, storyClue, storyReviewQuestion } from './story-practice.js';
 import { awardLocalRound, checkpointScoredRound, finishScoredRound } from './round-lifecycle.js';
@@ -54,6 +54,10 @@ import { boatyardRound, cleanBoatyard, cleanBoatyardRound, packBoatyardRound } f
 import { boatyardComplete, boatyardMap, boatyardPrompt, mountBoatyardRound, prepareBoatyardAudio } from './boatyard-view.js';
 import { cleanDaily, cleanDailyRound, createDailyRound, DAILY_PATHS, dailyEvidence, dailySuggestion, finishDailyMemory } from './daily.js';
 import { dailyComplete, dailyHome, mountDaily, prepareDailyAudio } from './daily-view.js';
+import { cleanTheater, cleanTheaterRound, createTheaterRound, packTheaterRound, theaterEvidence } from './theater.js';
+import { prepareTheaterAudio, theaterComplete, theaterMap } from './theater-ui.js';
+import { mountTheaterRound } from './theater-round-view.js';
+import { mountTheaterStudio } from './theater-studio.js';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -89,9 +93,10 @@ let picnic = cleanPicnic(null), picnicRound = null, picnicController = null, pic
 let delivery = cleanDelivery(null), deliveryRound = null, deliveryController = null, deliverySticker = null;
 let boatyard = cleanBoatyard(null), boatRound = null, boatController = null, boatSticker = null;
 let daily = cleanDaily(null), dailyRound = null, dailyController = null, dailySticker = null, homeDailyItems = null;
+let theater = cleanTheater(null), theaterRound = null, theaterController = null, theaterSticker = null;
 let homeItems = null;
 const progressScreens = ['home', 'album', 'letters-menu', 'letters-writing', 'letters-recognition', 'characters-menu'];
-const preferenceScreens = [...progressScreens, 'learning-hub', 'reading-levels', 'science-menu', 'number-menu'];
+const preferenceScreens = [...progressScreens, 'learning-hub', 'reading-levels', 'science-menu', 'number-menu', 'theater-map', 'theater-round', 'theater-studio', 'theater-complete'];
 
 try {
   const saved = JSON.parse(gameStorage.getItem(STORAGE_KEY) || 'null');
@@ -115,6 +120,7 @@ try {
     delivery = cleanDelivery(saved.delivery);
     boatyard = cleanBoatyard(saved.boatyard);
     daily = cleanDaily(saved.daily);
+    theater = cleanTheater(saved.theater);
   }
 } catch { /* A corrupt or unavailable save must never prevent play. */ }
 
@@ -180,9 +186,13 @@ function save() {
     const deliverySave = delivery.finished.length || Object.keys(delivery.drafts).length ? { delivery } : {};
     const boatyardSave = boatyard.finished.length || Object.keys(boatyard.drafts).length ? { boatyard } : {};
     const dailySave = daily.drafts.today || daily.finished.clock || daily.finished.english ? { daily } : {};
-    gameStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition, characterPractice, drafts, journeyDrafts, awardedRounds, writingPractice, ...(Object.keys(numberDrafts).length ? { numberDrafts } : {}), ...(Object.keys(scienceDrafts).length ? { scienceDrafts } : {}), ...picnicSave, ...deliverySave, ...boatyardSave, ...dailySave }));
+    const studio = theater.studio;
+    const theaterSave = theater.finished.length || Object.keys(theater.drafts).length || studio.shows.length || studio.draft.script.length
+      || studio.draft.actor !== 'bobi' || studio.draft.set !== 'room' ? { theater } : {};
+    gameStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition, characterPractice, drafts, journeyDrafts, awardedRounds, writingPractice, ...(Object.keys(numberDrafts).length ? { numberDrafts } : {}), ...(Object.keys(scienceDrafts).length ? { scienceDrafts } : {}), ...picnicSave, ...deliverySave, ...boatyardSave, ...dailySave, ...theaterSave }));
     storageAvailable = true;
   } catch { storageAvailable = false; }
+  return storageAvailable;
 }
 
 function openAlbumInvite() {
@@ -666,6 +676,7 @@ function render() {
   deliveryController?.destroy(); deliveryController=null;
   boatController?.destroy(); boatController=null;
   dailyController?.destroy(); dailyController=null;
+  theaterController?.destroy(); theaterController=null;
   letterPad?.destroy(); letterPad = null;
   clockSchool?.destroy(); clockSchool = null;
   applyPreferences();
@@ -681,7 +692,7 @@ function render() {
   else if (view === 'pikachu') renderPikachu();
   else if (view === 'science-menu') app.innerHTML = header() + scienceMenu(scienceDrafts, settings.nikud) + footer();
   else if (view === 'science-round') renderScience();
-  else if (view === 'chapters') app.innerHTML = header() + chapterMap({ picnic, delivery, boatyard }, settings.nikud) + footer();
+  else if (view === 'chapters') app.innerHTML = header() + chapterMap({ picnic, delivery, boatyard, theater }, settings.nikud) + footer();
   else if (view === 'picnic-map') app.innerHTML = header() + picnicMap(picnic, settings.nikud) + footer();
   else if (view === 'picnic-round') renderPicnicRound();
   else if (view === 'picnic-complete') app.innerHTML = header() + picnicComplete(picnicRound, picnicSticker, picnic.finished, settings.nikud) + footer();
@@ -693,6 +704,9 @@ function render() {
   else if (view === 'boatyard-complete') app.innerHTML = header() + boatyardComplete(boatRound, boatSticker, boatyard.finished, settings.nikud) + footer();
   else if (view === 'daily-round') renderDailyRound();
   else if (view === 'daily-complete') app.innerHTML = header() + dailyComplete(dailyRound, dailySticker, settings.nikud) + footer();
+  else if (view === 'theater-map') app.innerHTML = header() + theaterMap(theater, settings.nikud) + footer();
+  else if (view === 'theater-round' || view === 'theater-studio') renderTheater();
+  else if (view === 'theater-complete') app.innerHTML = header() + theaterComplete(theaterRound, theaterSticker, settings.nikud) + footer();
   else if (view === 'park') renderPark();
   else if (view === 'journey-complete') renderJourneyComplete();
   else if (view === 'game') { renderGame(); restoreQuestionState(); }
@@ -773,6 +787,9 @@ function replay() {
   if (view === 'boatyard-complete') { announcements.say(completionClip(boatSticker)); return; }
   if (view === 'daily-round') { dailyController?.replay(); return; }
   if (view === 'daily-complete') { announcements.say(completionClip(dailySticker)); return; }
+  if (view === 'theater-map') { clockSpeak(THEATER.intro); return; }
+  if (view === 'theater-round' || view === 'theater-studio') { theaterController?.replay(); return; }
+  if (view === 'theater-complete') { announcements.say(completionClip(theaterSticker)); return; }
   if(view==='park'){clockSpeak('journey-park-intro');return;}
   if (view === 'clock-school') { clockSchool.replay(true); return; }
   if (view === 'game') {
@@ -1018,7 +1035,7 @@ function renderSettings() {
   dialog.querySelector('[data-dialog="reset"]').onclick = () => {
     openDialog(`<h2 id="parent-title">לאפס את המכשיר הזה?</h2><p>המדבקות וההתקדמות בדפדפן הזה יימחקו. הגדרות המשחק יישמרו.${album.linked ? ' החיבור לאלבום המשפחתי יוסר. האלבום שכבר סונכרן יישמר עבור המכשירים האחרים.' : ''}</p><div class="dialog-actions"><button class="secondary-button" data-dialog="cancel-reset">ביטול</button><button class="primary-button" data-dialog="confirm-reset">איפוס ההתקדמות</button></div>`);
     dialog.querySelector('[data-dialog="cancel-reset"]').onclick = renderSettings;
-    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); learner.reset(); drafts={};journeyDrafts={};numberDrafts={};numberRound=null;scienceDrafts={};picnicController?.destroy({discard:true});picnicController=null;picnic=cleanPicnic(null);picnicRound=null;delivery=cleanDelivery(null);deliveryRound=null;boatyard=cleanBoatyard(null);boatRound=null;dailyController?.destroy({discard:true});dailyController=null;daily=cleanDaily(null);dailyRound=null;awardedRounds=[];writingPractice={mode:'trace',drafts:{}}; progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
+    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); learner.reset(); drafts={};journeyDrafts={};numberDrafts={};numberRound=null;scienceDrafts={};picnicController?.destroy({discard:true});picnicController=null;picnic=cleanPicnic(null);picnicRound=null;delivery=cleanDelivery(null);deliveryRound=null;boatyard=cleanBoatyard(null);boatRound=null;dailyController?.destroy({discard:true});dailyController=null;daily=cleanDaily(null);dailyRound=null;theater=cleanTheater(null);theaterRound=null;awardedRounds=[];writingPractice={mode:'trace',drafts:{}}; progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
   };
 }
 
@@ -1072,6 +1089,9 @@ function describeDraft({ kind, path, value }) {
   } else if (kind === 'boatyard') {
     ({ title, icon } = BOATYARD_MISSIONS[path]);
     length = BOATYARD.steps;
+  } else if (kind === 'theater') {
+    ({ title, icon } = THEATER_SHOWS[path]);
+    length = THEATER.steps;
   } else {
     const experiment = SCIENCE_EXPERIMENTS[path];
     title = experiment.title;
@@ -1082,7 +1102,7 @@ function describeDraft({ kind, path, value }) {
 }
 function currentDraft() {
   return latestPlayedDraft({ drafts, journeyDrafts, numberDrafts, scienceDrafts,
-    picnicDrafts: picnic.drafts, deliveryDrafts: delivery.drafts, boatyardDrafts: boatyard.drafts });
+    picnicDrafts: picnic.drafts, deliveryDrafts: delivery.drafts, boatyardDrafts: boatyard.drafts, theaterDrafts: theater.drafts });
 }
 
 function resumeLatest(){
@@ -1093,6 +1113,7 @@ function resumeLatest(){
   if (draft.kind === 'picnic') { startPicnicRound(draft.path); return; }
   if (draft.kind === 'delivery') { startDeliveryRound(draft.path); return; }
   if (draft.kind === 'boatyard') { startBoatyard(draft.path); return; }
+  if (draft.kind === 'theater') { startTheater(draft.path); return; }
   narrator.stop();
   if(draft.kind==='classic'){const restored=unpackRound(draft.value);if(!restored)return;round=restored;view='game';}
   else {journeyPlan=resumeJourney(draft.value);if(!journeyPlan)return;round=null;view='journey';}
@@ -1310,6 +1331,60 @@ function renderBoatyardRound() {
   });
 }
 
+function openTheater() {
+  checkpoint(); narrator.stop(); round = null; journeyPlan = null; theaterRound = null;
+  view = 'theater-map'; render(); focusTitle();
+  prepareTheaterAudio('map');
+  if (!theater.finished.length) announcements.say(THEATER.intro);
+}
+
+function startTheater(path) {
+  if (!Object.hasOwn(THEATER_SHOWS, path)) return;
+  checkpoint(); narrator.stop(); round = null; journeyPlan = null;
+  theaterRound = cleanTheaterRound(path, theater.drafts[path]);
+  if (!theaterRound) {
+    theaterRound = createTheaterRound(path);
+    checkpointScoredRound(theaterRound, theater.drafts, path, packTheaterRound);
+    save();
+  }
+  view = 'theater-round'; prepareTheaterAudio(path); render(); focusTitle();
+}
+
+function openTheaterStudio() {
+  checkpoint(); narrator.stop(); round = null; journeyPlan = null;
+  view = 'theater-studio'; prepareTheaterAudio('studio'); render(); focusTitle();
+}
+
+function renderTheater() {
+  app.innerHTML = header() + '<main id="main" class="picnic-page picnic-play theater-page"></main>' + footer();
+  const root = app.querySelector('#main');
+  const options = { nikud: settings.nikud, motion: motionEnabled, focusTitle,
+    play: (keys, manual) => manual ? clockSpeak(keys) : announcements.say(keys) };
+  if (view === 'theater-studio') {
+    theaterController = mountTheaterStudio(root, { ...options, studio: theater.studio, items: learner.items, onSave: save });
+  } else {
+    theaterController = mountTheaterRound(root, {
+      ...options, round: theaterRound,
+      onSave: draft => { checkpointScoredRound(draft, theater.drafts, draft.path, packTheaterRound); save(); },
+      onSuccess: draft => {
+        const evidence = theaterEvidence(draft);
+        if (evidence) learner.record(evidence, draft.helped.includes(draft.index) ? 'helped' : 'independent');
+        narrator.chime();
+      },
+      onFinish: draft => {
+        const result = finishScoredRound(draft, theater.drafts, draft.path,
+          (id, length) => awardRound(THEATER_SHOWS[draft.path].domain, draft.helped.length, null, id, length));
+        if (!result) return;
+        if (!theater.finished.includes(draft.path)) theater.finished.push(draft.path);
+        progress = result.progress; theaterSticker = result.sticker;
+        view = 'theater-complete'; save(); render(); focusTitle();
+        revealWin('.picnic-sticker'); announcements.say(completionClip(theaterSticker));
+      },
+    });
+  }
+  theaterController.start();
+}
+
 function startDaily(path) {
   if (!Object.hasOwn(DAILY_PATHS, path)) return;
   checkpoint(); narrator.stop(); round = null; journeyPlan = null;
@@ -1490,6 +1565,9 @@ app.addEventListener('click', event => {
     case 'boatyard': openBoatyard(); break;
     case 'boatyard-start': startBoatyard(button.dataset.path); break;
     case 'daily-start': startDaily(button.dataset.path); break;
+    case 'theater': openTheater(); break;
+    case 'theater-start': startTheater(button.dataset.path); break;
+    case 'theater-studio': openTheaterStudio(); break;
     case 'garden': openReadingLevels(); break;
     case 'mission-direct': startMission(button.dataset.mission,true); break;
     case 'journey-start': startJourney(button.dataset.journey,button.dataset.level); break;
@@ -1561,6 +1639,9 @@ window.addEventListener('online', () => {
   if (view === 'delivery-map' || view === 'delivery-round') prepareDeliveryAudio();
   if (view === 'boatyard-map' || view === 'boatyard-round') prepareBoatyardAudio();
   if (view === 'daily-round') prepareDailyAudio(dailyRound);
+  if (view === 'theater-map') prepareTheaterAudio('map');
+  if (view === 'theater-round') prepareTheaterAudio(theaterRound.path);
+  if (view === 'theater-studio') prepareTheaterAudio('studio');
 });
 window.addEventListener('hashchange', openAlbumInvite);
 window.addEventListener('focus', () => { void album.flush();void learner.flush(); });

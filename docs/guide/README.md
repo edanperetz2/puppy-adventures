@@ -6,6 +6,12 @@ The Luli chapter’s [harbor illustration](../../dist/assets/boatyard-harbor.web
 
 > Illustrate a peaceful lakeside boat workshop for a five-year-old’s learning game. Wide landscape storybook illustration. A honey-colored wooden jetty and a little workshop sit on the right among reeds and pine trees. Calm blue water fills the center and left, with soft late-afternoon light and a clear horizon. Use warm paper-grain gouache, rounded shapes, and a muted palette of teal, cream, coral, and amber. Leave open water in the middle for the game’s boat animation. Avoid characters, boats, words, logos, and interface elements.
 
+## Theater backdrop
+
+The [theater backdrop](../../dist/assets/theater-stage.webp) was made with the built-in ImageGen tool.
+
+> Use case: illustration-story. A landscape background for a Hebrew children's puppet-theater game. Make a welcoming little wooden theater seen straight-on at stage level, with soft dusty-coral curtains gathered only at the far sides and an amber wood floor occupying the lower third. Leave the middle 70 percent completely open and calm, with a light dusty lilac painted back wall and clear floor, so movable puppets, props, and a small door can be overlaid in the game. Frame the playable area with a rounded honey-colored proscenium, soft warm stage lighting and a few tiny painted stars at the very top corners. Refined contemporary children's picture-book gouache, subdued terracotta, plum, honey and cream, subtle paper grain, soft edges, uncluttered readable forms. Wide 16:9 composition, frame visible, no foreground seats, no characters, no props, no closed curtain across the stage, no lettering, no icons, no logos, no watermark.
+
 ## Original edition
 
 The original image is `dist/assets/game-guide.png`, with English on pale blue at the left and Hebrew on warm cream at the right. The source PNGs are `guide-en.png` and `guide-he.png`. English letters, words and arithmetic keep their natural left-to-right order.

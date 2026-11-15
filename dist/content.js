@@ -19,6 +19,7 @@ import { PICNIC_CLIPS } from './picnic-content.js';
 import { DELIVERY_CLIPS } from './delivery-content.js';
 import { BOATYARD_CLIPS } from './boatyard-content.js';
 import { DAILY_CLIPS } from './daily-content.js';
+import { THEATER_CLIPS } from './theater-content.js';
 export { ENGLISH_OBJECTS } from './english-expansion.js';
 export { WORDS, READING_LEVELS } from './reading.js?v=2.7.0-science';
 
@@ -154,4 +155,4 @@ Object.assign(CLIPS, NUMBER_WORKSHOP_CLIPS);
 CLIPS[ACT_OUT_PROMPT] = { lang: 'he-IL', text: ACT_OUT_INSTRUCTION, speech: 'kiʁʔˈi ʔˈet hamiʃpˈat. hazˈizi ʔˈet mˈa ʃematʔˈim.' };
 for (const [key, clip] of Object.entries(ACTION_STORY_INSTRUCTIONS)) CLIPS[key] = { lang: 'he-IL', ...clip };
 Object.assign(CLIPS, SCIENCE_CLIPS);
-Object.assign(CLIPS, STORY_CLUE_CLIPS, PICNIC_CLIPS, DELIVERY_CLIPS, BOATYARD_CLIPS, DAILY_CLIPS);
+Object.assign(CLIPS, STORY_CLUE_CLIPS, PICNIC_CLIPS, DELIVERY_CLIPS, BOATYARD_CLIPS, DAILY_CLIPS, THEATER_CLIPS);

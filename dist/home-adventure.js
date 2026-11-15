@@ -84,7 +84,7 @@ export function recommendAdventure({ items = {}, reading: selected, readingPract
   return { activity, reason: activity.he[1] };
 }
 
-export function latestPlayedDraft({ drafts, journeyDrafts, numberDrafts, scienceDrafts, picnicDrafts = {}, deliveryDrafts = {}, boatyardDrafts = {} }) {
+export function latestPlayedDraft({ drafts, journeyDrafts, numberDrafts, scienceDrafts, picnicDrafts = {}, deliveryDrafts = {}, boatyardDrafts = {}, theaterDrafts = {} }) {
   const activeClassic = d => d.index || d.resolved || d.attempted.length || d.counted.length || d.actOutMoves?.length
     || (d.helped.includes(d.index) && !d.questions[d.index].showModel);
   const activeJourney = ({ index, state }) => index || state.resolved || state.showModel || state.placed
@@ -98,5 +98,6 @@ export function latestPlayedDraft({ drafts, journeyDrafts, numberDrafts, science
     ...Object.entries(picnicDrafts).filter(([, d]) => d.at > 0).map(([path, value]) => ({ kind: 'picnic', path, value })),
     ...Object.entries(deliveryDrafts).filter(([, d]) => d.at > 0).map(([path, value]) => ({ kind: 'delivery', path, value })),
     ...Object.entries(boatyardDrafts).filter(([, d]) => d.at > 0).map(([path, value]) => ({ kind: 'boatyard', path, value })),
+    ...Object.entries(theaterDrafts).filter(([, d]) => d.at > 0).map(([path, value]) => ({ kind: 'theater', path, value })),
   ].sort((a, b) => b.value.at - a.value.at)[0];
 }

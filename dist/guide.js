@@ -4,7 +4,7 @@ import { GUIDE_ITEMS } from './guide-content.js';
 // The header must also work while an older installed game still serves art.js.
 export const GUIDE_ICON = '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6Q7 2 2 5V20Q7 17 12 21Q17 17 22 20V5Q17 2 12 6ZM12 6V21M5 8Q7 7 9 9M15 9Q17 7 19 8M5 12Q7 11 9 13M15 13Q17 11 19 12"/></g></svg>';
 
-export const GUIDE_IMAGE = Object.freeze({ src: './assets/game-guide-current.webp', width: 2172, height: 1448, panelWidth: 1086 });
+export const GUIDE_IMAGE = Object.freeze({ src: './assets/game-guide-current.webp', width: 2172, height: 1620, panelWidth: 1086 });
 const gameNames = GUIDE_ITEMS.map(item => item.he[0]);
 let guide = null;
 
