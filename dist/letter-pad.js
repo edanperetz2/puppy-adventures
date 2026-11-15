@@ -4,7 +4,7 @@ export const PEN_LIFT_MS = 650;
 export function writingDuration(length) { return Math.max(650, Math.min(6500, length * 12)); }
 
 export function mountLetterPad(container, {
-  motion = true, completeMessage = 'כל הכבוד! כתבת את האות!',
+  motion = () => true, completeMessage = 'כל הכבוד! כתבת את האות!',
   onComplete = () => {}, onStartNeeded = () => {}, onDemoComplete = () => {},
 } = {}) {
   const svg = container.querySelector('svg');
@@ -54,7 +54,7 @@ export function mountLetterPad(container, {
   }
   function demo() {
     if (destroyed) return;
-    if (!motion) { step(); return; }
+    if (!motion()) { step(); return; }
     reset(); mode = 'demo'; marker.setAttribute('hidden', ''); direction.setAttribute('hidden', '');
     let index = 0, beginning = null, pauseUntil = 0;
     function frame(now) {

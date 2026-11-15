@@ -1,27 +1,51 @@
-import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { readdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { CLIPS } from '../dist/content.js';
 
-const root = new URL('../dist/', import.meta.url);
-const files = await readdir(root);
-const assets = await readdir(new URL('assets/', root));
-const shell = files.filter(file => /\.(html|js|css|webmanifest)$/.test(file) && file !== 'sw.js').map(file => `./${file}`);
-const staticAssets = assets.filter(file => /\.(svg|png|jpe?g|webp|ttf|woff2|txt)$/.test(file)).map(file => `./assets/${file}`);
-const voiceRuntime = (await readdir(new URL('voice-runtime/', root))).filter(file => /\.(json|mjs)$/.test(file)).map(file => `./voice-runtime/${file}`);
-// Versioned scripts and styles bypass older caches online. Cache their exact
-// URLs too so an installed copy can use the same assets offline.
-const html = await readFile(new URL('index.html', root), 'utf8');
-const entries = [
-  ...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["']/g),
-  ...html.matchAll(/<link\b[^>]*\brel=["']stylesheet["'][^>]*\bhref=["']([^"']+)["']/g),
-].map(match => match[1]);
-const manifest = [...new Set(['./', ...shell, ...entries, ...voiceRuntime, ...staticAssets, ...Object.keys(CLIPS).map(key => `./assets/audio/${key}.mp3`)])];
-for (const url of manifest) {
-  if (!url.split('?')[0].endsWith('.js')) continue;
-  const module = await readFile(new URL(url, root), 'utf8');
-  for (const match of module.matchAll(/\bfrom\s+["'](\.\/[^"']+\?[^"']+)["']|\bnew URL\(\s*["'](\.\/[^"']+)["']\s*,\s*import\.meta\.url\s*\)/g)) {
-    const path = match[1] || match[2];
-    if (!manifest.includes(path)) manifest.push(path);
-  }
+export const styleLinks = /<link\b[^>]*\brel=["']stylesheet["'][^>]*\bhref=["']([^"']+)["'][^>]*>/g;
+export const scriptLinks = /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*><\/script>/g;
+const starter = ['welcome', 'meet-friends', 'choose-activity', 'try-again', 'correct-1', 'correct-2', 'correct-3', 'complete', 'complete-all', 'profile-good-luck-ariel', 'pikachu-greeting'];
+const archivedAssets = /^(?:game-guide\.png|game-guide-(?:six|ariel)\.webp|rubik-\d+\.ttf)$/;
+const narrationFolder = './assets/audio/';
+
+export async function offlineFiles(root, bundle = []) {
+  const html = await readFile(new URL('index.html', root), 'utf8');
+  const entryUrls = [...html.matchAll(styleLinks), ...html.matchAll(scriptLinks)].map(match => match[1]);
+  const explicitlyLoaded = ['./index.html', './manifest.webmanifest', ...entryUrls];
+  const sourceModules = bundle.length ? bundle : await findModules(root, entryUrls.filter(url => url.endsWith('.js') || url.includes('.js?')));
+  const pictures = (await readdir(new URL('assets/', root)))
+    .filter(file => /\.(?:svg|png|jpe?g|webp|woff2|txt)$/.test(file) && !archivedAssets.test(file))
+    .map(file => `./assets/${file}`);
+  const audio = JSON.parse(await readFile(new URL('assets/audio/manifest.json', root), 'utf8')).clips;
+  const keys = [...Object.keys(CLIPS), 'pikachu-greeting'];
+  const localCall = await readFile(new URL(`${narrationFolder}pikachu-greeting.mp3`, root));
+  const localHash = createHash('sha256').update(localCall).digest('hex');
+  const recordings = Object.fromEntries(keys.map(key => [
+    `${narrationFolder}${key}.mp3`, key === 'pikachu-greeting' ? localHash : audio[key].sha256,
+  ]));
+  const sizes = await Promise.all(Object.keys(recordings).map(url => stat(new URL(url, root)).then(file => file.size)));
+  const core = [...new Set([...explicitlyLoaded, ...sourceModules, ...pictures, ...starter.map(key => `${narrationFolder}${key}.mp3`)])];
+  const assets = [...new Set(['./', ...core, './offline-core.json', './offline-audio.json', ...Object.keys(recordings)])];
+  await Promise.all([
+    writeFile(new URL('offline.json', root), JSON.stringify(assets, null, 2) + '\n'),
+    writeFile(new URL('offline-core.json', root), JSON.stringify(core, null, 2) + '\n'),
+    writeFile(new URL('offline-audio.json', root), JSON.stringify({ bytes: sizes.reduce((total, size) => total + size, 0), recordings }) + '\n'),
+  ]);
+  console.log(`${core.length} files for offline startup, ${keys.length} recordings available to download.`);
+  return core;
 }
-await writeFile(new URL('offline.json', root), JSON.stringify(manifest, null, 2) + '\n');
-console.log(`Offline asset list: ${manifest.length} files.`);
+
+async function findModules(root, scripts) {
+  const urls = new Set(scripts);
+  for (const url of urls) {
+    const input = await readFile(new URL(url, root), 'utf8');
+    for (const match of input.matchAll(/\b(?:from\s+|import(?:\s*\(\s*|\s+))['"](\.\/[^'"]+\.js(?:\?[^'"]*)?)['"]/g)) urls.add(match[1]);
+  }
+  return [...urls];
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  await offlineFiles(new URL('../dist/', import.meta.url));
+}

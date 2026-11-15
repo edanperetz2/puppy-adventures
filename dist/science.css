@@ -330,6 +330,7 @@
   isolation: isolate;
   width: 100%;
   height: 100%;
+  container-type: size;
   border-radius: 50%;
   overflow: hidden;
   background: #f0ead9;
@@ -394,8 +395,8 @@
   100% { transform: scale(1); opacity: 0; }
 }
 @keyframes lab-pepper-slide {
-  from { left: var(--x); top: var(--y); }
-  to { left: var(--edge-x); top: var(--edge-y); }
+  from { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))); }
+  to { transform: translate(-50%, -50%); }
 }
 .lab-drag-ghost, .lab-in-motion {
   z-index: 60;

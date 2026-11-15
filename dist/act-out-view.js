@@ -153,13 +153,17 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
       door.classList.toggle('act-walking-in', Boolean(animate));
       door.classList.add('act-entered');
       if (!animate) return null;
+      const distance = door.clientWidth * .45;
+      const walk = (remaining, lift = 0, rock = 0, scale = 1) =>
+        `translate(calc(-50% + ${distance * remaining}px), ${lift}%) rotate(${rock}deg) scale(${scale})`;
       return door.querySelector('.act-entry-animal').animate([
-        { left: '74%', transform: 'translate(-50%, 0)' },
-        { left: '74%', transform: 'translate(-50%, 0)', offset: .26 },
-        { left: '55%', transform: 'translate(-50%, -8%) rotate(-5deg)', offset: .50 },
-        { left: '41%', transform: 'translate(-50%, 0) scale(.92)', offset: .70 },
-        { left: '29%', transform: 'translate(-50%, -5%) scale(.83)' },
-      ], { duration: 920, easing: 'ease-in-out' });
+        { transform: walk(1) },
+        { transform: walk(1), offset: .26 },
+        { transform: walk(.63, -9, -5), offset: .46 },
+        { transform: walk(.46, 0, 0, .97), offset: .58 },
+        { transform: walk(.26, -6, 3, .93), offset: .72 },
+        { transform: walk(0, -5, 0, .83) },
+      ], { duration: 820, easing: 'cubic-bezier(.27,.46,.32,1)' });
     }
     const [x, y] = stopPoint(plan.target);
     const [dx, dy] = group ? groupOffsets[plan.count - 2][played.indexOf(index)] : [0, 0];

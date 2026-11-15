@@ -2,9 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { readFile } from 'node:fs/promises';
+import { createHash, webcrypto } from 'node:crypto';
 
+const worker = await readFile(new URL('../dist/sw.js', import.meta.url), 'utf8');
 const context = vm.createContext({ self: { location: { href: 'https://game.example/sw.js' }, addEventListener() {} }, URL, Request, Response, Headers });
-vm.runInContext(await readFile(new URL('../dist/sw.js', import.meta.url), 'utf8'), context);
+vm.runInContext(worker, context);
 const serve = range => context.serveRange(new Request('https://game.example/test.mp3', { headers: { Range: range } }), new Response('0123456789', { headers: { 'Content-Type': 'audio/mpeg' } }));
 
 test('Offline audio handles bounded, open-ended and suffix requests from mobile browsers', async () => {
@@ -23,4 +25,95 @@ test('Invalid audio ranges return no misleading audio data', async () => {
     assert.equal(result.status, 416);
     assert.equal(result.headers.get('content-range'), 'bytes */10');
   }
+});
+
+async function offlineFixture(legacyClip) {
+  const base = 'https://game.example/';
+  const bytes = 'verified Ava MP3';
+  const digest = createHash('sha256').update(bytes).digest('hex');
+  const remote = {
+    'offline-core.json': JSON.stringify(['./index.html']),
+    'offline-audio.json': JSON.stringify({ bytes: bytes.length, recordings: { './assets/audio/sample.mp3': digest } }),
+    'index.html': 'home',
+    'assets/audio/sample.mp3': bytes,
+  };
+  const calls = [], listeners = {}, stores = new Map();
+  let online = true;
+  const fetch = async path => {
+    assert.ok(online, 'offline');
+    const key = String(path).slice(base.length);
+    calls.push(key);
+    assert.ok(Object.hasOwn(remote, key), key);
+    return new Response(remote[key]);
+  };
+  const caches = {
+    keys: async () => [...stores.keys()],
+    delete: async key => stores.delete(key),
+    open: async key => {
+      if (!stores.has(key)) {
+        const files = new Map();
+        stores.set(key, {
+          match: async request => files.get(request.url || request)?.clone(),
+          keys: async () => [...files.keys()].map(url => new Request(url)),
+          put: async (path, response) => { files.set(path, response.clone()); },
+          addAll: async paths => Promise.all([...paths].map(async path => files.set(path, await fetch(path)))),
+        });
+      }
+      return stores.get(key);
+    },
+  };
+  if (legacyClip) {
+    const old = await caches.open('puppy-adventures-2.7.1-pepper');
+    await old.put(base + 'assets/audio/sample.mp3', new Response(legacyClip));
+  }
+  const context = vm.createContext({
+    self: { location: { href: base + 'sw.js' }, skipWaiting() {}, clients: { claim() {} }, addEventListener(type, callback) { listeners[type] = callback; } },
+    URL, Request, Response, Headers, Uint8Array, caches, fetch, crypto: webcrypto,
+  });
+  vm.runInContext(worker, context);
+  async function message(type) {
+    let ended, response;
+    listeners.message({ data: { type }, ports: [{ postMessage(data) { response = data; } }], waitUntil(promise) { ended = promise; } });
+    await ended;
+    return response;
+  }
+  const event = { waitUntil: promise => { event.done = promise; } };
+  listeners.install(event);
+  await event.done;
+  listeners.activate(event);
+  await event.done;
+  const request = range => {
+    const req = new Request(base + 'assets/audio/sample.mp3', { headers: { Range: range } });
+    return context.gameAsset(req, new URL(req.url));
+  };
+  return { calls, message, request, disconnect() { online = false; } };
+}
+
+test('A first visit fetches the shell without downloading the audio pack', async () => {
+  const fixture = await offlineFixture();
+  assert.ok(fixture.calls.includes('index.html'));
+  assert.ok(!fixture.calls.some(path => path.endsWith('.mp3')));
+  assert.equal((await fixture.message('offline-status')).count, 0);
+  const result = await fixture.request('bytes=0-3');
+  assert.equal(await result.text(), 'veri');
+  fixture.disconnect();
+  assert.equal(await (await fixture.request('bytes=9-')).text(), 'Ava MP3');
+});
+
+test('Existing offline recordings remain usable across the update and a stale clip is replaced', async () => {
+  const matching = await offlineFixture('verified Ava MP3');
+  matching.disconnect();
+  assert.equal(await (await matching.request('bytes=9-')).text(), 'Ava MP3');
+  const stale = await offlineFixture('old recording');
+  assert.equal(await (await stale.request('bytes=9-')).text(), 'Ava MP3');
+  assert.equal(stale.calls.filter(x => x.endsWith('.mp3')).length, 1);
+});
+
+test('Downloading the offline pack restores playback before the clip has been played', async () => {
+  const fixture = await offlineFixture();
+  const outcome = await fixture.message('offline-download');
+  assert.equal(outcome.count, outcome.total);
+  assert.equal(outcome.incomplete, false);
+  fixture.disconnect();
+  assert.equal(await (await fixture.request('bytes=9-')).text(), 'Ava MP3');
 });

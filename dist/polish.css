@@ -1,0 +1,93 @@
+.skip-link:not(:focus) { clip-path: inset(50%); pointer-events: none; }
+.home-page .mission-body p,
+.home-page .subject-tag,
+.home-page .welcome-listen,
+.game-page .step-label,
+.game-page .mission-label,
+.game-page .section-kicker,
+.game-page .feedback,
+.game-page .buddy-bar,
+.game-page .back-button { color: #655d70; }
+.home-page .mission-body p { font-size: clamp(13px, 2.2vw, 15px); }
+.home-page .welcome-listen,
+.game-page .step-label,
+.game-page .section-kicker,
+.game-page .hint-button { font-size: 12px; }
+.game-page .hint-button { color: #735a32; min-height: 44px; }
+.hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-block-start: 16px; }
+.hero-actions .home-pika-start { margin: 0; }
+.home-page .hero-world .world-scene { max-width: 520px; margin-inline: auto; }
+.home-page .mission-card { position: relative; }
+.home-page .mission-card :is(.mission-go, .mission-go svg) { margin-top: 0; }
+.home-page .mission-go { position: absolute; bottom: 16px; inset-inline-end: 15px; padding: 3px; border-radius: 7px; }
+.home-page .mission-body p { padding-inline-end: 13px; }
+.science-card .mission-art { background: #e5f2ec; }
+.science-card .art-orbit { background: #bfdeda; }
+.science-card .mission-object { position: absolute; height: auto; aspect-ratio: 1; }
+.science-card .lab-prop-pepper { transform: rotate(-12deg) scale(1.15); }
+.learning-group + .learning-group { margin-block-start: 26px; }
+.learning-group-title { margin: 0 0 9px; font-size: clamp(19px, 3.5vw, 25px); color: var(--green-dark); }
+.learning-group .learning-path-card h3 { margin: 7px 0 3px; font-size: clamp(18px, 3.3vw, 23px); color: var(--ink); line-height: 1.4; }
+.offline-panel {
+  margin-block: 16px;
+  padding: 13px 16px;
+  border: 1px solid #c7dfd4;
+  border-radius: 16px;
+  background: #edf6ef;
+}
+.offline-panel h3 { margin: 0; font-size: 18px; }
+.offline-panel p { margin: 8px 0; font-size: 13px; line-height: 1.65; }
+.offline-panel button { min-height: 44px; }
+.home-page .scene-pup, .home-page .scene-butterfly, .home-page .scene-sparkle { animation: none; }
+.game-page .answer-button.try-again { opacity: .58; transform: none; border-color: #a99abc; }
+.game-page .answer-button.correct { border-color: #559581; background: #e9f6ec; }
+.game-page .answer-check, .number-answer.number-correct .ui-icon { transform-origin: 50% 60%; }
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.still) {
+    --arrival: cubic-bezier(.23,.75,.24,1);
+    --settle: cubic-bezier(.2,.83,.28,1.15);
+  }
+  html:not(.still) :is(.step-enter .question-visual, .step-enter .answer-grid) { animation: game-arrive 210ms var(--arrival) both; }
+  html:not(.still) .step-enter .answer-grid { animation-delay: 32ms; }
+  html:not(.still) :is(.correct .answer-check, .number-answer.number-correct .ui-icon) { animation: game-stamp 280ms var(--settle) both; }
+  html:not(.still) .feedback-reveal { animation: game-arrive 205ms var(--arrival) both; }
+  html:not(.still) .buddy-bar.celebrating .pup { animation: game-nod 400ms var(--settle); }
+  html:not(.still) .reward-reveal { animation: game-win 490ms var(--settle) both; }
+  html:not(.still) .hero-world .scene-luli { animation: game-pup-arrive 520ms 90ms var(--settle) both; }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not(.still) .mission-card:hover .mission-go { transform: translateX(-4px); }
+  .mission-card .mission-go { transition: transform 160ms var(--arrival, ease-out); }
+}
+
+@keyframes game-arrive {
+  from { opacity: .72; transform: translateY(5px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes game-stamp {
+  from { opacity: .45; transform: scale(.68) rotate(11deg); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes game-nod {
+  0%, 100% { transform: none; }
+  48% { transform: translateY(-5px) rotate(-5deg); }
+}
+@keyframes game-win {
+  0% { opacity: .6; transform: translateY(10px) rotate(-8deg) scale(.82); }
+  76% { opacity: 1; transform: translateY(-2px) rotate(2deg) scale(1.04); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes game-pup-arrive {
+  0% { transform: translateY(6px) rotate(-3deg); }
+  100% { transform: none; }
+}
+
+@media (max-width: 570px) {
+  .home-page .hero { gap: 9px; padding-block: 8px 19px; }
+  .hero-actions { justify-content: center; margin-block-start: 10px; }
+  .hero-actions .primary-button { gap: 9px; padding-inline: 13px; }
+  .home-page .hero-world { width: min(86%, 326px); }
+  .home-page .mission-go { bottom: 9px; inset-inline-end: 9px; }
+}

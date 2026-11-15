@@ -1,12 +1,12 @@
 # Bilingual game guide
 
-Version 2.2.3 uses [game-guide-ariel.webp](../../dist/assets/game-guide-ariel.webp). Both panels describe Ariel’s fixed profile and the Hebrew voice that welcomes her. The poster keeps the six-question adventures and six-page stories from version 2.2.2. The original posters and verification records below document the ten-question edition.
+The in-game guide uses [game-guide-current.webp](../../dist/assets/game-guide-current.webp). The image shows the current activity map with English on pale blue at the left and Hebrew on cream at the right. [Guide text](../../dist/guide-content.js) records both editions of the copy. The original posters and verification records below are release history.
 
 ## Original edition
 
-The app serves `dist/assets/game-guide.png`: **English on the left with a pale blue background; Hebrew on the right with warm cream**. The two source PNGs are `guide-en.png` and `guide-he.png`. Their text was checked against the app and the Hebrew poster was read for spelling, right-to-left ordering, number order and matching descriptions. English letters, words and arithmetic keep their natural left-to-right order.
+The original image is `dist/assets/game-guide.png`, with English on pale blue at the left and Hebrew on warm cream at the right. The source PNGs are `guide-en.png` and `guide-he.png`. English letters, words and arithmetic keep their natural left-to-right order.
 
-The current content has eleven main activities, ten Hebrew reading stages with 1,458 targets including 647 short picture-matching passages, 64 workshop words, eight ten-page interactive stories, twenty first-sound examples, thirty optional short English reading words, ten clock lessons, 1,000 sticker slots and a forty-space park with twelve decoration types. Short passages and complete playable stories are distinct activities. Writing forms cover Hebrew print/handwriting and English uppercase/lowercase. Completed scored ten-question adventures award stickers; writing practice and guided clock lessons save their own progress.
+The original edition illustrated ten-question scored adventures, ten-page stories and the 1,458 reading targets available at that release.
 
 The original overview was generated with the built-in image tool; the English background was tinted with the prompt in `english-background-prompt.txt`. The final combined image is a **lossless assembly**, rather than the lower-resolution generated composition: `scripts/prepare-game-guide.ps1` copies both original-size posters onto one 2172 × 1448 canvas and compares the decoded pixel hashes of both halves with the sources. `scripts/game-guide-image-review.json` records those checks.
 

@@ -60,7 +60,9 @@ const pepperGrains = Array.from({ length: 32 }, (_, index) => {
   const x = Math.cos(angle);
   const y = Math.sin(angle);
   const position = (distance, direction) => (50 + distance * direction).toFixed(2);
-  return `<i class="lab-pepper-grain" style="--x:${position(radius, x)}%;--y:${position(radius, y)}%;--edge-x:${position(edge, x)}%;--edge-y:${position(edge, y)}%;--grain:${2 + index % 3}px;--delay:${index * 11 % 215}ms"></i>`;
+  const dx = ((radius - edge) * x).toFixed(2);
+  const dy = ((radius - edge) * y).toFixed(2);
+  return `<i class="lab-pepper-grain" style="--x:${position(radius, x)}%;--y:${position(radius, y)}%;--edge-x:${position(edge, x)}%;--edge-y:${position(edge, y)}%;--dx:${dx}cqw;--dy:${dy}cqh;--grain:${2 + index % 3}px;--delay:${index * 11 % 215}ms"></i>`;
 }).join('');
 
 function pepperDishes(state, step, effect, text) {
@@ -115,7 +117,7 @@ export function mountScience(root, { path, saved, nikud, motion, speak, onSave, 
   const listen = (type, handler) => root.addEventListener(type, handler, { signal: events.signal });
   const ordered = steps.map(step => shuffle(step.actions));
   let state = saved || { index: 0, actions: [], complete: false };
-  let timer = null, drag = null, suppressClick = null;
+  let drag = null, suppressClick = null;
   const step = () => steps[state.index];
   const selection = () => state.actions[state.index];
 
@@ -161,7 +163,7 @@ export function mountScience(root, { path, saved, nikud, motion, speak, onSave, 
     const current = step();
     if (selection() || !current.actions.includes(id)) return;
     save({ actions: [...state.actions, id] });
-    const effect = motion && !matchMedia('(prefers-reduced-motion: reduce)').matches && (toolEffects.has(id) || id === 'time') ? id : '';
+    const effect = motion() && (toolEffects.has(id) || id === 'time') ? id : '';
     render(effect);
     const reveal = () => {
       root.querySelector('.lab-result > p').hidden = false;
@@ -170,8 +172,12 @@ export function mountScience(root, { path, saved, nikud, motion, speak, onSave, 
       if (document.activeElement === document.body || root.contains(document.activeElement)) button.focus({ preventScroll: true });
       replay();
     };
-    if (effect) timer = setTimeout(reveal, 950);
-    else reveal();
+    const running = effect ? root.querySelector('.lab-stage').getAnimations?.({ subtree: true }) ?? [] : [];
+    if (running.length) {
+      void Promise.allSettled(running.map(animation => animation.finished)).then(() => {
+        if (!events.signal.aborted) reveal();
+      });
+    } else reveal();
   }
 
   listen('click', event => {
@@ -237,5 +243,5 @@ export function mountScience(root, { path, saved, nikud, motion, speak, onSave, 
     if (event.pointerId === drag?.pointer) clearDrag();
   });
   render();
-  return { replay, destroy() { events.abort(); clearTimeout(timer); clearDrag(); } };
+  return { replay, destroy() { events.abort(); clearDrag(); } };
 }

@@ -7,7 +7,6 @@ import { FRUIT_CUTTING_TITLE } from './fruit-cutting.js?v=2.5.0-play';
 
 export const NUMBER_WORKSHOP_TITLE = 'סַדְנַת הַמִּסְפָּרִים';
 const labelFor = (key, nikud) => nikud ? CLIPS[key].text : CLIPS[key].text.replace(/[\u0591-\u05bd\u05bf-\u05c7]/gu, '');
-const bestMotion = () => !matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 export function numberMenu(drafts) {
   return `<main id="main" class="number-workshop">
@@ -128,7 +127,7 @@ export function mountNumberRound(root, {
         <h1 id="number-question" tabindex="-1">${labelFor(numberQuestionClip(round.path), nikud)}</h1>
         <button type="button" class="circle-button" data-action="replay" aria-label="שמיעת השאלה שוב">${uiIcon('sound')}</button>
       </div>
-      ${questionPicture(round.path, q, round.resolved, animate && motion && bestMotion())}
+      ${questionPicture(round.path, q, round.resolved, animate && motion())}
       <div class="number-model-total" hidden dir="ltr" aria-live="off"></div>
       <div class="number-choices" role="group" aria-label="בחירת מספר">
         ${q.choices.map(n => {
@@ -179,7 +178,7 @@ export function mountNumberRound(root, {
     for (const step of model.steps) {
       modelStep(step);
       if (audioEnabled()) await speak(spokenNumber(step.number));
-      else if (motion && bestMotion()) await new Promise(resolve => setTimeout(resolve, 270));
+      else if (motion()) await new Promise(resolve => setTimeout(resolve, 270));
       if (!stillShowing()) return;
     }
     cancelModel();

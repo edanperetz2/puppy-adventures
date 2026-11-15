@@ -99,13 +99,16 @@
   border-radius: 10% 10% 46% 46%;
 }
 .act-landmark { left: var(--x); top: 41%; height: 44%; width: min(36%, 132px); }
-.act-place, .act-placed {
+.act-placed {
   position: absolute;
   left: var(--x);
   top: var(--y);
   transform: translate(-50%, -50%);
 }
 .act-place {
+  position: absolute;
+  left: calc(var(--x) - 22px);
+  top: calc(var(--y) - 22px);
   z-index: 4;
   display: grid;
   place-items: center;
@@ -180,20 +183,20 @@
 .act-playfield.act-finished .act-place { visibility: hidden; }
 
 .act-animal {
+  --target-width: min(42%, 145px);
   position: absolute;
   z-index: 3;
-  left: var(--x);
+  left: calc(var(--x) - var(--target-width) / 2);
   top: 29%;
   display: grid;
   justify-items: center;
   grid-template-rows: 1fr auto;
-  width: min(42%, 145px);
+  width: var(--target-width);
   height: 47%;
   padding: 6px;
   border: 1px solid transparent;
   border-radius: 19px;
   background: transparent;
-  transform: translateX(-50%);
 }
 .act-playfield[data-scene="jump"] .act-animal {
   top: 35%;
@@ -249,20 +252,22 @@
 .act-night-moon { position: absolute; top: 5%; right: 11%; width: clamp(30px, 8vw, 48px); }
 .act-night-moon svg { width: 100%; display: block; }
 .act-destination {
+  --target-width: min(43%, 175px);
+  --target-height: 52%;
+  --target-y: 46%;
   position: absolute;
   z-index: 3;
   display: grid;
   place-items: center;
-  left: var(--x);
-  top: 46%;
-  width: min(43%, 175px);
-  height: 52%;
+  left: calc(var(--x) - var(--target-width) / 2);
+  top: calc(var(--target-y) - var(--target-height) / 2);
+  width: var(--target-width);
+  height: var(--target-height);
   padding: 3px;
   outline-offset: 2px;
   border: 2px dashed #567f78;
   border-radius: 22px;
   background: #ffffff54;
-  transform: translate(-50%, -50%);
 }
 .act-destination svg { width: 100%; height: 100%; min-height: 0; pointer-events: none; }
 .act-destination > i { pointer-events: none; }
@@ -271,9 +276,9 @@
 .act-destination.act-over { border-style: solid; box-shadow: 0 0 0 3px #32766965; }
 .act-finished .act-destination { z-index: 1; border-color: transparent; outline: none; }
 .act-destination-pond {
-  top: 56%;
-  height: 43%;
-  width: var(--pond-width);
+  --target-y: 56%;
+  --target-height: 43%;
+  --target-width: var(--pond-width);
   padding: 0;
   background: #84cada;
   border: 3px solid #5d9fbc;
@@ -282,8 +287,8 @@
 }
 .act-finished .act-destination-pond { border-color: #5d9fbc; }
 .act-destination-shore {
-  top: 56%;
-  height: 41%;
+  --target-y: 56%;
+  --target-height: 41%;
   background: #f2f7dca8;
 }
 .act-destination-shore svg { width: 52%; height: 74%; }
@@ -307,8 +312,8 @@
 .act-water-lines::before { left: -34%; top: -115%; }
 .act-water-lines::after { right: -62%; top: 6%; }
 .act-destination:is(.act-destination-bed, .act-destination-basket, .act-destination-nest) {
-  top: 47%;
-  height: 61%;
+  --target-y: 47%;
+  --target-height: 61%;
   border-color: transparent;
   background: transparent;
 }
@@ -333,7 +338,7 @@
 .act-playfield[data-scene="water"] {
   background: linear-gradient(#e1f3ed 0 40%, #e5efcb 40% 100%);
 }
-.act-garden-pot { top: 48%; height: 56%; }
+.act-garden-pot { --target-y: 48%; --target-height: 56%; }
 .act-garden-pot .act-plant {
   position: absolute;
   display: grid;

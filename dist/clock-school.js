@@ -5,7 +5,7 @@ import { CLOCK_LESSONS, clockLessonTasks, clockParts, clockTotal, learningTime, 
 import { CLOCK_MINUTE_LABELS } from './clock-school-content.js';
 import { LEGACY_SESSION_LENGTH, SESSION_LENGTH } from './adventure.js?v=2.2.2-six';
 
-export function mountClockSchool(root, { getProgress, position, onPosition, onRecord, speak, onPractice, practiceName, returnToGame = false, motion = true } ) {
+export function mountClockSchool(root, { getProgress, position, onPosition, onRecord, speak, onPractice, practiceName, returnToGame = false, motion = () => true } ) {
   let screen='map', lessonIndex=0, taskIndex=0, dial=null, moved=false, result=false, feedback='', demonstrating=false, selected='hour', saveTimer=null, realTimer=null, realRestore=[];
   let saved=sanitizeClockPosition(position);
   let practiceSeed, shufflePractice, practiceLength, variedPractice, practiceLessons;
@@ -99,7 +99,7 @@ export function mountClockSchool(root, { getProgress, position, onPosition, onRe
     if(screen==='map'){
       const resume=!hasClockLesson(getProgress(),saved.lesson)?saved.lesson:nextClockLesson(getProgress());
       root.innerHTML=`<div class="school-top"><span>גן השעונים · בובי לומד איתך</span>${returnToGame?button('practice','חוזרות למשחק','text-button'):''}</div><section class="school-welcome"><div><span class="section-kicker">מגלות, מזיזות ומבינות</span><h1 tabindex="-1">לומדות לקרוא שעון</h1><p>כל פעם רעיון קטן. קודם הסבר והדגמה, ואז תורך לנסות.</p><div class="school-welcome-actions">${button('continue',count===10?'חוזרות לגלות ביחד':'בואי נמשיך ביחד','primary-button',`data-lesson="${resume}"`)}${button('speak',uiIcon('sound'),'circle-button','aria-label="שמיעת ההסבר על הלמידה"')}</div></div><div class="school-mascot">${pup('bobi')}<span>בקצב שלך ♡</span></div></section>
-      <div class="school-map-heading"><h2>עשרה גילויים קטנים</h2><span>${count} מתוך 10 גילויים${count?' · נשמרו בשבילך':''}</span></div><div class="school-lesson-map">${CLOCK_LESSONS.map((item,i)=>`<button type="button" class="school-lesson ${hasClockLesson(getProgress(),i)?'learned':''}" data-school="lesson" data-lesson="${i}" aria-label="גילוי ${i+1}: ${item.title}${hasClockLesson(getProgress(),i)?' · כבר גילינו':''}"><span class="school-lesson-number">${hasClockLesson(getProgress(),i)?'✓':i+1}</span><span><b>${item.title}</b><small>${item.subtitle}</small></span>${uiIcon('arrow')}</button>`).join('')}</div><div class="school-other-paths">${button('free',`<b>השעון שלי</b><span>גוררות את שני המחוגים ומקשיבות לשעה</span>`,'school-free-card')}${button('practice',`<b>${returnToGame?'חוזרות למשחק':'משחק הקריאה'}</b><span>${returnToGame?'ממשיכות מהמקום שבו עצרנו':`${SESSION_LENGTH} צעדים · ${practiceName}`}</span>`,'school-practice-card')}</div><p class="school-footnote">אפשר לחזור לכל גילוי כמה פעמים שרוצים. המדבקות מחכות בסיום משחק הקריאה.</p><p id="audio-notice" class="audio-notice" role="status" hidden></p>`;
+      <div class="school-map-heading"><h2>עשרה גילויים קטנים</h2><span>${count} מתוך 10 גילויים${count?' · נשמרו בשבילך':''}</span></div><div class="school-lesson-map">${CLOCK_LESSONS.map((item,i)=>`<button type="button" class="school-lesson ${hasClockLesson(getProgress(),i)?'learned':''}" data-school="lesson" data-lesson="${i}" aria-label="גילוי ${i+1}: ${item.title}${hasClockLesson(getProgress(),i)?' · כבר גילינו':''}"><span class="school-lesson-number">${hasClockLesson(getProgress(),i)?'✓':i+1}</span><span><b>${item.title}</b><small>${item.subtitle}</small></span>${uiIcon('arrow')}</button>`).join('')}</div><div class="school-other-paths">${button('free',`<b>השעון שלי</b><span>גוררות את שני המחוגים ומקשיבות לשעה</span>`,'school-free-card')}${button('practice',`<b>${returnToGame?'חוזרות למשחק':'משחק הקריאה'}</b><span>${returnToGame?'ממשיכות מהמקום שבו עצרנו':`${SESSION_LENGTH} צעדים · ${practiceName()}`}</span>`,'school-practice-card')}</div><p class="school-footnote">אפשר לחזור לכל גילוי כמה פעמים שרוצים. המדבקות מחכות בסיום משחק הקריאה.</p><p id="audio-notice" class="audio-notice" role="status" hidden></p>`;
     }else if(screen==='done'){
       root.innerHTML=`${button('map','לכל הגילויים','text-button')}<section class="school-done">${pup('bobi')}<span class="school-done-star" aria-hidden="true">✦</span><h1 tabindex="-1">איזה יופי! גילינו עוד משהו</h1><p>סיימת את ״${lesson().title}״</p><p>${count} מתוך 10 גילויים · ההתקדמות שלך נשמרת</p>${count===10?'<p>אפשר לחזור לכל הסבר, או לנסות את משחק הקריאה.</p>':''}<div class="school-done-actions">${button('next-lesson',lessonIndex===9?'לכל הגילויים':'לגילוי הבא','primary-button')}${button('repeat','עוד פעם ביחד')}${button('free','לשעון שלי')}${count===10?button('practice',returnToGame?'חוזרות למשחק':'למשחק הקריאה'):''}</div></section>`;
     }else{
@@ -148,8 +148,8 @@ export function mountClockSchool(root, { getProgress, position, onPosition, onRe
     for(const [b] of disabledBefore)b.disabled=true;
     if(lesson().hand==='face'){
       root.querySelector(`[data-dial-number="${t.number}"]`).classList.add('number-example');
-      dial.demo(0,0,motion,finishDemo);
-    }else dial.demo(t.start,t.total,motion,finishDemo);
+      dial.demo(0,0,motion(),finishDemo);
+    }else dial.demo(t.start,t.total,motion(),finishDemo);
     function finishDemo(){demonstrating=false;status.textContent='עכשיו תורך לנסות';root.querySelector('.number-example')?.classList.remove('number-example');for(const [b,disabled] of disabledBefore)b.disabled=disabled;const check=root.querySelector('[data-school=check]');if(check)check.disabled=!moved;if(screen==='try')speak(taskClips(lesson(),task()));}
   }
   root.addEventListener('click',event=>{

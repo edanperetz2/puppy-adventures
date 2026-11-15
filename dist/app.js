@@ -40,6 +40,7 @@ import { actOutPrompt, actOutSteps } from './act-out.js?v=2.7.0-science';
 import { mountActOut } from './act-out-view.js?v=2.7.1-pepper';
 import { SCIENCE_TITLE, SCIENCE_EXPERIMENTS, cleanScienceRound, scienceClip } from './science-content.js?v=2.7.1-pepper';
 import { mountScience, scienceArt, scienceMenu } from './science-view.js?v=2.7.1-pepper';
+import { mountOfflineAudio, registerOffline } from './offline-audio.js';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -50,6 +51,7 @@ const STORAGE_KEY = GAME_KEY;
 let settings = sanitizeSettings(null);
 let progress = freshProgress();
 let storageAvailable = true;
+let refreshAfterDialog = false;
 let view = 'home';
 let round = null;
 let audioStatus = 'idle';
@@ -70,6 +72,8 @@ let numberRound = null, numberDrafts = {}, numberController = null, numberSticke
 let pikachuController = null;
 let actOutController = null;
 let sciencePath = null, scienceDrafts = {}, scienceController = null;
+const progressScreens = ['home', 'album', 'letters-menu', 'letters-writing', 'letters-recognition', 'characters-menu'];
+const preferenceScreens = [...progressScreens, 'learning-hub', 'reading-levels', 'science-menu', 'number-menu'];
 
 try {
   const saved = JSON.parse(gameStorage.getItem(STORAGE_KEY) || 'null');
@@ -103,7 +107,10 @@ const album = new SharedAlbum({ config: SYNC_CONFIG, storage: gameStorage, local
   updateParentProgress();
   const reset = dialog.querySelector('[data-dialog="reset"]');
   if (reset) reset.textContent = 'ניתוק מהאלבום ואיפוס המכשיר הזה';
-  if (changed && !dialog.open && ['home', 'album', 'letters-menu', 'letters-writing', 'letters-recognition', 'characters-menu'].includes(view)) render();
+  if (changed && progressScreens.includes(view)) {
+    if (dialog.open) refreshAfterDialog = true;
+    else render();
+  }
   if (view === 'letters-lesson') updateWritingStatus();
   if (changed && view === 'clock-school') clockSchool?.updateProgress();
 } });
@@ -158,6 +165,10 @@ function openAlbumInvite() {
 function applyPreferences() {
   document.documentElement.classList.toggle('still', !settings.motion);
   narrator.enabled = settings.sound;
+}
+
+function motionEnabled() {
+  return settings.motion && !matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 function header() {
@@ -294,7 +305,7 @@ function renderLetterLesson() {
     updateWritingStatus();return;
   }
   letterPad = mountLetterPad(document.querySelector('#letter-writing-pad'), {
-    motion: settings.motion && !matchMedia('(prefers-reduced-motion: reduce)').matches,
+    motion: motionEnabled,
     onComplete: () => {
       if (!letterDemo.recorded) {
         letterDemo.recorded = true;
@@ -303,7 +314,7 @@ function renderLetterLesson() {
         else progress.letterPractice = recordLetters(progress.letterPractice, language, mode, [letter.id]);
         save(); updateWritingStatus();
       }
-      announcements.say('letters-trace-done'); narrator.chime(); celebrate(12);
+      announcements.say('letters-trace-done'); narrator.chime(); revealWin('.letter-pad-caption');
     },
     onStartNeeded: () => { if (Date.now() - lastTraceHint > 5000) { lastTraceHint = Date.now(); announcements.say('letters-trace-start'); } },
   });
@@ -370,7 +381,7 @@ function renderClockSchool() {
       if (clockReturn && round) { view = 'game'; render(); focusTitle(); const q = current(); announcements.say([q.prompt, ...(q.targetClip ? [q.targetClip] : [])]); }
       else startMission('clock', true);
     },
-    returnToGame: clockReturn, practiceName: CLOCK_LEVELS[settings.clockLevel].name, motion: settings.motion,
+    returnToGame: clockReturn, practiceName: () => CLOCK_LEVELS[settings.clockLevel].name, motion: motionEnabled,
   });
 }
 
@@ -394,6 +405,15 @@ function characterMenuClip() { return CHARACTER_COLLECTIONS[characterCollection(
 function activityCount(id) { return id === 'characters' ? Object.values(characterPractice.completed).reduce((sum, count) => sum + count, 0) : progress.missions[id]; }
 
 function renderHome() {
+  const cards = Object.values(MISSIONS).map(m => `<button class="mission-card ${m.color}" data-action="mission" data-mission="${m.id}" aria-label="${m.name} — ${m.description}">
+    <div class="mission-art"><span class="art-orbit"></span>${m.id === 'characters' ? characterMissionArt() : art(m.icon, 'mission-object') + pup(m.pup, 'mission-pup')}</div>
+    <div class="mission-body"><span class="subject-tag" ${m.id === 'english' ? 'lang="en" dir="ltr"' : ''}>${m.subject}</span><h3>${m.name}</h3><p>${m.subtitle}</p><span class="mission-go" aria-hidden="true">${uiIcon('arrow')}</span></div>
+    ${activityCount(m.id) ? `<span class="mission-done" aria-label="כבר סיימת ${activityCount(m.id)} הרפתקאות">${uiIcon('check')}</span>` : ''}
+  </button>`);
+  const science = `<button class="mission-card science-card" data-action="science-menu">
+    <div class="mission-art" aria-hidden="true"><span class="art-orbit"></span><span class="lab-picture mission-object">${scienceArt('pepper')}</span>${pup('tofi', 'mission-pup')}</div>
+    <div class="mission-body"><span class="subject-tag">מדע</span><h3>${SCIENCE_TITLE}</h3><p>מְנַסּוֹת וּמְגַלּוֹת מָה קוֹרֶה</p><span class="mission-go" aria-hidden="true">${uiIcon('arrow')}</span></div>
+  </button>`;
   app.innerHTML = `${header()}<main id="main" class="home-page">${resumeCard()}
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
@@ -401,21 +421,15 @@ function renderHome() {
           <button type="button" class="home-pika-link" data-action="pikachu" aria-label="${PIKACHU_TITLE}">${pikachuImage('home-pikachu')}</button>
           <h1 id="hero-title" tabindex="-1">שלום <bdi>${ARIEL.name}</bdi>!</h1>
         </div>
-        <p class="hero-description">לולי, בובי וטופי מחכים לך.<br>בואי נשחק, נגלה ונלמד ביחד.</p>
-        <button class="primary-button hero-start" data-action="recommended">יוצאות להרפתקה ${uiIcon('arrow')}</button>
-        <button type="button" class="secondary-button home-pika-start" data-action="pikachu">${PIKACHU_TITLE} ${uiIcon('arrow')}</button>
+        <div class="hero-actions"><button class="primary-button hero-start" data-action="recommended">יוצאות להרפתקה ${uiIcon('arrow')}</button>
+        <button type="button" class="secondary-button home-pika-start" data-action="pikachu">${PIKACHU_TITLE}</button></div>
         <button class="text-button welcome-listen" data-action="welcome">${uiIcon('sound')} לחצי ונכיר את החברים</button>
         <p id="audio-notice" class="audio-notice" role="status" hidden></p>
-      </div><div class="hero-world">${scene()}<div class="world-caption"><span class="status-dot"></span> בית החברים · תמיד שמחים לראות אותך</div></div>
+      </div><div class="hero-world">${scene()}</div>
     </section>
-    <section class="missions" aria-labelledby="missions-title"><div class="section-heading"><div><span class="section-kicker">כל פעם מגלות משהו חדש</span><h2 id="missions-title">לאן נצא היום?</h2></div><span class="rounds-note">${SESSION_LENGTH} צעדים · מתחילות בקל ומתקדמות ${art('paw')}</span></div>
-      <div class="mission-grid">${Object.values(MISSIONS).map(m => `<button class="mission-card ${m.color}" data-action="mission" data-mission="${m.id}" aria-label="${m.name} — ${m.description}">
-        <div class="mission-art"><span class="art-orbit"></span>${m.id === 'characters' ? characterMissionArt() : art(m.icon, 'mission-object') + pup(m.pup, 'mission-pup')}<span class="mini-sparkle">✦</span></div>
-        <div class="mission-body"><span class="subject-tag" ${m.id === 'english' ? 'lang="en" dir="ltr"' : ''}>${m.subject}</span><h3>${m.name}</h3><p>${m.subtitle}</p><span class="mission-go">בואי נשחק ${uiIcon('arrow')}</span></div>
-        ${activityCount(m.id) ? `<span class="mission-done" aria-label="כבר סיימת ${activityCount(m.id)} הרפתקאות">${uiIcon('check')}</span>` : ''}
-      </button>`).join('')}</div>
+    <section class="missions" aria-labelledby="missions-title"><div class="section-heading"><h2 id="missions-title">לאן נצא היום?</h2></div>
+      <div class="mission-grid">${[...cards.slice(0, 2), science, ...cards.slice(2)].join('')}</div>
     </section>
-    <section class="home-feature-card science-feature"><div aria-hidden="true"><span class="lab-picture">${scienceArt('oil')}</span></div><span><h3>${SCIENCE_TITLE}</h3><p>מְנַסּוֹת וּמְגַלּוֹת מָה קוֹרֶה</p></span><button class="primary-button" data-action="science-menu">לַמַּעְבָּדָה ${uiIcon('arrow')}</button></section>
     <section class="home-feature-card park-feature"><div>${pup('tofi')}</div><span><h3>הַפָּארְק שֶׁלִּי</h3><p>קִשּׁוּטִים, חֲבֵרִים וּמָקוֹם לַדִּמְיוֹן</p></span><button class="primary-button" data-action="park">בּוֹנִים וּמְשַׂחֲקִים ${uiIcon('arrow')}</button></section>
     <section class="home-feature-card album-feature"><div>${art(progress.stickers.at(-1) || 'star')}</div><span><h3>הָאַלְבּוֹם שֶׁלִּי</h3><p>${progress.stickers.length ? `${progress.stickers.length} מדבקות מחכות לך באלבום` : 'בכל הרפתקה שלמה מגלות מדבקה חדשה'}</p></span><button class="primary-button" data-action="album">לאלבום שלי ${uiIcon('arrow')}</button></section>
   </main>${footer()}`;
@@ -750,7 +764,7 @@ function resolveAnswer(q, button = null) {
   document.querySelector('#buddy-message').textContent = 'יש! הצלחת!';
   announcements.say([`correct-${1 + round.index % 3}`, ...(q.type === 'character' ? [q.character.clip] : q.type === 'clock' ? q.time.clips : q.type === 'read' ? [`he-${q.word.id}`] : q.targetClip ? [q.targetClip] : [])]);
   narrator.chime();
-  celebrate(16);
+  feedback.classList.add('feedback-reveal');
   if (!q.actOut) next.focus({ preventScroll: q.type !== 'character' && q.type !== 'clock' && !(q.type === 'read' && q.word.scene) });
 }
 
@@ -770,7 +784,7 @@ function nextQuestion() {
       if (round.mission === 'letters') recognitionChoice = null;
       save();
     }
-    view = 'complete'; render(); focusTitle(); celebrate(40); announcements.say([round.sticker ? 'complete' : 'complete-all', ...(round.mission === 'hebrew' ? [nextReadingStage(round.reading, round.helped.size) ? 'reading-next' : 'reading-more'] : round.mission === 'characters' && nextCharacterLevel(round.characterLevel, round.helped.size) ? ['reading-next'] : [])]); return;
+    view = 'complete'; render(); focusTitle(); revealWin('.reward-art'); announcements.say([round.sticker ? 'complete' : 'complete-all', ...(round.mission === 'hebrew' ? [nextReadingStage(round.reading, round.helped.size) ? 'reading-next' : 'reading-more'] : round.mission === 'characters' && nextCharacterLevel(round.characterLevel, round.helped.size) ? ['reading-next'] : [])]); return;
   }
   round.index++;
   round.resolved = false;
@@ -778,20 +792,13 @@ function nextQuestion() {
   round.counted = new Set();
   delete round.actOutMoves;
   checkpoint(); render(); focusTitle();
+  document.querySelector('.game-board')?.classList.add('step-enter');
   const q = current();
   announcements.say([q.prompt, ...(q.showModel ? ['letters-recognition-hint'] : []), ...(q.targetClip ? [q.targetClip] : [])]);
 }
 
-function celebrate(amount) {
-  if (!settings.motion || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const holder = document.querySelector('#confetti');
-  const colors = ['#f2c76b', '#a99aca', '#76b8aa', '#e59eaa', '#8fbfda'];
-  for (let i = 0; i < amount; i++) {
-    const confetto = document.createElement('i');
-    confetto.style.cssText = `left:${Math.random() * 100}%;background:${colors[i % colors.length]};--delay:${Math.random() * 0.3}s;--spin:${Math.random() * 720}deg;--drift:${(Math.random() - 0.5) * 220}px;`;
-    holder.append(confetto);
-    confetto.addEventListener('animationend', () => confetto.remove(), { once: true });
-  }
+function revealWin(selector) {
+  document.querySelector(selector)?.classList.add('reward-reveal');
 }
 
 function openDialog(content) {
@@ -801,13 +808,14 @@ function openDialog(content) {
   if (!dialog.open) dialog.showModal();
 }
 
-function closeDialog() {
-  const action = dialogOpener?.dataset?.action;
+function closeDialog(updatePreferences = false) {
+  const action = dialogOpener?.dataset.action;
   dialog.close();
-  if (view !== 'game') {
-    render();
-    if (action) app.querySelector(`[data-action="${action}"]`)?.focus();
-  } else dialogOpener?.focus?.();
+  const refresh = refreshAfterDialog && progressScreens.includes(view) || updatePreferences === true && preferenceScreens.includes(view);
+  refreshAfterDialog = false;
+  if (refresh) render();
+  const opener = dialogOpener?.isConnected ? dialogOpener : action && app.querySelector(`[data-action="${action}"]`);
+  opener?.focus({ preventScroll: true });
 }
 
 function parentGate() {
@@ -830,12 +838,14 @@ function renderSettings() {
     <label class="setting-row"><span>קריאת שעון</span><select name="clockLevel">${Object.entries(CLOCK_LEVELS).map(([key, level]) => `<option value="${key}" ${settings.clockLevel === key ? 'selected' : ''}>${level.name}</option>`).join('')}</select></label>
     <label class="setting-toggle"><span><b>קול והנחיות</b><small>הקלטות בעברית ובאנגלית</small></span><input name="sound" type="checkbox" ${settings.sound ? 'checked' : ''}></label>
     <label class="setting-toggle"><span><b>תנועה וחגיגות</b><small>כיבוי מצמצם אנימציות</small></span><input name="motion" type="checkbox" ${settings.motion ? 'checked' : ''}></label>
-    <p class="parent-note">ההגדרות ייכנסו לתוקף בהרפתקה הבאה. האנגלית מבוססת על הקשבה ותמונות. מילים כתובות מוצגות באותיות גדולות בלבד.</p>
+    <p class="parent-note">בהרפתקה הבאה יופעלו הגדרות התרגול שבחרתם. באנגלית מתחילים בהקשבה. תרגול קריאה וכתיבה מופיע במסלולים משלו.</p>
     <button class="primary-button" type="submit">שמירת ההגדרות ${uiIcon('check')}</button></form>
     <section class="parent-progress"><h3>מה כבר גילינו?</h3><p id="parent-progress-summary">${progress.sessions} הרפתקאות שלמות · ${progress.stickers.length} מדבקות</p><table><thead><tr><th>תחום</th><th>תשובות ללא עזרה</th><th>עם הדגמה, רמז או ניסיון נוסף</th></tr></thead><tbody>${MISSION_IDS.map(id => MISSIONS[id]).map(m => `<tr><th>${m.id === 'hebrew' ? 'עברית · מילים ושמות' : m.subject}</th><td data-independent="${m.id}">${progress.skills[m.id].correct - progress.skills[m.id].assisted}</td><td data-assisted="${m.id}">${progress.skills[m.id].assisted}</td></tr>`).join('')}</tbody></table><p class="parent-note">מוצגות רק הרפתקאות שהושלמו. זהו תיעוד משחק, ולא מבחן או הערכת יכולת.</p></section>
     <div id="learning-parent">${parentLearning(learner)}</div>
-    <section id="family-panel"></section><p class="parent-note character-art-credit">איורי הדמויות: PAW Patrol / Rubble &amp; Crew © Spin Master Ltd. · <a href="https://dev.pawpatrol.com/character-guide" target="_blank" rel="noopener noreferrer">מדריך הדמויות הרשמי של מפרץ ההרפתקאות</a> · <a href="https://images.squarespace-cdn.com/content/v1/5595e2eee4b0b03840079b28/1685761053151-FY46DCUKCA43ODFF4MKK/image-asset.jpeg" target="_blank" rel="noopener noreferrer">McCown Design Agency</a>. משחק השמות נכלל בתחום עברית.</p>
-    <p class="privacy-note">האלבום המשפחתי משתף מדבקות, התקדמות, היסטוריית למידה ופארק עם המכשירים שחוברו אליו בקוד. הרפתקאות פתוחות וציורי תרגול נשמרים במכשיר.</p>
+    <section id="family-panel"></section>
+    <section class="offline-panel"><h3>משחק בלי אינטרנט</h3><p role="status">מכינות את המשחק לשימוש בלי אינטרנט…</p><button class="secondary-button" type="button" disabled>הורדת ההקלטות</button></section>
+    <p class="parent-note character-art-credit">איורי הדמויות: PAW Patrol / Rubble &amp; Crew © Spin Master Ltd. · <a href="https://dev.pawpatrol.com/character-guide" target="_blank" rel="noopener noreferrer">מדריך הדמויות הרשמי של מפרץ ההרפתקאות</a> · <a href="https://images.squarespace-cdn.com/content/v1/5595e2eee4b0b03840079b28/1685761053151-FY46DCUKCA43ODFF4MKK/image-asset.jpeg" target="_blank" rel="noopener noreferrer">McCown Design Agency</a>. משחק השמות נכלל בתחום עברית.</p>
+    <p class="privacy-note">האלבום המשפחתי משתף מדבקות, התקדמות, היסטוריית למידה ופארק עם המכשירים שחוברו אליו בקוד. הרפתקאות פתוחות נשמרות בדפדפן שבו התחילו, וציורי הכתיבה נשארים במכשיר.</p>
     <p class="parent-note">איורים נוספים: <a href="assets/Twemoji-LICENSE.txt" target="_blank" rel="noopener">Twemoji · רישיון ושמות היוצרים</a>. כל התמונות שמורות בתוך המשחק.</p>
     <p class="save-notice" ${storageAvailable ? 'hidden' : ''}>הדפדפן לא מאפשר שמירה כרגע. אפשר לשחק, אבל ההתקדמות עלולה להיעלם בסגירה.</p>
     <button class="text-button reset-button" data-dialog="reset">${album.linked ? 'ניתוק מהאלבום ואיפוס המכשיר הזה' : 'איפוס ההתקדמות במכשיר הזה'}</button>`);
@@ -845,15 +855,16 @@ function renderSettings() {
     album, getLocalProgress: () => progress, pendingCode: pendingJoinCode,
     onPaired: () => { pendingJoinCode = null; },
   });
+  mountOfflineAudio(dialog.querySelector('.offline-panel'));
   dialog.querySelector('#settings-form').onsubmit = event => {
     event.preventDefault();
     const form = new FormData(event.target);
     settings = sanitizeSettings({ ...settings, nikud: form.has('nikud'), sound: form.has('sound'), motion: form.has('motion'), reading: form.get('reading'), mathMax: Number(form.get('mathMax')), englishMax: Number(form.get('englishMax')), clockLevel: form.get('clockLevel'), letterLanguage: settings.letterLanguage, letterWriting: settings.letterWriting });
-    save(); narrator.stop(); applyPreferences(); closeDialog();
-    // Keep a running question and its answer state intact until the next round.
-    if (view === 'game') renderSoundButton();
-    else if (view === 'pikachu') { renderSoundButton(); pikachuController?.update(); }
-    else render();
+    save(); narrator.stop(); applyPreferences(); closeDialog(true);
+    renderSoundButton();
+    clockSchool?.updateProgress();
+    numberController?.updateMotion?.();
+    if (view === 'pikachu') pikachuController?.update();
   };
   dialog.querySelector('[data-dialog="reset"]').onclick = () => {
     openDialog(`<h2 id="parent-title">לאפס את המכשיר הזה?</h2><p>המדבקות וההתקדמות בדפדפן הזה יימחקו. הגדרות המשחק יישמרו.${album.linked ? ' החיבור לאלבום המשפחתי יוסר. האלבום שכבר סונכרן יישמר עבור המכשירים האחרים.' : ''}</p><div class="dialog-actions"><button class="secondary-button" data-dialog="cancel-reset">ביטול</button><button class="primary-button" data-dialog="confirm-reset">איפוס ההתקדמות</button></div>`);
@@ -943,10 +954,10 @@ function openNumberWriting() {
 function renderNumberWriting() {
   app.innerHTML = `${header()}<main id="main" class="number-workshop"><div id="number-writing-root"></div></main>${footer()}`;
   numberController = mountNumberWriting(document.querySelector('#number-writing-root'), {
-    getItems: () => learner.items, motion: settings.motion, speak: clips => announcements.say(clips),
+    getItems: () => learner.items, motion: motionEnabled, speak: clips => announcements.say(clips),
     onPractice: number => {
       learner.record({ item: numberWritingKey(number), domain: 'math' }, 'practice', 'trace');
-      celebrate(12);
+      revealWin('.number-writing-count');
     },
   });
 }
@@ -1013,10 +1024,10 @@ function startScience(path, restart = false) {
 function renderScience() {
   app.innerHTML = `${header()}<main id="main" class="lab-page"><div id="science-root"></div></main>${footer()}`;
   scienceController = mountScience(document.querySelector('#science-root'), {
-    path: sciencePath, saved: scienceDrafts[sciencePath], nikud: settings.nikud, motion: settings.motion,
+    path: sciencePath, saved: scienceDrafts[sciencePath], nikud: settings.nikud, motion: motionEnabled,
     speak: key => announcements.say(key),
     onSave: draft => { scienceDrafts[sciencePath] = draft; save(); },
-    onFinish: () => celebrate(28),
+    onFinish: () => revealWin('.lab-prompt'),
     onRestart: () => startScience(sciencePath, true),
   });
 }
@@ -1025,41 +1036,52 @@ function renderNumberRound() {
   app.innerHTML = `${header()}<main id="main" class="number-workshop"><div id="number-root"></div></main>${footer()}`;
   const active = numberRound;
   numberController = mountNumberRound(document.querySelector('#number-root'), {
-    round: active, nikud: settings.nikud, motion: settings.motion, speak: clips => announcements.say(clips),
+    round: active, nikud: settings.nikud, motion: motionEnabled, speak: clips => announcements.say(clips),
     audioEnabled: () => settings.sound, stopSpeaking: () => narrator.stop(),
     onSave: draft => { numberDrafts[draft.path] = draft; save(); },
     onObservation: (item, kind, index) => learner.record({ item, domain: 'math', eventId: `${active.id}:${kind === 'seen' ? 'seen:' : ''}${index}` }, kind),
-    onSuccess: () => { narrator.chime(); celebrate(12); },
+    onSuccess: () => narrator.chime(),
     onComplete: draft => {
       const result = awardRound('math', draft.helped.length, null, draft.id, draft.questions.length);
       progress = result.progress; numberSticker = result.sticker;
       delete numberDrafts[draft.path]; view = 'number-complete'; save(); render(); focusTitle();
-      celebrate(32); announcements.say(numberSticker ? 'complete' : 'complete-all');
+      revealWin('.journey-complete-art'); announcements.say(numberSticker ? 'complete' : 'complete-all');
     },
   });
 }
 
-function openLearningHub(subject){checkpoint();narrator.stop();round=null;journeyPlan=null;hub=subject==='english'?'english':'hebrew';view='learning-hub';render();focusTitle();announcements.say(hub==='english'?'journey-english-one':'journey-workshop-intro');}
+function openLearningHub(subject) {
+  checkpoint(); narrator.stop(); round = null; journeyPlan = null;
+  hub = subject === 'english' ? 'english' : 'hebrew';
+  view = 'learning-hub'; render(); focusTitle();
+  announcements.say('choose-activity');
+}
 function journeyChoice(mode,level,label,description,icon,tag=''){
   const saved=journeyDrafts[`${mode}:${level}`];
-  return `<button class="learning-path-card" data-action="journey-start" data-journey="${mode}" data-level="${level}"><span class="learning-path-art">${art(icon)}</span>${tag?`<small class="learning-path-tag">${tag}</small>`:''}<h2>${label}</h2><p>${description}</p><strong>${saved?`מַמְשִׁיכִים מִצַּעַד ${saved.index+1}`:`${SESSION_LENGTH} צְעָדִים · בַּקֶּצֶב שֶׁלָּנוּ`} ${uiIcon('arrow')}</strong></button>`;
+  return `<button class="learning-path-card" data-action="journey-start" data-journey="${mode}" data-level="${level}"><span class="learning-path-art">${art(icon)}</span>${tag?`<small class="learning-path-tag">${tag}</small>`:''}<h3>${label}</h3><p>${description}</p>${saved ? `<strong>מַמְשִׁיכוֹת מִצַּעַד ${saved.index+1} ${uiIcon('arrow')}</strong>` : ''}</button>`;
 }
 function renderLearningHub(){
-  const names={hebrew:'מַגְלִים מִלִּים וְסִפּוּרִים',english:'מִלָּה קְטַנָּה, הַצְלָחָה גְּדוֹלָה'};
-  let cards='';
-  if(hub==='hebrew')cards=`<button class="learning-path-card" data-action="garden"><span class="learning-path-art">${art('flower')}</span><h2>גִּנַּת הַמִּלִּים</h2><p>כָּל שִׁלְבֵי הַקְּרִיאָה הַמֻּכָּרִים</p><strong>בּוֹחֲרִים שָׁלָב ${uiIcon('arrow')}</strong></button>`+
-    [1,2,3,4].map(level=>journeyChoice('workshop',level,`סַדְנַת מִלִּים · ${level}`,['חֲלָקִים קְטַנִּים וּמִלִּים מֻכָּרוֹת','מִלִּים אֲרֻכּוֹת יוֹתֵר','עוֹד אוֹתִיּוֹת וְצֵרוּפִים','אֶתְגָּר לְבוֹנֵי מִלִּים'][level-1],'pencil',level===1?'מַתְחִילִים כָּאן':'')).join('')+
-    STORIES.map(story=>journeyChoice('stories',story.id,story.title,story.description,'house','סִפּוּר שֶׁמְּשַׂחֲקִים')).join('');
-  if(hub==='english'){
-    const ready=englishPairsReady(learner.items);
-    cards=journeyChoice('english','single','מִלָּה אַחַת בְּכָל פַּעַם','תְּמוּנוֹת מֻכָּרוֹת, שְׁתֵּי אֶפְשָׁרֻיּוֹת, וּמִלָּה חֲדָשָׁה אַחַת.','dog','הַמַּסְלוּל הַמֻּמְלָץ עַכְשָׁו')+
-      journeyChoice('english','pairs','צֶבַע וְכַדּוּר','קֹדֶם נַכִּיר אֶת הַמִּלָּה כַּדּוּר. נְחַבֵּר לְצֶבַע מֻכָּר בִּצְעָדִים קְטַנִּים.','ball',ready?'מוּכָנִים לְצַעַד הַבָּא':'לְאַחַר הַרְבֵּה הַצְלָחוֹת בְּמִלָּה אַחַת')+
-      `<button class="learning-path-card" data-action="mission-direct" data-mission="english"><span class="learning-path-art">${art('star')}</span><h2>מִלִּים, צְבָעִים וּמִסְפָּרִים</h2><p>הַמִּשְׂחָק הַמֻּכָּר שֶׁל הַקְשָׁבָה לְמִלָּה אַחַת</p></button>`+
-      journeyChoice('english','cars','צֶבַע וּמְכוֹנִית','עוֹד חֵפֶץ אֶחָד. קֹדֶם מַכִּירִים אוֹתוֹ לְבַד, וְאָז מְחַבְּרִים לְצֶבַע.','car','אַחֲרֵי הַכַּדּוּר · רַק כְּשֶׁמוּכָנִים')+
-      journeyChoice('sounds','sounds','מַגְלִים צְלִילִים','אוֹת גְּדוֹלָה, אוֹת קְטַנָּה וְצָלִיל בְּתוֹךְ מִלָּה.','bird','מַסְלוּל בְּחִירָה · בְּעֶזְרַת הוֹרֶה')+
-      journeyChoice('sounds','blend','מְחַבְּרִים צְלִילִים','רַק כְּשֶׁמוּכָנִים: מִלִּים קְצָרוֹת מִצְּלִילִים מֻכָּרִים.','fish','לְאַחַר מַסְלוּל הַצְּלִילִים');
+  const group = (title, cards) => `<section class="learning-group"><h2 class="learning-group-title">${title}</h2><div class="learning-paths">${cards}</div></section>`;
+  const card = (action, extra, title, description, icon) => `<button class="learning-path-card" data-action="${action}" ${extra}><span class="learning-path-art">${art(icon)}</span><h3>${title}</h3><p>${description}</p></button>`;
+  const hebrew = hub === 'hebrew';
+  let sections;
+  if (hebrew) {
+    const reading = card('garden', '', 'כָּל שְׁלָבֵי הַקְּרִיאָה', 'מִמִּלִּים קְצָרוֹת וְעַד מִשְׁפָּטִים.', 'flower')
+      + card('reading-level', 'data-level="sentences"', 'סִפּוּרִים קְטַנִּים', 'קוֹרְאוֹת מִשְׁפָּט, מַתְאִימוֹת תְּמוּנָה וּמַמְחִיזוֹת.', 'story-action-luli-waters-flower');
+    const workshop = ['חֲלָקִים קְטַנִּים וּמִלִּים מֻכָּרוֹת', 'מִלִּים אֲרֻכּוֹת יוֹתֵר', 'עוֹד אוֹתִיּוֹת וְצֵרוּפִים', 'אֶתְגָּר לְבִנְיַן מִלִּים']
+      .map((description, i) => journeyChoice('workshop', i + 1, `שָׁלָב ${i + 1}`, description, 'pencil')).join('');
+    sections = group('קוֹרְאוֹת וּמְשַׂחֲקוֹת', reading) + group('סַדְנַת הַמִּלִּים', workshop)
+      + group('סִפּוּרִים שֶׁמְּשַׂחֲקִים', STORIES.map(story => journeyChoice('stories', story.id, story.title, story.description, 'house')).join(''));
+  } else {
+    const listening = journeyChoice('english', 'single', 'מִלָּה אַחַת בְּכָל פַּעַם', 'מַקְשִׁיבוֹת וּבוֹחֲרוֹת תְּמוּנָה.', 'dog')
+      + card('mission-direct', 'data-mission="english"', 'מִלִּים, צְבָעִים וּמִסְפָּרִים', 'מַקְשִׁיבוֹת לְמִלִּים מֵהַמִּשְׂחָק הַמֻּכָּר.', 'star');
+    const pairs = journeyChoice('english', 'pairs', 'צֶבַע וְכַדּוּר', 'מַכִּירוֹת אֶת הַכַּדּוּר וּמְחַבְּרוֹת לוֹ צֶבַע.', 'ball', englishPairsReady(learner.items) ? 'מוּכָנָה לַצַּעַד הַבָּא' : '')
+      + journeyChoice('english', 'cars', 'צֶבַע וּמְכוֹנִית', 'מַכִּירוֹת אֶת הַמְּכוֹנִית וּמְחַבְּרוֹת לָהּ צֶבַע.', 'car');
+    const sounds = journeyChoice('sounds', 'sounds', 'מְגַלּוֹת צְלִילִים', 'אוֹת גְּדוֹלָה, אוֹת קְטַנָּה וְצָלִיל בִּתְחִלַּת מִלָּה.', 'bird')
+      + journeyChoice('sounds', 'blend', 'מְחַבְּרוֹת צְלִילִים', 'קוֹרְאוֹת מִלִּים קְצָרוֹת מִצְּלִילִים מֻכָּרִים.', 'fish');
+    sections = group('מַתְחִילוֹת בְּהַקְשָׁבָה', listening) + group('שְׁתֵּי מִלִּים בְּיַחַד', pairs) + group('צְלִילִים וּקְרִיאָה', sounds);
   }
-  app.innerHTML=`${header()}<main id="main" class="learning-hub"><button class="text-button" data-action="home">${uiIcon('home')} לְבֵית הַחֲבֵרִים</button><section class="learning-hub-heading"><div><span class="section-kicker">בּוֹחֲרִים אֵיךְ לְגַלּוֹת הַיּוֹם</span><h1 tabindex="-1">${names[hub]}</h1><p>${hub==='english'?'לֹא צָרִיךְ לָדַעַת לִקְרֹא בְּאַנְגְּלִית. מַקְשִׁיבִים, נוֹגְעִים וּמַצְלִיחִים.':'כָּל הַדְּרָכִים פְּתוּחוֹת. מַתְחִילִים יַחַד, וּמַמְשִׁיכִים בַּקֶּצֶב שֶׁלָּנוּ.'}</p></div>${pup(hub==='english'?'bobi':'luli')}</section><div class="learning-paths">${cards}</div></main>${footer()}`;
+  app.innerHTML = `${header()}<main id="main" class="learning-hub"><button class="text-button back-button" data-action="home">${uiIcon('home')} לְבֵית הַחֲבֵרִים</button><section class="learning-hub-heading"><h1 tabindex="-1">${hebrew ? 'עִבְרִית' : 'מִפְרַץ הָאַנְגְּלִית'}</h1>${pup(hebrew ? 'luli' : 'bobi')}</section>${sections}</main>${footer()}`;
 }
 function startJourney(mode,level){
   if(!JOURNEYS[mode])return;checkpoint();narrator.stop();round=null;
@@ -1074,13 +1096,13 @@ function renderJourney(){
     onHome:()=>{checkpoint();view='home';journeyPlan=null;render();focusTitle();},
     onComplete:plan=>{
       const result=awardRound(JOURNEYS[plan.mode].domain,plan.helped.length,null,plan.id,journeyLength(plan));
-      progress=result.progress;plan.sticker=result.sticker;delete journeyDrafts[`${plan.mode}:${plan.level}`];view='journey-complete';save();render();focusTitle();celebrate(32);announcements.say('complete');
+      progress=result.progress;plan.sticker=result.sticker;delete journeyDrafts[`${plan.mode}:${plan.level}`];view='journey-complete';save();render();focusTitle();revealWin('.journey-complete-art');announcements.say(plan.sticker ? 'complete' : 'complete-all');
     }
   });
 }
 function renderJourneyComplete(){
   const plan=journeyPlan;
-  app.innerHTML=`${header()}<main id="main" class="journey-complete"><div class="journey-complete-art">${pup('luli')}${art(plan?.sticker||'star')}</div><h1 tabindex="-1">כָּל הַכָּבוֹד! עוֹד הַרְפַּתְקָה שְׁלֵמָה!</h1><p>הַמַּדְבֵּקָה וְהַלְּמִידָה שְׁמוּרוֹת. אֶפְשָׁר לָצֵאת לְהַפְסָקָה אוֹ לְשַׂחֵק בַּפָּארְק.</p><div class="journey-controls"><button class="primary-button" data-action="park">לַפָּארְק שֶׁלִּי ${uiIcon('arrow')}</button><button class="secondary-button" data-action="learning-hub" data-hub="${plan?JOURNEYS[plan.mode].domain:'hebrew'}">עוֹד גִּלּוּי קָטָן</button><button class="text-button" data-action="home">לְבֵית הַחֲבֵרִים</button></div></main>${footer()}`;
+  app.innerHTML=`${header()}<main id="main" class="journey-complete"><div class="journey-complete-art">${pup('luli')}${art(plan?.sticker||'star')}</div><h1 tabindex="-1">כָּל הַכָּבוֹד! עוֹד הַרְפַּתְקָה שְׁלֵמָה!</h1><p>${plan?.sticker ? 'מַדְבֵּקָה חֲדָשָׁה הִצְטָרְפָה לָאַלְבּוֹם.' : 'הַהַרְפַּתְקָה נִשְׁמְרָה.'}</p><div class="journey-controls"><button class="primary-button" data-action="park">לַפָּארְק שֶׁלִּי ${uiIcon('arrow')}</button><button class="secondary-button" data-action="learning-hub" data-hub="${plan?JOURNEYS[plan.mode].domain:'hebrew'}">עוֹד גִּלּוּי קָטָן</button><button class="text-button" data-action="home">לְבֵית הַחֲבֵרִים</button></div></main>${footer()}`;
 }
 function renderPark(){
   app.innerHTML=`${header()}<main id="main" class="park-page"><div id="park-root"></div></main>${footer()}`;
@@ -1172,6 +1194,7 @@ app.addEventListener('change', event => {
 });
 
 dialog.addEventListener('click', event => { if (event.target === dialog && event.offsetX >= 0 && event.offsetX <= dialog.clientWidth && event.offsetY >= 0 && event.offsetY <= dialog.clientHeight) return; if (event.target === dialog) closeDialog(); });
+dialog.addEventListener('cancel', event => { event.preventDefault(); closeDialog(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) narrator.stop(); else { void album.flush();void learner.flush(); startOpeningWelcome(); } });
 window.addEventListener('online', () => { void album.flush();void learner.flush(); });
 window.addEventListener('hashchange', openAlbumInvite);
@@ -1183,6 +1206,4 @@ openAlbumInvite();
 startOpeningWelcome();
 if (album.linked) {void album.flush();void learner.flush();}
 
-if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-  navigator.serviceWorker.register('./sw.js').catch(() => { /* Online play remains available. */ });
-}
+registerOffline();

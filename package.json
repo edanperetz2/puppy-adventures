@@ -1,10 +1,12 @@
 {
   "name": "puppy-adventures",
-  "version": "2.7.1",
+  "version": "2.8.0",
   "private": true,
   "type": "module",
   "description": "A family learning game for phones, tablets and computers, with a shared sticker album.",
   "scripts": {
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/serve.mjs --release",
     "dev": "node scripts/serve.mjs",
     "start": "node scripts/serve.mjs",
     "test": "node --test tests/*.test.mjs",
@@ -13,5 +15,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
   }
 }

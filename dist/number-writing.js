@@ -57,7 +57,7 @@ export function numberWritingPad(number) {
 
 export function mountNumberWriting(root, { getItems, motion, speak, onPractice }) {
   const events = new AbortController();
-  const animate = motion && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const demoCaption = () => motion() ? 'הַרְאִי לִי אֵיךְ' : 'קַו אַחַר קַו';
   let number = nextWritingNumber(getItems());
   let pad, recorded, showedDemo, lastHint;
 
@@ -74,7 +74,7 @@ export function mountNumberWriting(root, { getItems, motion, speak, onPractice }
       <div class="number-writing-tools">
         <bdi class="number-writing-example" dir="ltr"></bdi>
         <div>
-          <button type="button" class="secondary-button" data-number-writing="demo">${uiIcon('pencil')} ${animate ? 'הַרְאִי לִי אֵיךְ' : 'קַו אַחַר קַו'}</button>
+          <button type="button" class="secondary-button" data-number-writing="demo">${uiIcon('pencil')} <span>${demoCaption()}</span></button>
           <button type="button" class="text-button" data-number-writing="reset">${uiIcon('again')} מֵחָדָשׁ</button>
         </div>
       </div>
@@ -141,7 +141,7 @@ export function mountNumberWriting(root, { getItems, motion, speak, onPractice }
     next.hidden = true;
     surface.innerHTML = `${numberWritingPad(number)}<p class="letter-pad-caption" role="status"></p>`;
     pad = mountLetterPad(surface, {
-      motion: animate,
+      motion,
       completeMessage: 'כָּל הַכָּבוֹד! כָּתַבְתְּ אֶת הַמִּסְפָּר.',
       onDemoComplete: () => { lastHint = Date.now(); void speak(traceCue()); },
       onStartNeeded: () => {
@@ -177,7 +177,7 @@ export function mountNumberWriting(root, { getItems, motion, speak, onPractice }
         showedDemo = true;
         next.hidden = true;
         pad.demo();
-        if (animate) void speak(spokenNumber(number));
+        if (motion()) void speak(spokenNumber(number));
         else void speak(traceCue());
         break;
       case 'reset':
@@ -196,5 +196,9 @@ export function mountNumberWriting(root, { getItems, motion, speak, onPractice }
   }, { signal: events.signal });
 
   selectNumber(number);
-  return { replay, updateProgress, destroy() { events.abort(); pad.destroy(); } };
+  return {
+    replay, updateProgress,
+    updateMotion() { root.querySelector('[data-number-writing="demo"] span').textContent = demoCaption(); },
+    destroy() { events.abort(); pad.destroy(); },
+  };
 }
