@@ -17,13 +17,19 @@ export const ENGLISH_LISTENING = Object.freeze({
   icon: 'dog',
 });
 
+export const MY_JOURNEY = Object.freeze({
+  id: 'my-journey',
+  route: Object.freeze({ action: 'chapters' }),
+  he: Object.freeze(['הַמַּסָּע שֶׁלִּי', 'פִּיקְנִיק לִקְרִיאָה, חִבּוּר וּשְׁעוֹן. מִשְׁלוֹחִים לְתִרְגּוּל הַקְשָׁבָה בְּאַנְגְּלִית.']),
+  en: Object.freeze(['My Journey', 'Read clues, add, and set the clock at the picnic. Listen to English words to help Bobi make deliveries.']),
+  icon: 'boat',
+});
+
 export const PICNIC = Object.freeze({
   id: 'picnic',
   route: Object.freeze({ action: 'picnic' }),
-  he: Object.freeze(['הַמַּסָּע שֶׁלִּי', 'פִּיקְנִיק בְּשָׁלוֹשׁ מְשִׂימוֹת שֶׁל שִׁשָּׁה צְעָדִים. קְרִיאָה, חִבּוּר וּשְׁעוֹן.']),
-  en: Object.freeze(['My Journey', 'Get a picnic ready in three six-step missions. Read clues, add groups, and move clock hands.']),
   chapter: 'הַפִּיקְנִיק שֶׁל הַחֲבֵרִים',
-  icon: 'basket',
+  detail: 'קוֹרְאוֹת רְמָזִים, מְחַבְּרוֹת וּמְכַוְּנוֹת אֶת הַשָּׁעוֹן.',
   intro: 'picnic-welcome',
   steps: SESSION_LENGTH,
 });
@@ -32,4 +38,20 @@ export const PICNIC_MISSIONS = Object.freeze({
   reading: { domain: 'hebrew', title: 'מְסַדְּרוֹת אֶת הַמָּקוֹם', description: 'קִרְאִי וְהַזִּיזִי דְּבָרִים לַמָּקוֹם הַנָּכוֹן.', icon: 'star' },
   addition: { domain: 'math', title: 'מְכִינוֹת אֶת הַכִּבּוּד', description: 'חַבְּרִי שְׁתֵּי קְבוּצוֹת וּמִצְאִי כַּמָּה יֵשׁ בְּיַחַד.', icon: 'apple' },
   clock: { domain: 'clock', title: 'מָתַי הַחֲבֵרִים מַגִּיעִים?', description: 'הַזִּיזִי אֶת הַמְּחוֹגִים וּסְפְרִי דַּקּוֹת.', icon: 'clock' },
+});
+
+export const DELIVERY = Object.freeze({
+  id: 'delivery',
+  route: Object.freeze({ action: 'delivery' }),
+  chapter: 'הַמִּשְׁלוֹחַ שֶׁל בּוֹבִּי',
+  detail: 'מַקְשִׁיבוֹת לְמִלָּה בְּאַנְגְּלִית וְעוֹזְרוֹת לְבּוֹבִּי בַּמַּסָּע.',
+  icon: 'boat',
+  intro: 'delivery-welcome',
+  steps: SESSION_LENGTH,
+});
+
+export const DELIVERY_MISSIONS = Object.freeze({
+  aboard: { title: 'מִי עוֹלֶה לַסִּירָה?', description: 'מַקְשִׁיבוֹת וּמַעֲלוֹת חַיּוֹת לַסִּירָה.', icon: 'duck', prompt: 'delivery-aboard' },
+  cargo: { title: 'אוֹסְפוֹת צִיּוּד', description: 'מַקְשִׁיבוֹת וְאוֹרְזוֹת אֶת הַצִּיּוּד בַּסַּל.', icon: 'basket', prompt: 'delivery-pack' },
+  route: { title: 'מַגִּיעוֹת לַחֲבֵרִים', description: 'מַקְשִׁיבוֹת וּמְבִיאוֹת חֲבִילָה לַחָבֵר הַנָּכוֹן.', icon: 'gift', prompt: 'delivery-route' },
 });

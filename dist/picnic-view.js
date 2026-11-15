@@ -1,4 +1,4 @@
-import { PICNIC, PICNIC_MISSIONS } from './activities.js';
+import { MY_JOURNEY, PICNIC, PICNIC_MISSIONS } from './activities.js';
 import { art, pup, uiIcon } from './art.js';
 import { mountActOut } from './act-out-view.js?v=2.7.1-pepper';
 import { mountClockDial } from './clock-dial.js?v=2.2.4-practice';
@@ -6,13 +6,15 @@ import { learningTime } from './clock-learning.js?v=2.2.4-practice';
 import { CLIPS } from './content.js';
 import { nextPicnicStep, picnicClockCorrect, picnicReadingModel, picnicWord } from './picnic.js';
 import { storyClue } from './story-practice.js';
+import { mountDrag } from './drag.js';
+import { chapterMissions, chapterText } from './chapter-ui.js';
 
-const labels = nikud => text => nikud ? text : text.replace(/\p{M}/gu, '');
+const labels = chapterText;
 const clipText = key => CLIPS[key].text;
 const time = total => learningTime(total).digital;
 const foodNames = { apple: ['תַּפּוּחַ', 'תַּפּוּחִים'], cookie: ['עוּגִיָּה', 'עוּגִיּוֹת'], bone: ['עֶצֶם', 'עֲצָמוֹת'] };
 
-function picnicScene(finished) {
+export function picnicScene(finished = []) {
   return `<div class="picnic-landscape" aria-hidden="true">
     <span class="picnic-sun"></span><span class="picnic-hill"></span>
     ${art('tree', 'picnic-tree')}<div class="picnic-rug"></div>
@@ -23,34 +25,16 @@ function picnicScene(finished) {
   </div>`;
 }
 
-export function picnicEntry(nikud) {
-  const label = labels(nikud);
-  return `<section class="picnic-entry" aria-labelledby="picnic-entry-title">
-    ${picnicScene([])}<div class="picnic-entry-copy"><h2 id="picnic-entry-title">${label(PICNIC.he[0])}</h2>
-    <p>${label(PICNIC.chapter)}</p><button class="primary-button" data-action="${PICNIC.route.action}">${label('לַמַּסָּע שֶׁלִּי')} ${uiIcon('arrow')}</button></div>
-  </section>`;
-}
-
 export function picnicMap({ drafts, finished }, nikud) {
   const label = labels(nikud);
   const ready = finished.length === Object.keys(PICNIC_MISSIONS).length;
-  const cards = Object.entries(PICNIC_MISSIONS).map(([path, mission]) => {
-    const saved = drafts[path], done = finished.includes(path);
-    const status = saved ? `מַמְשִׁיכוֹת מִצַּעַד ${saved.index + 1}` : done ? 'מְשַׂחֲקוֹת שׁוּב' : 'מַתְחִילוֹת';
-    return `<button class="picnic-mission picnic-${path}" data-action="picnic-start" data-path="${path}">
-      <span class="picnic-mission-art" aria-hidden="true">${art(mission.icon)}</span>
-      <span class="picnic-mission-title">${label(mission.title)}</span><span class="picnic-mission-detail">${label(mission.description)}</span>
-      <span class="picnic-mission-go">${label(status)} ${uiIcon('arrow')}</span>
-      ${done ? `<span class="picnic-done" aria-label="${label('הֻשְׁלַם')}">${uiIcon('check')}</span>` : ''}
-    </button>`;
-  }).join('');
   return `<main id="main" class="picnic-page">
-    <button class="text-button back-button" data-action="home">${uiIcon('home')} ${label('לְבֵית הַחֲבֵרִים')}</button>
+    <button class="text-button back-button" data-action="${MY_JOURNEY.route.action}">${uiIcon('arrow')} ${label('לַמַּסָּע שֶׁלִּי')}</button>
     <section class="picnic-map-hero">${picnicScene(finished)}<div class="picnic-map-title">
-      <p>${label(PICNIC.he[0])}</p><h1 tabindex="-1">${label(PICNIC.chapter)}</h1>
+      <p>${label(MY_JOURNEY.he[0])}</p><h1 tabindex="-1">${label(PICNIC.chapter)}</h1>
       <p>${label(ready ? 'הַפִּיקְנִיק מוּכָן!' : 'בַּחֲרִי אֵיךְ לַעֲזֹר לַחֲבֵרִים.')}</p>
     </div></section>
-    <div class="picnic-missions" role="group" aria-label="${label('מְשִׂימוֹת הַפִּיקְנִיק')}">${cards}</div>
+    ${chapterMissions(PICNIC_MISSIONS, { drafts, finished }, 'picnic-start', 'picnic', label)}
   </main>`;
 }
 
@@ -89,7 +73,7 @@ export function mountPicnicRound(root, {
   const model = () => round.index === 0;
   const state = () => round.state;
   const events = new AbortController(), listeners = { signal: events.signal };
-  let dial, acts, drag, suppressClick, timer, modelTimer;
+  let dial, acts, timer, modelTimer;
   const find = selector => root.querySelector(selector);
   const note = (message, success = false) => {
     const feedback = find('.picnic-feedback');
@@ -337,7 +321,7 @@ export function mountPicnicRound(root, {
       const [kind, direction] = picnicClock.split(':');
       dial.step(kind, Number(direction));
     }
-    if (picnicGroup !== undefined && (button !== suppressClick || !event.detail)) moveGroup(Number(picnicGroup));
+    if (picnicGroup !== undefined && tapAllowed(event, button)) moveGroup(Number(picnicGroup));
     if (picnicAnswer !== undefined) answer(Number(picnicAnswer));
     if (picnicAction === 'replay') replay(picnicPrompt(round));
     if (picnicAction === 'model') { button.hidden = true; playModel(); }
@@ -356,37 +340,9 @@ export function mountPicnicRound(root, {
     }
   }, listeners);
 
-  if (isAddition) {
-    root.addEventListener('pointerdown', event => {
-      const button = event.target.closest('[data-picnic-group]');
-      if (!button || drag || event.button !== 0 || !event.isPrimary) return;
-      suppressClick = null;
-      drag = { button, id: event.pointerId, x: event.clientX, y: event.clientY, active: false };
-      button.setPointerCapture(drag.id);
-    }, listeners);
-    root.addEventListener('pointermove', event => {
-      if (drag?.id !== event.pointerId) return;
-      const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
-      if (!drag.active && Math.hypot(dx, dy) < 8) return;
-      drag.active = true;
-      drag.button.classList.add('is-dragging');
-      drag.button.style.translate = `${dx}px ${dy}px`;
-    }, listeners);
-    const endDrag = event => {
-      if (drag?.id !== event.pointerId) return;
-      const { button, active } = drag;
-      drag = null;
-      const blanket = active && find('.picnic-blanket')?.getBoundingClientRect();
-      // A tap after a touch drag may arrive without a compatibility click.
-      const tapped = !active && event.pointerType === 'touch';
-      if (active || tapped) suppressClick = button;
-      const dropped = blanket
-        && event.clientX >= blanket.left && event.clientX <= blanket.right && event.clientY >= blanket.top && event.clientY <= blanket.bottom;
-      if (event.type === 'pointerup' && (tapped || dropped)) moveGroup(Number(button.dataset.picnicGroup));
-      button.classList.remove('is-dragging'); button.style.translate = '';
-    };
-    for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) root.addEventListener(type, endDrag, listeners);
-  }
+  const move = button => moveGroup(Number(button.dataset.picnicGroup));
+  const tapAllowed = isAddition ? mountDrag(root, { sources: '[data-picnic-group]', targets: '.picnic-blanket',
+    signal: events.signal, onTouchTap: move, onDrop: move }) : () => true;
 
   paint();
   return {

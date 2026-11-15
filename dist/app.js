@@ -41,12 +41,15 @@ import { mountActOut } from './act-out-view.js?v=2.7.1-pepper';
 import { SCIENCE_TITLE, SCIENCE_EXPERIMENTS, cleanScienceRound, scienceClip } from './science-content.js?v=2.7.1-pepper';
 import { mountScience, scienceArt, scienceMenu } from './science-view.js?v=2.7.1-pepper';
 import { mountOfflineAudio, registerOffline } from './offline-audio.js';
-import { ENGLISH_LISTENING, LITTLE_STORIES, PICNIC, PICNIC_MISSIONS } from './activities.js';
+import { DELIVERY, DELIVERY_MISSIONS, ENGLISH_LISTENING, LITTLE_STORIES, PICNIC, PICNIC_MISSIONS } from './activities.js';
 import { latestPlayedDraft, readingActivity, recommendAdventure } from './home-adventure.js';
 import { firstStoryClue, pictureClue, storyClue, storyReviewQuestion } from './story-practice.js';
 import { awardLocalRound, checkpointScoredRound, finishScoredRound } from './round-lifecycle.js';
 import { cleanPicnic, cleanPicnicRound, createPicnicRound, packPicnicRound, picnicItem } from './picnic.js';
-import { mountPicnicRound, picnicComplete, picnicEntry, picnicMap, picnicPrompt } from './picnic-view.js';
+import { mountPicnicRound, picnicComplete, picnicMap, picnicPrompt } from './picnic-view.js';
+import { chapterEntry, chapterMap } from './chapter-map.js';
+import { cleanDelivery, cleanDeliveryRound, createDeliveryBonus, createDeliveryRound, deliveryEvidence, deliveryPairReady, packDeliveryRound } from './delivery.js';
+import { deliveryComplete, deliveryMap, mountDeliveryRound, prepareDeliveryAudio } from './delivery-view.js';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -79,6 +82,7 @@ let pikachuController = null;
 let actOutController = null;
 let sciencePath = null, scienceDrafts = {}, scienceController = null;
 let picnic = cleanPicnic(null), picnicRound = null, picnicController = null, picnicSticker = null;
+let delivery = cleanDelivery(null), deliveryRound = null, deliveryController = null, deliverySticker = null;
 let homeItems = null;
 const progressScreens = ['home', 'album', 'letters-menu', 'letters-writing', 'letters-recognition', 'characters-menu'];
 const preferenceScreens = [...progressScreens, 'learning-hub', 'reading-levels', 'science-menu', 'number-menu'];
@@ -102,6 +106,7 @@ try {
     awardedRounds=(Array.isArray(saved.awardedRounds)?saved.awardedRounds:[]).filter(id=>/^[0-9a-f-]{36}$/i.test(id)).slice(-10000);
     if(Object.hasOwn(WRITING_STEPS,saved.writingPractice?.mode))writingPractice={mode:saved.writingPractice.mode,drafts:saved.writingPractice.drafts&&typeof saved.writingPractice.drafts==='object'&&!Array.isArray(saved.writingPractice.drafts)?saved.writingPractice.drafts:{}};
     picnic = cleanPicnic(saved.picnic);
+    delivery = cleanDelivery(saved.delivery);
   }
 } catch { /* A corrupt or unavailable save must never prevent play. */ }
 
@@ -160,7 +165,8 @@ function welcome() {
 function save() {
   try {
     const picnicSave = picnic.finished.length || Object.keys(picnic.drafts).length ? { picnic } : {};
-    gameStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition, characterPractice, drafts, journeyDrafts, awardedRounds, writingPractice, ...(Object.keys(numberDrafts).length ? { numberDrafts } : {}), ...(Object.keys(scienceDrafts).length ? { scienceDrafts } : {}), ...picnicSave }));
+    const deliverySave = delivery.finished.length || Object.keys(delivery.drafts).length ? { delivery } : {};
+    gameStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition, characterPractice, drafts, journeyDrafts, awardedRounds, writingPractice, ...(Object.keys(numberDrafts).length ? { numberDrafts } : {}), ...(Object.keys(scienceDrafts).length ? { scienceDrafts } : {}), ...picnicSave, ...deliverySave }));
     storageAvailable = true;
   } catch { storageAvailable = false; }
 }
@@ -408,7 +414,7 @@ function openClockLesson(returnToGame = false) {
 
 function clockSpeak(keys) {
   if (!settings.sound) { settings.sound = true; narrator.enabled = true; save(); renderSoundButton(); }
-  announcements.say(keys);
+  return announcements.say(keys);
 }
 
 function openCharacters() {
@@ -427,7 +433,7 @@ function homeSuggestion() {
 }
 
 function homeAdventureContent() {
-  const draft = latestPlayedDraft({ drafts, journeyDrafts, numberDrafts, scienceDrafts, picnicDrafts: picnic.drafts });
+  const draft = currentDraft();
   homeItems = draft ? null : learner.items;
   const choice = draft ? describeDraft(draft) : homeSuggestion();
   const { activity, reason } = choice;
@@ -462,7 +468,7 @@ function renderHome() {
         <p id="audio-notice" class="audio-notice" role="status" hidden></p>
       </div><div class="hero-world">${scene()}</div>
     </section>
-    ${picnicEntry(settings.nikud)}
+    ${chapterEntry(settings.nikud)}
     <section class="missions" aria-labelledby="missions-title"><div class="section-heading"><h2 id="missions-title">לאן נצא היום?</h2></div>
       <div class="mission-grid">${[...cards.slice(0, 2), science, ...cards.slice(2)].join('')}</div>
     </section>
@@ -635,6 +641,7 @@ function render() {
   actOutController?.destroy(); actOutController=null;
   scienceController?.destroy(); scienceController=null;
   picnicController?.destroy(); picnicController=null;
+  deliveryController?.destroy(); deliveryController=null;
   letterPad?.destroy(); letterPad = null;
   clockSchool?.destroy(); clockSchool = null;
   applyPreferences();
@@ -650,9 +657,13 @@ function render() {
   else if (view === 'pikachu') renderPikachu();
   else if (view === 'science-menu') app.innerHTML = header() + scienceMenu(scienceDrafts, settings.nikud) + footer();
   else if (view === 'science-round') renderScience();
+  else if (view === 'chapters') app.innerHTML = header() + chapterMap({ picnic, delivery }, settings.nikud) + footer();
   else if (view === 'picnic-map') app.innerHTML = header() + picnicMap(picnic, settings.nikud) + footer();
   else if (view === 'picnic-round') renderPicnicRound();
   else if (view === 'picnic-complete') app.innerHTML = header() + picnicComplete(picnicRound, picnicSticker, picnic.finished, settings.nikud) + footer();
+  else if (view === 'delivery-map') app.innerHTML = header() + deliveryMap(delivery, deliveryPairReady(learner.items), settings.nikud) + footer();
+  else if (view === 'delivery-round') renderDeliveryRound();
+  else if (view === 'delivery-complete') app.innerHTML = header() + deliveryComplete(deliveryRound, deliverySticker, delivery.finished, settings.nikud) + footer();
   else if (view === 'park') renderPark();
   else if (view === 'journey-complete') renderJourneyComplete();
   else if (view === 'game') { renderGame(); restoreQuestionState(); }
@@ -725,6 +736,9 @@ function replay() {
   if (view === 'picnic-map') { announcements.say(PICNIC.intro); return; }
   if (view === 'picnic-round') { picnicController?.replay(); return; }
   if (view === 'picnic-complete') { announcements.say(completionClip(picnicSticker)); return; }
+  if (view === 'delivery-map') { announcements.say(DELIVERY.intro); return; }
+  if (view === 'delivery-round') { deliveryController?.replay(); return; }
+  if (view === 'delivery-complete') { announcements.say(completionClip(deliverySticker)); return; }
   if(view==='park'){clockSpeak('journey-park-intro');return;}
   if (view === 'clock-school') { clockSchool.replay(true); return; }
   if (view === 'game') {
@@ -970,7 +984,7 @@ function renderSettings() {
   dialog.querySelector('[data-dialog="reset"]').onclick = () => {
     openDialog(`<h2 id="parent-title">לאפס את המכשיר הזה?</h2><p>המדבקות וההתקדמות בדפדפן הזה יימחקו. הגדרות המשחק יישמרו.${album.linked ? ' החיבור לאלבום המשפחתי יוסר. האלבום שכבר סונכרן יישמר עבור המכשירים האחרים.' : ''}</p><div class="dialog-actions"><button class="secondary-button" data-dialog="cancel-reset">ביטול</button><button class="primary-button" data-dialog="confirm-reset">איפוס ההתקדמות</button></div>`);
     dialog.querySelector('[data-dialog="cancel-reset"]').onclick = renderSettings;
-    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); learner.reset(); drafts={};journeyDrafts={};numberDrafts={};numberRound=null;scienceDrafts={};picnicController?.destroy({discard:true});picnicController=null;picnic=cleanPicnic(null);picnicRound=null;awardedRounds=[];writingPractice={mode:'trace',drafts:{}}; progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
+    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); learner.reset(); drafts={};journeyDrafts={};numberDrafts={};numberRound=null;scienceDrafts={};picnicController?.destroy({discard:true});picnicController=null;picnic=cleanPicnic(null);picnicRound=null;delivery=cleanDelivery(null);deliveryRound=null;awardedRounds=[];writingPractice={mode:'trace',drafts:{}}; progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
   };
 }
 
@@ -1017,6 +1031,9 @@ function describeDraft({ kind, path, value }) {
   } else if (kind === 'picnic') {
     ({ title, icon } = PICNIC_MISSIONS[path]);
     length = PICNIC.steps;
+  } else if (kind === 'delivery') {
+    ({ title, icon } = DELIVERY_MISSIONS[path]);
+    length = DELIVERY.steps;
   } else {
     const experiment = SCIENCE_EXPERIMENTS[path];
     title = experiment.title;
@@ -1025,12 +1042,17 @@ function describeDraft({ kind, path, value }) {
   }
   return { activity: { he: [title], icon }, reason: `צַעַד ${value.index + 1} מִתּוֹךְ ${length}` };
 }
+function currentDraft() {
+  return latestPlayedDraft({ drafts, journeyDrafts, numberDrafts, scienceDrafts, picnicDrafts: picnic.drafts, deliveryDrafts: delivery.drafts });
+}
+
 function resumeLatest(){
-  const draft = latestPlayedDraft({ drafts, journeyDrafts, numberDrafts, scienceDrafts, picnicDrafts: picnic.drafts });
+  const draft = currentDraft();
   if (!draft) return;
   if (draft.kind === 'numbers') { startNumberRound(draft.value.path); return; }
   if (draft.kind === 'science') { startScience(draft.path); return; }
   if (draft.kind === 'picnic') { startPicnicRound(draft.path); return; }
+  if (draft.kind === 'delivery') { startDeliveryRound(draft.path); return; }
   narrator.stop();
   if(draft.kind==='classic'){const restored=unpackRound(draft.value);if(!restored)return;round=restored;view='game';}
   else {journeyPlan=resumeJourney(draft.value);if(!journeyPlan)return;round=null;view='journey';}
@@ -1154,10 +1176,62 @@ function renderScience() {
   });
 }
 
+function openChapters() {
+  checkpoint(); narrator.stop(); round = null; journeyPlan = null;
+  view = 'chapters'; render(); focusTitle();
+}
+
 function openPicnic() {
   checkpoint(); narrator.stop(); round = null; journeyPlan = null; picnicRound = null;
   view = 'picnic-map'; render(); focusTitle();
   if (!picnic.finished.length) announcements.say(PICNIC.intro);
+}
+
+function openDelivery() {
+  checkpoint(); narrator.stop(); round = null; journeyPlan = null; deliveryRound = null;
+  view = 'delivery-map'; render(); focusTitle();
+  if (!delivery.finished.length) announcements.say(DELIVERY.intro);
+  prepareDeliveryAudio();
+}
+
+function startDeliveryRound(path) {
+  const bonus = path === 'pair';
+  if (bonus ? !deliveryPairReady(learner.items) : !Object.hasOwn(DELIVERY_MISSIONS, path)) return;
+  checkpoint(); narrator.stop(); round = null; journeyPlan = null;
+  deliveryRound = bonus ? createDeliveryBonus() : cleanDeliveryRound(path, delivery.drafts[path]) || createDeliveryRound(path, learner.items);
+  view = 'delivery-round'; render(); focusTitle();
+  prepareDeliveryAudio();
+}
+
+function renderDeliveryRound() {
+  app.innerHTML = header() + '<main id="main" class="picnic-page picnic-play delivery-page delivery-play"></main>' + footer();
+  deliveryController = mountDeliveryRound(app.querySelector('#main'), {
+    round: deliveryRound, nikud: settings.nikud, motion: motionEnabled,
+    play: (keys, manual) => manual ? clockSpeak(keys) : announcements.say(keys), focusTitle,
+    onSave: draft => {
+      if (draft.path === 'pair') return;
+      checkpointScoredRound(draft, delivery.drafts, draft.path, packDeliveryRound); save();
+    },
+    onSuccess: draft => {
+      const { mode, ...evidence } = deliveryEvidence(draft);
+      learner.record(evidence, draft.helped.includes(draft.index) ? 'helped' : 'independent', mode);
+      narrator.chime();
+    },
+    onComplete: draft => {
+      if (draft.path === 'pair') { openDelivery(); return; }
+      const result = finishScoredRound(draft, delivery.drafts, draft.path,
+        (id, length) => awardRound('english', draft.helped.length, null, id, length));
+      if (!result) return;
+      const newlyFinished = !delivery.finished.includes(draft.path);
+      if (newlyFinished) delivery.finished.push(draft.path);
+      progress = result.progress; deliverySticker = result.sticker;
+      view = 'delivery-complete'; save(); render(); focusTitle();
+      revealWin('.picnic-sticker');
+      const chapterReady = newlyFinished && delivery.finished.length === Object.keys(DELIVERY_MISSIONS).length;
+      announcements.say([completionClip(deliverySticker), ...(chapterReady ? ['delivery-finish'] : [])]);
+    },
+  });
+  deliveryController.start();
 }
 
 function startPicnicRound(path) {
@@ -1294,8 +1368,12 @@ app.addEventListener('click', event => {
     case 'pikachu': openPikachu(); break;
     case 'science-menu': openScienceMenu(); break;
     case 'science-start': startScience(button.dataset.path, scienceDrafts[button.dataset.path]?.complete); break;
+    case 'chapters': openChapters(); break;
     case 'picnic': openPicnic(); break;
     case 'picnic-start': startPicnicRound(button.dataset.path); break;
+    case 'delivery': openDelivery(); break;
+    case 'delivery-start': startDeliveryRound(button.dataset.path); break;
+    case 'delivery-bonus': startDeliveryRound('pair'); break;
     case 'garden': openReadingLevels(); break;
     case 'mission-direct': startMission(button.dataset.mission,true); break;
     case 'journey-start': startJourney(button.dataset.journey,button.dataset.level); break;
@@ -1362,7 +1440,7 @@ app.addEventListener('change', event => {
 dialog.addEventListener('click', event => { if (event.target === dialog && event.offsetX >= 0 && event.offsetX <= dialog.clientWidth && event.offsetY >= 0 && event.offsetY <= dialog.clientHeight) return; if (event.target === dialog) closeDialog(); });
 dialog.addEventListener('cancel', event => { event.preventDefault(); closeDialog(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) { picnicController?.flush(); narrator.stop(); } else { void album.flush();void learner.flush(); startOpeningWelcome(); } });
-window.addEventListener('online', () => { void album.flush();void learner.flush(); });
+window.addEventListener('online', () => { void album.flush();void learner.flush(); if (view === 'delivery-map' || view === 'delivery-round') prepareDeliveryAudio(); });
 window.addEventListener('hashchange', openAlbumInvite);
 window.addEventListener('focus', () => { void album.flush();void learner.flush(); });
 setInterval(() => { if (!document.hidden && album.linked) {void album.flush();void learner.flush();} }, 15000);

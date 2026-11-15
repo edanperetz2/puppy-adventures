@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { PICNIC, PICNIC_MISSIONS } from '../dist/activities.js';
+import { MY_JOURNEY, PICNIC, PICNIC_MISSIONS } from '../dist/activities.js';
 import { actOutMatches, actOutPlan, canActOut } from '../dist/act-out.js?v=2.7.0-science';
 import { clockParts, clockTotal } from '../dist/clock-learning.js?v=2.2.4-practice';
 import { CLIPS } from '../dist/content.js';
@@ -12,7 +12,7 @@ import {
 import { picnicPrompt } from '../dist/picnic-view.js';
 
 test('the guide and chapter share a six-step curriculum with distinct, solvable challenges and recorded prompts', () => {
-  assert.ok(GUIDE_ITEMS.some(item => item.he === PICNIC.he && item.en === PICNIC.en));
+  assert.ok(GUIDE_ITEMS.some(item => item.he === MY_JOURNEY.he && item.en === MY_JOURNEY.en));
   assert.equal(PICNIC.steps, 6);
   for (const path of Object.keys(PICNIC_MISSIONS)) {
     const start = packPicnicRound(createPicnicRound(path));

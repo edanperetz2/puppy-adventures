@@ -37923,6 +37923,110 @@
       "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
       "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
       "sha256": "a1824be2d78c50dcd0ca6d3a43059714c78f35044cefd3977f2ca607507db928"
+    },
+    "delivery-welcome": {
+      "take": 0,
+      "segments": [
+        "bˈobi jotsˈe ʔˈim hasiʁˈa. boˈi naʔazˈoʁ lˈo."
+      ],
+      "lang": "he-IL",
+      "speech": "bˈobi jotsˈe ʔˈim hasiʁˈa. boˈi naʔazˈoʁ lˈo.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "3976dce05b00a4c250ed35445b08cb65e41755718c369f1659581284543eb3dc"
+    },
+    "delivery-aboard": {
+      "take": 0,
+      "segments": [
+        "hakʃˈivi. haʔalˈi ʔˈet haχajˈa lasiʁˈa."
+      ],
+      "lang": "he-IL",
+      "speech": "hakʃˈivi. haʔalˈi ʔˈet haχajˈa lasiʁˈa.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "175be62c91b438570a88261c7ad72c42dfc6add8d6226f1e45c1b793ca5af4fd"
+    },
+    "delivery-pack": {
+      "lang": "he-IL",
+      "speech": "hakʃˈivi. sˈimi basˈal ʔˈet mˈa ʃematʔˈim.",
+      "segments": [
+        "hakʃˈivi. sˈimi basˈal ʔˈet mˈa ʃematʔˈim."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "eb8b5f209c4551572125baa2a86f7aaa2cf290ad22ec46c34a0acc19b9f0f485"
+    },
+    "delivery-route": {
+      "take": 0,
+      "segments": [
+        "lemˈi navˈi ʔˈet haχavilˈa? hakʃˈivi."
+      ],
+      "lang": "he-IL",
+      "speech": "lemˈi navˈi ʔˈet haχavilˈa? hakʃˈivi.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "56d0a5d042443e90bad8f7963578a74e69bed6911b60667918ef207c8abf9b83"
+    },
+    "delivery-finish": {
+      "take": 0,
+      "segments": [
+        "kˈol hamiʃloχˈim hiɡˈiʔu. todˈa ʔal haʔezʁˈa!"
+      ],
+      "lang": "he-IL",
+      "speech": "kˈol hamiʃloχˈim hiɡˈiʔu. todˈa ʔal haʔezʁˈa!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "c99d77d9f2e7580eaa701a75c739f5614a9a552fd8561228da11cff041fef765"
+    },
+    "delivery-pair": {
+      "take": 0,
+      "segments": [
+        "aχʃˈav niʃmˈa ʃtˈej milˈim. mˈa matʔˈim?"
+      ],
+      "lang": "he-IL",
+      "speech": "aχʃˈav niʃmˈa ʃtˈej milˈim. mˈa matʔˈim?",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "6b47f619f292129fd0ab7c9c7bd01101308f961080852b778c244b789eb4c906"
+    },
+    "delivery-en-boat": {
+      "lang": "en-US",
+      "speech": "boat",
+      "voice": "en-US-AvaMultilingualNeural",
+      "rate": "+0%",
+      "sha256": "a588457286515e270c1cb24ecfa6de37cb3a4dde73442249b5e64ba9c7a0412a"
+    },
+    "delivery-en-blue-boat": {
+      "lang": "en-US",
+      "speech": "blue boat",
+      "voice": "en-US-AvaMultilingualNeural",
+      "rate": "+0%",
+      "sha256": "8237583ad36590bb31b7470bd48b4a28e2ba3f1ef6b6f9184f26f70574650256"
     }
   }
 }

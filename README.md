@@ -8,7 +8,7 @@ Ariel’s learning game for phones, tablets and computers. Ava gives instruction
 
 | Activity | Practice |
 | --- | --- |
-| **המסע שלי** | Get the friends' picnic ready in three six-step missions. Read a clue and move an object, combine two groups and choose their sum, or move the clock hands to find an arrival time. |
+| **המסע שלי** | Two chapters with three six-step missions each. Read clues, add, and move clock hands at the friends' picnic. Help Bobi move animals, pack supplies, and deliver packages by listening to English words. Hear an optional two-word phrase when both words have been recognized independently on different days. |
 | **גינת המילים** | Ten Hebrew stages, from short words to little stories. Choose a matching picture or act out the sentence. A mixed adventure draws from the stages across replays. |
 | **סדנת המילים** | Build words from parts and letters, fill gaps and finish short sentences across four stages. |
 | **סיפור שמשחקים** | Eight playable Hebrew stories with illustrated choices and actions such as moving objects into place. |

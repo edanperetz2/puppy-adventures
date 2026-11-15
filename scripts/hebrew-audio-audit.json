@@ -16957,6 +16957,48 @@
       "detected_ipa": "hapˈiknik muχˈan, kˈol haχaveʁˈim kˈan.",
       "phoneme_edit_ratio": 0,
       "seconds": 4.33
+    },
+    "delivery-welcome": {
+      "sha256": "3976dce05b00a4c250ed35445b08cb65e41755718c369f1659581284543eb3dc",
+      "expected_ipa": "bˈobi jotsˈe ʔˈim hasiʁˈa. boˈi naʔazˈoʁ lˈo.",
+      "detected_ipa": "bˈobi jotsˈe ʔˈim hasiʁˈa, bˈoʔi naʔazˈoʁ lˈo.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.47
+    },
+    "delivery-aboard": {
+      "sha256": "175be62c91b438570a88261c7ad72c42dfc6add8d6226f1e45c1b793ca5af4fd",
+      "expected_ipa": "hakʃˈivi. haʔalˈi ʔˈet haχajˈa lasiʁˈa.",
+      "detected_ipa": "hakʃˈivi, haʔalˈi ʔˈet haχajˈa lasiʁˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.25
+    },
+    "delivery-pack": {
+      "sha256": "eb8b5f209c4551572125baa2a86f7aaa2cf290ad22ec46c34a0acc19b9f0f485",
+      "expected_ipa": "hakʃˈivi. sˈimi basˈal ʔˈet mˈa ʃematʔˈim.",
+      "detected_ipa": "hakʃˈivi, sˈimi basˈal ʔˈet mˈa ʃematʔˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.59
+    },
+    "delivery-route": {
+      "sha256": "56d0a5d042443e90bad8f7963578a74e69bed6911b60667918ef207c8abf9b83",
+      "expected_ipa": "lemˈi navˈi ʔˈet haχavilˈa? hakʃˈivi.",
+      "detected_ipa": "lemˈi navˈi ʔˈet haχavilˈa? hakʃˈivi.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.19
+    },
+    "delivery-finish": {
+      "sha256": "c99d77d9f2e7580eaa701a75c739f5614a9a552fd8561228da11cff041fef765",
+      "expected_ipa": "kˈol hamiʃloχˈim hiɡˈiʔu. todˈa ʔal haʔezʁˈa!",
+      "detected_ipa": "kˈol hamiʃloχˈim hiɡˈiʔu. todˈa ʔˈal haʔezʁˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.11
+    },
+    "delivery-pair": {
+      "sha256": "6b47f619f292129fd0ab7c9c7bd01101308f961080852b778c244b789eb4c906",
+      "expected_ipa": "aχʃˈav niʃmˈa ʃtˈej milˈim. mˈa matʔˈim?",
+      "detected_ipa": "ʔaχʃˈav niʃmˈa ʃtˈej milˈim. mˈa matʔˈim?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.39
     }
   }
 }
