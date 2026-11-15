@@ -1,5 +1,5 @@
 import { LearningStore } from './learning-sync.js?v=2.2.2-six';
-import { questionLearning, learningSummary } from './learning.js';
+import { questionLearning } from './learning.js';
 import { packRound, unpackRound, cleanDrafts, roundKey } from './session-state.js?v=2.7.1-pepper';
 import { JOURNEYS, newJourney, cleanJourney, resumeJourney, englishPairsReady, journeyLength } from './journey.js?v=2.2.5-practice';
 import { STORIES } from './journey-content.js';
@@ -31,7 +31,7 @@ import { ARIEL, openAriel, readArielInvitation, GAME_KEY } from './profiles.js?v
 import { profileSpeech } from './profile-speech.js?v=2.2.0-voices';
 import { openGameGuide, GUIDE_ICON } from './guide.js?v=2.2.3-ariel';
 import { NUMBER_PATHS, cleanNumberRound, newNumberRound, numberClip } from './number-workshop.js?v=2.3.0-numbers';
-import { NUMBER_WORKSHOP_TITLE, numberMenu, mountNumberRound, numberComplete } from './number-workshop-view.js?v=2.5.0-play';
+import { numberMenu, mountNumberRound, numberComplete } from './number-workshop-view.js?v=2.5.0-play';
 import { numberWritingKey, mountNumberWriting } from './number-writing.js?v=2.3.3-dictation';
 import { mountNumberDictation, numberDictationKey } from './number-dictation.js?v=2.3.3-dictation';
 import { mountFruitCutting } from './fruit-cutting.js?v=2.5.0-play';
@@ -41,6 +41,8 @@ import { mountActOut } from './act-out-view.js?v=2.7.1-pepper';
 import { SCIENCE_TITLE, SCIENCE_EXPERIMENTS, cleanScienceRound, scienceClip } from './science-content.js?v=2.7.1-pepper';
 import { mountScience, scienceArt, scienceMenu } from './science-view.js?v=2.7.1-pepper';
 import { mountOfflineAudio, registerOffline } from './offline-audio.js';
+import { ENGLISH_LISTENING, LITTLE_STORIES } from './activities.js';
+import { latestPlayedDraft, readingActivity, recommendAdventure } from './home-adventure.js';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -72,6 +74,7 @@ let numberRound = null, numberDrafts = {}, numberController = null, numberSticke
 let pikachuController = null;
 let actOutController = null;
 let sciencePath = null, scienceDrafts = {}, scienceController = null;
+let homeItems = null;
 const progressScreens = ['home', 'album', 'letters-menu', 'letters-writing', 'letters-recognition', 'characters-menu'];
 const preferenceScreens = [...progressScreens, 'learning-hub', 'reading-levels', 'science-menu', 'number-menu'];
 
@@ -120,6 +123,10 @@ learner = new LearningStore({ storage:gameStorage, config:SYNC_CONFIG, getCode:(
   if(view==='park')parkController?.update();
   if(view==='letters-lesson')updateWritingStatus();
   if (view === 'number-writing') numberController?.updateProgress();
+  if (view === 'home' && homeItems && !dialog.open && learner.items !== homeItems) {
+    const card = app.querySelector('#home-adventure');
+    if (card && !card.contains(document.activeElement)) card.innerHTML = homeAdventureContent();
+  }
 } });
 
 const narrator = new Narrator(status => {
@@ -404,6 +411,27 @@ function characterMenuClip() { return CHARACTER_COLLECTIONS[characterCollection(
 
 function activityCount(id) { return id === 'characters' ? Object.values(characterPractice.completed).reduce((sum, count) => sum + count, 0) : progress.missions[id]; }
 
+function activityButton({ action, level, mode, path }) {
+  return `data-action="${action}"${level ? ` data-level="${level}"` : ''}${mode ? ` data-journey="${mode}"` : ''}${path ? ` data-path="${path}"` : ''}`;
+}
+
+function homeSuggestion() {
+  return recommendAdventure({ items: learner.items, reading: settings.reading, readingPractice });
+}
+
+function homeAdventureContent() {
+  const draft = latestPlayedDraft({ drafts, journeyDrafts, numberDrafts, scienceDrafts });
+  homeItems = draft ? null : learner.items;
+  const choice = draft ? describeDraft(draft) : homeSuggestion();
+  const { activity, reason } = choice;
+  const text = value => settings.nikud ? value : value.replace(/\p{M}/gu, '');
+  return `<span class="home-adventure-art" aria-hidden="true">${art(activity.icon)}</span><div class="home-adventure-copy">
+    <p class="home-adventure-label">${text(draft ? 'הַהַרְפַּתְקָה שֶׁלָּךְ' : 'הַהַרְפַּתְקָה הַבָּאָה')}</p>
+    <h2 id="home-adventure-title">${text(activity.he[0])}</h2><p id="home-adventure-detail">${text(reason)}</p>
+    <button class="primary-button hero-start" ${activityButton(draft ? { action: 'resume' } : activity.route)} aria-describedby="home-adventure-title home-adventure-detail">${text(draft ? 'מַמְשִׁיכוֹת' : 'יוֹצְאוֹת לְהַרְפַּתְקָה')} ${uiIcon('arrow')}</button>
+  </div>`;
+}
+
 function renderHome() {
   const cards = Object.values(MISSIONS).map(m => `<button class="mission-card ${m.color}" data-action="mission" data-mission="${m.id}" aria-label="${m.name} — ${m.description}">
     <div class="mission-art"><span class="art-orbit"></span>${m.id === 'characters' ? characterMissionArt() : art(m.icon, 'mission-object') + pup(m.pup, 'mission-pup')}</div>
@@ -414,16 +442,16 @@ function renderHome() {
     <div class="mission-art" aria-hidden="true"><span class="art-orbit"></span><span class="lab-picture mission-object">${scienceArt('pepper')}</span>${pup('tofi', 'mission-pup')}</div>
     <div class="mission-body"><span class="subject-tag">מדע</span><h3>${SCIENCE_TITLE}</h3><p>מְנַסּוֹת וּמְגַלּוֹת מָה קוֹרֶה</p><span class="mission-go" aria-hidden="true">${uiIcon('arrow')}</span></div>
   </button>`;
-  app.innerHTML = `${header()}<main id="main" class="home-page">${resumeCard()}
+  app.innerHTML = `${header()}<main id="main" class="home-page">
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
         <div class="hero-greeting">
           <button type="button" class="home-pika-link" data-action="pikachu" aria-label="${PIKACHU_TITLE}">${pikachuImage('home-pikachu')}</button>
           <h1 id="hero-title" tabindex="-1">שלום <bdi>${ARIEL.name}</bdi>!</h1>
         </div>
-        <div class="hero-actions"><button class="primary-button hero-start" data-action="recommended">יוצאות להרפתקה ${uiIcon('arrow')}</button>
-        <button type="button" class="secondary-button home-pika-start" data-action="pikachu">${PIKACHU_TITLE}</button></div>
-        <button class="text-button welcome-listen" data-action="welcome">${uiIcon('sound')} לחצי ונכיר את החברים</button>
+        <section class="home-adventure" id="home-adventure" aria-labelledby="home-adventure-title">${homeAdventureContent()}</section>
+        <div class="hero-actions"><button type="button" class="secondary-button home-pika-start" data-action="pikachu">${PIKACHU_TITLE}</button>
+        <button class="text-button welcome-listen" data-action="welcome">${uiIcon('sound')} לחצי ונכיר את החברים</button></div>
         <p id="audio-notice" class="audio-notice" role="status" hidden></p>
       </div><div class="hero-world">${scene()}</div>
     </section>
@@ -580,7 +608,7 @@ function renderAlbum() {
     ${page.collected ? '<button class="text-button album-latest" data-action="album-latest">למדבקה האחרונה שלי</button>' : ''}
     <div class="sticker-grid">${page.entries.map(({ id, number, unlocked }) => `<div class="sticker ${unlocked ? 'unlocked' : 'locked'}" role="img" aria-label="${unlocked ? `מדבקה ${number} נאספה: ${stickerDefinition(id).name}` : `מדבקה ${number} מחכה להרפתקה הבאה`}">${unlocked ? art(id) : '<span class="sticker-mystery" aria-hidden="true">?</span>'}<span class="sticker-index" aria-hidden="true">${String(number).padStart(3, '0')}</span></div>`).join('')}</div>
     <nav class="album-pagination album-bottom-pages" aria-label="דפדוף בתחתית האלבום">${previousButton}${nextButton}</nav>
-    <button class="primary-button" data-action="recommended">יוצאות להרפתקה ${uiIcon('arrow')}</button></main>${footer()}`;
+    <button class="primary-button" ${activityButton(homeSuggestion().activity.route)}>יוצאות להרפתקה ${uiIcon('arrow')}</button></main>${footer()}`;
 }
 
 function turnAlbumPage(index) {
@@ -643,7 +671,7 @@ function startMission(mission, skipLesson = false) {
   if(restored){round=restored;view='game';render();focusTitle();return;}
   const letterIds = mission === 'letters' ? recognitionGroup().map(letter => letter.id) : null;
   const questions = createSession(mission, { ...settings, learning:learner.items, readingRecent: readingPractice.recent[settings.reading], letterPractice: progress.letterPractice, letterIds, characterPractice });
-  if (mission === 'hebrew' && settings.reading === 'sentences') {
+  if (mission === 'hebrew' && settings.reading === LITTLE_STORIES.route.level) {
     for (const index of actOutSteps(questions)) {
       const question = questions[index];
       Object.assign(question, { actOut: true, prompt: actOutPrompt(question.word) });
@@ -657,11 +685,10 @@ function startMission(mission, skipLesson = false) {
   announcements.say(['good-luck', ...(mission === 'characters' ? round.characterMode === 'mixed' ? ['characters-intro', q.prompt] : [q.prompt] : mission === 'hebrew' ? [READING_LEVELS[round.reading].clip, q.prompt] : [mission === 'letters' ? q.prompt : MISSIONS[mission].intro]), ...(q.showModel ? ['letters-recognition-hint'] : []), ...(q.targetClip ? [q.targetClip] : [])]);
 }
 
-function recommended() {
-  const due=learningSummary(learner.items).review[0];
-  if(due){if(due.startsWith('workshop:')){openLearningHub('hebrew');return;}if(due.startsWith('english:')){openLearningHub('english');return;}if(due.startsWith('objects:')||due.startsWith('math:')){openNumberMenu();return;}}
-  const next = Object.keys(MISSIONS).reduce((a, b) => activityCount(a) <= activityCount(b) ? a : b);
-  startMission(next);
+function startReadingLevel(level) {
+  if (!Object.hasOwn(READING_LEVELS, level)) return;
+  settings.reading = level;
+  startMission('hebrew', true);
 }
 
 function leaveTo(destination) {
@@ -894,22 +921,34 @@ function awardRound(mission,helped,letters,id,length){
   if(awardedRounds.includes(id))return {progress,sticker:null};
   const result=finishSession(progress,mission,helped,letters,length);awardedRounds=[...awardedRounds,id].slice(-10000);return result;
 }
-function latestDraft() {
-  return [
-    ...Object.values(drafts).filter(d => d.mission !== 'math').map(d => ({ kind: 'classic', value: d, at: d.at })),
-    ...Object.values(journeyDrafts).filter(d => d.mode !== 'objects').map(d => ({ kind: 'journey', value: d, at: d.at })),
-    ...Object.values(numberDrafts).map(d => ({ kind: 'numbers', value: d, at: d.at })),
-    ...Object.entries(scienceDrafts).filter(([, draft]) => !draft.complete).map(([path, value]) => ({ kind: 'science', path, value, at: value.at })),
-  ].sort((a, b) => b.at - a.at)[0];
-}
-function resumeCard(){
-  const draft=latestDraft();if(!draft)return '';
-  const name=draft.kind==='science'?SCIENCE_EXPERIMENTS[draft.path].title:draft.kind==='numbers'?NUMBER_WORKSHOP_TITLE:draft.kind==='journey'?JOURNEYS[draft.value.mode].title:MISSIONS[draft.value.mission].name;
-  const length = draft.kind === 'science' ? SCIENCE_EXPERIMENTS[draft.path].steps.length : draft.kind === 'journey' ? journeyLength(draft.value) : draft.value.questions.length;
-  return `<section class="resume-card"><span>${uiIcon('again')}</span><div><strong>מַמְשִׁיכִים מֵאֵיפֹה שֶׁעָצַרְנוּ?</strong><small>${name} · צַעַד ${draft.value.index+1} מִתּוֹךְ ${length}</small></div><button class="primary-button" data-action="resume">מַמְשִׁיכִים ${uiIcon('arrow')}</button></section>`;
+function describeDraft({ kind, path, value }) {
+  let title, icon, length;
+  if (kind === 'classic') {
+    const mission = MISSIONS[value.mission];
+    const reading = value.mission === 'hebrew' && readingActivity(value.reading);
+    title = reading ? reading.he[0] : mission.name;
+    icon = reading ? reading.icon : mission.icon;
+    length = value.questions.length;
+  } else if (kind === 'journey') {
+    const journey = JOURNEYS[value.mode];
+    title = value.mode === 'stories' ? STORIES.find(story => story.id === value.level).title
+      : value.mode === 'english' && value.level === 'single' ? ENGLISH_LISTENING.he[0] : journey.title;
+    icon = journey.icon;
+    length = journeyLength(value);
+  } else if (kind === 'numbers') {
+    ({ title, icon } = NUMBER_PATHS[value.path]);
+    length = value.questions.length;
+  } else {
+    const experiment = SCIENCE_EXPERIMENTS[path];
+    title = experiment.title;
+    icon = 'clock';
+    length = experiment.steps.length;
+  }
+  return { activity: { he: [title], icon }, reason: `צַעַד ${value.index + 1} מִתּוֹךְ ${length}` };
 }
 function resumeLatest(){
-  const draft=latestDraft();if(!draft)return;
+  const draft = latestPlayedDraft({ drafts, journeyDrafts, numberDrafts, scienceDrafts });
+  if (!draft) return;
   if (draft.kind === 'numbers') { startNumberRound(draft.value.path); return; }
   if (draft.kind === 'science') { startScience(draft.path); return; }
   narrator.stop();
@@ -1067,13 +1106,13 @@ function renderLearningHub(){
   let sections;
   if (hebrew) {
     const reading = card('garden', '', 'כָּל שְׁלָבֵי הַקְּרִיאָה', 'מִמִּלִּים קְצָרוֹת וְעַד מִשְׁפָּטִים.', 'flower')
-      + card('reading-level', 'data-level="sentences"', 'סִפּוּרִים קְטַנִּים', 'קוֹרְאוֹת מִשְׁפָּט, מַתְאִימוֹת תְּמוּנָה וּמַמְחִיזוֹת.', 'story-action-luli-waters-flower');
+      + card(LITTLE_STORIES.route.action, `data-level="${LITTLE_STORIES.route.level}"`, ...LITTLE_STORIES.he, LITTLE_STORIES.icon);
     const workshop = ['חֲלָקִים קְטַנִּים וּמִלִּים מֻכָּרוֹת', 'מִלִּים אֲרֻכּוֹת יוֹתֵר', 'עוֹד אוֹתִיּוֹת וְצֵרוּפִים', 'אֶתְגָּר לְבִנְיַן מִלִּים']
       .map((description, i) => journeyChoice('workshop', i + 1, `שָׁלָב ${i + 1}`, description, 'pencil')).join('');
     sections = group('קוֹרְאוֹת וּמְשַׂחֲקוֹת', reading) + group('סַדְנַת הַמִּלִּים', workshop)
       + group('סִפּוּרִים שֶׁמְּשַׂחֲקִים', STORIES.map(story => journeyChoice('stories', story.id, story.title, story.description, 'house')).join(''));
   } else {
-    const listening = journeyChoice('english', 'single', 'מִלָּה אַחַת בְּכָל פַּעַם', 'מַקְשִׁיבוֹת וּבוֹחֲרוֹת תְּמוּנָה.', 'dog')
+    const listening = journeyChoice(ENGLISH_LISTENING.route.mode, ENGLISH_LISTENING.route.level, ...ENGLISH_LISTENING.he, ENGLISH_LISTENING.icon)
       + card('mission-direct', 'data-mission="english"', 'מִלִּים, צְבָעִים וּמִסְפָּרִים', 'מַקְשִׁיבוֹת לְמִלִּים מֵהַמִּשְׂחָק הַמֻּכָּר.', 'star');
     const pairs = journeyChoice('english', 'pairs', 'צֶבַע וְכַדּוּר', 'מַכִּירוֹת אֶת הַכַּדּוּר וּמְחַבְּרוֹת לוֹ צֶבַע.', 'ball', englishPairsReady(learner.items) ? 'מוּכָנָה לַצַּעַד הַבָּא' : '')
       + journeyChoice('english', 'cars', 'צֶבַע וּמְכוֹנִית', 'מַכִּירוֹת אֶת הַמְּכוֹנִית וּמְחַבְּרוֹת לָהּ צֶבַע.', 'car');
@@ -1141,7 +1180,7 @@ app.addEventListener('click', event => {
     case 'album-latest': turnAlbumPage(null); break;
     case 'mission': startMission(button.dataset.mission); break;
     case 'reading-levels': if (view === 'game') leaveTo('reading-levels'); else openReadingLevels(); break;
-    case 'reading-level': if (Object.hasOwn(READING_LEVELS, button.dataset.level)) { settings.reading = button.dataset.level; save(); startMission('hebrew', true); } break;
+    case 'reading-level': startReadingLevel(button.dataset.level); break;
     case 'reading-stage-sound': if (Object.hasOwn(READING_LEVELS, button.dataset.level)) clockSpeak(READING_LEVELS[button.dataset.level].clip); break;
     case 'characters-menu': if (view === 'game') leaveTo('characters-menu'); else openCharacters(); break;
     case 'character-collection': if (Object.hasOwn(CHARACTER_COLLECTIONS, button.dataset.collection)) { Object.assign(settings, selectCharacterLevel(settings, settings.characterCollectionLevels[button.dataset.collection])); save(); render(); document.querySelector(`[data-action="character-collection"][data-collection="${button.dataset.collection}"]`)?.focus({ preventScroll: true }); announcements.say(characterMenuClip()); } break;
@@ -1151,7 +1190,6 @@ app.addEventListener('click', event => {
     case 'character-sound': { const character = CHARACTERS.find(c => c.id === button.dataset.character); if (character) clockSpeak(character.clip); break; }
     case 'character-advance': if (Object.hasOwn(CHARACTER_LEVELS, button.dataset.level)) { Object.assign(settings, selectCharacterLevel(settings, button.dataset.level)); settings.characterMode = round.characterMode; save(); startMission('characters', true); } break;
     case 'character-repeat': Object.assign(settings, selectCharacterLevel(settings, round.characterLevel)); settings.characterMode = round.characterMode; save(); startMission('characters', true); break;
-    case 'recommended': recommended(); break;
     case 'welcome': welcome(); break;
     case 'replay': replay(); break;
     case 'listen-word': if (!settings.sound) { settings.sound = true; narrator.enabled = true; save(); renderSoundButton(); } announcements.say(current().targetClip); break;

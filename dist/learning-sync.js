@@ -1,4 +1,4 @@
-import { LEARNING_KEY, applyObservation, cleanItems, cleanPark, mergePark } from './learning.js';
+import { LEARNING_KEY, applyObservation, applyObservations, cleanItems, cleanPark, mergePark } from './learning.js';
 import { normalizeCode } from './sync.js?v=2.2.2-six';
 import { SyncRetry, rateLimitError } from './sync-retry.js';
 
@@ -10,7 +10,14 @@ export class LearningStore {
     let saved; try{saved=JSON.parse(storage.getItem(LEARNING_KEY)||'null');}catch{/* Local play stays available. */}
     this.state={writer: /^[0-9a-f-]{36}$/i.test(saved?.writer||'')?saved.writer:uuid(), seq: Number.isSafeInteger(saved?.seq)?saved.seq:0, code:normalizeCode(saved?.code), remote:cleanItems(saved?.remote), pending:Array.isArray(saved?.pending)?saved.pending.filter(e=>Number.isSafeInteger(e.seq)&&e.seq>0).slice(0,20000):[], park:cleanPark(saved?.park), parkPending:cleanPark(saved?.parkPending), receipt:Number.isSafeInteger(saved?.receipt)?saved.receipt:0, receipts:Array.isArray(saved?.receipts)?saved.receipts.filter(id=>typeof id==='string'&&id.length<160).slice(-10000):[]};
   }
-  get items(){const old=this.cache;if(old&&old.remote===this.state.remote&&old.seq===this.state.seq&&old.length===this.state.pending.length)return old.items;let items=this.state.remote;for(const e of this.state.pending)items=applyObservation(items,e);this.cache={remote:this.state.remote,seq:this.state.seq,length:this.state.pending.length,items};return items;}
+  get items() {
+    const { remote, seq, pending } = this.state;
+    const cached = this.cache;
+    if (cached && cached.remote === remote && cached.seq === seq && cached.length === pending.length) return cached.items;
+    const items = applyObservations(remote, pending);
+    this.cache = { remote, seq, length: pending.length, items };
+    return items;
+  }
   get park(){return mergePark(this.state.park,this.state.parkPending);}
   get pending(){return this.state.pending.length+Object.keys(this.state.parkPending).length;}
   persist(){try{this.storage.setItem(LEARNING_KEY,JSON.stringify(this.state));return true;}catch{this.status='storage-error';return false;}}

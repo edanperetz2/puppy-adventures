@@ -13,17 +13,38 @@ const nTime = n => Number.isSafeInteger(n) && n > 0 && n < 9999999999999 ? n : 0
 export function cleanItems(input) {
   return Object.fromEntries(Object.entries(input && typeof input === 'object' ? input : {}).filter(([id])=>itemId(id)).slice(0,MAX_LEARNING_ITEMS).map(([id,value])=>[id,cleanItem(value)]));
 }
-export function applyObservation(items, event) {
-  if (!itemId(event?.item) || !domains.includes(event.domain) || !['seen','helped','independent','practice'].includes(event.kind) || !nTime(event.at)) return items;
-  if (!items[event.item] && Object.keys(items).length >= MAX_LEARNING_ITEMS) return items;
-  const old = cleanItem(items[event.item]), at = event.at;
+function validObservation(event) {
+  return itemId(event?.item) && domains.includes(event.domain)
+    && ['seen','helped','independent','practice'].includes(event.kind) && nTime(event.at);
+}
+
+function observedItem(previous, event) {
+  const old = cleanItem(previous), at = event.at;
   const next = { ...old, domain:event.domain, ...(event.kind==='seen'?{}:{[event.kind]:Math.min(1000000,old[event.kind]+1)}), seen:Math.min(1000000,old.seen+(event.kind==='seen'||event.kind==='practice'||!old.seen?1:0)), first:old.first ? Math.min(old.first,at) : at, last:Math.max(old.last,at), mode:event.mode || old.mode };
   if (event.kind === 'independent') {
     next.firstSuccess = old.firstSuccess ? Math.min(old.firstSuccess,at) : at;
     next.success = Math.max(old.success,at);
     next.days = [...new Set([...old.days,new Date(at).toISOString().slice(0,10)])].sort().slice(-8);
   }
-  return { ...items, [event.item]:next };
+  return next;
+}
+
+export function applyObservation(items, event) {
+  if (!validObservation(event) || (!Object.hasOwn(items, event.item) && Object.keys(items).length >= MAX_LEARNING_ITEMS)) return items;
+  return { ...items, [event.item]: observedItem(items[event.item], event) };
+}
+
+export function applyObservations(items, events) {
+  if (!events.length) return items;
+  // Reopen a device with a long offline history without cloning the whole
+  // catalogue for every observation. The application order stays the same.
+  const updated = new Map(Object.entries(items));
+  for (const event of events) {
+    if (validObservation(event) && (updated.has(event.item) || updated.size < MAX_LEARNING_ITEMS)) {
+      updated.set(event.item, observedItem(updated.get(event.item), event));
+    }
+  }
+  return Object.fromEntries(updated);
 }
 export function learningStage(item) {
   if (!item?.seen) return 'new';

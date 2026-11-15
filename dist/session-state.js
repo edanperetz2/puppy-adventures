@@ -4,6 +4,7 @@ import { clockTime, CLOCK_LEVELS } from './clock.js';
 import { CHARACTERS, CHARACTER_LEVELS, CHARACTER_MODES } from './characters.js?v=2.2.2-six';
 import { adventurePhase, isSessionLength } from './adventure.js?v=2.2.2-six';
 import { actOutPrompt, canActOut, cleanActOutMoves } from './act-out.js?v=2.7.0-science';
+import { LITTLE_STORIES } from './activities.js';
 
 export const roundKey = (mission,settings) => `${mission}:${mission==='hebrew'?settings.reading:mission==='letters'?settings.letterLanguage:mission==='clock'?settings.clockLevel:mission==='characters'?`${settings.characterLevel}:${settings.characterMode}`:'default'}`;
 export function packRound(round) {
@@ -22,7 +23,7 @@ export function unpackRound(raw) {
         if (!q.word) throw Error();
         pool = WORDS;
         q.answer = q.word.id;
-        if (d.actOut === true && raw.mission === 'hebrew' && raw.reading === 'sentences' && canActOut(q.word)) {
+        if (d.actOut === true && raw.mission === 'hebrew' && raw.reading === LITTLE_STORIES.route.level && canActOut(q.word)) {
           q.actOut = true;
           q.prompt = actOutPrompt(q.word);
         }

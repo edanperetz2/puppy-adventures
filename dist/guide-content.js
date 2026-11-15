@@ -1,6 +1,8 @@
+import { LITTLE_STORIES } from './activities.js';
+
 export const GUIDE_ITEMS = [
-  { icon: 'flower', he: ['גִּנַּת הַמִּלִּים', 'עֲשָׂרָה שְׁלָבִים, מִמִּלִּים קְצָרוֹת וְעַד סִפּוּרִים קְטַנִּים. קוֹרְאוֹת, בּוֹחֲרוֹת תְּמוּנָה וּמַמְחִיזוֹת מִשְׁפָּטִים.'],
-    en: ['Word Garden', 'Ten reading stages, from short words to Little Stories. Match what you read to a picture or act out a sentence.'] },
+  { icon: 'flower', he: ['גִּנַּת הַמִּלִּים', `עֲשָׂרָה שְׁלָבִים עַד ״${LITTLE_STORIES.he[0]}״. ${LITTLE_STORIES.he[1]}`],
+    en: ['Word Garden', `Ten stages, from short words to ${LITTLE_STORIES.en[0]}. ${LITTLE_STORIES.en[1]}`] },
   { icon: 'pencil', he: ['סַדְנַת הַמִּלִּים', 'בּוֹנוֹת מִלִּים מֵחֲלָקִים וּמַשְׁלִימוֹת אוֹתִיּוֹת וּמִשְׁפָּטִים.'],
     en: ['Word Workshop', 'Build Hebrew words from smaller pieces, fill in a missing letter, and find the word that fits a sentence.'] },
   { icon: 'book', he: ['סִפּוּר שֶׁמְּשַׂחֲקִים', 'שְׁמוֹנָה סִפּוּרִים מְאֻיָּרִים. קוֹרְאוֹת, מְזִיזוֹת חֲפָצִים וְעוֹזְרוֹת לַחֲבֵרִים.'],

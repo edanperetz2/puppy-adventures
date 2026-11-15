@@ -2,7 +2,7 @@ import {recognitionTargets,sanitizeLetterPractice} from '../dist/letter-progress
 import{LETTERS}from'../dist/letters.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { applyObservation,learningStage,choosePractice,mergePark,englishPairsReady } from '../dist/learning.js';
+import { applyObservation,applyObservations,learningStage,choosePractice,mergePark,englishPairsReady,MAX_LEARNING_ITEMS } from '../dist/learning.js';
 import { LearningStore } from '../dist/learning-sync.js';
 import { newJourney,journeyQuestions,cleanJourney } from '../dist/journey.js';
 import { WORKSHOP_WORDS,STORIES } from '../dist/journey-content.js';
@@ -28,6 +28,23 @@ test('An encounter, supported answer, independent answer and later memory stay d
 test('Review favours an overdue supported item and never infers knowledge from an old album',()=>{
  const items=applyObservation({}, {item:'read:dog',domain:'hebrew',kind:'helped',at:time-7*86400000});
  assert.deepEqual(choosePractice([{id:'cat'},{id:'dog'}],items,w=>`read:${w.id}`,1,time,()=>.5).map(x=>x.id),['dog']);assert.equal(englishPairsReady({}),false);
+});
+test('Replaying a practice backlog agrees with individual observations, including at capacity', () => {
+  const old = { item: 'read:dog', domain: 'hebrew', kind: 'helped', at: time };
+  const items = applyObservation({}, old);
+  const events = [
+    { ...old, kind: 'independent', at: time + 5 },
+    { ...old, kind: 'seen', item: 'read:cat', at: time + 8 },
+    { ...old, kind: 'independent', at: time + 2 },
+    { ...old, kind: 'bad-kind' },
+    { ...old, item: '__proto__' },
+  ];
+  assert.deepEqual(applyObservations(items, events), events.reduce(applyObservation, items));
+  assert.equal(items['read:dog'].helped, 1);
+  assert.equal(items['read:dog'].independent, 0);
+  const full = Object.fromEntries(Array.from({ length: MAX_LEARNING_ITEMS }, (_, i) => [`read:word-${i}`, items['read:dog']]));
+  assert.deepEqual(applyObservations(full, [...events, { ...old, item: 'read:word-0' }]),
+    [...events, { ...old, item: 'read:word-0' }].reduce(applyObservation, full));
 });
 function service(){const albums=new Map();return async(_url,init)=>{const b=JSON.parse(init.body);let a=albums.get(b.access_code);if(!a){a={items:{},park:{},acks:{}};albums.set(b.access_code,a);}let ack=a.acks[b.writer_key]||0;for(const e of b.observations){if(e.seq<=ack)continue;if(e.seq!==ack+1)return {ok:false,json:async()=>({})};a.items=applyObservation(a.items,e);ack=e.seq;}a.acks[b.writer_key]=ack;a.park=mergePark(a.park,b.park_changes);return {ok:true,json:async()=>({version:1,ack,items:structuredClone(a.items),park:structuredClone(a.park)})};};}
 const code='2AB3CD4EF5GH6JK7MN8PQ9RS';
