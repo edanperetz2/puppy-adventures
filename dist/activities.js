@@ -16,3 +16,20 @@ export const ENGLISH_LISTENING = Object.freeze({
   he: Object.freeze(['מִלָּה אַחַת בְּכָל פַּעַם', 'מַקְשִׁיבוֹת בְּאַנְגְּלִית וּבוֹחֲרוֹת תְּמוּנָה.']),
   icon: 'dog',
 });
+
+export const PICNIC = Object.freeze({
+  id: 'picnic',
+  route: Object.freeze({ action: 'picnic' }),
+  he: Object.freeze(['הַמַּסָּע שֶׁלִּי', 'פִּיקְנִיק בְּשָׁלוֹשׁ מְשִׂימוֹת שֶׁל שִׁשָּׁה צְעָדִים. קְרִיאָה, חִבּוּר וּשְׁעוֹן.']),
+  en: Object.freeze(['My Journey', 'Get a picnic ready in three six-step missions. Read clues, add groups, and move clock hands.']),
+  chapter: 'הַפִּיקְנִיק שֶׁל הַחֲבֵרִים',
+  icon: 'basket',
+  intro: 'picnic-welcome',
+  steps: SESSION_LENGTH,
+});
+
+export const PICNIC_MISSIONS = Object.freeze({
+  reading: { domain: 'hebrew', title: 'מְסַדְּרוֹת אֶת הַמָּקוֹם', description: 'קִרְאִי וְהַזִּיזִי דְּבָרִים לַמָּקוֹם הַנָּכוֹן.', icon: 'star' },
+  addition: { domain: 'math', title: 'מְכִינוֹת אֶת הַכִּבּוּד', description: 'חַבְּרִי שְׁתֵּי קְבוּצוֹת וּמִצְאִי כַּמָּה יֵשׁ בְּיַחַד.', icon: 'apple' },
+  clock: { domain: 'clock', title: 'מָתַי הַחֲבֵרִים מַגִּיעִים?', description: 'הַזִּיזִי אֶת הַמְּחוֹגִים וּסְפְרִי דַּקּוֹת.', icon: 'clock' },
+});

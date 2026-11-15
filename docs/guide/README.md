@@ -1,6 +1,6 @@
 # Bilingual game guide
 
-The in-game guide uses [game-guide-current.webp](../../dist/assets/game-guide-current.webp). The image shows the current activity map with English on pale blue at the left and Hebrew on cream at the right. [Guide text](../../dist/guide-content.js) records both editions of the copy. The Little Stories copy comes from the [same activity definition](../../dist/activities.js) used in the game picker and the home suggestion. The original posters and verification records below are release history.
+The in-game guide uses [game-guide-current.webp](../../dist/assets/game-guide-current.webp). The image shows the current activity map with English on pale blue at the left and Hebrew on cream at the right. [Guide text](../../dist/guide-content.js) records both editions of the copy. Little Stories and My Journey share their copy with the [game's activity definitions](../../dist/activities.js). The original posters and verification records below are release history.
 
 ## Original edition
 

@@ -41,10 +41,12 @@ import { mountActOut } from './act-out-view.js?v=2.7.1-pepper';
 import { SCIENCE_TITLE, SCIENCE_EXPERIMENTS, cleanScienceRound, scienceClip } from './science-content.js?v=2.7.1-pepper';
 import { mountScience, scienceArt, scienceMenu } from './science-view.js?v=2.7.1-pepper';
 import { mountOfflineAudio, registerOffline } from './offline-audio.js';
-import { ENGLISH_LISTENING, LITTLE_STORIES } from './activities.js';
+import { ENGLISH_LISTENING, LITTLE_STORIES, PICNIC, PICNIC_MISSIONS } from './activities.js';
 import { latestPlayedDraft, readingActivity, recommendAdventure } from './home-adventure.js';
 import { firstStoryClue, pictureClue, storyClue, storyReviewQuestion } from './story-practice.js';
 import { awardLocalRound, checkpointScoredRound, finishScoredRound } from './round-lifecycle.js';
+import { cleanPicnic, cleanPicnicRound, createPicnicRound, packPicnicRound, picnicItem } from './picnic.js';
+import { mountPicnicRound, picnicComplete, picnicEntry, picnicMap, picnicPrompt } from './picnic-view.js';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -76,6 +78,7 @@ let numberRound = null, numberDrafts = {}, numberController = null, numberSticke
 let pikachuController = null;
 let actOutController = null;
 let sciencePath = null, scienceDrafts = {}, scienceController = null;
+let picnic = cleanPicnic(null), picnicRound = null, picnicController = null, picnicSticker = null;
 let homeItems = null;
 const progressScreens = ['home', 'album', 'letters-menu', 'letters-writing', 'letters-recognition', 'characters-menu'];
 const preferenceScreens = [...progressScreens, 'learning-hub', 'reading-levels', 'science-menu', 'number-menu'];
@@ -98,6 +101,7 @@ try {
     }
     awardedRounds=(Array.isArray(saved.awardedRounds)?saved.awardedRounds:[]).filter(id=>/^[0-9a-f-]{36}$/i.test(id)).slice(-10000);
     if(Object.hasOwn(WRITING_STEPS,saved.writingPractice?.mode))writingPractice={mode:saved.writingPractice.mode,drafts:saved.writingPractice.drafts&&typeof saved.writingPractice.drafts==='object'&&!Array.isArray(saved.writingPractice.drafts)?saved.writingPractice.drafts:{}};
+    picnic = cleanPicnic(saved.picnic);
   }
 } catch { /* A corrupt or unavailable save must never prevent play. */ }
 
@@ -155,7 +159,8 @@ function welcome() {
 
 function save() {
   try {
-    gameStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition, characterPractice, drafts, journeyDrafts, awardedRounds, writingPractice, ...(Object.keys(numberDrafts).length ? { numberDrafts } : {}), ...(Object.keys(scienceDrafts).length ? { scienceDrafts } : {}) }));
+    const picnicSave = picnic.finished.length || Object.keys(picnic.drafts).length ? { picnic } : {};
+    gameStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, progress, readingPractice, clockSchoolPosition, characterPractice, drafts, journeyDrafts, awardedRounds, writingPractice, ...(Object.keys(numberDrafts).length ? { numberDrafts } : {}), ...(Object.keys(scienceDrafts).length ? { scienceDrafts } : {}), ...picnicSave }));
     storageAvailable = true;
   } catch { storageAvailable = false; }
 }
@@ -422,7 +427,7 @@ function homeSuggestion() {
 }
 
 function homeAdventureContent() {
-  const draft = latestPlayedDraft({ drafts, journeyDrafts, numberDrafts, scienceDrafts });
+  const draft = latestPlayedDraft({ drafts, journeyDrafts, numberDrafts, scienceDrafts, picnicDrafts: picnic.drafts });
   homeItems = draft ? null : learner.items;
   const choice = draft ? describeDraft(draft) : homeSuggestion();
   const { activity, reason } = choice;
@@ -457,6 +462,7 @@ function renderHome() {
         <p id="audio-notice" class="audio-notice" role="status" hidden></p>
       </div><div class="hero-world">${scene()}</div>
     </section>
+    ${picnicEntry(settings.nikud)}
     <section class="missions" aria-labelledby="missions-title"><div class="section-heading"><h2 id="missions-title">לאן נצא היום?</h2></div>
       <div class="mission-grid">${[...cards.slice(0, 2), science, ...cards.slice(2)].join('')}</div>
     </section>
@@ -628,6 +634,7 @@ function render() {
   pikachuController?.destroy(); pikachuController=null;
   actOutController?.destroy(); actOutController=null;
   scienceController?.destroy(); scienceController=null;
+  picnicController?.destroy(); picnicController=null;
   letterPad?.destroy(); letterPad = null;
   clockSchool?.destroy(); clockSchool = null;
   applyPreferences();
@@ -643,6 +650,9 @@ function render() {
   else if (view === 'pikachu') renderPikachu();
   else if (view === 'science-menu') app.innerHTML = header() + scienceMenu(scienceDrafts, settings.nikud) + footer();
   else if (view === 'science-round') renderScience();
+  else if (view === 'picnic-map') app.innerHTML = header() + picnicMap(picnic, settings.nikud) + footer();
+  else if (view === 'picnic-round') renderPicnicRound();
+  else if (view === 'picnic-complete') app.innerHTML = header() + picnicComplete(picnicRound, picnicSticker, picnic.finished, settings.nikud) + footer();
   else if (view === 'park') renderPark();
   else if (view === 'journey-complete') renderJourneyComplete();
   else if (view === 'game') { renderGame(); restoreQuestionState(); }
@@ -712,6 +722,9 @@ function replay() {
   if (view === 'number-menu') { announcements.say(numberClip('menu')); return; }
   if (view === 'science-menu') { announcements.say(scienceClip('menu')); return; }
   if (view === 'science-round') { scienceController.replay(); return; }
+  if (view === 'picnic-map') { announcements.say(PICNIC.intro); return; }
+  if (view === 'picnic-round') { picnicController?.replay(); return; }
+  if (view === 'picnic-complete') { announcements.say(completionClip(picnicSticker)); return; }
   if(view==='park'){clockSpeak('journey-park-intro');return;}
   if (view === 'clock-school') { clockSchool.replay(true); return; }
   if (view === 'game') {
@@ -957,7 +970,7 @@ function renderSettings() {
   dialog.querySelector('[data-dialog="reset"]').onclick = () => {
     openDialog(`<h2 id="parent-title">לאפס את המכשיר הזה?</h2><p>המדבקות וההתקדמות בדפדפן הזה יימחקו. הגדרות המשחק יישמרו.${album.linked ? ' החיבור לאלבום המשפחתי יוסר. האלבום שכבר סונכרן יישמר עבור המכשירים האחרים.' : ''}</p><div class="dialog-actions"><button class="secondary-button" data-dialog="cancel-reset">ביטול</button><button class="primary-button" data-dialog="confirm-reset">איפוס ההתקדמות</button></div>`);
     dialog.querySelector('[data-dialog="cancel-reset"]').onclick = renderSettings;
-    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); learner.reset(); drafts={};journeyDrafts={};numberDrafts={};numberRound=null;scienceDrafts={};awardedRounds=[];writingPractice={mode:'trace',drafts:{}}; progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
+    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); learner.reset(); drafts={};journeyDrafts={};numberDrafts={};numberRound=null;scienceDrafts={};picnicController?.destroy({discard:true});picnicController=null;picnic=cleanPicnic(null);picnicRound=null;awardedRounds=[];writingPractice={mode:'trace',drafts:{}}; progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
   };
 }
 
@@ -975,6 +988,7 @@ function updateParentProgress() {
 function checkpoint(){
   if (view === 'game' && round) checkpointScoredRound(round, drafts, round.key, packRound);
   if(view==='journey'&&journeyPlan)journeyDrafts[`${journeyPlan.mode}:${journeyPlan.level}`]=journeyPlan;
+  picnicController?.flush();
   save();
 }
 function awardRound(mission,helped,letters,id,length){
@@ -1000,6 +1014,9 @@ function describeDraft({ kind, path, value }) {
   } else if (kind === 'numbers') {
     ({ title, icon } = NUMBER_PATHS[value.path]);
     length = value.questions.length;
+  } else if (kind === 'picnic') {
+    ({ title, icon } = PICNIC_MISSIONS[path]);
+    length = PICNIC.steps;
   } else {
     const experiment = SCIENCE_EXPERIMENTS[path];
     title = experiment.title;
@@ -1009,10 +1026,11 @@ function describeDraft({ kind, path, value }) {
   return { activity: { he: [title], icon }, reason: `צַעַד ${value.index + 1} מִתּוֹךְ ${length}` };
 }
 function resumeLatest(){
-  const draft = latestPlayedDraft({ drafts, journeyDrafts, numberDrafts, scienceDrafts });
+  const draft = latestPlayedDraft({ drafts, journeyDrafts, numberDrafts, scienceDrafts, picnicDrafts: picnic.drafts });
   if (!draft) return;
   if (draft.kind === 'numbers') { startNumberRound(draft.value.path); return; }
   if (draft.kind === 'science') { startScience(draft.path); return; }
+  if (draft.kind === 'picnic') { startPicnicRound(draft.path); return; }
   narrator.stop();
   if(draft.kind==='classic'){const restored=unpackRound(draft.value);if(!restored)return;round=restored;view='game';}
   else {journeyPlan=resumeJourney(draft.value);if(!journeyPlan)return;round=null;view='journey';}
@@ -1136,6 +1154,47 @@ function renderScience() {
   });
 }
 
+function openPicnic() {
+  checkpoint(); narrator.stop(); round = null; journeyPlan = null; picnicRound = null;
+  view = 'picnic-map'; render(); focusTitle();
+  if (!picnic.finished.length) announcements.say(PICNIC.intro);
+}
+
+function startPicnicRound(path) {
+  if (!Object.hasOwn(PICNIC_MISSIONS, path)) return;
+  checkpoint(); narrator.stop(); round = null; journeyPlan = null;
+  picnicRound = cleanPicnicRound(path, picnic.drafts[path]) || createPicnicRound(path, settings.mathMax);
+  view = 'picnic-round'; render(); focusTitle();
+  if (!picnicRound.resolved) announcements.say(picnicPrompt(picnicRound));
+}
+
+function renderPicnicRound() {
+  app.innerHTML = header() + '<main id="main" class="picnic-page picnic-play"></main>' + footer();
+  const { domain } = PICNIC_MISSIONS[picnicRound.path];
+  picnicController = mountPicnicRound(app.querySelector('#main'), {
+    round: picnicRound, nikud: settings.nikud, motion: motionEnabled,
+    speak: keys => announcements.say(keys), replay: clockSpeak, focusTitle,
+    onSave: draft => { checkpointScoredRound(draft, picnic.drafts, draft.path, packPicnicRound); save(); },
+    onSuccess: draft => {
+      learner.record({ item: picnicItem(draft), domain, eventId: `picnic:${draft.id}:${draft.index}` },
+        draft.helped.includes(draft.index) ? 'helped' : 'independent');
+      narrator.chime();
+    },
+    onComplete: draft => {
+      const result = finishScoredRound(draft, picnic.drafts, draft.path,
+        (id, length) => awardRound(domain, draft.helped.length, null, id, length));
+      if (!result) return;
+      const newlyFinished = !picnic.finished.includes(draft.path);
+      if (newlyFinished) picnic.finished.push(draft.path);
+      progress = result.progress; picnicSticker = result.sticker;
+      view = 'picnic-complete'; save(); render(); focusTitle();
+      revealWin('.picnic-sticker');
+      const picnicReady = newlyFinished && picnic.finished.length === Object.keys(PICNIC_MISSIONS).length;
+      announcements.say([completionClip(picnicSticker), ...(picnicReady ? ['picnic-finish'] : [])]);
+    },
+  });
+}
+
 function renderNumberRound() {
   app.innerHTML = `${header()}<main id="main" class="number-workshop"><div id="number-root"></div></main>${footer()}`;
   const active = numberRound;
@@ -1235,6 +1294,8 @@ app.addEventListener('click', event => {
     case 'pikachu': openPikachu(); break;
     case 'science-menu': openScienceMenu(); break;
     case 'science-start': startScience(button.dataset.path, scienceDrafts[button.dataset.path]?.complete); break;
+    case 'picnic': openPicnic(); break;
+    case 'picnic-start': startPicnicRound(button.dataset.path); break;
     case 'garden': openReadingLevels(); break;
     case 'mission-direct': startMission(button.dataset.mission,true); break;
     case 'journey-start': startJourney(button.dataset.journey,button.dataset.level); break;
@@ -1300,7 +1361,7 @@ app.addEventListener('change', event => {
 
 dialog.addEventListener('click', event => { if (event.target === dialog && event.offsetX >= 0 && event.offsetX <= dialog.clientWidth && event.offsetY >= 0 && event.offsetY <= dialog.clientHeight) return; if (event.target === dialog) closeDialog(); });
 dialog.addEventListener('cancel', event => { event.preventDefault(); closeDialog(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden) narrator.stop(); else { void album.flush();void learner.flush(); startOpeningWelcome(); } });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { picnicController?.flush(); narrator.stop(); } else { void album.flush();void learner.flush(); startOpeningWelcome(); } });
 window.addEventListener('online', () => { void album.flush();void learner.flush(); });
 window.addEventListener('hashchange', openAlbumInvite);
 window.addEventListener('focus', () => { void album.flush();void learner.flush(); });

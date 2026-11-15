@@ -37788,6 +37788,141 @@
       "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
       "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
       "sha256": "c2a5ef7431d6b431094cca3bb3f501b2babbfe712608df8455a7c71443d50ccf"
+    },
+    "picnic-welcome": {
+      "take": 0,
+      "segments": [
+        "boˈi naχˈin pˈiknik laχaveʁˈim."
+      ],
+      "lang": "he-IL",
+      "speech": "boˈi naχˈin pˈiknik laχaveʁˈim.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "64f93d6da9e33f204986a9fe9da9f754eba305da26aac3e5f9e15f5626427462"
+    },
+    "picnic-read-model": {
+      "take": 0,
+      "segments": [
+        "hinˈe hakoχˈav ʔˈal haʃulχˈan."
+      ],
+      "lang": "he-IL",
+      "speech": "hinˈe hakoχˈav ʔˈal haʃulχˈan.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "2a112cc63e65e6d7542b963df618a0102f2ed37d4982c863cd11c3b241713031"
+    },
+    "picnic-add-model": {
+      "take": 0,
+      "segments": [
+        "ʃnˈajim veʔˈod ʔeχˈad hˈem ʃloʃˈa."
+      ],
+      "lang": "he-IL",
+      "speech": "ʃnˈajim veʔˈod ʔeχˈad hˈem ʃloʃˈa.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "a61a2e79ae9e073c6ed8fd14f7b088d087b25a23911b4f17e21d37b124cc9531"
+    },
+    "picnic-add-move": {
+      "take": 0,
+      "segments": [
+        "hazˈizi ʔˈet ʃtˈej hakvutsˈot lasmiχˈa."
+      ],
+      "lang": "he-IL",
+      "speech": "hazˈizi ʔˈet ʃtˈej hakvutsˈot lasmiχˈa.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "16700aced2f38e0559e36a5bd31b72919b37fc9c90adca845438fcc152aa48e6"
+    },
+    "picnic-add-choose": {
+      "take": 0,
+      "segments": [
+        "kˈama jˈeʃ bejˈaχad?"
+      ],
+      "lang": "he-IL",
+      "speech": "kˈama jˈeʃ bejˈaχad?",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "fe1ede67051b619a916fd0eb3dc0e67a39f8a8211534bf95ef91c437a65a1620"
+    },
+    "picnic-clock-model": {
+      "lang": "he-IL",
+      "speech": "mikˈav lekˈav ʔovˈeʁet dakˈa ʔaχˈat. beʃaʔˈa jˈeʃ ʃiʃˈim dakˈot.",
+      "segments": [
+        "mikˈav lekˈav ʔovˈeʁet dakˈa ʔaχˈat. beʃaʔˈa jˈeʃ ʃiʃˈim dakˈot."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "33e4bc547d3126428a46206a6d423df512d281c766eaaa8ad9e807f6b517c333"
+    },
+    "picnic-clock-set": {
+      "lang": "he-IL",
+      "speech": "boˈi neχavˈen ʔˈet haʃaʔˈon.",
+      "segments": [
+        "boˈi neχavˈen ʔˈet haʃaʔˈon."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "e2b2486cceca14fd5ba5c474f156b0ec3cd8d2bd8857928591fbfa945d082f15"
+    },
+    "picnic-clock-elapsed": {
+      "take": 0,
+      "segments": [
+        "hazˈizi ʔˈet hamaχˈoɡ haʔaʁˈoχ kadˈima."
+      ],
+      "lang": "he-IL",
+      "speech": "hazˈizi ʔˈet hamaχˈoɡ haʔaʁˈoχ kadˈima.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "d3023a5aa433260dfc29017f8cd5af4345038d2c9e65df6cfccabd248074dfd1"
+    },
+    "picnic-finish": {
+      "take": 0,
+      "segments": [
+        "hapˈiknik muχˈan. kˈol haχaveʁˈim kˈan!"
+      ],
+      "lang": "he-IL",
+      "speech": "hapˈiknik muχˈan. kˈol haχaveʁˈim kˈan!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "a1824be2d78c50dcd0ca6d3a43059714c78f35044cefd3977f2ca607507db928"
     }
   }
 }

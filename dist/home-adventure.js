@@ -84,7 +84,7 @@ export function recommendAdventure({ items = {}, reading: selected, readingPract
   return { activity, reason: activity.he[1] };
 }
 
-export function latestPlayedDraft({ drafts, journeyDrafts, numberDrafts, scienceDrafts }) {
+export function latestPlayedDraft({ drafts, journeyDrafts, numberDrafts, scienceDrafts, picnicDrafts = {} }) {
   const activeClassic = d => d.index || d.resolved || d.attempted.length || d.counted.length || d.actOutMoves?.length
     || (d.helped.includes(d.index) && !d.questions[d.index].showModel);
   const activeJourney = ({ index, state }) => index || state.resolved || state.showModel || state.placed
@@ -95,5 +95,6 @@ export function latestPlayedDraft({ drafts, journeyDrafts, numberDrafts, science
     ...Object.values(numberDrafts).filter(d => d.index || d.resolved || d.hint || d.attempted.length).map(value => ({ kind: 'numbers', value })),
     ...Object.entries(scienceDrafts).filter(([, d]) => !d.complete && d.actions.length)
       .map(([path, value]) => ({ kind: 'science', path, value })),
+    ...Object.entries(picnicDrafts).filter(([, d]) => d.at > 0).map(([path, value]) => ({ kind: 'picnic', path, value })),
   ].sort((a, b) => b.value.at - a.value.at)[0];
 }
