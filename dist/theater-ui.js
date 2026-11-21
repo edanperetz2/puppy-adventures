@@ -1,3 +1,4 @@
+import { rewardSticker } from './playable-stickers.js';
 import { MY_JOURNEY, THEATER, THEATER_SHOWS } from './activities.js';
 import { art, pup, uiIcon } from './art.js';
 import { chapterMissions, chapterText } from './chapter-ui.js';
@@ -56,7 +57,7 @@ export function theaterComplete(round, sticker, nikud) {
   const label = theaterText(nikud);
   return `<main id="main" class="picnic-page picnic-result theater-page th-result">
     <div class="th-map-art" aria-hidden="true">${stagePicture()}${actorArt('luli', 'th-map-luli')}${actorArt('bobi', 'th-map-bobi')}${actorArt('tofi', 'th-map-tofi')}</div>
-    <div class="picnic-sticker" aria-hidden="true">${art(sticker || THEATER_SHOWS[round.path].icon)}</div>
+    ${rewardSticker(sticker, THEATER_SHOWS[round.path].icon, 'picnic-sticker')}
     <h1 tabindex="-1">${label('כָּל הַכָּבוֹד, הַהַצָּגָה הֻשְׁלְמָה!')}</h1>
     <p>${label(sticker ? 'מַדְבֵּקָה חֲדָשָׁה הִצְטָרְפָה לָאַלְבּוֹם.' : 'הַהַצָּגָה נִשְׁמְרָה.')}</p>
     <div class="picnic-result-actions"><button class="primary-button" data-action="theater">${label('לַתֵּאַטְרוֹן')} ${uiIcon('arrow')}</button>

@@ -20,6 +20,35 @@
 .album-connect-note{max-width:650px;margin:20px auto;padding:17px 20px;background:#edf2e8;border:1px solid #dce4d5;border-radius:18px;color:#809276;font-size:13px;line-height:1.8}
 .album-connect-note .text-button{display:inline-flex;margin:9px auto 0;min-height:44px;font-size:12px}
 .sticker .sticker-scene{width:100%}
+.album-play-hint { margin: 0 auto 8px; color: #305e52; font-size: clamp(16px, 3.6vw, 21px); font-weight: 600; }
+.album-play-hint + .sticker-grid { margin-top: 9px; }
+.playable-sticker { position: relative; overflow: visible; }
+.playable-sticker:focus-visible { outline: 3px solid #176e66; outline-offset: 3px; }
+.playable-sticker .sticker-picture { display: block; width: 100%; min-width: 0; pointer-events: none; }
+.playable-sticker .sticker-picture > svg { display: block; width: 100%; height: auto; }
+.playable-sticker.is-reacting { z-index: 3; }
+.sticker-caption {
+  display: none; position: absolute; z-index: 3; left: 50%; bottom: calc(100% - 8px);
+  transform: translateX(-50%); width: max-content; max-width: min(176px, calc(100% + 22px));
+  padding: 5px 8px; border: 1px solid #c6d3bd; border-radius: 12px 12px 5px 12px;
+  background: #fffdf4; box-shadow: 0 2px 6px #203e301c; color: #214e46;
+  font-size: clamp(13px, 2.4vw, 16px); font-weight: 600; line-height: 1.5;
+  text-align: center; pointer-events: none;
+}
+.playable-sticker.is-reacting > .sticker-caption { display: block; }
+.home-album-sticker, .reward-inline {
+  padding: 0; min-height: 44px; min-width: 44px; background: transparent; border-radius: 14px;
+}
+.home-album-sticker { display: block; width: 100%; }
+.reward-inline { width: clamp(76px, 20vw, 160px); }
+.reward-inline > svg { max-width: 100%; }
+.home-album-sticker .sticker-caption { left: auto; right: 0; transform: none; max-width: 116px; }
+.playable-sticker.reward-art { display: grid; place-items: center; }
+.picnic-sticker.playable-sticker .sticker-picture { width: 75%; }
+#sticker-announcement {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
 @media(max-width:570px){
   .album-page .sticker-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   .album-pagination{gap:9px}

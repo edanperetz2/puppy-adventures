@@ -1,0 +1,32 @@
+Sticker album sounds
+
+The following Freesound field recordings are dedicated to the public domain
+under Creative Commons CC0 1.0 Universal.
+https://creativecommons.org/publicdomain/zero/1.0/
+
+sticker-bark.wav
+Dog bark 2, recorded by Sadiquecat
+https://freesound.org/people/Sadiquecat/sounds/850823/
+
+sticker-meow.wav
+Cat Meow2.wav, recorded by steffcaffrey
+https://freesound.org/people/steffcaffrey/sounds/262313/
+
+sticker-tweet.wav
+Single Bird Chirp, recorded by Allan Legemaate (alegemaate)
+https://freesound.org/people/alegemaate/sounds/233255/
+
+sticker-quack.wav
+single quack from a duck, edited by Mikes-MultiMedia
+https://freesound.org/people/Mikes-MultiMedia/sounds/418509/
+Original field recording ducks1.wav, by squashy555 (CC0)
+https://freesound.org/people/squashy555/sounds/244329/
+
+sticker-cluck.wav
+Chicken, recorded by D4XX
+https://freesound.org/people/D4XX/sounds/607245/
+
+The game uses short mono excerpts with gentle fades and adjusted levels.
+The bark, quack, and tweet each repeat with a small pitch variation.
+The bell, brass, chime, clop, hop, pluck, and splash were synthesized
+specifically for this game.

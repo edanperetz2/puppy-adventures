@@ -42,5 +42,6 @@ export function stickerScene(id, baseArt) {
   const [background, accent] = palettes[spec.theme];
   const picture = baseArt(spec.motif).replace(/^<svg\b[^>]*>/u, '').replace(/<\/svg>$/u, '');
   const clip = `sticker-clip-${spec.index}`;
-  return `<defs><clipPath id="${clip}"><circle cx="100" cy="97" r="88"/></clipPath></defs><circle cx="100" cy="101" r="94" fill="#e1d9cb"/><circle cx="100" cy="97" r="92" fill="${background}" stroke="#fffdf6" stroke-width="7"/><g clip-path="url(#${clip})">${scenery(spec.theme, accent)}<ellipse cx="100" cy="160" rx="57" ry="8" fill="${accent}" opacity=".32"/><g transform="translate(35 30) scale(.65)">${picture}</g>${star(165,34,5,'#fffdf6')}</g>`;
+  const rider = spec.motif === 'slide' ? '<circle class="sticker-slide-rider" cx="89" cy="25" r="11" fill="#439d92" stroke="#f8efcd" stroke-width="3" opacity="0"/>' : '';
+  return `<defs><clipPath id="${clip}"><circle cx="100" cy="97" r="88"/></clipPath></defs><circle cx="100" cy="101" r="94" fill="#e1d9cb"/><circle cx="100" cy="97" r="92" fill="${background}" stroke="#fffdf6" stroke-width="7"/><g clip-path="url(#${clip})">${scenery(spec.theme, accent)}<ellipse cx="100" cy="160" rx="57" ry="8" fill="${accent}" opacity=".32"/><g transform="translate(35 30) scale(.65)"><g class="sticker-subject">${picture}${rider}</g></g>${star(165,34,5,'#fffdf6')}</g>`;
 }

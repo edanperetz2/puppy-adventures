@@ -1,3 +1,4 @@
+import { rewardSticker } from './playable-stickers.js';
 import { art, uiIcon } from './art.js';
 import { DAILY_ACTIVITY, LISTEN_AND_CHOOSE_ANIMAL } from './activities.js';
 import { chapterText } from './chapter-ui.js';
@@ -54,7 +55,7 @@ export function dailyComplete(round, sticker, nikud) {
   const label = chapterText(nikud), q = dailyQuestion(round);
   return `<main id="main" class="picnic-page picnic-result daily-page daily-result">
     ${round.path === 'clock' ? rails(q.scene) : shore(q, true)}
-    <div class="picnic-sticker" aria-hidden="true">${art(sticker || DAILY_PATHS[round.path].icon)}</div>
+    ${rewardSticker(sticker, DAILY_PATHS[round.path].icon, 'picnic-sticker')}
     <h1 tabindex="-1">${label('כָּל הַכָּבוֹד, הַמְּשִׂימָה הֻשְׁלְמָה!')}</h1>
     <p>${label(sticker ? 'מַדְבֵּקָה חֲדָשָׁה הִצְטָרְפָה לָאַלְבּוֹם.' : 'הַמְּשִׂימָה נִשְׁמְרָה.')}</p>
     <div class="picnic-result-actions"><button class="primary-button" data-action="home">${label('לְבֵית הַחֲבֵרִים')} ${uiIcon('arrow')}</button>

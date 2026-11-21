@@ -1,3 +1,4 @@
+import { rewardSticker } from './playable-stickers.js';
 import { art, pup, uiIcon } from './art.js';
 import { CLIPS } from './content.js?v=2.5.0-play';
 import { NUMBER_PATHS, numberQuestion, numberQuestionClip, numberPrompt, numberModel, spokenNumber } from './number-workshop.js?v=2.3.0-numbers';
@@ -257,7 +258,7 @@ export function mountNumberRound(root, {
 
 export function numberComplete(round, sticker) {
   return `<main id="main" class="journey-complete number-workshop">
-    <div class="journey-complete-art">${pup('tofi')}${art(sticker || 'star')}</div>
+    <div class="journey-complete-art">${pup('tofi')}${rewardSticker(sticker, 'star', 'reward-inline')}</div>
     <h1 tabindex="-1">כָּל הַכָּבוֹד!</h1>
     <div class="journey-controls">
       <button type="button" class="primary-button" data-action="album">לָאַלְבּוֹם שֶׁלִּי ${uiIcon('arrow')}</button>

@@ -1,3 +1,4 @@
+import { rewardSticker } from './playable-stickers.js';
 import { AVAILABLE_PICNIC_MISSIONS, MY_JOURNEY, PICNIC, PICNIC_MISSIONS, isPicnicReady } from './activities.js';
 import { CLOCK_ACTIVITIES_ENABLED } from './availability.js';
 import { art, pup, uiIcon } from './art.js';
@@ -45,7 +46,7 @@ export function picnicComplete(round, sticker, finished, nikud) {
   const ready = isPicnicReady(finished);
   const message = sticker ? 'מַדְבֵּקָה חֲדָשָׁה הִצְטָרְפָה לָאַלְבּוֹם.' : 'הַמְּשִׂימָה נִשְׁמְרָה.';
   return `<main id="main" class="picnic-page picnic-result">
-    ${picnicScene(finished)}<div class="picnic-sticker" aria-hidden="true">${art(sticker || PICNIC_MISSIONS[round.path].icon)}</div>
+    ${picnicScene(finished)}${rewardSticker(sticker, PICNIC_MISSIONS[round.path].icon, 'picnic-sticker')}
     <h1 tabindex="-1">${label(ready ? 'הַפִּיקְנִיק מוּכָן!' : 'כָּל הַכָּבוֹד, הִשְׁלַמְתְּ אֶת הַמְּשִׂימָה!')}</h1><p>${label(message)}</p>
     <div class="picnic-result-actions"><button class="primary-button" data-action="${PICNIC.route.action}">${label('לְמַפַּת הַמַּסָּע')} ${uiIcon('arrow')}</button>
       <button class="secondary-button" data-action="album">${label('לָאַלְבּוֹם שֶׁלִּי')}</button></div>

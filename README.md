@@ -20,7 +20,7 @@ Ariel’s learning game for phones, tablets and computers. Ava gives instruction
 | **מחפשות עם פיקאצ׳ו** | Match Hebrew words to pictures, make animals hop, and tap Pikachu for his greeting. |
 | **מחפשות עם סטיץ׳** | Match six Hebrew clues to pictures, from a familiar object to its color, quantity or position. Tap Stitch to see him dance and hear a ukulele. Reopen his game to continue on the same device. |
 
-New scored adventures have six steps. Existing ten-step drafts can be finished at their original length. Each scored completion unlocks one sticker until the 1,000-sticker album is full. Stickers unlock decorations for the puppy park. Open-ended activities such as tracing and playing with the two characters have their own practice feedback.
+New scored adventures have six steps. Existing ten-step drafts can be finished at their original length. Each scored completion unlocks one sticker until the 1,000-sticker album is full. Tap any earned sticker in the album or on a reward screen to play its reaction. Dogs bark, cats meow, birds chirp and suns shine. Sticker play works offline and follows the sound and motion settings. Stickers also unlock decorations for the puppy park. Open-ended activities such as tracing and playing with the two characters have their own practice feedback.
 
 Tap the Pikachu or Stitch sticker on any screen to hear “Pika pika” or Stitch’s ukulele. If Ava is speaking, the last sticker you tapped waits for her to finish. These taps work offline and leave the current question and album as they were.
 

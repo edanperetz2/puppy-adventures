@@ -22,7 +22,8 @@ import { sanitizeClockPosition, recordClockLesson } from './clock-learning.js?v=
 import { LETTERS, WRITING_FORMS, writingLetter, writingMode, writingPositionKey, letterGroup, letterShape } from './letters.js';
 import { mountLetterPad } from './letter-pad.js?v=2.3.1-number-writing';
 import { nextReadingStage, sanitizeReadingPractice, finishReadingPractice } from './reading.js?v=2.7.0-science';
-import { stickerPage, stickerDefinition } from './stickers.js';
+import { stickerPage } from './stickers.js';
+import { albumSticker, rewardSticker, createStickerPlayer } from './playable-stickers.js';
 import { suggestedLetters, practicedLetterCount, recordLetters, recognitionTargets } from './letter-progress.js';
 import { CHARACTERS, CHARACTER_COLLECTIONS, CHARACTER_LEVELS, CHARACTER_MODES, characterCollection, selectCharacterLevel, sanitizeCharacterPractice, finishCharacterPractice, nextCharacterLevel } from './characters.js?v=2.2.2-six';
 import { characterMenu, characterQuestion, characterAnswer, characterAnswerLabel, characterMissionArt, characterName } from './characters-view.js?v=2.2.2-six';
@@ -179,6 +180,15 @@ const narrator = new Narrator(status => {
   if (notice) { notice.hidden = status !== 'unavailable'; notice.textContent = 'הקול לא נשמע? לחצי שוב על הרמקול. אפשר גם להיעזר בהורה.'; }
 });
 const companions = createCompanionGreetings(narrator.audio, () => settings.sound);
+const stickerPlayer = createStickerPlayer({
+  audio: narrator.audio,
+  interrupt: () => { companions.stop(); narrator.stop(); },
+  status: document.querySelector('#sticker-announcement'),
+});
+function stopStickerPlayback() {
+  companions.stop();
+  stickerPlayer.stop();
+}
 narrator.enabled = settings.sound;
 narrator.resolveKey = profileSpeech(ARIEL);
 const announcements = new GameAnnouncements(narrator);
@@ -224,7 +234,7 @@ function openAlbumInvite() {
 function applyPreferences() {
   document.documentElement.classList.toggle('still', !settings.motion);
   narrator.enabled = settings.sound;
-  if (!settings.sound) companions.stop();
+  if (!settings.sound) stopStickerPlayback();
 }
 
 function motionEnabled() {
@@ -568,7 +578,7 @@ function renderHome() {
     ${chapterEntry(settings.nikud)}
     <div class="home-collection">
     <section class="home-feature-card park-feature"><div>${pup('tofi')}</div><span><h3>הַפָּארְק שֶׁלִּי</h3><p>קִשּׁוּטִים, חֲבֵרִים וּמָקוֹם לַדִּמְיוֹן</p></span><button class="primary-button" data-action="park">בּוֹנִים וּמְשַׂחֲקִים ${uiIcon('arrow')}</button></section>
-    <section class="home-feature-card album-feature"><div>${art(progress.stickers.at(-1) || 'star')}</div><span><h3>הָאַלְבּוֹם שֶׁלִּי</h3><p>${progress.stickers.length ? `${progress.stickers.length} מדבקות מחכות לך באלבום` : 'בכל הרפתקה שלמה מגלות מדבקה חדשה'}</p></span><button class="primary-button" data-action="album">לאלבום שלי ${uiIcon('arrow')}</button></section>
+    <section class="home-feature-card album-feature"><div>${rewardSticker(progress.stickers.at(-1), 'star', 'home-album-sticker')}</div><span><h3>הָאַלְבּוֹם שֶׁלִּי</h3><p>${progress.stickers.length ? `${progress.stickers.length} מדבקות מחכות לך באלבום` : 'בכל הרפתקה שלמה מגלות מדבקה חדשה'}</p></span><button class="primary-button" data-action="album">לאלבום שלי ${uiIcon('arrow')}</button></section>
     </div>
   </main>${footer()}`;
 }
@@ -686,7 +696,7 @@ function renderComplete() {
   const nextKey = reading ? nextReadingStage(round.reading, round.helped.size) : null;
   const nextStage = nextKey ? READING_LEVELS[nextKey] : null;
   app.innerHTML = `${header()}<main id="main" class="completion-page">
-    <div class="completion-stars">✦ <span>✧</span> ✦</div><div class="reward-art">${art(round.sticker || mission.sticker)}</div>
+    <div class="completion-stars">✦ <span>✧</span> ✦</div>${rewardSticker(round.sticker, mission.sticker, 'reward-art')}
     <div class="eyebrow">החברים שמחים כל כך!</div><h1 tabindex="-1">יש! עשית את זה!</h1>
     <p>סיימת את ${mission.name}${wordMatch ? ` · התאמת מילים ב${round.letterLanguage === 'english' ? 'אנגלית' : 'עברית'}` : ''}${characters ? ` · שלב ${CHARACTER_LEVELS[round.characterLevel].number}` : ''}${reading && READING_LEVELS[round.reading]?.number ? ` · שלב ${READING_LEVELS[round.reading].number}` : ''}.</p>
     <p class="reward-caption">${round.sticker ? 'מדבקה חדשה הצטרפה לאלבום שלך' : 'עוד הרפתקה נפלאה עם החברים'}</p>
@@ -740,7 +750,8 @@ function renderAlbum() {
     <nav class="album-pagination" aria-label="דפדוף בראש האלבום">${previousButton}<label class="album-page-select"><span>עמוד ${page.index + 1} מתוך ${page.pageCount}</span><select data-album-page aria-label="בחירת עמוד באלבום">${Array.from({ length: page.pageCount }, (_, index) => `<option value="${index}" ${index === page.index ? 'selected' : ''}>עמוד ${index + 1}</option>`).join('')}</select></label>${nextButton}</nav>
     <p class="album-page-range" role="status">מדבקות <bdi dir="ltr">${page.start + 1}–${page.end}</bdi></p>
     ${page.collected ? '<button class="text-button album-latest" data-action="album-latest">למדבקה האחרונה שלי</button>' : ''}
-    <div class="sticker-grid">${page.entries.map(({ id, number, unlocked }) => `<div class="sticker ${unlocked ? 'unlocked' : 'locked'}" role="img" aria-label="${unlocked ? `מדבקה ${number} נאספה: ${stickerDefinition(id).name}` : `מדבקה ${number} מחכה להרפתקה הבאה`}">${unlocked ? art(id) : '<span class="sticker-mystery" aria-hidden="true">?</span>'}<span class="sticker-index" aria-hidden="true">${String(number).padStart(3, '0')}</span></div>`).join('')}</div>
+    ${page.entries.some(entry => entry.unlocked) ? `<p class="album-play-hint">${settings.nikud ? 'גְּעִי בְּמַדְבֵּקָה וּגְלִי מָה קוֹרֶה!' : 'געי במדבקה וגלי מה קורה!'}</p>` : ''}
+    <div class="sticker-grid">${page.entries.map(albumSticker).join('')}</div>
     <nav class="album-pagination album-bottom-pages" aria-label="דפדוף בתחתית האלבום">${previousButton}${nextButton}</nav>
     <button class="primary-button" ${activityButton(homeSuggestion().activity.route)}>יוצאות להרפתקה ${uiIcon('arrow')}</button></main>${footer()}`;
 }
@@ -751,7 +762,7 @@ function turnAlbumPage(index) {
 }
 
 function render() {
-  companions.stop();
+  stopStickerPlayback();
   freeWriting?.destroy(); freeWriting=null;
   journeyController?.destroy(); journeyController=null;
   numberController?.destroy(); numberController=null;
@@ -1073,7 +1084,7 @@ function revealWin(selector) {
 }
 
 function openDialog(content) {
-  companions.stop();
+  stopStickerPlayback();
   if (!dialog.open) dialogOpener = document.activeElement;
   dialog.innerHTML = `<button class="dialog-close circle-button" aria-label="סגירה" data-dialog="close">${uiIcon('close')}</button>${companionStickers()}${content}`;
   dialog.querySelector('[data-dialog="close"]').onclick = closeDialog;
@@ -1081,7 +1092,7 @@ function openDialog(content) {
 }
 
 function closeDialog(updatePreferences = false) {
-  companions.stop();
+  stopStickerPlayback();
   const action = dialogOpener?.dataset.action;
   dialog.close();
   const refresh = refreshAfterDialog && progressScreens.includes(view) || updatePreferences === true && preferenceScreens.includes(view);
@@ -1656,7 +1667,7 @@ function renderJourney(){
 }
 function renderJourneyComplete(){
   const plan=journeyPlan;
-  app.innerHTML=`${header()}<main id="main" class="journey-complete"><div class="journey-complete-art">${pup('luli')}${art(plan?.sticker||'star')}</div><h1 tabindex="-1">כָּל הַכָּבוֹד! עוֹד הַרְפַּתְקָה שְׁלֵמָה!</h1><p>${plan?.sticker ? 'מַדְבֵּקָה חֲדָשָׁה הִצְטָרְפָה לָאַלְבּוֹם.' : 'הַהַרְפַּתְקָה נִשְׁמְרָה.'}</p><div class="journey-controls"><button class="primary-button" data-action="park">לַפָּארְק שֶׁלִּי ${uiIcon('arrow')}</button><button class="secondary-button" data-action="learning-hub" data-hub="${plan?JOURNEYS[plan.mode].domain:'hebrew'}">עוֹד גִּלּוּי קָטָן</button><button class="text-button" data-action="home">לְבֵית הַחֲבֵרִים</button></div></main>${footer()}`;
+  app.innerHTML=`${header()}<main id="main" class="journey-complete"><div class="journey-complete-art">${pup('luli')}${rewardSticker(plan?.sticker, 'star', 'reward-inline')}</div><h1 tabindex="-1">כָּל הַכָּבוֹד! עוֹד הַרְפַּתְקָה שְׁלֵמָה!</h1><p>${plan?.sticker ? 'מַדְבֵּקָה חֲדָשָׁה הִצְטָרְפָה לָאַלְבּוֹם.' : 'הַהַרְפַּתְקָה נִשְׁמְרָה.'}</p><div class="journey-controls"><button class="primary-button" data-action="park">לַפָּארְק שֶׁלִּי ${uiIcon('arrow')}</button><button class="secondary-button" data-action="learning-hub" data-hub="${plan?JOURNEYS[plan.mode].domain:'hebrew'}">עוֹד גִּלּוּי קָטָן</button><button class="text-button" data-action="home">לְבֵית הַחֲבֵרִים</button></div></main>${footer()}`;
 }
 function renderPark(){
   app.innerHTML=`${header()}<main id="main" class="park-page"><div id="park-root"></div></main>${footer()}`;
@@ -1673,7 +1684,7 @@ app.addEventListener('click', event => {
   if (button.disabled) return;
   switch (button.dataset.action) {
     case 'home': leaveTo('home'); break;
-    case 'guide': companions.stop(); narrator.stop(); openGameGuide(button, companions.stop); break;
+    case 'guide': stopStickerPlayback(); narrator.stop(); openGameGuide(button, stopStickerPlayback); break;
     case 'learning-hub': openLearningHub(button.dataset.hub); break;
     case 'number-menu': openNumberMenu(); break;
     case 'number-start': startNumberRound(button.dataset.path); break;
@@ -1704,6 +1715,9 @@ app.addEventListener('click', event => {
     case 'writing-step': if(Object.hasOwn(WRITING_STEPS,button.dataset.step)){writingPractice.mode=button.dataset.step;letterDemo.recorded=false;save();render();if(writingPractice.mode!=='trace')announcements.say(writingPractice.mode==='paper'?'journey-paper':writingPractice.mode==='copy'?'journey-copy-letters':'journey-memory-letters');}break;
     case 'name-letter': selectLetter(Number(button.dataset.index));break;
     case 'album': albumPageIndex = null; if (view === 'game') leaveTo('album'); else { narrator.stop(); view = 'album'; render(); focusTitle(); announcements.say('stickers'); } break;
+    case 'sticker-play':
+      if (progress.stickers.includes(button.dataset.sticker)) stickerPlayer.play(button, settings);
+      break;
     case 'album-page': turnAlbumPage(Number(button.dataset.page)); break;
     case 'album-latest': turnAlbumPage(null); break;
     case 'mission': startMission(button.dataset.mission); break;
@@ -1754,7 +1768,7 @@ app.addEventListener('click', event => {
     case 'next': nextQuestion(); break;
     case 'parents': parentGate(); break;
     case 'sound':
-      companions.stop();
+      stopStickerPlayback();
       settings.sound = !settings.sound; narrator.stop(); narrator.enabled = settings.sound; save(); renderSoundButton();
       if (companionController) companionController.updateSound();
       else if (settings.sound) replay();
@@ -1765,7 +1779,10 @@ app.addEventListener('click', event => {
 
 document.addEventListener('click', event => {
   const sticker = event.target.closest('button[data-companion]');
-  if (sticker) companions.greet(sticker.dataset.companion, sticker);
+  if (sticker) {
+    stickerPlayer.stop();
+    companions.greet(sticker.dataset.companion, sticker);
+  }
 });
 
 app.addEventListener('change', event => {
@@ -1774,7 +1791,7 @@ app.addEventListener('change', event => {
 
 dialog.addEventListener('click', event => { if (event.target === dialog && event.offsetX >= 0 && event.offsetX <= dialog.clientWidth && event.offsetY >= 0 && event.offsetY <= dialog.clientHeight) return; if (event.target === dialog) closeDialog(); });
 dialog.addEventListener('cancel', event => { event.preventDefault(); closeDialog(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden) { companions.stop(); picnicController?.flush(); dailyController?.flush(); narrator.stop(); } else { void album.flush();void learner.flush(); startOpeningWelcome(); } });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { stopStickerPlayback(); picnicController?.flush(); dailyController?.flush(); narrator.stop(); } else { void album.flush();void learner.flush(); startOpeningWelcome(); } });
 window.addEventListener('online', () => {
   void album.flush(); void learner.flush();
   if (view === 'delivery-map' || view === 'delivery-round') prepareDeliveryAudio();
@@ -1787,7 +1804,7 @@ window.addEventListener('online', () => {
 window.addEventListener('hashchange', openAlbumInvite);
 window.addEventListener('focus', () => { void album.flush();void learner.flush(); });
 setInterval(() => { if (!document.hidden && album.linked) {void album.flush();void learner.flush();} }, 15000);
-window.addEventListener('pagehide', () => { companions.stop(); checkpoint(); narrator.stop(); });
+window.addEventListener('pagehide', () => { stopStickerPlayback(); checkpoint(); narrator.stop(); });
 render();
 openAlbumInvite();
 startOpeningWelcome();

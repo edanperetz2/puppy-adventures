@@ -1,3 +1,4 @@
+import { rewardSticker } from './playable-stickers.js';
 import { DELIVERY, DELIVERY_MISSIONS, MY_JOURNEY } from './activities.js';
 import { art, pup, uiIcon } from './art.js';
 import { chapterMissions, chapterText } from './chapter-ui.js';
@@ -71,7 +72,7 @@ export function deliveryComplete(round, sticker, finished, nikud) {
   const label = chapterText(nikud);
   const ready = finished.length === Object.keys(DELIVERY_MISSIONS).length;
   return `<main id="main" class="picnic-page picnic-result delivery-page">
-    ${deliveryScene(finished)}<div class="picnic-sticker" aria-hidden="true">${art(sticker || DELIVERY_MISSIONS[round.path].icon)}</div>
+    ${deliveryScene(finished)}${rewardSticker(sticker, DELIVERY_MISSIONS[round.path].icon, 'picnic-sticker')}
     <h1 tabindex="-1">${label(ready ? 'כָּל הַמִּשְׁלוֹחִים הִגִּיעוּ!' : 'כָּל הַכָּבוֹד, הִשְׁלַמְתְּ אֶת הַמְּשִׂימָה!')}</h1>
     <p>${label(sticker ? 'מַדְבֵּקָה חֲדָשָׁה הִצְטָרְפָה לָאַלְבּוֹם.' : 'הַמְּשִׂימָה נִשְׁמְרָה.')}</p>
     <div class="picnic-result-actions">

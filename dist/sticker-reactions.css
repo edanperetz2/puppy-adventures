@@ -1,0 +1,113 @@
+/* The landscape and frame stay still while their subject plays. The same
+   markup also fits the larger sticker Ariel has just earned. */
+.playable-sticker {
+  position: relative;
+  isolation: isolate;
+  touch-action: manipulation;
+  --sticker-sign: '✧';
+  --sticker-ink: #655133;
+  --sticker-paper: #fff0b9;
+}
+.playable-sticker .sticker-picture { position: relative; width: 100%; display: block; pointer-events: none; }
+.sticker-picture > svg { width: 100%; height: auto; display: block; }
+.sticker-effect { position: absolute; inset: 3%; pointer-events: none; }
+.playable-sticker:focus-visible { outline: 3px solid #176b73; outline-offset: 2px; }
+.album-page .sticker.is-reacting { border-color: #8f784a; box-shadow: inset 0 0 0 2px var(--sticker-paper), 0 3px 0 #cabc9b; }
+.is-reacting .sticker-effect::after {
+  content: var(--sticker-sign);
+  position: absolute;
+  top: 1%; inset-inline-end: 1%;
+  display: grid; place-items: center;
+  min-width: 1.55em; min-height: 1.5em; padding: .04em .27em;
+  border-radius: 65% 65% 65% 20%; border: 1px solid currentColor;
+  background: var(--sticker-paper); color: var(--sticker-ink);
+  font-size: clamp(12px, 2.3vw, 20px); font-weight: 650; line-height: 1.3;
+  box-shadow: 0 2px 0 #5b50341a;
+}
+.playable-sticker[data-motion=bark] { --sticker-sign: 'הַב!'; --sticker-action: sticker-bark; }
+.playable-sticker[data-motion=meow] { --sticker-sign: 'מְיָאוּ'; --sticker-action: sticker-meow; }
+.playable-sticker:is([data-motion=shine],[data-motion=light],[data-motion=sparkle],[data-motion=rainbow],[data-motion=beacon]) { --sticker-sign: '✦'; --sticker-action: sticker-brighten; }
+.playable-sticker[data-motion=rainbow] { --sticker-paper: #f2dbf0; }
+.playable-sticker[data-motion=beat] { --sticker-sign: '♥'; --sticker-paper: #fce3e7; --sticker-ink: #993555; --sticker-action: sticker-pulse; }
+.playable-sticker:is([data-motion=bloom],[data-motion=open]) { --sticker-sign: '✿'; --sticker-paper: #e3f0cf; --sticker-action: sticker-open; }
+.playable-sticker:is([data-motion=fly],[data-motion=strum],[data-motion=trumpet],[data-motion=cycle]) { --sticker-sign: '♫'; --sticker-paper: #dcefe9; --sticker-ink: #306861; }
+.playable-sticker:is([data-motion=fly],[data-motion=glide],[data-motion=launch]) { --sticker-action: sticker-flight; }
+.playable-sticker[data-motion=launch] { --sticker-sign: '↑'; }
+.playable-sticker:is([data-motion=flutter],[data-motion=hover]) { --sticker-action: sticker-hover; }
+.playable-sticker:is([data-motion=swim],[data-motion=paddle],[data-motion=rock],[data-motion=wave]) { --sticker-sign: '≈'; --sticker-paper: #dcf2f5; --sticker-ink: #366e80; --sticker-action: sticker-swim; }
+.playable-sticker:is([data-motion=bounce],[data-motion=hop],[data-motion=gallop],[data-motion=dance]) { --sticker-sign: '↗'; --sticker-action: sticker-hop; }
+.playable-sticker:is([data-motion=stomp],[data-motion=gallop],[data-motion=peck]) { --sticker-sign: '• •'; --sticker-action: sticker-step; }
+.playable-sticker:is([data-motion=sway],[data-motion=rock],[data-motion=trumpet],[data-motion=look],[data-motion=dig]) { --sticker-action: sticker-tilt; }
+.playable-sticker:is([data-motion=roll],[data-motion=curl]) { --sticker-sign: '↻'; --sticker-action: sticker-roll; }
+.playable-sticker[data-motion=drop] { --sticker-sign: '↓'; --sticker-action: sticker-drop; }
+.playable-sticker:is([data-motion=drive],[data-motion=cycle],[data-motion=rumble],[data-motion=crawl],[data-motion=push]) { --sticker-action: sticker-travel; }
+.playable-sticker[data-motion=crawl] { --sticker-ease: ease-in-out; --sticker-time: 1.1s; }
+.playable-sticker[data-motion=strum] { --sticker-action: sticker-strum; }
+.playable-sticker[data-motion=tick] { --sticker-sign: 'טִיק!'; }
+.playable-sticker[data-motion=slide] { --sticker-sign: '↘'; }
+.playable-sticker[data-motion=swing] { --sticker-sign: '↔'; }
+.playable-sticker[data-motion=snap] { --sticker-sign: '↑'; }
+
+/* These paint changes carry through even when either motion setting is off. */
+.is-reacting .sticker-window { fill: #ffdc64; filter: drop-shadow(0 0 4px #e8b83d); }
+.is-reacting .sticker-beacon { fill: #e87b30; filter: drop-shadow(0 0 4px #f6ba52); }
+.is-reacting .sticker-slide-rider { opacity: 1; }
+.is-reacting:is([data-motion=shine],[data-motion=sparkle],[data-motion=rainbow]) .sticker-effect::before {
+  content: '';
+  position: absolute; inset: 1%;
+  background: repeating-conic-gradient(from 3deg, #efaf34 0 5deg, transparent 6deg 30deg);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 75%, black 79% 95%, transparent 99%);
+  mask-image: radial-gradient(closest-side, transparent 75%, black 79% 95%, transparent 99%);
+}
+.is-reacting[data-motion=rainbow] .sticker-effect::before {
+  background: conic-gradient(#e4a39e, #eac569, #82b989, #84bdc9, #bd9dd3, #e4a39e);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.still) .is-reacting :is(.sticker-picture > svg:not(.sticker-scene), .sticker-subject) {
+    transform-box: fill-box; transform-origin: 50% 75%;
+    animation: var(--sticker-action, none) var(--sticker-time, .94s) var(--sticker-ease, ease-out) both;
+  }
+  html:not(.still) .is-reacting .sticker-wing {
+    transform-box: fill-box; transform-origin: 60% 16%; animation: sticker-flap .28s ease-in-out 3;
+  }
+  html:not(.still) .is-reacting .pup-tail {
+    transform-box: fill-box; transform-origin: 0 78%; animation: sticker-wag .24s ease-in-out 4;
+  }
+  html:not(.still) .is-reacting .sticker-hand {
+    transform-box: fill-box; transform-origin: 50% 83%; animation: sticker-tick 1.04s steps(4,end) both;
+  }
+  html:not(.still) .is-reacting .sticker-swing-seat {
+    transform-box: fill-box; transform-origin: 50% 0; animation: sticker-swing .98s ease-in-out both;
+  }
+  html:not(.still) .is-reacting .sticker-rotor {
+    transform-box: fill-box; transform-origin: center; animation: sticker-rotor .15s linear 6;
+  }
+  html:not(.still) .is-reacting .sticker-chocolate-square {
+    transform-box: fill-box; transform-origin: center; animation: sticker-hop .85s ease both;
+  }
+  html:not(.still) .is-reacting .sticker-slide-rider { animation: sticker-slide .99s ease-in both; }
+  html:not(.still) .is-reacting .sticker-effect::after { animation: sticker-callout .28s ease-out both; }
+}
+@keyframes sticker-callout { from { opacity: .4; transform: translateY(3px) scale(.76); } 75% { transform: scale(1.08); } }
+@keyframes sticker-bark { 20%, 57% { transform: translateY(-5%) scale(1.05,.97); } 36%, 70% { transform: scale(.98,1.07); } }
+@keyframes sticker-meow { 24% { transform: rotate(-8deg); } 53% { transform: translateY(-5%) rotate(5deg) scale(1.04); } }
+@keyframes sticker-flight { 22% { transform: translate(-7%,3%) rotate(-7deg); } 52% { transform: translate(11%,-18%) rotate(5deg); } 75% { transform: translate(13%,-8%); } }
+@keyframes sticker-brighten { 43% { transform: scale(1.07); filter: brightness(1.13); } }
+@keyframes sticker-hover { 21%, 67% { transform: translate(2%,-12%) rotate(4deg); } 46% { transform: translate(-7%,-4%) rotate(-4deg); } }
+@keyframes sticker-hop { 18% { transform: scale(1.07,.89); } 40% { transform: translateY(-19%) scale(.97,1.06); } 64% { transform: scale(1.05,.93); } 82% { transform: translateY(-7%); } }
+@keyframes sticker-step { 23% { transform: translate(-4%,-5%) rotate(-7deg); } 40% { transform: translateX(-3%) scale(1.04,.94); } 65% { transform: translate(4%,-5%) rotate(7deg); } }
+@keyframes sticker-pulse { 21%, 64% { transform: scale(1.13); } 39% { transform: scale(.98); } }
+@keyframes sticker-open { 12% { transform: scale(.82,.92); } 52% { transform: scale(1.12,1.06); } 75% { transform: scale(1.02); } }
+@keyframes sticker-swim { 21% { transform: translate(-7%,1%) rotate(-6deg); } 59% { transform: translate(8%,-6%) rotate(6deg); } 82% { transform: translate(5%,2%); } }
+@keyframes sticker-tilt { 22% { transform: rotate(-10deg); } 60% { transform: rotate(9deg); } 80% { transform: rotate(-3deg); } }
+@keyframes sticker-roll { 27% { transform: translateX(-5%) rotate(-15deg); } 64% { transform: translateX(8%) rotate(23deg); } }
+@keyframes sticker-drop { 16% { transform: translateY(-12%); } 54% { transform: translateY(8%) scale(1.08,.91); } 73% { transform: translateY(-3%); } }
+@keyframes sticker-travel { 18% { transform: translate(-5%,1%); } 52% { transform: translate(10%,-3%) rotate(-2deg); } 74% { transform: translate(11%,1%); } }
+@keyframes sticker-strum { 20%, 50% { transform: rotate(-6deg); } 34%, 64% { transform: rotate(5deg); } }
+@keyframes sticker-flap { 50% { transform: rotate(-35deg) scaleY(.68); } }
+@keyframes sticker-wag { 50% { transform: rotate(-23deg); } }
+@keyframes sticker-tick { to { transform: rotate(24deg); } }
+@keyframes sticker-swing { 20% { transform: rotate(-19deg); } 58% { transform: rotate(16deg); } 83% { transform: rotate(-7deg); } }
+@keyframes sticker-rotor { 50% { transform: scaleX(.16); } }
+@keyframes sticker-slide { 0%, 10% { transform: translate(0,0); } 60% { transform: translate(40px,78px); } 100% { transform: translate(86px,122px); } }
