@@ -608,7 +608,7 @@ function tallyGroup(n, offset, item) {
 
 function letterRecognitionModel(q) {
   const model = q.direction === 'to-main' ? familiarGlyph(q.letter) : letterShape(q.letter);
-  return `<div id="letter-recognition-model" class="letter-recognition-model" ${q.showModel ? '' : 'hidden'}>${model}<span>זו אותה אות · נסתכל על הצורה</span></div>`;
+  return `<div id="letter-recognition-model" class="letter-recognition-model" ${q.showModel || q.visualHintShown ? '' : 'hidden'}>${model}<span>זו אותה אות · נסתכל על הצורה</span></div>`;
 }
 
 function questionVisual(q) {
@@ -966,6 +966,7 @@ function hint() {
     }
     if (guideStory(firstStoryClue(q))) return;
   }
+  if (q.type === 'letter') q.visualHintShown = true;
   round.helped.add(round.index); checkpoint();
   if (q.type === 'word-form') {
     document.querySelector('#feedback').textContent = settings.nikud ? CLIPS[q.hint].text : CLIPS[q.hint].text.replace(/\p{M}/gu, '');
@@ -1261,7 +1262,6 @@ function restoreQuestionState(){
   for(const b of document.querySelectorAll('[data-action="tally"]')){
     if(round.counted.has(b.dataset.token)){b.classList.add('counted');b.setAttribute('aria-disabled','true');b.querySelector('.count-bubble').textContent=[...round.counted].indexOf(b.dataset.token)+1;}
   }
-  if(round.helped.has(round.index)&&q.type==='letter')document.querySelector('#letter-recognition-model').hidden=false;
   if (!round.resolved) {
     if (inLittleStories() && round.storyClue) paintStoryClue();
     return;

@@ -59,6 +59,33 @@ test('Reverse letter prompts survive reopening and an older draft keeps its orig
   assert.equal(unpackRound(old).questions[4].targetClip, questions[4].letter.clip);
 });
 
+test('reopening recognition restores only an explicit visual hint on a recall step', () => {
+  for (const language of ['hebrew', 'english']) {
+    const questions = createSession('letters', { letterLanguage: language }, seeded(36));
+    const index = 4;
+    assert.equal(questions[index].showModel, false);
+    const wrong = questions[index].options.find(option => option.id !== questions[index].answer).id;
+    for (const attempted of [[], [wrong]]) {
+      const packed = packRound({
+        id: crypto.randomUUID(), key: `letters:${language}`, mission: 'letters', questions, index,
+        letterLanguage: language, attempted, helped: [index], counted: [],
+      });
+      const restore = () => unpackRound(JSON.parse(JSON.stringify(packed)));
+      let restored = restore();
+      assert.equal(restored.questions[index].visualHintShown, false, 'hearing the name or trying a wrong choice keeps the model hidden');
+      assert.ok(restored.helped.has(index));
+      assert.deepEqual([...restored.attempted], attempted);
+      packed.questions[index].visualHintShown = true;
+      restored = restore();
+      assert.equal(restored.questions[index].visualHintShown, true);
+      assert.equal(restored.questions[index + 1].visualHintShown, false, 'the next recall step stays independent');
+      assert.equal(restored.questions[0].showModel, true, 'guided steps still show their model');
+      delete packed.questions[index].visualHintShown;
+      assert.equal(restore().questions[index].visualHintShown, true, 'older drafts retain the clue they previously restored');
+    }
+  }
+});
+
 test('Both alphabets have complete, distinct teaching forms and recorded names', () => {
   assert.equal(LETTERS.english.map(l => l.familiar).join(''), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
   assert.equal(LETTERS.english.map(l => l.small).join(''), 'abcdefghijklmnopqrstuvwxyz');

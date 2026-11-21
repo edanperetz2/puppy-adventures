@@ -139,7 +139,7 @@ function buildSession(mission, rawSettings, rng) {
       const showModel = i < group.length;
       const reverse = i > group.length;
       return { id: `letters-${i}`, type: 'letter', letter, answer: letter.id, phase: adventurePhase(i), showModel,
-        direction: reverse ? 'to-main' : 'to-alternate',
+        direction: reverse ? 'to-main' : 'to-alternate', visualHintShown: false,
         options: optionsFrom(group, letter, rng, adventurePhase(i) === 'challenge' ? 3 : 2),
         prompt: reverse ? 'letters-recognition' : `letter-match-${language}`, targetClip: reverse ? undefined : letter.clip, hint: 'letters-recognition-hint' };
     });

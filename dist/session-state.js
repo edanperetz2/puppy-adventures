@@ -58,6 +58,10 @@ export function unpackRound(raw) {
         // Older rounds always showed the familiar form as the clue.
         q.direction=d.direction==='to-main'?'to-main':'to-alternate';
         q.targetClip=q.direction==='to-main'?undefined:q.letter.clip;
+        // Earlier drafts used the assisted score for both grading and restoring the visual clue.
+        q.visualHintShown = d.visualHintShown === true || (
+          !Object.hasOwn(d, 'visualHintShown') && Array.isArray(raw.helped) && raw.helped.includes(i)
+        );
       }
       else if(d.type==='character'){q.character=CHARACTERS.find(c=>c.id===d.character);if(!q.character||!['picture-name','name-picture'].includes(d.direction)||!Object.hasOwn(CHARACTER_COLLECTIONS,d.collection))throw Error();Object.assign(q,{collection:d.collection,direction:d.direction,tier:Math.min(3,Math.max(1,Number(d.tier)||1)),answer:q.character.id});pool=CHARACTERS.filter(c=>c.tiers[d.collection]);}
       else if(d.type==='clock'){if(!Number.isInteger(d.time?.hour)||d.time.hour<1||d.time.hour>12||!Number.isInteger(d.time.minute)||d.time.minute<0||d.time.minute>59)throw Error();q.time=clockTime(d.time.hour,d.time.minute);q.answer=q.time.id;pool=Array.from({length:12},(_,h)=>Array.from({length:60},(_,m)=>clockTime(h+1,m))).flat();}
