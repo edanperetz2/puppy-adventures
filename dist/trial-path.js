@@ -5,7 +5,7 @@ import { boatyardGames } from './trial-boatyard.js';
 import { numberGames } from './trial-numbers.js';
 import { theaterGames, mountTrialStudio } from './trial-theater.js';
 import { escapeHtml } from './profiles.js';
-import { mountDrag } from './drag.js';
+import { mountDrag, mountTouchControls } from './drag.js';
 
 export const TRIAL_AREAS = [
   { id:'science', title:'מַעְבֶּדֶת הַמַּדָּע', icon:'cup', games:scienceGames },
@@ -155,6 +155,13 @@ export function mountTrialPath(root, {storage,route,nikud,motion,sound,enableSou
     root.querySelector('[data-trial-next]')?.focus({preventScroll:true});
   }
   const events=new AbortController();
+  // Touch browsers can omit the first compatibility click following a drop.
+  // Trigger the tapped control on release, and let keyboard/mouse clicks work normally.
+  const touchControls=mountTouchControls(root,'button:not([data-trial-drag])',button=>button.click(),events.signal);
+  root.addEventListener('click',event=>{
+    if(touchControls.accepts(event))return;
+    event.preventDefault();event.stopImmediatePropagation();
+  },{capture:true,signal:events.signal});
   const allowClick=mountDrag(root,{
     sources:'button[data-trial-drag]',targets:'[data-trial-drop]',signal:events.signal,
     onDrop:(button,target)=>{

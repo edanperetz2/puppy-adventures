@@ -37,7 +37,7 @@
   "./explore-surfaces.css",
   "./play-surfaces.css",
   "./sticker-reactions.css",
-  "./app.js?v=2.23.0",
+  "./app.js?v=2.23.1",
   "./learning-sync.js?v=2.2.2-six",
   "./learning.js",
   "./session-state.js?v=2.7.1-pepper",

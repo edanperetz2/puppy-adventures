@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { TRIAL_AREAS, TRIAL_CUES, clearTrialSaves, newTrialRound, restoreTrialRound, trialChoices } from '../dist/trial-path.js';
+import { TRIAL_AREAS, TRIAL_CUES, clearTrialSaves, mountTrialPath, newTrialRound, restoreTrialRound, trialChoices } from '../dist/trial-path.js';
 import { trialRecording } from '../dist/trial-voice.js';
 import { studioSpeech } from '../dist/trial-theater.js';
 import { CLIPS } from '../dist/content.js';
@@ -71,4 +71,31 @@ test('resetting trial storage addresses only its own per-activity keys',()=>{
   for(const area of TRIAL_AREAS) for(const g of area.games)storage.setItem('puppy-trial-v1:'+area.id+':'+g.id,'trial state');
   clearTrialSaves(storage);
   assert.deepEqual([...backing.keys()],[GAME_KEY,FAMILY_KEY,'learning-state']);
+});
+
+test('Next advances on touch release after a drop even if the browser omits its click',t=>{
+  const originalWindow=globalThis.window;
+  globalThis.window={scrollTo(){}};
+  t.after(()=>{if(originalWindow===undefined)delete globalThis.window;else globalThis.window=originalWindow;});
+  const root=Object.assign(new EventTarget(),{dataset:{},querySelector:()=>null,querySelectorAll:()=>[],contains:()=>true});
+  const route={area:'science',game:'floating'};
+  let stored=JSON.stringify({version:1,seed:12,variant:0,answers:[],selected:'cork',finished:false});
+  const player=mountTrialPath(root,{route,nikud:true,sound:()=>false,say:()=>false,stop(){},storage:{
+    getItem:()=>stored,setItem:(key,value)=>{stored=value;},
+  }});
+  t.after(()=>player.destroy());
+  const next={ dataset:{}, disabled:false, hasAttribute:name=>name==='data-trial-next',
+    closest(selector){return selector.includes('[data-trial-drag]')&&!selector.includes(':not')?null:this;},
+    click(){dispatch('click',0);},
+  };
+  function dispatch(type,detail) {
+    const event=Object.assign(new Event(type,{cancelable:true}),{pointerId:1,pointerType:'touch',button:0,isPrimary:true,clientX:40,clientY:60,detail});
+    Object.defineProperty(event,'target',{value:next});
+    return root.dispatchEvent(event);
+  }
+  dispatch('pointerdown',0);
+  dispatch('pointerup',0);
+  assert.deepEqual(JSON.parse(stored).answers,['cork']);
+  assert.equal(JSON.parse(stored).selected,null);
+  assert.equal(dispatch('click',1),false,'a delayed compatibility click is consumed');
 });
