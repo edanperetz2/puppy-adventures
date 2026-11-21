@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CLIPS } from '../dist/content.js';
+import { hasArt } from '../dist/art.js';
 import { NUMBER_PATHS, cleanNumberRound, newNumberRound, numberModel, numberPrompt, numberQuestion, numberQuestionClip, spokenNumber } from '../dist/number-workshop.js';
+import { questionPicture } from '../dist/number-workshop-view.js';
 import { numberWritingKey, numberWritingPad, nextWritingNumber, WRITING_NUMBERS } from '../dist/number-writing.js';
 import { dictationNumberClips, numberDictationDraw, numberDictationKey } from '../dist/number-dictation.js';
 import { applyObservation, learningStage } from '../dist/learning.js';
@@ -18,6 +20,7 @@ test('Each Number Workshop path gives six distinct, progressively harder questio
   for (const path of Object.keys(NUMBER_PATHS)) {
     for (const cap of [5, 10, 20]) {
       const openingPositions = new Set();
+      const openingCounts = new Set();
       const examples = new Set();
       for (let seed = 1; seed <= 160; seed++) {
         const round = newNumberRound(path, cap, {}, seeded(seed * 15485863));
@@ -25,6 +28,10 @@ test('Each Number Workshop path gives six distinct, progressively harder questio
         assert.deepEqual(cleanNumberRound(JSON.parse(JSON.stringify(round))), round);
         const questions = round.questions.map((_, index) => numberQuestion({ ...round, index }));
         assert.equal(new Set(questions.map(q => q.itemKey)).size, SESSION_LENGTH);
+        if (path !== 'left') {
+          assert.equal(new Set(questions.map(q => q.item)).size, SESSION_LENGTH);
+          assert.ok(questions.every(q => hasArt(q.item)));
+        }
         if (path === 'add' && cap > 5) assert.equal(new Set(questions.map(q => q.answer)).size, SESSION_LENGTH);
         for (const [index, q] of questions.entries()) {
           assert.equal(q.choices.length, index < 2 ? 2 : 3);
@@ -34,11 +41,15 @@ test('Each Number Workshop path gives six distinct, progressively harder questio
           if (previous && q.choices.length === previous.choices.length) {
             assert.ok(q.choices.some(answer => !previous.choices.includes(answer)));
           }
-          if (path === 'count' || path === 'add') {
+          if (path === 'count') {
+            assert.ok(q.total <= cap);
+            if (index === 0) openingCounts.add(q.total);
+            if (index >= 2) assert.ok(q.total > Math.max(...questions.slice(0, index - index % 2).map(x => x.total)));
+          } else if (path === 'add') {
             assert.ok(q.total <= cap && (!previous || q.total >= previous.total));
-            if (path === 'add') assert.ok(q.part > 0 && q.part <= q.total - q.part);
+            assert.ok(q.part >= 0 && q.part <= q.total - q.part);
           } else if (path === 'left') {
-            assert.ok(q.total <= Math.min(cap, 8) && q.part <= 3 && q.item === 'apple');
+            assert.ok(q.total <= cap && q.part <= 3 && q.item === 'apple');
             assert.equal(q.answer, q.total - q.part);
             if (previous) assert.notEqual(q.answer, previous.answer);
             if (index === 0) assert.equal(q.answer, 0);
@@ -54,9 +65,47 @@ test('Each Number Workshop path gives six distinct, progressively harder questio
         }
       }
       assert.equal(openingPositions.size, 2);
+      if (path === 'count') assert.ok(openingCounts.size > 1);
       assert.ok(examples.size >= SESSION_LENGTH);
     }
   }
+});
+
+test('Counting frames, reordered addends and larger baskets are playable using the same recorded hints', () => {
+  const seen = new Set(), pictures = new Set();
+  for (const path of ['count', 'add', 'left']) {
+    for (let seed = 1; seed <= 65; seed++) {
+      const round = newNumberRound(path, 20, {}, seeded(seed * 33149));
+      if (path === 'count') assert.equal(round.questions.filter(q => q.layout === 'frame').length, 3);
+      for (const [index, task] of round.questions.entries()) {
+        const q = numberQuestion({ ...round, index });
+        const html = questionPicture(path, q, false, false);
+        pictures.add(task.item);
+        if (q.layout === 'frame') {
+          seen.add('frame');
+          assert.equal((html.match(/class="number-frame"/g) || []).length, Math.max(1, Math.ceil(q.total / 10)));
+          assert.equal((html.match(/<span data-model-step="/g) || []).length, q.total);
+        }
+        if (q.layout === 'small-first') {
+          seen.add('small-first');
+          assert.ok(html.includes(`${q.part} + ${q.total - q.part} =`));
+        }
+        if (path === 'add' && q.part === 0) {
+          seen.add('zero');
+          assert.equal(index, 0);
+          assert.deepEqual(numberModel(path, q).steps, [{ index: 'large', number: q.answer }]);
+        }
+        if (path === 'left' && q.total > 8) seen.add('larger-basket');
+        for (const step of numberModel(path, q).steps) assert.ok(html.includes(`data-model-step="${step.index}"`));
+      }
+      // Previous releases saved these tasks without a layout field.
+      const legacy = structuredClone(round);
+      for (const q of legacy.questions) delete q.layout;
+      assert.deepEqual(cleanNumberRound(legacy), legacy);
+    }
+  }
+  assert.deepEqual(seen, new Set(['frame', 'small-first', 'zero', 'larger-basket']));
+  assert.equal(pictures.size, 18);
 });
 
 test('Every prompt and hint has Hebrew narration and each hint arrives at the right number', () => {
@@ -152,6 +201,23 @@ test('Number dictation shuffles every number without repeats and has Hebrew audi
   assert.deepEqual(dictationNumberClips(98), ['number-workshop-90', 'number-workshop-and-8']);
   assert.deepEqual(dictationNumberClips(100), ['number-workshop-100']);
   assert.notEqual(numberDictationKey(47), numberWritingKey(47));
+});
+
+test('Focused dictation exhausts the selected band; on return, it starts with less-practised numbers', () => {
+  for (const [range, numbers] of Object.entries({
+    digits: WRITING_NUMBERS.filter(n => n < 10),
+    teens: WRITING_NUMBERS.filter(n => n >= 10 && n < 20),
+    tens: WRITING_NUMBERS.filter(n => n > 0 && n % 10 === 0),
+  })) {
+    const target = numbers[3];
+    const items = Object.fromEntries(numbers.filter(n => n !== target)
+      .map(n => [numberDictationKey(n), { practice: 1, last: n + 1 }]));
+    const draw = numberDictationDraw(seeded(23), range, () => items);
+    assert.equal(draw(), target);
+    const rest = Array.from({ length: numbers.length - 1 }, draw);
+    assert.deepEqual(new Set([target, ...rest]), new Set(numbers));
+    assert.notEqual(rest.at(-1), draw());
+  }
 });
 
 test('Unfinished Number Workshop rounds retain their current pictures, options and help on reload', () => {

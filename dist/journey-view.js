@@ -85,12 +85,15 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
     if (task.operation === 'takeaway') {
       const toGive = task.known - s().tokens.length;
       clips.push(toGive > 0 ? GIVING_CLIPS[toGive] : 'journey-apples-left');
+    } else if (task.readPicture) {
+      clips.push(task.prompt);
+      if (s().showModel) clips.push(task.clip);
     } else if (task.kind === 'story') {
       help();
       clips.push(task.prompt.replace(/-prompt$/, ''), task.prompt);
       if (task.page.english) clips.push(`en-${task.page.english}`);
     } else {
-      clips.push(task.prompt, ...(task.extraClips || []));
+      clips.push(task.kind === 'blend' ? 'listen' : task.prompt, ...(task.extraClips || []));
       if (task.kind !== 'context') {
         if (task.clip) clips.push(task.clip);
         else if (task.word) clips.push(`he-${task.word.id}`);
@@ -132,11 +135,17 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
     return `<div class="story-reading"><span>סִפּוּר ${STORIES.findIndex(story=>story.id===plan.level)+1} · עַמּוּד ${plan.index+1}</span><p dir="rtl" lang="he">${nikud?p.text:p.text.replace(/[\u0591-\u05c7]/gu,'')}</p><button data-j="read-story" class="text-button">${uiIcon('sound')} קוֹרְאִים יַחַד</button></div>${scene}<p class="journey-instruction">${p.prompt}</p>${answers}`;
   }
   function englishView(task){
+    if (task.readPicture) {
+      return `<p class="journey-instruction">קִרְאִי אֶת הַמִּלָּה וּבַחֲרִי תְּמוּנָה.</p>
+        <div class="blend-reading-word" lang="en" dir="ltr"><strong>${task.word.toUpperCase()}</strong> <span>${task.word}</span></div>
+        <button class="listen-orb" data-j="listen" aria-label="שמיעת המילה באנגלית">${uiIcon('sound')}</button>
+        <div class="journey-choices">${task.choices.map(id => `<button data-j="answer" data-answer="${id}" aria-label="${WORDS.find(w => w.id === id).he}" ${s().resolved ? 'disabled' : ''}>${learningPicture(id)}</button>`).join('')}</div>`;
+    }
     if(task.kind==='sound'||task.kind==='blend') {
       const picture = task.example?.id || (task.phoneme.word === 'insect' ? 'butterfly' : task.phoneme.word);
       const exampleText = task.example?.text || task.phoneme.word.toUpperCase();
       const letters=task.kind==='sound'?`<bdi class="sound-letters" dir="ltr">${task.phoneme.capital} <span>${task.phoneme.small}</span></bdi>`:`<div class="blend-pieces" dir="ltr">${task.word.split('').map(l=>`<button data-j="phoneme" data-phoneme="${l}" aria-label="דוגמה למילה שמתחילה בצליל ${l.toUpperCase()}">${l.toUpperCase()}<small>${l}</small>${uiIcon('sound')}</button>`).join('')}</div>`;
-      return `<p class="journey-instruction">${task.kind==='sound'?'מַקְשִׁיבִים לַמִּלָּה וּמְחַפְּשִׂים אֶת הַצְּלִיל הָרִאשׁוֹן.':'מַקְשִׁיבִים לַמִּלָּה וּבוֹחֲרִים אֵיךְ הִיא כְּתוּבָה. בִּנְגִיעָה בָּאוֹת נִשְׁמַע מִלַּת דֻּגְמָה.'}</p>${(task.model||s().showModel)?letters:''}${task.kind==='sound'?`<div class="phonics-example">${learningPicture(picture)}${task.model||s().showModel?`<bdi dir="ltr" lang="en">${exampleText}</bdi>`:''}</div>`:''}<button class="listen-orb" data-j="listen" aria-label="שמיעת מילת הדוגמה">${uiIcon('sound')}</button><div class="journey-choices">${task.choices.map(c=>`<button data-j="answer" data-answer="${task.kind==='sound'?c.id:c}" ${s().resolved?'disabled':''} dir="ltr">${task.kind==='sound'?`<b class="sound-choice">${c.capital}<small>${c.small}</small></b>`:`<b class="sound-choice">${c.toUpperCase()}</b>`}</button>`).join('')}</div><p class="parent-note">${task.kind==='sound'?'מקשיבים לצליל בתחילת מילת דוגמה שלמה. אין צורך לקרוא את המילה.':'אפשר לחזור למסלול הצלילים בכל זמן.'}</p>`;
+      return `<p class="journey-instruction">${task.kind==='sound'?'מַקְשִׁיבִים לַמִּלָּה וּמְחַפְּשִׂים אֶת הַצְּלִיל הָרִאשׁוֹן.':'הַקְשִׁיבִי לַמִּלָּה וּבַחֲרִי אֵיךְ כּוֹתְבִים אוֹתָהּ.'}</p>${(task.model||s().showModel)?letters:''}${task.kind==='sound'?`<div class="phonics-example">${learningPicture(picture)}${task.model||s().showModel?`<bdi dir="ltr" lang="en">${exampleText}</bdi>`:''}</div>`:task.pictured && (task.model || s().showModel) ? `<div class="phonics-example">${learningPicture(task.word)}</div>` : ''}<button class="listen-orb" data-j="listen" aria-label="שמיעת מילת הדוגמה">${uiIcon('sound')}</button><div class="journey-choices">${task.choices.map(c=>`<button data-j="answer" data-answer="${task.kind==='sound'?c.id:c}" ${s().resolved?'disabled':''} dir="ltr">${task.kind==='sound'?`<b class="sound-choice">${c.capital}<small>${c.small}</small></b>`:`<b class="sound-choice">${c.toUpperCase()}</b>`}</button>`).join('')}</div><p class="parent-note">${task.kind==='sound'?'מקשיבים לצליל בתחילת מילת דוגמה שלמה. אין צורך לקרוא את המילה.':'אפשר לחזור למסלול הצלילים בכל זמן.'}</p>`;
     }
     const pair=task.kind==='pair';
     return `<p class="journey-instruction">${task.newWord?'מִלָּה חֲדָשָׁה אַחַת! נַכִּיר אוֹתָה יַחַד.':pair?'כְּבָר מַכִּירִים אֶת הַצֶּבַע וְאֶת הַחֵפֶץ. נַקְשִׁיב לִשְׁתֵּי מִלִּים.':'מַקְשִׁיבִים לְמִלָּה אַחַת וּבוֹחֲרִים תְּמוּנָה.'}</p>
@@ -188,7 +197,7 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
     const b=e.target.closest('[data-j]');if(!b||b.disabled||b.dataset.suppressClick)return;const task=q(),action=b.dataset.j;
     if(action==='home'){persist();onHome();return;}
     if(action==='replay'){replay(true);return;}
-    if(action==='listen'){say(task.clip,true);return;}
+    if(action==='listen'){if(task.readPicture&&!s().resolved)help();say(task.clip,true);return;}
     if(action==='word'){say(`he-${task.word.id}`,true);return;}
     if(action==='read-story'){help();replay(true);return;}
     if(action==='pair-color'){say(`en-${task.target.color}`,true);return;}

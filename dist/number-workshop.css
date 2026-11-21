@@ -210,6 +210,18 @@ html:not(.still) .fruit-half { transition: transform .24s cubic-bezier(.2, .7, .
   border-radius: 7px;
 }
 .number-tokens svg { width: 100%; }
+.number-frame {
+  display: grid;
+  grid-template-columns: repeat(5, var(--number-tile));
+  gap: 1px;
+  padding: 2px;
+  border-radius: 7px;
+  background: #96ada1;
+}
+.number-frame + .number-frame { margin-block-start: 6px; }
+.number-frame > span { display: grid; place-items: center; aspect-ratio: 1; background: #fffefa; }
+.number-frame svg { width: 88%; height: 88%; }
+.number-frame > .number-counted { background: #c9efcf; outline-offset: -2px; }
 .number-empty { width: 62px; height: 34px; border: 1px dashed #c9b999; border-radius: 8px; }
 .number-plus,
 .number-take-arrow { display: grid; place-items: center; color: var(--green-dark); font-size: clamp(20px, 4vw, 32px); }

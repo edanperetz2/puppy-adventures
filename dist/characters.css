@@ -4,8 +4,8 @@
 .character-family-art{display:block;width:100%;height:auto;background:white;border-radius:22px;border:1px solid #efe6d7}
 .character-paw-hero{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:9px;background:#fffaf3;border-radius:24px;transform:rotate(-2deg)}
 .character-paw-hero .character-portrait{width:100%;height:auto;aspect-ratio:1;border-radius:18px}
-.character-collection-section{margin:0 0 30px}.character-collection-tabs{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.character-collection-tabs>button{display:flex;align-items:center;justify-content:center;gap:20px;min-width:0;padding:16px;border:2px solid #eadfce;border-radius:23px;background:#fffaf1;color:#8c7898;font-size:19px}
+.character-collection-section{margin:0 0 30px}.character-collection-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.character-collection-tabs>button{display:flex;align-items:center;justify-content:center;gap:9px;min-width:0;padding:12px;border:2px solid #eadfce;border-radius:23px;background:#fffaf1;color:#8c7898;font-size:19px}
 .character-collection-tabs>button[aria-pressed=true]{border-color:#a8c5b2;background:#edf3e7;box-shadow:0 4px 0 #dce6d680}
 .character-collection-faces{display:flex;width:42%;max-width:170px;flex-shrink:0;gap:4px}.character-collection-faces .character-portrait{width:31%;height:auto;aspect-ratio:1;border-radius:50%}
 .character-welcome .text-button{margin-top:10px;font-size:12px}

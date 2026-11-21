@@ -34,3 +34,12 @@ export const BLEND_GROUPS = [
  ['sun','run','fun'],['pan','can','van'],['map','cap','tap'],['sit','hit','bit'],
  ['bed','red','fed'],['hen','pen','ten'],
 ];
+
+// Concrete CVC words with single-letter sounds, an existing whole-word
+// recording and a distinct picture. Each trio ends with reading for meaning.
+export const PICTURE_BLEND_GROUPS = [
+ ['cat','sun','bus'], ['dog','bed','cat'], ['bus','pen','hat'],
+ ['pig','hat','bat'], ['hat','map','dog'], ['sun','bat','pig'],
+ ['pan','bus','sun'], ['bat','cat','pan'], ['hen','pig','map'],
+ ['map','dog','bed'], ['bed','pan','hen'], ['bus','bed','pen'],
+];

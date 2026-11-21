@@ -10,13 +10,13 @@ Ariel’s learning game for phones, tablets and computers. Ava gives instruction
 | --- | --- |
 | **משימה קטנה להיום** | Listen to English animal names and move the right animals to the pond in six steps. A worked example leads to a fresh try at the same step. |
 | **המסע שלי** | Read and add at the friends’ picnic. Listen for an English word and choose a picture on Bobi’s delivery route. Both chapters have six-step missions. Bobi offers an optional two-word prompt after independent practice with both words on different days. |
-| **גינת המילים** | Ten Hebrew stages, from short words to little stories. Choose a matching picture or act out the sentence. A mixed adventure draws from the stages across replays. |
+| **גינת המילים** | Ten Hebrew stages, from short words to little stories. Read a sentence and choose a picture, act it out, or choose **מתמונה למשפט** to find the written sentence for a picture. The two reading directions save separately. |
 | **סדנת המילים** | Build words from parts and letters, fill gaps and finish short sentences across four stages. |
 | **סיפור שמשחקים** | Eight playable Hebrew stories with illustrated choices and actions such as moving objects into place. |
-| **מפרץ האנגלית** | Start by listening to one word at a time. Optional routes introduce two-word phrases, first sounds and short written words. |
-| **סטודיו האותיות** | Recognize Hebrew handwriting and English lowercase in their own games. Trace and write Hebrew print, Hebrew handwriting, English capitals and English lowercase. |
-| **סדנת המספרים** | Count, add, find how many remain, and work with tens and ones. Trace numbers from 0 to 100, write them from Hebrew dictation, or cut fruits into halves. |
-| **חברים מהמסך** | Read the Hebrew names of Rubble & Crew and PAW Patrol characters. Play picture-to-name, name-to-picture or a mixture, with three levels per collection. |
+| **מפרץ האנגלית** | Listen for one word and choose a picture. The listening library has 106 words. Optional routes introduce two-word phrases, first sounds and short written words. In reading practice, illustrated groups end with matching the printed word to a picture. |
+| **סטודיו האותיות** | Match Hebrew print and handwriting or English capitals and lowercase in both directions. In each writing form, trace single letters or write an illustrated word one letter at a time. There are 79 Hebrew words and 68 English words. |
+| **סדנת המספרים** | Count objects in rows and frames, add groups including zero, find how many remain, and work with tens and ones. Trace 0–100 or take Hebrew dictation. Dictation also offers single digits, 10–19 and whole tens. Slice fruit to practise halves. |
+| **חברים מהמסך** | Read the Hebrew names of Rubble & Crew and PAW Patrol characters, or choose **כולם יחד** to include Pikachu and Stitch. The combined cast grows from 3 to 12 to 17. All three collections support picture-to-name, name-to-picture and mixed rounds. |
 | **מחפשות עם פיקאצ׳ו** | Match Hebrew words to pictures, make animals hop, and tap Pikachu for his greeting. |
 | **מחפשות עם סטיץ׳** | Match six Hebrew clues to pictures, from a familiar object to its color, quantity or position. Tap Stitch to see him dance and hear a ukulele. Reopen his game to continue on the same device. |
 

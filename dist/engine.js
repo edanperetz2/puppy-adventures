@@ -11,10 +11,11 @@ import { sanitizeClockLessons } from './clock-learning.js?v=2.2.4-practice';
 import { CHARACTER_MODES, createCharacterSession, sanitizeCharacterSelection } from './characters.js?v=2.2.2-six';
 import { answerShuffler, shuffle } from './answer-order.js';
 import { PLAYABLE_STORIES } from './reading-animal-stories.js?v=2.7.0-science';
+import { CAPTION_PROMPT, CAPTION_HINT } from './reading-nature.js';
 export { SESSION_LENGTH } from './adventure.js?v=2.2.2-six';
 export { shuffle };
 
-export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', letterLanguage: 'hebrew', letterWriting: Object.freeze({ hebrew: 0, english: 0 }), letterMainWriting: Object.freeze({ hebrew: 0, english: 0 }), letterWritingForm: Object.freeze({ hebrew: 'alternate', english: 'alternate' }), characterLevel: 'friends', characterCollectionLevels: Object.freeze({ crew: 'friends', paw: 'paw-friends' }), characterMode: 'mixed', sound: true, motion: true });
+export const DEFAULT_SETTINGS = Object.freeze({ nikud: true, reading: 'short', mathMax: 10, englishMax: 10, clockLevel: 'hours', letterLanguage: 'hebrew', letterWriting: Object.freeze({ hebrew: 0, english: 0 }), letterMainWriting: Object.freeze({ hebrew: 0, english: 0 }), letterWritingForm: Object.freeze({ hebrew: 'alternate', english: 'alternate' }), characterLevel: 'friends', characterCollectionLevels: Object.freeze({ crew: 'friends', paw: 'paw-friends', together: 'together-friends' }), characterMode: 'mixed', sound: true, motion: true });
 
 function optionsFrom(pool, correct, rng, count = 3) {
   return shuffle([correct, ...shuffle(pool.filter(x => x.id !== correct.id), rng).slice(0, count - 1)], rng);
@@ -43,6 +44,33 @@ function chooseReadingWords(pool, settings, count, rng) {
 
 const playableStoryIds = new Set(PLAYABLE_STORIES.map(word => word.id));
 const firstActions = ['water', 'enter', 'swim', 'sleep'];
+
+function chooseSentenceWords(pool, settings, count, rng, first) {
+  const recent = new Set(settings.readingRecent || []);
+  const lastRound = new Set((settings.readingRecent || []).slice(-SESSION_LENGTH));
+  let remaining = pool.filter(word => !lastRound.has(word.id));
+  if (remaining.length < count) remaining = [...pool];
+  const targets = [], objects = new Set(first ? [first.scene.object] : []);
+  while (targets.length < count && remaining.length) {
+    const unread = remaining.filter(word => !recent.has(word.id));
+    const candidates = unread.length ? unread : remaining;
+    const otherObjects = candidates.filter(word => !objects.has(word.scene.object));
+    const [word] = chooseReadingWords(otherObjects.length ? otherObjects : candidates, settings, 1, rng);
+    targets.push(word);
+    objects.add(word.scene.object);
+    remaining = remaining.filter(other => other !== word);
+  }
+  return targets;
+}
+
+// Later answers share a detail with the target wherever the family permits.
+// Reading the noun alone cannot distinguish the sentences.
+function captionOptions(family, target, count, rng, close) {
+  const differences = other => Object.keys(target.scene).filter(field => target.scene[field] !== other.scene[field]).length;
+  const others = shuffle(family.filter(other => other.id !== target.id), rng);
+  if (close) others.sort((a, b) => differences(a) - differences(b));
+  return [target, ...others.slice(0, count - 1)];
+}
 
 function chooseActionStory(settings, rng) {
   const recent = new Set(settings.readingRecent || []);
@@ -74,7 +102,14 @@ function buildSession(mission, rawSettings, rng) {
       [recall[0], recall[swap]] = [recall[swap], recall[0]];
     }
     const targets = [...guided, ...recall];
-    return targets.map((letter, i) => ({ id: `letters-${i}`, type: 'letter', letter, answer: letter.id, phase: adventurePhase(i), showModel: i < group.length, options: optionsFrom(group, letter, rng, adventurePhase(i) === 'challenge' ? 3 : 2), prompt: `letter-match-${language}`, targetClip: letter.clip, hint: 'letters-recognition-hint' }));
+    return targets.map((letter, i) => {
+      const showModel = i < group.length;
+      const reverse = i > group.length;
+      return { id: `letters-${i}`, type: 'letter', letter, answer: letter.id, phase: adventurePhase(i), showModel,
+        direction: reverse ? 'to-main' : 'to-alternate',
+        options: optionsFrom(group, letter, rng, adventurePhase(i) === 'challenge' ? 3 : 2),
+        prompt: reverse ? 'letters-recognition' : `letter-match-${language}`, targetClip: reverse ? undefined : letter.clip, hint: 'letters-recognition-hint' };
+    });
   }
   if (mission === 'hebrew') {
     const pool = readingWords(settings.reading);
@@ -82,16 +117,21 @@ function buildSession(mission, rawSettings, rng) {
     if (settings.reading === 'all') targets = mixedReadingTargets(pool.filter(word => !word.playOnly), settings.readingRecent, rng);
     else if (settings.reading === 'sentences') {
       const others = pool.filter(word => !playableStoryIds.has(word.id));
-      targets = [chooseActionStory(settings, rng), ...chooseReadingWords(others, settings, SESSION_LENGTH - 1, rng)].sort(readingOrder);
+      const action = chooseActionStory(settings, rng);
+      targets = [action, ...chooseSentenceWords(others, settings, SESSION_LENGTH - 1, rng, action)].sort(readingOrder);
+    } else if (settings.reading === 'captions') {
+      targets = chooseSentenceWords(pool, settings, SESSION_LENGTH, rng).sort(readingOrder);
     } else {
-      targets = (settings.learning && Object.keys(settings.learning).length
-        ? choosePractice(pool, settings.learning, word => `read:${word.id}`, SESSION_LENGTH, Date.now(), rng)
-        : readingTargets(pool, settings.readingRecent, SESSION_LENGTH, rng)).sort(readingOrder);
+      targets = chooseReadingWords(pool, settings, SESSION_LENGTH, rng).sort(readingOrder);
     }
     // Prefer unseen reading targets before reviewing the oldest practiced ones.
     return Array.from({ length: SESSION_LENGTH }, (_, i) => {
       const word = targets[i % targets.length];
       const choices = word.family ? pool.filter(item => item.family === word.family) : pool.filter(item => !item.family && distinctWordPictures(word, item));
+      if (settings.reading === 'captions') return {
+        id: `he-${i}`, type: 'read', direction: 'picture-sentence', word, answer: word.id, phase: adventurePhase(i),
+        options: captionOptions(choices, word, choiceCount(i), rng, i >= 2), prompt: CAPTION_PROMPT, hint: CAPTION_HINT,
+      };
       return { id: `he-${i}`, type: 'read', word, answer: word.id, phase: adventurePhase(i), options: optionsFrom(choices, word, rng, choiceCount(i)), prompt: word.scene ? 'reading-phrase' : 'read', hint: word.scene ? 'reading-phrase-hint' : 'read-hint' };
     });
   }

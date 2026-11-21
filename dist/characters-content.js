@@ -1,6 +1,10 @@
 import { CHARACTERS } from './characters.js';
 
 export const CHARACTER_SCRIPTS = Object.freeze({
+  'characters-menu-together': 'הַיּוֹם כֻּלָּם מְשַׂחֲקִים יַחַד!',
+  'characters-level-together-friends': 'שָׁלָב רִאשׁוֹן. שְׁלוֹשָׁה חֲבֵרִים.',
+  'characters-level-together-pups': 'שָׁלָב שֵׁנִי. מִי עוֹד כָּאן?',
+  'characters-level-together-all': 'שָׁלָב שְׁלִישִׁי. כָּל הַחֲבֵרִים כָּאן!',
   'characters-menu': 'רַאבֶּל וְהַחֲבֵרִים מְחַכִּים לָךְ! נִקְרָא שֵׁמוֹת וְנִמְצָא תְּמוּנוֹת. בַּחֲרִי שָׁלָב וְנַתְחִיל.',
   'characters-menu-paw': 'בְּמִפְרַץ הַהַרְפַּתְקָאוֹת הַחֲבֵרִים מְחַכִּים לָךְ! נִקְרָא שֵׁמוֹת וְנִמְצָא תְּמוּנוֹת. בַּחֲרִי שָׁלָב וְנַתְחִיל.',
   'characters-intro': 'בּוֹאִי נַכִּיר אֶת הַשֵּׁמוֹת שֶׁל הַחֲבֵרִים. פַּעַם נַבִּיט בַּתְּמוּנָה וְנִמְצָא שֵׁם. וּפַעַם נִקְרָא שֵׁם וְנִמְצָא תְּמוּנָה. אִם תִּרְצִי עֶזְרָה, לִחְצִי עַל הַנּוּרָה.',
@@ -20,6 +24,8 @@ export const CHARACTER_SCRIPTS = Object.freeze({
 // Proper names and prefixed forms are explicit, so Hebrew spelling never has
 // to guess the foreign sounds (especially the two different geresh sounds).
 export const CHARACTER_LEXICON = Object.freeze({
+  'פִּיקָאצ׳וּ': 'pikˈatʃu', 'סְטִיץ׳': 'stˈitʃ', 'חֲבֵרִים': 'χaveʁˈim', 'מִי': 'mˈi', 'עוֹד': 'ʔˈod',
+  'הַיּוֹם': 'hajˈom', 'כֻּלָּם': 'kulˈam', 'מְשַׂחֲקִים': 'mesaχakˈim', 'יַחַד': 'jˈaχad',
   'רַאבֶּל': 'ʁˈabel', 'מִיקְס': 'mˈiks', 'צַ׳ארְגֶ׳ר': 'tʃˈaʁdʒeʁ', 'וְצַ׳ארְגֶ׳ר': 'vetʃˈaʁdʒeʁ',
   'ווִילֶר': 'wˈileʁ', 'מוֹטוֹר': 'mˈotoʁ', 'וּמוֹטוֹר': 'umˈotoʁ',
   'דּוֹדָה': 'dodˈa', 'קְרֵיין': 'kʁˈejn', 'סַבָּא': 'sˈaba', 'וְסַבָּא': 'vesˈaba', 'גְרַאבֶּל': 'ɡʁˈabel',

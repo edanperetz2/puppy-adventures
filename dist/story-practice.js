@@ -17,6 +17,10 @@ export function storyClue(word, field) {
   const scene = word?.scene;
   if (word?.level !== 10 || !fields.includes(field) || scene?.[field] === undefined) return null;
   const length = word.he.split(' ').length;
+  if (scene.kind === 'nature' && scene.action === 'crawl') {
+    const [start, end] = { anchor: [0, 2], action: [2, 3], object: [3, 4] }[field];
+    return { start, end, clip: `story-clue-${clips[field] || 'detail'}` };
+  }
   // Level 10 has fixed sentence forms. Use word positions so the same clue
   // works for both the pointed and unpointed versions of the sentence.
   let start, end;

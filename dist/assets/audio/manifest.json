@@ -38942,6 +38942,486 @@
       "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
       "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
       "sha256": "ef63eab7b7ca2178cf3f54830476cee40e549fb950e2948e9901a453600458be"
+    },
+    "characters-menu-together": {
+      "take": 0,
+      "segments": [
+        "hajˈom kulˈam mesaχakˈim jˈaχad!"
+      ],
+      "lang": "he-IL",
+      "speech": "hajˈom kulˈam mesaχakˈim jˈaχad!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "b5da110ca3e66799d2d253dce741f3a1d2d60fec594aa7937d9629dd31ec1be4"
+    },
+    "characters-level-together-friends": {
+      "lang": "he-IL",
+      "speech": "ʃalˈav ʁiʃˈon. ʃloʃˈa χaveʁˈim.",
+      "segments": [
+        "ʃalˈav ʁiʃˈon. ʃloʃˈa χaveʁˈim."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "81839ffb0cd3d2c72cb9cbff22c2a4411a488b7457e6f003a500d530b524e15b"
+    },
+    "characters-level-together-pups": {
+      "lang": "he-IL",
+      "speech": "ʃalˈav ʃenˈi. mˈi ʔˈod kˈan?",
+      "segments": [
+        "ʃalˈav ʃenˈi. mˈi ʔˈod kˈan?"
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "2569a792c50946b7a3d5daaef2ba780ae3988e2c875a0d00cd23bc6b96b56b1c"
+    },
+    "characters-level-together-all": {
+      "take": 0,
+      "segments": [
+        "ʃalˈav ʃliʃˈi. kˈol haχaveʁˈim kˈan!"
+      ],
+      "lang": "he-IL",
+      "speech": "ʃalˈav ʃliʃˈi. kˈol haχaveʁˈim kˈan!",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "62aabcbb501a4ec737e7d11c07cf1eee96646b6d774cd034c4210f99a3f67997"
+    },
+    "character-pikachu": {
+      "lang": "he-IL",
+      "speech": "haʃˈem hˈu pikˈatʃu.",
+      "segments": [
+        "haʃˈem hˈu pikˈatʃu."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "c53cc94b28a7eb964b8c8fccae99d4327b0ad0a30504765c58f5eeb959e59edb"
+    },
+    "character-stitch": {
+      "take": 0,
+      "segments": [
+        "haʃˈem hˈu stˈitʃ."
+      ],
+      "lang": "he-IL",
+      "speech": "haʃˈem hˈu stˈitʃ.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "71e02c7375127523ff3a01985f5c3d52aa97aa3f08f8e9cc3687383e1182255c"
+    },
+    "he-nature-rabbit-tree": {
+      "take": 0,
+      "segments": [
+        "haʔaʁnˈav kofˈets lejˈad haʔˈets."
+      ],
+      "lang": "he-IL",
+      "speech": "haʔaʁnˈav kofˈets lejˈad haʔˈets.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "fe039349fae40b583b454104de1f6bca0f404f78b170cb3c0c547e8ca59e3fe9"
+    },
+    "he-nature-rabbit-flower": {
+      "take": 0,
+      "segments": [
+        "haʔaʁnˈav kofˈets lejˈad hapˈeʁaχ."
+      ],
+      "lang": "he-IL",
+      "speech": "haʔaʁnˈav kofˈets lejˈad hapˈeʁaχ.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "21026a31b35c4ccca51ec5691a2a1dbfdc1bdf80c4e9bd60462b66b2d47a3829"
+    },
+    "he-nature-rabbit-mushroom": {
+      "take": 0,
+      "segments": [
+        "haʔaʁnˈav kofˈets lejˈad hapitʁijˈa."
+      ],
+      "lang": "he-IL",
+      "speech": "haʔaʁnˈav kofˈets lejˈad hapitʁijˈa.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "d03ace728d783c62bf2d933c924172a927950a659250b4f1beabf86c060a267b"
+    },
+    "he-nature-rabbit-rock": {
+      "take": 0,
+      "segments": [
+        "haʔaʁnˈav kofˈets lejˈad hasˈela."
+      ],
+      "lang": "he-IL",
+      "speech": "haʔaʁnˈav kofˈets lejˈad hasˈela.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "ef1db8087b3242592c8bfa935c60fac3cd5d956214164799cdaf87ed3a37d455"
+    },
+    "he-nature-turtle-tree": {
+      "take": 0,
+      "segments": [
+        "lejˈad haʔˈets zoχˈel tsˈav."
+      ],
+      "lang": "he-IL",
+      "speech": "lejˈad haʔˈets zoχˈel tsˈav.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "91c6379447ccda958ffbb97dd77101cd39d0add2ace7278b5fd6a8c45cd4cdd4"
+    },
+    "he-nature-turtle-flower": {
+      "take": 0,
+      "segments": [
+        "lejˈad hapˈeʁaχ zoχˈel tsˈav."
+      ],
+      "lang": "he-IL",
+      "speech": "lejˈad hapˈeʁaχ zoχˈel tsˈav.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "968e43143b316580d7320f1dd6548ebd1221e6369fe3770582d99cb58dc23a69"
+    },
+    "he-nature-turtle-mushroom": {
+      "take": 0,
+      "segments": [
+        "lejˈad hapitʁijˈa zoχˈel tsˈav."
+      ],
+      "lang": "he-IL",
+      "speech": "lejˈad hapitʁijˈa zoχˈel tsˈav.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "a081dc5d1ac88d1c4dac4a27126ee4c4f6855ce53968fbe1f2a4165ccacc9f83"
+    },
+    "he-nature-turtle-rock": {
+      "take": 0,
+      "segments": [
+        "lejˈad hasˈela zoχˈel tsˈav."
+      ],
+      "lang": "he-IL",
+      "speech": "lejˈad hasˈela zoχˈel tsˈav.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "1ee46ea0a374cb5ef89aa17aeb0afe0f6667cbe82d2af6fb3838a1eb6f3fadba"
+    },
+    "he-nature-snail-tree": {
+      "take": 0,
+      "segments": [
+        "lejˈad haʔˈets zoχˈel ʃablˈul."
+      ],
+      "lang": "he-IL",
+      "speech": "lejˈad haʔˈets zoχˈel ʃablˈul.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "8223ed7f0949850630ab00afa00c79c5faea51f338b150b59403e618e853c0a6"
+    },
+    "he-nature-snail-flower": {
+      "take": 0,
+      "segments": [
+        "lejˈad hapˈeʁaχ zoχˈel ʃablˈul."
+      ],
+      "lang": "he-IL",
+      "speech": "lejˈad hapˈeʁaχ zoχˈel ʃablˈul.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "dd4ff9f8789c6f1e6ad6d70fdf2605f227b72cd8653e3201730440f7c98d2177"
+    },
+    "he-nature-snail-mushroom": {
+      "take": 0,
+      "segments": [
+        "lejˈad hapitʁijˈa zoχˈel ʃablˈul."
+      ],
+      "lang": "he-IL",
+      "speech": "lejˈad hapitʁijˈa zoχˈel ʃablˈul.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "b34b7b2bcd97c5c4e593853cf6d1bfb1369613e0d5f3a647abd318e17350bb1d"
+    },
+    "he-nature-snail-rock": {
+      "take": 0,
+      "segments": [
+        "lejˈad hasˈela zoχˈel ʃablˈul."
+      ],
+      "lang": "he-IL",
+      "speech": "lejˈad hasˈela zoχˈel ʃablˈul.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "c086dd907fe290db1652efd85e9aee69fa16ff3c4ce1304629ff412cba121ecb"
+    },
+    "he-nature-dog-tree": {
+      "lang": "he-IL",
+      "speech": "hakˈelev holˈeχ lejˈad haʔˈets.",
+      "segments": [
+        "hakˈelev holˈeχ lejˈad haʔˈets."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "6e84284705bc05d38dfd7f8647b92c26a055f0270ab85ff6020da39cfd9c7719"
+    },
+    "he-nature-dog-flower": {
+      "lang": "he-IL",
+      "speech": "hakˈelev holˈeχ lejˈad hapˈeʁaχ.",
+      "segments": [
+        "hakˈelev holˈeχ lejˈad hapˈeʁaχ."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "d3f952c4f70926abcf8177ed1c014eb3e854ab9bb6f08f05abeac21ca104417f"
+    },
+    "he-nature-dog-mushroom": {
+      "lang": "he-IL",
+      "speech": "hakˈelev holˈeχ lejˈad hapitʁijˈa.",
+      "segments": [
+        "hakˈelev holˈeχ lejˈad hapitʁijˈa."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "bdf8f4937365fbcd23d1cd0913dc082423d49b9ad1ac104af47c518fc1443c10"
+    },
+    "he-nature-dog-rock": {
+      "lang": "he-IL",
+      "speech": "hakˈelev holˈeχ lejˈad hasˈela.",
+      "segments": [
+        "hakˈelev holˈeχ lejˈad hasˈela."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "56cd1e6a4d276e22506dd55aecaa1c028dff52b44afba5f4d8c391fbd9d76b95"
+    },
+    "he-nature-bird-tree": {
+      "take": 0,
+      "segments": [
+        "hatsipˈoʁ ʔafˈa lejˈad haʔˈets."
+      ],
+      "lang": "he-IL",
+      "speech": "hatsipˈoʁ ʔafˈa lejˈad haʔˈets.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "3d040664819764c8559ebcef0a4c56ed689e8eb202ed2b04c93206f7066b9a3d"
+    },
+    "he-nature-bird-flower": {
+      "take": 0,
+      "segments": [
+        "hatsipˈoʁ ʔafˈa lejˈad hapˈeʁaχ."
+      ],
+      "lang": "he-IL",
+      "speech": "hatsipˈoʁ ʔafˈa lejˈad hapˈeʁaχ.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "076d5da8d8f128935a0c73eb86c53baf6de6d76b57bedc13776636e49b676b2d"
+    },
+    "he-nature-bird-mushroom": {
+      "take": 0,
+      "segments": [
+        "hatsipˈoʁ ʔafˈa lejˈad hapitʁijˈa."
+      ],
+      "lang": "he-IL",
+      "speech": "hatsipˈoʁ ʔafˈa lejˈad hapitʁijˈa.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "5782b0db42970745766814984cd9464b26fb43e742d683bcffca2b8f2861f44e"
+    },
+    "he-nature-bird-rock": {
+      "take": 0,
+      "segments": [
+        "hatsipˈoʁ ʔafˈa lejˈad hasˈela."
+      ],
+      "lang": "he-IL",
+      "speech": "hatsipˈoʁ ʔafˈa lejˈad hasˈela.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "540d035f039f3fbe9778aa7f0f38a67ca267300f42cffcb407f7e53f7c890192"
+    },
+    "he-nature-butterfly-tree": {
+      "take": 0,
+      "segments": [
+        "hapaʁpˈaʁ ʔˈaf lejˈad haʔˈets."
+      ],
+      "lang": "he-IL",
+      "speech": "hapaʁpˈaʁ ʔˈaf lejˈad haʔˈets.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "fe14c9180135b575c064c39fabb0c2eef54e7f3d7872962ac256297ce640e0bc"
+    },
+    "he-nature-butterfly-flower": {
+      "take": 0,
+      "segments": [
+        "hapaʁpˈaʁ ʔˈaf lejˈad hapˈeʁaχ."
+      ],
+      "lang": "he-IL",
+      "speech": "hapaʁpˈaʁ ʔˈaf lejˈad hapˈeʁaχ.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "c2d8771470147b7242d4d82bbcdfbbeb1bf0f263b53e002f2c6464b272c84567"
+    },
+    "he-nature-butterfly-mushroom": {
+      "take": 0,
+      "segments": [
+        "hapaʁpˈaʁ ʔˈaf lejˈad hapitʁijˈa."
+      ],
+      "lang": "he-IL",
+      "speech": "hapaʁpˈaʁ ʔˈaf lejˈad hapitʁijˈa.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "23dcad857593269939b22052205e83e72cb561a9f3ec2b77a27b5ff59e58669c"
+    },
+    "he-nature-butterfly-rock": {
+      "take": 0,
+      "segments": [
+        "hapaʁpˈaʁ ʔˈaf lejˈad hasˈela."
+      ],
+      "lang": "he-IL",
+      "speech": "hapaʁpˈaʁ ʔˈaf lejˈad hasˈela.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "db806ef94595e40f929bb60d92693cca5e0b0a9b21115f13486201dc4648dc81"
+    },
+    "reading-caption-prompt": {
+      "take": 0,
+      "segments": [
+        "ʔˈejze miʃpˈat matʔˈim latmunˈa?"
+      ],
+      "lang": "he-IL",
+      "speech": "ʔˈejze miʃpˈat matʔˈim latmunˈa?",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "cee0eee1298527c841b470d572dd9271d56547c387339a076c4d48682df2893a"
+    },
+    "reading-caption-hint": {
+      "take": 0,
+      "segments": [
+        "boˈi niʃmˈa mˈa ʁoʔˈim batmunˈa."
+      ],
+      "lang": "he-IL",
+      "speech": "boˈi niʃmˈa mˈa ʁoʔˈim batmunˈa.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "e4cf6dec265722590d60eab9c8ada1ec34028b6e37ffaad916dc8761a2fd3e21"
     }
   }
 }

@@ -11,11 +11,11 @@ import { compactContribution, withPending } from '../dist/sync.js';
 function seeded(seed) { return () => { seed = (1664525 * seed + 1013904223) >>> 0; return seed / 4294967296; }; }
 const plain = text => text.normalize('NFC').replace(/[\u0591-\u05bd\u05bf-\u05c7]/gu, '');
 
-test('Both casts have consistent pointed Hebrew names, portraits and recorded pronunciation', async () => {
+test('All three collections have consistent pointed Hebrew names, portraits and recorded pronunciation', async () => {
   assert.deepEqual(characterPool('family').map(c => c.he), ['ראבל', 'מיקס', 'צ׳ארג׳ר', 'ווילר', 'מוטור', 'דודה קריין', 'סבא גראבל']);
   assert.deepEqual(characterPool('paw-all').map(c => c.he), ['ראבל', 'צ׳ייס', 'מרשל', 'סקיי', 'רוקי', 'זומה', 'אוורסט', 'ליברטי', 'ריידר']);
-  assert.deepEqual(Object.keys(CHARACTER_LEVELS).map(level => characterPool(level).length), [3, 5, 7, 3, 6, 9]);
-  assert.equal(new Set(CHARACTERS.map(c => c.id)).size, 15);
+  assert.deepEqual(Object.keys(CHARACTER_LEVELS).map(level => characterPool(level).length), [3, 5, 7, 3, 6, 9, 3, 12, 17]);
+  assert.equal(new Set(CHARACTERS.map(c => c.id)).size, 17);
   for (const c of CHARACTERS) {
     assert.equal(plain(c.pointed), c.he);
     assert.equal(CLIPS[c.clip].lang, 'he-IL'); assert.match(CLIPS[c.clip].speech, /haʃˈem/u);
@@ -101,23 +101,23 @@ test('Reading targets and choices do not reveal the other half of the matching t
   const menu = characterMenu(sanitizeSettings(null), sanitizeCharacterPractice(null));
   assert.equal((menu.match(/data-action="character-level"/gu) || []).length, 3);
   assert.equal((menu.match(/data-action="character-mode"/gu) || []).length, 3);
-  assert.equal((menu.match(/data-action="character-collection"/gu) || []).length, 2);
+  assert.equal((menu.match(/data-action="character-collection"/gu) || []).length, 3);
   assert.match(menu, /character-family-art/u, 'The full original artwork remains visible in the menu');
   assert.equal(characterName(CHARACTERS[2], false), 'צ׳ארג׳ר');
 });
 
 test('Switching series remembers both levels and migrates existing character history without changing rewards', () => {
   let settings = sanitizeSettings({ characterLevel: 'family', characterMode: 'name-picture' });
-  assert.deepEqual(settings.characterCollectionLevels, { crew: 'family', paw: 'paw-friends' });
+  assert.deepEqual(settings.characterCollectionLevels, { crew: 'family', paw: 'paw-friends', together: 'together-friends' });
   settings = { ...settings, ...selectCharacterLevel(settings, 'paw-team') };
   settings = sanitizeSettings(JSON.parse(JSON.stringify(settings)));
   assert.equal(settings.characterLevel, 'paw-team');
-  assert.deepEqual(settings.characterCollectionLevels, { crew: 'family', paw: 'paw-team' });
+  assert.deepEqual(settings.characterCollectionLevels, { crew: 'family', paw: 'paw-team', together: 'together-friends' });
   settings = { ...settings, ...selectCharacterLevel(settings, settings.characterCollectionLevels.crew) };
   assert.equal(settings.characterLevel, 'family'); assert.equal(settings.characterMode, 'name-picture');
   const other = sanitizeSettings(null); other.characterCollectionLevels.paw = 'paw-all';
   assert.equal(sanitizeSettings(null).characterCollectionLevels.paw, 'paw-friends');
-  assert.deepEqual(sanitizeSettings({ characterCollectionLevels: { crew: 'paw-all', paw: '__proto__' } }).characterCollectionLevels, { crew: 'friends', paw: 'paw-friends' });
+  assert.deepEqual(sanitizeSettings({ characterCollectionLevels: { crew: 'paw-all', paw: '__proto__' } }).characterCollectionLevels, { crew: 'friends', paw: 'paw-friends', together: 'together-friends' });
   const old = { completed: { family: 7 }, seen: { 'picture-name': { mix: 12, wheeler: 8 } } };
   const practice = sanitizeCharacterPractice(old);
   assert.equal(practice.completed.family, 7); assert.equal(practice.completed['paw-all'], 0);
@@ -169,4 +169,18 @@ test('Less-practiced names are offered first and advancement allows two assisted
   assert.equal(nextCharacterLevel('family', 0), null); assert.equal(nextCharacterLevel('__proto__', 0), null);
   assert.equal(nextCharacterLevel('paw-friends', 2), 'paw-team'); assert.equal(nextCharacterLevel('paw-team', 0), 'paw-all');
   assert.equal(nextCharacterLevel('paw-all', 0), null); assert.equal(nextCharacterLevel('paw-friends', 3), null);
+});
+
+test('The shared cast introduces both home companions and resumes each direction across rounds', () => {
+  const level = 'together-friends';
+  assert.deepEqual(characterPool(level).map(c => c.id), ['rubble', 'pikachu', 'stitch']);
+  assert.equal(characterArtwork(characterPool(level)[1], 'together').src, './assets/home-pikachu.png');
+  assert.equal(characterArtwork(characterPool(level)[2], 'together').src, './assets/home-stitch.webp');
+  const settings = { characterLevel: level, characterMode: 'mixed' };
+  const first = createCharacterSession(settings, seeded(1));
+  const practice = finishCharacterPractice(null, level, first);
+  const next = createCharacterSession({ ...settings, characterPractice: practice }, seeded(1));
+  assert.notEqual(next[0].answer, first.at(-1).answer);
+  assert.notEqual(next[0].direction, first[0].direction);
+  assert.ok(next.every(q => q.collection === 'together' && q.options.some(c => c.id === q.answer)));
 });

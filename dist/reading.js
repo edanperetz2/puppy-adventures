@@ -6,6 +6,7 @@ import { SUPPLEMENTAL_LETTER_WORDS } from './word-practice-expansion.js';
 import { PICTURE_PLACE_PASSAGES } from './reading-picture-places.js';
 import { PICTURE_SCENE_PASSAGES } from './reading-picture-scenes.js';
 import { LITTLE_STORIES } from './activities.js';
+import { CAPTION_PROMPT } from './reading-nature.js';
 
 // Reading stages are independent choices, never locked behind a score.
 export const READING_LEVELS = Object.freeze({
@@ -19,6 +20,7 @@ export const READING_LEVELS = Object.freeze({
   positions: { number: 8, name: 'איפה החברים?', description: 'מעל, מתחת, בתוך וליד', range: 'קוראות מיקום', level: 8, samples: ['place-ball-under', 'place-cat-in'], art: 'place-cat-in', color: 'lavender', clip: 'reading-positions', fresh: true },
   actions: { number: 9, name: 'מה הם עושים?', description: 'ישנים, רצים, קופצים ועפים', range: 'שם ופעולה', level: 9, samples: ['action-dog-jump', 'action-bird-fly'], art: 'action-dog-jump', color: 'peach', clip: 'reading-actions', fresh: true },
   [LITTLE_STORIES.route.level]: { number: 10, name: LITTLE_STORIES.he[0].replace(/\p{M}/gu, ''), description: LITTLE_STORIES.he[1], range: 'משפטים קצרים', level: 10, samples: ['facts-car-red-house', 'facts-butterflies-two-blue'], art: 'facts-car-red-house', color: 'blue', clip: LITTLE_STORIES.intro, fresh: true },
+  captions: { name: 'מתמונה למשפט', description: 'מִסְתַּכְּלוֹת בַּתְּמוּנָה וּבוֹחֲרוֹת מִשְׁפָּט מַתְאִים.', range: 'משפטים קצרים', level: 10, art: 'nature-dog-mushroom', clip: CAPTION_PROMPT },
   all: { name: 'מכל הגינה', description: 'מערבבות מילים מכל השלבים', range: 'כל המילים', level: null, clip: 'reading-all' },
 });
 
@@ -69,6 +71,7 @@ export const WORDS = [
 
 export function readingWords(key = 'short') {
   const stage = Object.hasOwn(READING_LEVELS, key) ? READING_LEVELS[key] : READING_LEVELS.short;
+  if (key === 'captions') return WORDS.filter(word => word.level === stage.level && !word.playOnly);
   return WORDS.filter(word => stage.level === null || word.level === stage.level);
 }
 

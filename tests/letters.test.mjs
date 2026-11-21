@@ -4,9 +4,45 @@ import { LETTERS, letterGroup, letterShape, advanceTrace } from '../dist/letters
 import { HEBREW_HANDWRITING } from '../dist/hebrew-handwriting.js';
 import { writingDuration, PEN_LIFT_MS } from '../dist/letter-pad.js';
 import { CLIPS } from '../dist/content.js';
+import { WRITING_WORDS, savedWritingWord, wordLabel, writingWordChoices } from '../dist/letter-words.js';
+import { hasArt } from '../dist/art.js';
+import { unpackRound, packRound } from '../dist/session-state.js';
 import { createSession, DEFAULT_SETTINGS, sanitizeSettings, sanitizeProgress, finishSession } from '../dist/engine.js';
 
 function seeded(seed) { return () => { seed = (1664525 * seed + 1013904223) >>> 0; return seed / 4294967296; }; }
+
+test('Short writing words have pictures, recorded names, and the exact strokes for the printed clue', () => {
+  for (const [language, alphabet] of Object.entries(LETTERS)) {
+    const words = WRITING_WORDS[language];
+    assert.ok(words.length >= 65);
+    assert.equal(new Set(words.map(w => w.id)).size, words.length);
+    for (const [i, letter] of alphabet.entries()) {
+      assert.ok(writingWordChoices(letter).length > 0);
+      assert.ok(writingWordChoices(letter).every(word => word.indices.includes(i)));
+    }
+    for (const word of words) {
+      assert.ok(hasArt(word.id)); assert.ok(CLIPS[word.clip]);
+      assert.ok(word.indices.length >= 2 && word.indices.length <= 6);
+      assert.equal(word.indices.map(i => alphabet[i].familiar).join(''), word.plain);
+      for (const form of ['main', 'alternate']) {
+        const saved = { [`${language}:${form}`]: { id: word.id, index: 1 } };
+        assert.deepEqual(savedWritingWord(saved, language, form), { word, index: 1 });
+        assert.equal(savedWritingWord(saved, language, form === 'main' ? 'alternate' : 'main'), null);
+        assert.equal(wordLabel(word, language, form, false), language === 'english' && form === 'alternate' ? word.plain.toLowerCase() : word.plain);
+      }
+    }
+  }
+});
+
+test('Reverse letter prompts survive reopening and an older draft keeps its original direction and spoken name', () => {
+  const questions = createSession('letters', { letterLanguage: 'hebrew' }, seeded(12));
+  const old = packRound({id:crypto.randomUUID(), key:'letters:hebrew', mission:'letters', questions, index:4, attempted:[], helped:[], counted:[], observed:[]});
+  assert.equal(unpackRound(old).questions[4].direction, 'to-main');
+  assert.equal(unpackRound(old).questions[4].targetClip, undefined);
+  for (const q of old.questions) { delete q.direction; q.prompt = 'letter-match-hebrew'; }
+  assert.equal(unpackRound(old).questions[4].direction, 'to-alternate');
+  assert.equal(unpackRound(old).questions[4].targetClip, questions[4].letter.clip);
+});
 
 test('Both alphabets have complete, distinct teaching forms and recorded names', () => {
   assert.equal(LETTERS.english.map(l => l.familiar).join(''), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
@@ -92,8 +128,11 @@ test('Every starting letter gets six questions that move from a shown model to r
       assert.equal(new Set(q.options.map(o => o.id)).size, index < 4 ? 2 : 3);
       assert.equal(q.showModel, index < 3);
       assert.equal(q.options.filter(o => o.id === q.answer).length, 1);
-      assert.equal(q.prompt, `letter-match-${language}`);
-      assert.ok(CLIPS[q.prompt]); assert.ok(CLIPS[q.targetClip]); assert.ok(CLIPS[q.hint]);
+      assert.equal(q.direction, index < 4 ? 'to-alternate' : 'to-main');
+      assert.equal(q.prompt, index < 4 ? `letter-match-${language}` : 'letters-recognition');
+      assert.ok(CLIPS[q.prompt]); assert.ok(CLIPS[q.hint]);
+      if (index < 4) assert.ok(CLIPS[q.targetClip]);
+      else assert.equal(q.targetClip, undefined);
     }
   }
 });

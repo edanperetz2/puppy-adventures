@@ -1,7 +1,7 @@
 import { WORDS, ANIMALS, COLORS, NUMBERS, CLIPS, MISSIONS, READING_LEVELS } from './content.js?v=2.7.1-pepper';
 import { LETTERS } from './letters.js';
 import { clockTime, CLOCK_LEVELS } from './clock.js';
-import { CHARACTERS, CHARACTER_LEVELS, CHARACTER_MODES } from './characters.js?v=2.2.2-six';
+import { CHARACTERS, CHARACTER_COLLECTIONS, CHARACTER_LEVELS, CHARACTER_MODES } from './characters.js?v=2.2.2-six';
 import { adventurePhase, isSessionLength } from './adventure.js?v=2.2.2-six';
 import { actOutPrompt, canActOut, cleanActOutMoves } from './act-out.js?v=2.7.0-science';
 import { LITTLE_STORIES } from './activities.js';
@@ -24,13 +24,24 @@ export function unpackRound(raw) {
         if (!q.word) throw Error();
         pool = WORDS;
         q.answer = q.word.id;
+        if (raw.reading === 'captions' && raw.mission === 'hebrew') {
+          if (q.word.level !== 10 || q.word.playOnly || d.direction !== 'picture-sentence') throw Error();
+          q.direction = d.direction;
+          pool = WORDS.filter(word => word.family === q.word.family && !word.playOnly);
+        }
         if (d.actOut === true && raw.mission === 'hebrew' && raw.reading === LITTLE_STORIES.route.level && canActOut(q.word)) {
           q.actOut = true;
           q.prompt = actOutPrompt(q.word);
         }
       }
-      else if(d.type==='letter'){q.letter=LETTERS[d.letter?.language]?.find(l=>l.id===d.letter.id);if(!q.letter)throw Error();pool=LETTERS[d.letter.language];q.answer=q.letter.id;q.showModel=d.showModel===true;q.targetClip=q.letter.clip;}
-      else if(d.type==='character'){q.character=CHARACTERS.find(c=>c.id===d.character);if(!q.character||!['picture-name','name-picture'].includes(d.direction)||!['crew','paw'].includes(d.collection))throw Error();Object.assign(q,{collection:d.collection,direction:d.direction,tier:Math.min(3,Math.max(1,Number(d.tier)||1)),answer:q.character.id});pool=CHARACTERS;}
+      else if(d.type==='letter'){
+        q.letter=LETTERS[d.letter?.language]?.find(l=>l.id===d.letter.id);if(!q.letter)throw Error();
+        pool=LETTERS[d.letter.language];q.answer=q.letter.id;q.showModel=d.showModel===true;
+        // Older rounds always showed the familiar form as the clue.
+        q.direction=d.direction==='to-main'?'to-main':'to-alternate';
+        q.targetClip=q.direction==='to-main'?undefined:q.letter.clip;
+      }
+      else if(d.type==='character'){q.character=CHARACTERS.find(c=>c.id===d.character);if(!q.character||!['picture-name','name-picture'].includes(d.direction)||!Object.hasOwn(CHARACTER_COLLECTIONS,d.collection))throw Error();Object.assign(q,{collection:d.collection,direction:d.direction,tier:Math.min(3,Math.max(1,Number(d.tier)||1)),answer:q.character.id});pool=CHARACTERS.filter(c=>c.tiers[d.collection]);}
       else if(d.type==='clock'){if(!Number.isInteger(d.time?.hour)||d.time.hour<1||d.time.hour>12||!Number.isInteger(d.time.minute)||d.time.minute<0||d.time.minute>59)throw Error();q.time=clockTime(d.time.hour,d.time.minute);q.answer=q.time.id;pool=Array.from({length:12},(_,h)=>Array.from({length:60},(_,m)=>clockTime(h+1,m))).flat();}
       else if(d.type==='listen'){if(!['animal','color','number'].includes(d.kind))throw Error();pool=d.kind==='animal'?ANIMALS:d.kind==='color'?COLORS:Array.from({length:21},(_,number)=>({id:String(number),number,en:NUMBERS[number]}));q.target=pool.find(t=>t.id===d.target);if(!q.target)throw Error();Object.assign(q,{kind:d.kind,answer:q.target.id,targetClip:`en-${q.target.id}`});}
       else if(['count','add'].includes(d.type)){if(![d.a,d.b,d.total].every(n=>Number.isInteger(n)&&n>=0&&n<=20)||d.a+d.b!==d.total||!['apple','flower','berry','ball','star','heart'].includes(d.item))throw Error();Object.assign(q,{a:d.a,b:d.b,total:d.total,item:d.item,answer:String(d.total)});pool=Array.from({length:21},(_,number)=>({id:String(number),number}));}

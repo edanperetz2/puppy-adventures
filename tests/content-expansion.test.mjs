@@ -89,6 +89,26 @@ test('Supported English can reach the full bank while introducing only one fresh
   for(const group of BLEND_GROUPS)for(const word of group){assert.ok(CLIPS[`journey-en-${word}`]);for(const letter of word)assert.ok(PHONICS.some(p=>p.id===letter));}
 });
 
+test('English warm-ups vary with previously learned words and the wider bank keeps each matching recording', () => {
+  const items = Object.fromEntries(ENGLISH_WORDS.slice(0, 32).map(({ id }) => [`english:single:${id}`, cleanItem({ seen: 3, independent: 2 })]));
+  const openings = new Set();
+  for (let i = 0; i < 32; i++) {
+    const plan = newJourney('english', 'single', items, { rng: seeded(i + 1) });
+    const qs = journeyQuestions(plan);
+    openings.add(qs[0].target.id);
+    assert.ok(items[qs[0].key] || ['dog','cat','red','blue'].includes(qs[0].target.id));
+    assert.deepEqual(journeyQuestions(cleanJourney(plan)), qs);
+  }
+  assert.ok(openings.size > 4);
+  const extra = ENGLISH_WORDS.filter(word => word.clip);
+  assert.ok(extra.length >= 35);
+  for (const word of extra) {
+    assert.equal(CLIPS[word.clip]?.lang, 'en-US', word.id);
+    assert.equal(CLIPS[word.clip].text.toUpperCase(), word.en);
+    assert.ok(hasArt(word.id));
+  }
+});
+
 test('Object work and classic arithmetic cover varied cases and keep parent caps and ascending difficulty',()=>{
   assert.equal(objectCases('bonds',20).length,190);assert.equal(objectCases('tens',20).length,91);
   const seen={quantity:new Set(),bonds:new Set(),tens:new Set(),takeaway:new Set()},additions=new Set(),objects=new Set();

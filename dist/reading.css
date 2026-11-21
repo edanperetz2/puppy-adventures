@@ -6,3 +6,17 @@
 
 @media(max-width:570px){.reading-path{grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin:17px 0 21px}.reading-continue{padding:13px;gap:10px;flex-wrap:wrap}.reading-continue-art{width:47px}.reading-continue h2{font-size:16px}.reading-continue>div:nth-child(2){flex:1;min-width:0}.reading-continue .primary-button{margin-inline-start:0;flex-basis:100%;justify-content:center}.reading-game .word-card.phrase-word{padding:12px 11px}.reading-game .phrase-word .target-word{font-size:30px;line-height:1.85}.reading-game .scene-options{grid-template-columns:repeat(2,minmax(0,1fr))}.scene-options .answer-button:last-child{grid-column:1 / -1;justify-self:center;width:calc(50% - 4px)}.reading-game .scene-options .answer-button{min-height:123px;padding:5px}.reading-game .answer-button>.reading-scene{height:117px;width:130px}.reading-next-offer .primary-button{font-size:15px;min-height:50px}.reading-next-offer small{font-size:12px}}
 .reading-stage-count{font-size:11px;color:#8f7b96;line-height:1.6;margin-top:3px}.scene-feeding{transform-origin:center}@media(prefers-reduced-motion:no-preference){.scene-feeding{animation:feed-nod 2s ease-in-out infinite}@keyframes feed-nod{0%,100%{transform:rotate(0deg)}50%{transform:rotate(3deg)}}}
+.reading-caption-entry { margin-block: 14px 0; }
+.reading-game .caption-picture { display: grid; place-items: center; width: min(100%, 274px); border-radius: 22px; margin: auto; background: #f4f5e8; }
+.reading-game .caption-picture .reading-scene { width: min(100%, 220px); height: 184px; }
+.reading-game .answer-grid.caption-options { display: grid; grid-template-columns: 1fr; width: min(100%, 590px); max-width: 590px; gap: 9px; margin-inline: auto; }
+.reading-game .caption-options .answer-button { width: 100%; min-height: 56px; height: auto; padding: 7px 30px; }
+.caption-text { font-size: clamp(20px, 4vw, 28px); line-height: 1.6; color: var(--ink); }
+@media (prefers-reduced-motion: no-preference) {
+  .reading-scene .scene-walk, .reading-scene .scene-crawl { animation: nature-step 2.4s ease-in-out infinite alternate; }
+  @keyframes nature-step { to { transform: translate(10px, -1px); } }
+}
+@media (max-width: 540px) {
+  .reading-game .caption-picture .reading-scene { height: 140px; }
+  .reading-game .caption-options .answer-button { min-height: 48px; padding-inline: 23px; }
+}

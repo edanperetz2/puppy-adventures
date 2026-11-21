@@ -62,3 +62,18 @@
   .letter-recognition-start small,.letter-writing-continue small{font-size:10px}
   .letter-next-offer .primary-button{font-size:13px;padding-inline:17px}
 }
+.letter-question-card>.letter-shape{width:125px;height:125px;margin:auto}
+.letter-recognition-model>.letter-familiar{font-size:48px}
+.letter-game .answer-button>.letter-familiar{font-size:clamp(46px,8vw,82px);line-height:1.3}
+.letter-word-picker{margin:12px auto 18px;padding:10px 16px;border:1px solid #d9cbe2;border-radius:16px;background:#f5eff8}
+.letter-word-picker summary{cursor:pointer;font-weight:600;color:#654d76;min-height:44px;align-content:center}
+.letter-word-picker summary .ui-icon{width:20px;vertical-align:middle;margin-inline:5px}
+.letter-word-choices{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.letter-word-choices button{display:flex;gap:8px;align-items:center;min-height:44px;padding:6px 12px;border-radius:13px;background:#fffdfa;color:#51455a;border:1px solid #ddd2df}
+.letter-word-choices .art{width:38px;height:38px}
+.word-trace-card{display:grid;justify-items:center;gap:10px;max-width:620px;margin:auto;text-align:center}
+.word-trace-title{display:flex;align-items:center;justify-content:center;gap:12px}.word-trace-title .art{width:64px;height:64px}
+.word-trace-title h1{font-size:20px;margin:0}.word-trace-title bdi{font-size:28px;font-weight:650}.word-trace-card .word-letter-count{margin:0}
+.written-word{display:flex;max-width:100%;gap:4px}.word-glyph{width:clamp(32px,8vw,66px);aspect-ratio:1;border-radius:10px;background:#f4eff5}
+.word-glyph .letter-shape{color:#867b88}.word-glyph[aria-current]{outline:2px solid #80569c;background:#efdff8}.word-glyph.written{background:#e6f3e9}.word-glyph.written .letter-shape{color:#33775b}
+.word-trace-card .letter-pad-card{width:min(100%,330px)}

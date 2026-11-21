@@ -1,5 +1,5 @@
 import { SESSION_LENGTH, choiceCount } from './adventure.js?v=2.2.2-six';
-import { answerShuffler } from './answer-order.js';
+import { answerShuffler, shuffle } from './answer-order.js';
 import { choosePractice } from './learning.js';
 
 export const NUMBER_PATHS = Object.freeze({
@@ -11,7 +11,8 @@ export const NUMBER_PATHS = Object.freeze({
 export const numberClip = key => `number-workshop-${key}`;
 export const numberQuestionClip = path => numberClip(path === 'left' || path === 'add' ? path : 'count');
 
-const itemsForCounting = ['apple', 'flower', 'berry', 'ball', 'star', 'heart'];
+const itemsForCounting = ['apple', 'flower', 'berry', 'ball', 'star', 'heart', 'pear', 'carrot',
+  'leaf', 'bee', 'ladybug', 'turtle', 'butterfly', 'fish', 'shell', 'lemon', 'kite', 'strawberry'];
 const supportedCaps = [5, 10, 20];
 const uuidPattern = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
 const range = (low, high) => Array.from({ length: high - low + 1 }, (_, i) => low + i);
@@ -33,12 +34,15 @@ function numberCases(path, cap) {
   }
   if (path === 'count') return range(0, cap).map(total => ({ total, part: 0, level: 0 }));
   if (path === 'add') {
-    return range(2, cap).flatMap(total => range(1, Math.floor(total / 2)).map(part => ({ total, part, level: 0 })));
+    return [
+      { total: 1, part: 0, level: -1 }, { total: 2, part: 0, level: -1 },
+      ...range(2, cap).flatMap(total => range(1, Math.floor(total / 2)).map(part => ({ total, part, level: 0 }))),
+    ];
   }
-  // A few actual objects to take away, even when larger additions are enabled.
-  return range(1, Math.min(cap, 8)).flatMap(total => range(1, Math.min(total, 3)).map(part => ({
+  // Take at most three apples. Introduce larger baskets after the first few steps.
+  return range(1, cap).flatMap(total => range(1, Math.min(total, 3)).map(part => ({
     total, part, level: part === total ? 0 : part === 1 ? 1 : 2,
-  })));
+  }))).filter(task => task.level !== 1 || task.total <= 8);
 }
 
 const byDifficulty = (a, b) => a.level - b.level || a.total - b.total || a.part - b.part;
@@ -61,7 +65,7 @@ export function numberPrompt(path, task, index) {
 
 function getChoices(path, task, cap, count, order, rng, previousChoices) {
   const answer = correctNumber(path, task);
-  const high = path === 'tens' ? 100 : path === 'left' ? Math.min(cap, 8) : cap;
+  const high = path === 'tens' ? 100 : cap;
   const low = path === 'tens' ? 10 : 0;
   const candidates = [
     ...(path === 'tens' ? [answer + 10, answer - 10, answer + 1, answer - 1] : []),
@@ -80,6 +84,9 @@ function getChoices(path, task, cap, count, order, rng, previousChoices) {
 
 function selectPractice(group, path, count, items, now, rng, previous) {
   const rank = (pool, size) => choosePractice(pool, items, task => keyFor(path, task), size, now, rng);
+  // At the smallest cap every round contains 0–5. Shuffle within the three
+  // difficulty bands so the step number alone cannot identify the answer.
+  if (path === 'count') return rank(group, count);
   if (path === 'add') {
     // Preserve different facts such as 4 + 1 and 3 + 2 when the pool is small,
     // while preferring a new total when the range gives us room to choose it.
@@ -108,11 +115,19 @@ export function newNumberRound(path, limit, items = {}, rng = Math.random) {
   const cap = supportedCaps.includes(limit) ? limit : 10;
   const order = answerShuffler(rng);
   const now = Date.now();
-  const bank = numberCases(path, cap).sort(byDifficulty);
+  const all = numberCases(path, cap).sort(byDifficulty);
+  const bank = all.filter(task => task.level >= 0);
   const groups = path === 'tens' || path === 'left'
     ? Array.from({ length: path === 'tens' ? 4 : 3 }, (_, level) => bank.filter(task => task.level === level))
     : [0, 1, 2].map(i => bank.slice(Math.floor(i * bank.length / 3), Math.floor((i + 1) * bank.length / 3)));
   const slots = path === 'tens' ? [2, 2, 1, 1] : path === 'left' ? [1, 3, 2] : [2, 2, 2];
+  if (path === 'add' && rng() < .5) {
+    groups.unshift(all.filter(task => task.part === 0));
+    slots[0]--;
+    slots.unshift(1);
+  }
+  const pictures = shuffle(itemsForCounting, rng);
+  const framedSteps = path === 'count' ? new Set(groups.map((_, i) => 2 * i + Math.floor(rng() * 2))) : new Set();
   const questions = [];
   for (const [i, group] of groups.entries()) {
     const selected = selectPractice(group, path, slots[i], items, now, rng, questions.at(-1));
@@ -120,7 +135,9 @@ export function newNumberRound(path, limit, items = {}, rng = Math.random) {
       const before = questions.at(-1);
       questions.push({
         total: task.total, part: task.part,
-        item: path === 'left' ? 'apple' : itemsForCounting[Math.floor(rng() * itemsForCounting.length)],
+        item: path === 'left' ? 'apple' : pictures[questions.length],
+        ...(framedSteps.has(questions.length) ? { layout: 'frame' } : {}),
+        ...(path === 'add' && task.part * 2 !== task.total && rng() < .5 ? { layout: 'small-first' } : {}),
         choices: getChoices(path, task, cap, choiceCount(questions.length), order, rng, before?.choices),
       });
     }
@@ -184,7 +201,10 @@ export function cleanNumberRound(raw) {
         || task.choices.some(n => !Number.isInteger(n) || n < min || n > max)
         || new Set(task.choices).size !== task.choices.length || !task.choices.includes(correctNumber(path, task))) return null;
     used.add(key);
-    questions.push({ total: task.total, part: task.part, item: task.item, choices: [...task.choices] });
+    if (task.layout !== undefined && !(path === 'count' && task.layout === 'frame'
+        || path === 'add' && task.layout === 'small-first')) return null;
+    questions.push({ total: task.total, part: task.part, item: task.item,
+      ...(task.layout ? { layout: task.layout } : {}), choices: [...task.choices] });
   }
   const { choices } = questions[index];
   const answer = correctNumber(path, questions[index]);

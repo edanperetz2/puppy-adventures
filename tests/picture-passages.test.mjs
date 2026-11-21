@@ -17,10 +17,37 @@ const actionIds = new Set(PLAYABLE_STORIES.map(word => word.id));
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const rng=seed=>()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
 
+test('Picture-to-sentence rounds offer distinct illustrated subjects and resume their text choices', () => {
+  const pool = readingWords('captions');
+  assert.equal(pool.length, 686);
+  const original = createSession('hebrew', { reading: 'captions' }, rng(3));
+  const recentlyPlayed = original.map(question => question.answer);
+  const weak = Object.fromEntries(recentlyPlayed.map(id => [`read:${id}`, { seen: 1, helped: 1, last: Date.now() }]));
+  const questions = createSession('hebrew', { reading: 'captions', readingRecent: recentlyPlayed, learning: weak }, rng(4));
+  assert.equal(new Set(questions.map(q => q.word.scene.object)).size, 6);
+  for (const [index, q] of questions.entries()) {
+    assert.ok(!recentlyPlayed.includes(q.answer) && !q.word.playOnly);
+    assert.equal(q.direction, 'picture-sentence');
+    assert.ok(!q.targetClip && !q.actOut);
+    assert.equal(q.options.length, index < 2 ? 2 : 3);
+    assert.ok(q.options.every(option => option.family === q.word.family));
+    assert.equal(new Set(q.options.map(option => option.pointed)).size, q.options.length);
+    assert.equal(new Set(q.options.map(option => art(option.id))).size, q.options.length);
+  }
+  const raw = packRound({ id: 'f9a30be1-d8d1-4231-b8e8-f463a7475646', key: 'hebrew:captions', mission: 'hebrew', reading: 'captions',
+    questions, index: 3, attempted: [], helped: [2], counted: [] });
+  const restored = unpackRound(JSON.parse(JSON.stringify(raw)));
+  assert.equal(restored.key, 'hebrew:captions');
+  assert.equal(restored.index, 3);
+  assert.ok(restored.questions.every(q => q.direction === 'picture-sentence'));
+  assert.deepEqual(restored.questions.map(q => q.options), questions.map(q => q.options));
+  assert.ok(createSession('hebrew', { reading: 'sentences' }).every(q => !q.direction));
+});
+
 test('Short picture stories more than double at the same reading level and length',()=>{
   assert.equal(additions.length,360);
-  assert.equal(readingWords('sentences').length,666);
-  assert.equal(WORDS.length,1477);
+  assert.equal(readingWords('sentences').length,690);
+  assert.equal(WORDS.length,1501);
   assert.equal(new Set(WORDS.map(word=>word.he)).size,WORDS.length);
   assert.equal(new Set(WORDS.map(word=>art(word.id))).size,WORDS.length);
   for(const word of additions){
@@ -62,10 +89,10 @@ test('A practiced sentence bank keeps its history and offers the new passages be
 
 test('Every previous reading target and all 2114 original voice records remain unchanged',async()=>{
   const baseline=JSON.parse(await readFile(new URL('./fixtures/release-2.1-reading.json',import.meta.url),'utf8'));
-  const originalWords=WORDS.filter(word=>!ids.has(word.id)&&!actionIds.has(word.id));
+  const originalWords=WORDS.filter(word=>!ids.has(word.id)&&!actionIds.has(word.id)&&!word.id.startsWith('nature-'));
   assert.equal(originalWords.length,baseline.wordCount);
   assert.equal(hash(originalWords),baseline.wordDigest);
-  const previouslyReleased = ([key]) => !/^(?:he-picture-|he-story-(?:animal|action)-|story-clue-|picnic-|delivery-|boatyard-|daily-|theater-|listen-pick-animal$|profile-good-luck|journey-give-|journey-apples-left$|number-workshop-|science-|act-out(?:-jump|-feed|-move-animal|-water|-door)?$)/u.test(key);
+  const previouslyReleased = ([key]) => !/^(?:he-picture-|he-story-(?:animal|action)-|he-nature-|reading-caption-|characters-(?:menu|level)-together|character-(?:pikachu|stitch)$|story-clue-|picnic-|delivery-|boatyard-|daily-|theater-|listen-pick-animal$|profile-good-luck|journey-give-|journey-apples-left$|number-workshop-|science-|act-out(?:-jump|-feed|-move-animal|-water|-door)?$)/u.test(key);
   const originalClips=Object.fromEntries(Object.entries(CLIPS).filter(previouslyReleased));
   assert.equal(Object.keys(originalClips).length,baseline.clipCount);
   assert.equal(hash(originalClips),baseline.clipDigest);

@@ -8,6 +8,7 @@ import { CLIPS, READING_LEVELS } from '../dist/content.js';
 import { createSession } from '../dist/engine.js';
 import { cleanJourney, ENGLISH_WORDS, journeyQuestions, newJourney, PHONICS, resumeJourney, seeded } from '../dist/journey.js';
 import { STORIES } from '../dist/journey-content.js';
+import { BLEND_GROUPS, PICTURE_BLEND_GROUPS } from '../dist/english-expansion.js';
 import { cleanItem } from '../dist/learning.js';
 
 function distinctNeighbors(targets, path) {
@@ -15,6 +16,42 @@ function distinctNeighbors(targets, path) {
     assert.notEqual(targets[i], targets[i - 1], `${path}, questions ${i} and ${i + 1}`);
   }
 }
+
+test('Short reading keeps the original spelling trios and adds 12 illustrated CVC trios with recorded words', () => {
+  const pictured = new Set(PICTURE_BLEND_GROUPS.map(trio => trio.join(',')));
+  const all = [...BLEND_GROUPS, ...PICTURE_BLEND_GROUPS];
+  assert.equal(new Set(all.flat()).size, 31);
+  const reached = new Set(), meanings = new Set();
+  for (let seed = 1; seed <= 200 && reached.size < all.length; seed++) {
+    const plan = newJourney('sounds', 'blend', {}, { rng: seeded(seed * 15485863) });
+    const trio = plan.blendWords.join(',');
+    if (reached.has(trio)) continue;
+    reached.add(trio);
+    const questions = journeyQuestions(plan);
+    assert.equal(questions.length, 6);
+    assert.deepEqual(questions.slice(3).map(q => q.word), plan.blendWords);
+    for (const [index, q] of questions.entries()) {
+      assert.equal(CLIPS[q.clip].lang, 'en-US');
+      if (index < 3) { assert.equal(q.kind, 'sound'); continue; }
+      assert.equal(CLIPS[q.clip].text.toLowerCase(), q.word);
+      assert.ok([...q.word].every(l => PHONICS.some(p => p.id === l)));
+      if (pictured.has(trio)) {
+        assert.match(q.word, /^[^aeiou][aeiou][^aeiou]$/);
+        assert.ok(q.choices.every(hasArt));
+        assert.equal(q.readPicture, index === 5);
+        if (q.readPicture) { meanings.add(q.word); assert.equal(q.prompt, 'read'); }
+      } else assert.equal(q.pictured, undefined);
+    }
+    plan.index = 5;
+    plan.state = { attempted: [questions[5].choices.find(id => id !== questions[5].word)], showModel: true };
+    const saved = resumeJourney(JSON.parse(JSON.stringify(plan)));
+    assert.deepEqual(journeyQuestions(saved), questions);
+    assert.deepEqual(saved.state.attempted, plan.state.attempted);
+    assert.ok(saved.state.showModel);
+  }
+  assert.equal(reached.size, 22);
+  assert.equal(meanings.size, 12);
+});
 
 test('Sound practice teaches three distinct sounds and reviews M with another word', () => {
   const learned = Object.fromEntries(PHONICS.map(({ id }) => [`phonics:sound:${id}`, cleanItem({ seen: 1 })]));

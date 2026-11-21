@@ -17426,6 +17426,230 @@
       "detected_ipa": "ʔaχʃˈav, liχtsˈi ʔˈal hakvutsˈa haʃnijˈa.",
       "phoneme_edit_ratio": 0,
       "seconds": 2.12
+    },
+    "characters-menu-together": {
+      "sha256": "b5da110ca3e66799d2d253dce741f3a1d2d60fec594aa7937d9629dd31ec1be4",
+      "expected_ipa": "hajˈom kulˈam mesaχakˈim jˈaχad!",
+      "detected_ipa": "hajˈom kulˈam mesaχakˈim jˈaχad.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.91
+    },
+    "characters-level-together-friends": {
+      "sha256": "81839ffb0cd3d2c72cb9cbff22c2a4411a488b7457e6f003a500d530b524e15b",
+      "expected_ipa": "ʃalˈav ʁiʃˈon. ʃloʃˈa χaveʁˈim.",
+      "detected_ipa": "ʃalˈav ʁiʃˈon, ʃloʃˈa χaveʁˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.91
+    },
+    "characters-level-together-pups": {
+      "sha256": "2569a792c50946b7a3d5daaef2ba780ae3988e2c875a0d00cd23bc6b96b56b1c",
+      "expected_ipa": "ʃalˈav ʃenˈi. mˈi ʔˈod kˈan?",
+      "detected_ipa": "ʃalˈav ʃenˈi, mˈi ʔˈod kˈan?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 3.61
+    },
+    "characters-level-together-all": {
+      "sha256": "62aabcbb501a4ec737e7d11c07cf1eee96646b6d774cd034c4210f99a3f67997",
+      "expected_ipa": "ʃalˈav ʃliʃˈi. kˈol haχaveʁˈim kˈan!",
+      "detected_ipa": "ʃalˈav ʃliʃˈi, kˈol haχaveʁˈim kˈan.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 6.2
+    },
+    "character-pikachu": {
+      "sha256": "c53cc94b28a7eb964b8c8fccae99d4327b0ad0a30504765c58f5eeb959e59edb",
+      "expected_ipa": "haʃˈem hˈu pikˈatʃu.",
+      "detected_ipa": "haʃˈem hˈu pikˈatʃu.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 5.5
+    },
+    "character-stitch": {
+      "sha256": "71e02c7375127523ff3a01985f5c3d52aa97aa3f08f8e9cc3687383e1182255c",
+      "expected_ipa": "haʃˈem hˈu stˈitʃ.",
+      "detected_ipa": "haʃˈem hˈu stˈitʃ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 6.16
+    },
+    "he-nature-rabbit-tree": {
+      "sha256": "fe039349fae40b583b454104de1f6bca0f404f78b170cb3c0c547e8ca59e3fe9",
+      "expected_ipa": "haʔaʁnˈav kofˈets lejˈad haʔˈets.",
+      "detected_ipa": "haʔaʁnˈav kofˈets lejˈad haʔˈets.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.97
+    },
+    "he-nature-rabbit-flower": {
+      "sha256": "21026a31b35c4ccca51ec5691a2a1dbfdc1bdf80c4e9bd60462b66b2d47a3829",
+      "expected_ipa": "haʔaʁnˈav kofˈets lejˈad hapˈeʁaχ.",
+      "detected_ipa": "haʔaʁnˈav kofˈets lejˈad hapˈeʁaχ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 5.11
+    },
+    "he-nature-rabbit-mushroom": {
+      "sha256": "d03ace728d783c62bf2d933c924172a927950a659250b4f1beabf86c060a267b",
+      "expected_ipa": "haʔaʁnˈav kofˈets lejˈad hapitʁijˈa.",
+      "detected_ipa": "haʔaʁnˈav kofˈets lejˈad hapitʁijˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.94
+    },
+    "he-nature-rabbit-rock": {
+      "sha256": "ef1db8087b3242592c8bfa935c60fac3cd5d956214164799cdaf87ed3a37d455",
+      "expected_ipa": "haʔaʁnˈav kofˈets lejˈad hasˈela.",
+      "detected_ipa": "haʔaʁnˈav kofˈets lejˈad hasˈela.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 6.12
+    },
+    "he-nature-turtle-tree": {
+      "sha256": "91c6379447ccda958ffbb97dd77101cd39d0add2ace7278b5fd6a8c45cd4cdd4",
+      "expected_ipa": "lejˈad haʔˈets zoχˈel tsˈav.",
+      "detected_ipa": "lejˈad haʔˈets zoχˈel tsˈav.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.41
+    },
+    "he-nature-turtle-flower": {
+      "sha256": "968e43143b316580d7320f1dd6548ebd1221e6369fe3770582d99cb58dc23a69",
+      "expected_ipa": "lejˈad hapˈeʁaχ zoχˈel tsˈav.",
+      "detected_ipa": "lejˈad hapˈeʁaχ zoχˈel tsˈav.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.81
+    },
+    "he-nature-turtle-mushroom": {
+      "sha256": "a081dc5d1ac88d1c4dac4a27126ee4c4f6855ce53968fbe1f2a4165ccacc9f83",
+      "expected_ipa": "lejˈad hapitʁijˈa zoχˈel tsˈav.",
+      "detected_ipa": "lejˈad hapitʁijˈa zoχˈel tsˈav.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.59
+    },
+    "he-nature-turtle-rock": {
+      "sha256": "1ee46ea0a374cb5ef89aa17aeb0afe0f6667cbe82d2af6fb3838a1eb6f3fadba",
+      "expected_ipa": "lejˈad hasˈela zoχˈel tsˈav.",
+      "detected_ipa": "lejˈad hasˈela zoχˈel tsˈav.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.28
+    },
+    "he-nature-snail-tree": {
+      "sha256": "8223ed7f0949850630ab00afa00c79c5faea51f338b150b59403e618e853c0a6",
+      "expected_ipa": "lejˈad haʔˈets zoχˈel ʃablˈul.",
+      "detected_ipa": "lejˈad haʔˈets zoχˈel ʃablˈul.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.5
+    },
+    "he-nature-snail-flower": {
+      "sha256": "dd4ff9f8789c6f1e6ad6d70fdf2605f227b72cd8653e3201730440f7c98d2177",
+      "expected_ipa": "lejˈad hapˈeʁaχ zoχˈel ʃablˈul.",
+      "detected_ipa": "lejˈad hapˈeʁaχ zoχˈel ʃablˈul.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.78
+    },
+    "he-nature-snail-mushroom": {
+      "sha256": "b34b7b2bcd97c5c4e593853cf6d1bfb1369613e0d5f3a647abd318e17350bb1d",
+      "expected_ipa": "lejˈad hapitʁijˈa zoχˈel ʃablˈul.",
+      "detected_ipa": "lejˈad hapitʁijˈa zoχˈel ʃablˈul.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.27
+    },
+    "he-nature-snail-rock": {
+      "sha256": "c086dd907fe290db1652efd85e9aee69fa16ff3c4ce1304629ff412cba121ecb",
+      "expected_ipa": "lejˈad hasˈela zoχˈel ʃablˈul.",
+      "detected_ipa": "lejˈad hasˈela zoχˈel ʃablˈul.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.48
+    },
+    "he-nature-dog-tree": {
+      "sha256": "6e84284705bc05d38dfd7f8647b92c26a055f0270ab85ff6020da39cfd9c7719",
+      "expected_ipa": "hakˈelev holˈeχ lejˈad haʔˈets.",
+      "detected_ipa": "hakˈelev holˈeχ lejˈad haʔˈets.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.28
+    },
+    "he-nature-dog-flower": {
+      "sha256": "d3f952c4f70926abcf8177ed1c014eb3e854ab9bb6f08f05abeac21ca104417f",
+      "expected_ipa": "hakˈelev holˈeχ lejˈad hapˈeʁaχ.",
+      "detected_ipa": "hakˈelev holˈeχ lejˈad hapˈeʁaχ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2
+    },
+    "he-nature-dog-mushroom": {
+      "sha256": "bdf8f4937365fbcd23d1cd0913dc082423d49b9ad1ac104af47c518fc1443c10",
+      "expected_ipa": "hakˈelev holˈeχ lejˈad hapitʁijˈa.",
+      "detected_ipa": "hakˈelev holˈeχ lejˈad hapitʁijˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 1.91
+    },
+    "he-nature-dog-rock": {
+      "sha256": "56cd1e6a4d276e22506dd55aecaa1c028dff52b44afba5f4d8c391fbd9d76b95",
+      "expected_ipa": "hakˈelev holˈeχ lejˈad hasˈela.",
+      "detected_ipa": "hakˈelev holˈeχ lejˈad hasˈela.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 3.19
+    },
+    "he-nature-bird-tree": {
+      "sha256": "3d040664819764c8559ebcef0a4c56ed689e8eb202ed2b04c93206f7066b9a3d",
+      "expected_ipa": "hatsipˈoʁ ʔafˈa lejˈad haʔˈets.",
+      "detected_ipa": "hatsipˈoʁ ʔafˈa lejˈad haʔˈets.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.47
+    },
+    "he-nature-bird-flower": {
+      "sha256": "076d5da8d8f128935a0c73eb86c53baf6de6d76b57bedc13776636e49b676b2d",
+      "expected_ipa": "hatsipˈoʁ ʔafˈa lejˈad hapˈeʁaχ.",
+      "detected_ipa": "hatsipˈoʁ ʔafˈa lejˈad hapˈeʁaχ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.41
+    },
+    "he-nature-bird-mushroom": {
+      "sha256": "5782b0db42970745766814984cd9464b26fb43e742d683bcffca2b8f2861f44e",
+      "expected_ipa": "hatsipˈoʁ ʔafˈa lejˈad hapitʁijˈa.",
+      "detected_ipa": "hatsipˈoʁ ʔafˈa lejˈad hapitʁijˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.55
+    },
+    "he-nature-bird-rock": {
+      "sha256": "540d035f039f3fbe9778aa7f0f38a67ca267300f42cffcb407f7e53f7c890192",
+      "expected_ipa": "hatsipˈoʁ ʔafˈa lejˈad hasˈela.",
+      "detected_ipa": "hatsipˈoʁ ʔafˈa lejˈad hasˈela.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 3.31
+    },
+    "he-nature-butterfly-tree": {
+      "sha256": "fe14c9180135b575c064c39fabb0c2eef54e7f3d7872962ac256297ce640e0bc",
+      "expected_ipa": "hapaʁpˈaʁ ʔˈaf lejˈad haʔˈets.",
+      "detected_ipa": "hapaʁpˈaʁ ʔˈaf lejˈad haʔˈets.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.66
+    },
+    "he-nature-butterfly-flower": {
+      "sha256": "c2d8771470147b7242d4d82bbcdfbbeb1bf0f263b53e002f2c6464b272c84567",
+      "expected_ipa": "hapaʁpˈaʁ ʔˈaf lejˈad hapˈeʁaχ.",
+      "detected_ipa": "hapaʁpˈaʁ ʔˈaf lejˈad hapˈeʁaχ.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.12
+    },
+    "he-nature-butterfly-mushroom": {
+      "sha256": "23dcad857593269939b22052205e83e72cb561a9f3ec2b77a27b5ff59e58669c",
+      "expected_ipa": "hapaʁpˈaʁ ʔˈaf lejˈad hapitʁijˈa.",
+      "detected_ipa": "hapaʁpˈaʁ ʔˈaf lejˈad hapitʁijˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 3.31
+    },
+    "he-nature-butterfly-rock": {
+      "sha256": "db806ef94595e40f929bb60d92693cca5e0b0a9b21115f13486201dc4648dc81",
+      "expected_ipa": "hapaʁpˈaʁ ʔˈaf lejˈad hasˈela.",
+      "detected_ipa": "hapaʁpˈaʁ ʔˈaf lejˈad hasˈela.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 3.16
+    },
+    "reading-caption-prompt": {
+      "sha256": "cee0eee1298527c841b470d572dd9271d56547c387339a076c4d48682df2893a",
+      "expected_ipa": "ʔˈejze miʃpˈat matʔˈim latmunˈa?",
+      "detected_ipa": "ʔˈejze miʃpˈat matʔˈim latmunˈa?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.62
+    },
+    "reading-caption-hint": {
+      "sha256": "e4cf6dec265722590d60eab9c8ada1ec34028b6e37ffaad916dc8761a2fd3e21",
+      "expected_ipa": "boˈi niʃmˈa mˈa ʁoʔˈim batmunˈa.",
+      "detected_ipa": "bˈoʔi niʃmˈa mˈa ʁoʔˈim batmunˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 4.64
     }
   }
 }

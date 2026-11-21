@@ -46,28 +46,45 @@ function groupPicture(count, item, start = 0) {
   </div>`;
 }
 
+// The borders mark a frame of five or ten spaces. Only filled spaces count.
+function framePicture(count, item) {
+  const length = count <= 5 ? 5 : 10;
+  return Array.from({ length: Math.max(1, Math.ceil(count / length)) }, (_, frame) => {
+    const cells = Array.from({ length }, (_, cell) => {
+      const index = frame * length + cell;
+      return index < count ? `<span data-model-step="${index}">${art(item)}</span>` : '<span></span>';
+    });
+    return `<div class="number-frame" dir="ltr" ${count === 0 ? 'data-model-step="empty"' : ''}>${cells.join('')}</div>`;
+  }).join('');
+}
+
 function tensPicture(count) {
   return `<div class="number-rods" style="--columns:${Math.min(count, 5)}">
     ${Array.from({ length: count }, (_, index) => `<span data-model-step="${index}" class="number-rod">${'<i></i>'.repeat(10)}</span>`).join('')}
   </div>`;
 }
 
-function questionPicture(path, task, solved, animate) {
+export function questionPicture(path, task, solved, animate) {
   const { total, part, item, answer } = task;
   if (path === 'count') {
     return `<div class="number-scene number-count-scene" role="img" aria-label="קבוצה של ${total} פריטים">
-      <div class="number-tray">${groupPicture(total, item)}</div>
+      <div class="number-tray">${task.layout === 'frame' ? framePicture(total, item) : groupPicture(total, item)}</div>
     </div>`;
   }
   if (path === 'add') {
     const larger = total - part;
-    return `<div class="number-scene number-add-scene" role="img" aria-label="${larger} ועוד ${part}">
+    const groups = task.layout === 'small-first' ? [part, larger] : [larger, part];
+    const tray = (quantity, side) => {
+      // On doubles either tray can start the hint; highlight only the first one.
+      const startsHint = quantity === larger && (larger !== part || side === 0);
+      return `<div class="number-tray number-tray-${side === 0 ? 'first' : 'second'}" ${startsHint ? 'data-model-step="large"' : ''}>
+        <b>${quantity}</b>${groupPicture(quantity, item, startsHint ? 0 : larger)}</div>`;
+    };
+    return `<div class="number-scene number-add-scene" role="img" aria-label="${groups[0]} ועוד ${groups[1]}">
       <div class="number-pair" dir="ltr">
-        <div class="number-tray number-tray-first" data-model-step="large"><b>${larger}</b>${groupPicture(larger, item)}</div>
-        <span class="number-plus">+</span>
-        <div class="number-tray number-tray-second"><b>${part}</b>${groupPicture(part, item, larger)}</div>
+        ${tray(groups[0], 0)}<span class="number-plus">+</span>${tray(groups[1], 1)}
       </div>
-      <div class="number-equation" dir="ltr">${larger} + ${part} = <strong>${solved ? total : '?'}</strong></div>
+      <div class="number-equation" dir="ltr">${groups[0]} + ${groups[1]} = <strong>${solved ? total : '?'}</strong></div>
     </div>`;
   }
   if (path === 'left') {

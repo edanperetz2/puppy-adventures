@@ -1,5 +1,5 @@
 import { WORDS, ANIMALS, COLORS, ENGLISH_OBJECTS } from './content.js?v=2.2.0-voices';
-import { MORE_PHONICS, BLEND_GROUPS } from './english-expansion.js';
+import { MORE_PHONICS, BLEND_GROUPS, PICTURE_BLEND_GROUPS } from './english-expansion.js';
 import { distinctWordPictures } from './vocabulary.js';
 import { WORKSHOP_WORDS, STORIES } from './journey-content.js';
 import { WORD_CONTEXTS } from './word-contexts.js';
@@ -23,6 +23,7 @@ export const PHONICS = [
  ...MORE_PHONICS,
 ];
 export const soundExample = letter => {const word=PHONICS.find(p=>p.id===letter)?.word;return word==='fish'?'en-fish':`journey-en-${word}`;};
+const blendLessons = [...BLEND_GROUPS, ...PICTURE_BLEND_GROUPS];
 // The review word starts with the same sound as the model. A vowel or a
 // letter like C or G can be pronounced differently in other words.
 const soundReviewWords = {
@@ -33,7 +34,20 @@ const soundReviewWords = {
   l: ['leaf', 'lamp', 'lemon'], v: ['vase'], w: ['window', 'worm'],
 };
 export const ENGLISH_PAIRS = ['ball','car'].flatMap(object=>COLORS.map(c=>({color:c.id,object})));
-export const ENGLISH_WORDS = [...ANIMALS,...COLORS,...ENGLISH_OBJECTS];
+// Letter Studio already pairs these spoken nouns with pictures. Reuse the same
+// recording and artwork when Ariel meets the word again in English Bay.
+const listeningWords = new Map([...ANIMALS, ...COLORS, ...ENGLISH_OBJECTS].map(word => [word.id, word]));
+const picturedNouns = new Map(WORDS.filter(word => !word.scene).map(word => [word.id, word]));
+for (const [letter, examples] of Object.entries(LETTER_EXAMPLES)) {
+  if (!letter.startsWith('en-')) continue;
+  for (const { id, text, clip } of examples) {
+    const noun = picturedNouns.get(id);
+    if (noun && !listeningWords.has(id) && /^[A-Z]+$/u.test(text)) {
+      listeningWords.set(id, { id, he: noun.he, en: text, clip });
+    }
+  }
+}
+export const ENGLISH_WORDS = [...listeningWords.values()];
 export const STORY_RELATIONS = ['on', 'under', 'beside'];
 // Each route has the same opening and ending. Its middle pages keep related
 // events together and give the other illustrated pages a turn on later visits.
@@ -99,11 +113,16 @@ export function newJourney(mode,level,items={},options={}) {
   const knownColors=COLORS.filter(c=>['red','blue',...known].includes(c.id));
   const pairColors=choosePractice(knownColors,items,c=>`english:pair:${c.id}-${cleanLevel==='cars'?'car':'ball'}`,2,Date.now(),rng).map(c=>c.id);
   const introduced=PHONICS.filter(p=>items[`phonics:sound:${p.id}`]?.seen).length;
-  const blendWords=choosePractice(BLEND_GROUPS,items,g=>`phonics:blend:${g[0]}`,1,Date.now(),rng)[0];
+  const blendPool = mode === 'sounds' && cleanLevel === 'blend' ? blendLessons : BLEND_GROUPS;
+  const blendWords=choosePractice(blendPool,items,g=>`phonics:blend:${g[0]}`,1,Date.now(),rng)[0];
   const soundIds=mode==='sounds'?cleanLevel==='blend'?[...new Set(blendWords.join(''))].slice(0,3):choosePractice(PHONICS.slice(0,Math.min(PHONICS.length,Math.max(3,introduced+1))),items,p=>`phonics:sound:${p.id}`,3,Date.now(),rng).sort((a,b)=>PHONICS.indexOf(a)-PHONICS.indexOf(b)).map(p=>p.id):[];
   const max=[5,10,20].includes(options.mathMax)?options.mathMax:10;
   const distinctReview = mode === 'english' && cleanLevel === 'single' && !newWord;
-  return {id:globalThis.crypto.randomUUID(),revision:2,length:SESSION_LENGTH,shuffleAnswers:true,varietyFrom:0,...(distinctReview ? { distinctReview } : {}),introducing:Boolean(newWord),mode,level:cleanLevel,seed,words,soundIds,blendWords,pairColors,examples:mode==='objects'?objectExamples(cleanLevel,max,items,rng):[],english:[...new Set([...familiar,...review])].concat(fresh),max,index:0,state:{},helped:[],observed:[],at:Date.now()};
+  const warm = [...familiar, ...review];
+  // Save the shuffled list in the round, so reopening preserves the clue and
+  // newly learned words also get a turn as the easy opening questions.
+  const english = (mode === 'english' && cleanLevel === 'single' ? mix(warm, rng) : warm).concat(fresh);
+  return {id:globalThis.crypto.randomUUID(),revision:2,length:SESSION_LENGTH,shuffleAnswers:true,varietyFrom:0,...(distinctReview ? { distinctReview } : {}),introducing:Boolean(newWord),mode,level:cleanLevel,seed,words,soundIds,blendWords,pairColors,examples:mode==='objects'?objectExamples(cleanLevel,max,items,rng):[],english,max,index:0,state:{},helped:[],observed:[],at:Date.now()};
 }
 export function cleanJourney(raw) {
   if(!raw||!Object.hasOwn(JOURNEYS,raw.mode)||!/^[0-9a-f-]{36}$/i.test(raw.id)||!Number.isInteger(raw.seed))return null;
@@ -119,7 +138,7 @@ export function cleanJourney(raw) {
   const distinctReview = raw.mode === 'english' && raw.level === 'single' && raw.distinctReview === true;
   const soundIds=[...new Set((Array.isArray(raw.soundIds)?raw.soundIds:['f','s','m']).filter(id=>PHONICS.some(p=>p.id===id)))].slice(0,3);
   const revision=raw.revision===2?2:1,max=[5,10,20].includes(raw.max)?raw.max:10;
-  const blendWords=BLEND_GROUPS.find(g=>JSON.stringify(g)===JSON.stringify(raw.blendWords))||BLEND_GROUPS[0];
+  const blendWords=blendLessons.find(g=>JSON.stringify(g)===JSON.stringify(raw.blendWords))||BLEND_GROUPS[0];
   const pairColors=[...new Set((Array.isArray(raw.pairColors)?raw.pairColors:[]).filter(id=>COLORS.some(c=>c.id===id)))].slice(0,2);
   const cases = raw.mode === 'objects' ? objectCases(raw.level, max) : [];
   const examples=(Array.isArray(raw.examples)?raw.examples:[]).filter(p=>cases.some(c=>c.total===p?.total&&c.known===p?.known)).slice(0,length).map(({total,known})=>({total,known}));
@@ -193,7 +212,8 @@ export function journeyQuestions(plan) {
       const id=x=>pair?`${x.color}-${x.object}`:x.id;
       const choices=mix([target,...mix(pool.filter(x=>id(x)!==id(target)),rng).slice(0,challenge?2:1)],rng);
       const newWord=plan.level==='single'?i===introduction&&(plan.revision!==2||plan.introducing!==false):i===0;
-      result.push({kind:pair?'pair':'single',target,choices,answer:id(target),key:pair?`english:pair:${id(target)}`:`english:single:${target.id}`,prompt:pair?'journey-english-two':'journey-english-one',clip:pair?`journey-en-${id(target)}`:['ball','car'].includes(target.id)?`journey-en-${target.id}`:`en-${target.id}`,model:newWord||pair&&!challenge,newWord});
+      const singleClip = target.clip || (['ball','car'].includes(target.id) ? `journey-en-${target.id}` : `en-${target.id}`);
+      result.push({kind:pair?'pair':'single',target,choices,answer:id(target),key:pair?`english:pair:${id(target)}`:`english:single:${target.id}`,prompt:pair?'journey-english-two':'journey-english-one',clip:pair?`journey-en-${id(target)}`:singleClip,model:newWord||pair&&!challenge,newWord});
     } else if(plan.mode==='objects') {
       const kind=plan.level;
       const cap=kind==='takeaway'?Math.min(8,plan.max):plan.max;
@@ -221,7 +241,12 @@ export function journeyQuestions(plan) {
         ? counts(phoneme) === 0
         : short ? plan.level==='blend' ? i<4 : i%2===0 : i<3||blend&&i<7||!blend&&[4,7].includes(i);
       const example = varied && !model ? soundReview(phoneme, result, rng) : undefined;
-      result.push({kind:blend?'blend':'sound',phoneme,word,choices,answer:blend?word:phoneme.id,key:blend?`phonics:blend:${word}`:`phonics:sound:${phoneme.id}`,prompt:'journey-phonics-intro',model,clip:blend?`journey-en-${word}`:example?.clip||soundExample(phoneme.id),...(example ? {example} : {})});
+      const pictured = blend && PICTURE_BLEND_GROUPS.some(trio => trio.every((target, j) => words[j] === target));
+      const readPicture = pictured && i === length - 1;
+      const prompt = readPicture ? 'read' : pictured ? 'listen' : 'journey-phonics-intro';
+      const clip = blend ? (word === 'bus' ? 'en-bus' : `journey-en-${word}`) : example?.clip || soundExample(phoneme.id);
+      result.push({kind:blend?'blend':'sound',phoneme,word,choices,answer:blend?word:phoneme.id,key:blend?`phonics:blend:${word}`:`phonics:sound:${phoneme.id}`,prompt,model,clip,
+        ...(pictured ? { pictured: true, readPicture } : {}), ...(example ? {example} : {})});
     }
   }
   if (!plan.shuffleAnswers) return result;

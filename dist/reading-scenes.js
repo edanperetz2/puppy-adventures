@@ -45,6 +45,15 @@ export function readingScene(id, baseArt) {
     return asleep ? sleepingReadingAnimal(body) : body;
   };
   let body = '';
+  if (spec.kind === 'nature') {
+    const flying = spec.action === 'fly', jumping = spec.action === 'jump';
+    body = ground + at(spec.anchor, 90, 54, 108);
+    if (jumping) body += '<path d="M15 148q-2-23 11-37" fill="none" stroke="#ac92ac" stroke-width="4" stroke-dasharray="4 5"/>';
+    if (flying) body += '<path d="M4 67q7-16 20-16" fill="none" stroke="#98b1bc" stroke-width="4" stroke-linecap="round"/>';
+    if (spec.action === 'walk') body += '<g fill="#c7b797"><ellipse cx="13" cy="171" rx="4" ry="2"/><ellipse cx="23" cy="177" rx="4" ry="2"/><ellipse cx="33" cy="171" rx="4" ry="2"/></g>';
+    if (spec.action === 'crawl') body += '<path d="M6 179q11-5 23-1t17-1" fill="none" stroke="#c3c9ad" stroke-width="3" stroke-linecap="round"/>';
+    body += place(actor(spec.object, false), flying || jumping ? 0 : 8, flying ? 24 : jumping ? 70 : 93, 100, `scene-${spec.action}`);
+  }
   if (spec.kind === 'color') body = at(spec.object, 14, 12, 172, spec.color);
   if (spec.kind === 'count') {
     const positions = spec.count === 2 ? [[13, 56], [105, 56]] : spec.count === 3 ? [[58, 9], [13, 104], [105, 104]] : [[13, 9], [105, 9], [13, 104], [105, 104]];

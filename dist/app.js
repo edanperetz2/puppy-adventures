@@ -27,6 +27,7 @@ import { suggestedLetters, practicedLetterCount, recordLetters, recognitionTarge
 import { CHARACTERS, CHARACTER_COLLECTIONS, CHARACTER_LEVELS, CHARACTER_MODES, characterCollection, selectCharacterLevel, sanitizeCharacterPractice, finishCharacterPractice, nextCharacterLevel } from './characters.js?v=2.2.2-six';
 import { characterMenu, characterQuestion, characterAnswer, characterAnswerLabel, characterMissionArt, characterName } from './characters-view.js?v=2.2.2-six';
 import { letterExampleCards } from './letter-examples.js';
+import { WRITING_WORDS, mountWritingWord, savedWritingWord, wordPicker } from './letter-words.js';
 import { ARIEL, openAriel, readArielInvitation, GAME_KEY, STITCH_KEY } from './profiles.js?v=2.2.3-ariel';
 import { profileSpeech } from './profile-speech.js?v=2.2.0-voices';
 import { openGameGuide, GUIDE_ICON } from './guide.js?v=2.2.3-ariel';
@@ -80,6 +81,7 @@ let clockReturn = false;
 let letterDemo = { language: 'hebrew', form: 'alternate', index: 0, recorded: false };
 let recognitionChoice = null;
 let letterPad = null;
+let writingWord = null, wordPad = null;
 let lastTraceHint = 0;
 let readingPractice = sanitizeReadingPractice(null);
 let albumPageIndex = null;
@@ -118,7 +120,13 @@ try {
       if (draft) scienceDrafts[path] = draft;
     }
     awardedRounds=(Array.isArray(saved.awardedRounds)?saved.awardedRounds:[]).filter(id=>/^[0-9a-f-]{36}$/i.test(id)).slice(-10000);
-    if(Object.hasOwn(WRITING_STEPS,saved.writingPractice?.mode))writingPractice={mode:saved.writingPractice.mode,drafts:saved.writingPractice.drafts&&typeof saved.writingPractice.drafts==='object'&&!Array.isArray(saved.writingPractice.drafts)?saved.writingPractice.drafts:{}};
+    if(Object.hasOwn(WRITING_STEPS,saved.writingPractice?.mode)){
+      writingPractice={mode:saved.writingPractice.mode,drafts:saved.writingPractice.drafts&&typeof saved.writingPractice.drafts==='object'&&!Array.isArray(saved.writingPractice.drafts)?saved.writingPractice.drafts:{}};
+      for (const language of Object.keys(LETTERS)) for (const form of WRITING_FORMS) {
+        const draft = savedWritingWord(saved.writingPractice.words, language, form);
+        if (draft) (writingPractice.words ??= {})[`${language}:${form}`] = { id: draft.word.id, index: draft.index };
+      }
+    }
     picnic = cleanPicnic(saved.picnic);
     delivery = cleanDelivery(saved.delivery);
     boatyard = cleanBoatyard(saved.boatyard);
@@ -305,7 +313,7 @@ function renderLetterRecognition() {
   const language = settings.letterLanguage, letters = LETTERS[language], group = recognitionGroup();
   app.innerHTML = `${header()}<main id="main" class="letter-lesson-page letter-recognition-page" dir="rtl" lang="he">${letterNavigation('recognition')}
     <section class="letter-lesson-card"><div class="question-heading"><div><span class="section-kicker">משחק הזיהוי שלך</span><h1 tabindex="-1">מזהות אותיות</h1></div><button class="circle-button" data-action="replay" aria-label="שמיעת ההסבר שוב">${uiIcon('sound')}</button></div>
-    <p class="letter-route-description">מסתכלות על האות המוכרת, ומוצאות את אותה אות ${language === 'hebrew' ? 'בכתב יד' : 'קטנה באנגלית'}.</p>
+    <p class="letter-route-description">${language === 'hebrew' ? 'מתאימות אות דפוס לאות בכתב יד. אחר כך מחפשות את אות הדפוס.' : 'מתאימות אות גדולה לאות קטנה. אחר כך מחפשות את האות הגדולה.'}</p>
     <p class="letter-route-progress">תרגלת ${practicedLetterCount(progress.letterPractice, language, 'recognition')} מתוך ${letters.length} אותיות</p>
     <div class="letter-recognition-preview" dir="${language === 'hebrew' ? 'rtl' : 'ltr'}">${group.map(letter => `<div><bdi class="letter-familiar">${letter.familiar}</bdi>${letterShape(letter)}</div>`).join('')}</div>
     <div class="letter-recognition-start"><span class="section-kicker">${recognitionChoice ? 'האותיות שבחרת' : 'ממשיכות עם האותיות הבאות'}</span>${letterGroupPreview(group, language)}<small>${SESSION_LENGTH} צעדים קטנים · מדוגמה מוכרת לאתגר חדש</small><button class="primary-button" data-action="letter-practice">בואי נשחק ${uiIcon('arrow')}</button>${recognitionChoice ? '<button class="text-button" data-action="letter-recognition-auto">ממשיכות במסלול שלי</button>' : ''}</div>
@@ -324,11 +332,48 @@ function openLetterLesson(form = settings.letterWritingForm[settings.letterLangu
   view = 'letters-lesson'; render(); focusTitle(); announcements.say(letterNarration());
 }
 
+function openWritingWord(id) {
+  const { language, form } = letterDemo;
+  const word = WRITING_WORDS[language].find(entry => entry.id === id);
+  if (!word) return;
+  const key = `${language}:${form}`;
+  const draft = savedWritingWord(writingPractice.words, language, form);
+  writingWord = { language, form, word, index: draft?.word === word ? draft.index : 0 };
+  (writingPractice.words ??= {})[key] = { id, index: writingWord.index };
+  save(); view = 'letters-word'; render(); focusTitle();
+  wordPad.replay();
+}
+
+function renderWritingWord() {
+  const { language, form, word } = writingWord;
+  app.innerHTML = `${header()}<main id="main" class="letter-lesson-page letter-word-page" dir="rtl" lang="he"></main>${footer()}`;
+  wordPad = mountWritingWord(document.querySelector('#main'), { ...writingWord, nikud: settings.nikud, motion: motionEnabled,
+    speak: (clips, manual) => manual ? clockSpeak(clips) : announcements.say(clips),
+    onTraced(letter, index) {
+      const key = `${language}:${form}`;
+      writingWord.index = index;
+      if (index === word.indices.length) delete writingPractice.words[key];
+      else writingPractice.words[key] = { id: word.id, index };
+      const mode = writingMode(form);
+      learner.record({item:`letter:${language}:${letter.id}:${form}:trace`,domain:'letters'},'practice','trace');
+      if (album.linked) progress = album.recordWriting(language, letter.id, mode);
+      else progress.letterPractice = recordLetters(progress.letterPractice, language, mode, [letter.id]);
+      save();
+    },
+    onBack() {
+      narrator.stop(); view = 'letters-lesson'; render();
+      const picker = document.querySelector('.letter-word-picker');
+      picker.open = true; picker.querySelector('summary').focus();
+    },
+  });
+}
+
 function renderLetterLesson() {
   const letter = demoLetter(), language = letterDemo.language, letters = LETTERS[language];
   const mode = writingMode(letterDemo.form), main = letterDemo.form === 'main';
   const direction = language === 'hebrew' ? 'rtl' : 'ltr';
   app.innerHTML = `${header()}<main id="main" class="letter-lesson-page" dir="rtl" lang="he" data-letter-language="${language}" data-writing-form="${letterDemo.form}">${letterNavigation('writing')}${letterFormTabs()}<div class="writing-steps" role="group" aria-label="דרך תרגול הכתיבה">${Object.entries(WRITING_STEPS).map(([id,label])=>`<button data-action="writing-step" data-step="${id}" aria-pressed="${writingPractice.mode===id}">${label}</button>`).join('')}</div><div class="name-writing"><span>אוֹתִיּוֹת הַשֵּׁם שֶׁלִּי:</span>${nameLetterButtons(language)}</div>
+    ${wordPicker(letter, letterDemo.form, settings.nikud, writingPractice.words)}
     <section class="letter-lesson-card"><div class="question-heading"><div><span class="section-kicker">לולי מגלה איתך איך כותבים</span><h1 tabindex="-1">${language === 'hebrew' ? `כותבות ${main ? 'בדפוס' : 'בכתב יד'}` : `כותבות אותיות ${main ? 'גדולות' : 'קטנות'}`}</h1></div><button class="circle-button" data-action="replay" aria-label="שמיעת ההסבר שוב">${uiIcon('sound')}</button></div>
       <p class="letter-route-progress" id="letter-writing-progress">כתבת ${writingCount(language,letterDemo.form)} מתוך ${letters.length} אותיות</p>
       <div class="letter-lesson-layout" dir="rtl"><div><div class="letter-pair" dir="${direction}"><div class="letter-form-card"><small dir="rtl">${language === 'hebrew' ? 'האות שאת מכירה · דפוס' : 'האות שאת מכירה · גדולה'}</small><bdi class="letter-familiar" dir="${direction}" lang="${language === 'hebrew' ? 'he' : 'en'}">${letter.familiar}</bdi></div><span class="letter-pair-arrow" dir="ltr" aria-hidden="true">${language === 'hebrew' ? '←' : '→'}</span><div class="letter-form-card new-form"><small dir="rtl">${main ? language === 'hebrew' ? 'כך כותבים · דפוס' : 'כך כותבים · גדולה' : language === 'hebrew' ? 'אותה אות · כתב יד' : 'אותה אות · קטנה'}</small>${letterShape(letter)}</div></div>
@@ -524,18 +569,29 @@ function tallyGroup(n, offset, item) {
 
 function questionVisual(q) {
   if (q.type === 'character') return characterQuestion(q, settings.nikud);
-  if (q.type === 'letter') return `<div class="letter-question-layout" dir="rtl"><div class="letter-question-card"><small>${q.letter.language === 'hebrew' ? 'איזו אות בכתב יד מתאימה?' : 'איזו אות קטנה מתאימה?'}</small><bdi class="letter-familiar" dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}">${q.letter.familiar}</bdi></div><div id="letter-recognition-model" class="letter-recognition-model" ${q.showModel ? '' : 'hidden'}>${letterShape(q.letter)}<span>זו אותה אות · נסתכל על הצורה</span></div></div>`;
+  if (q.type === 'letter') {
+    const main = q.direction === 'to-main', hebrew = q.letter.language === 'hebrew';
+    const form = hebrew ? (main ? 'בדפוס' : 'בכתב יד') : (main ? 'גדולה' : 'קטנה');
+    const familiar = familiarGlyph(q.letter), alternate = letterShape(q.letter);
+    return `<div class="letter-question-layout" dir="rtl"><div class="letter-question-card"><small>איזו אות ${form} מתאימה?</small>${main ? alternate : familiar}</div><div id="letter-recognition-model" class="letter-recognition-model" ${q.showModel ? '' : 'hidden'}>${main ? familiar : alternate}<span>זו אותה אות · נסתכל על הצורה</span></div></div>`;
+  }
   if (q.type === 'clock') return `<div class="clock-question-clock">${analogClock(q.time.hour, q.time.minute)}</div><button class="text-button clock-learn-link" data-action="clock-learn">${uiIcon('hint')} נזכרות איך קוראים שעון</button>`;
+  if (q.direction === 'picture-sentence') return `<div class="caption-picture" role="img" aria-label="${q.word.he}">${art(q.word.id)}</div>`;
   if (q.type === 'read') return `<div class="word-card ${q.word.scene ? 'phrase-word' : q.word.he.length >= 6 ? 'long-word' : ''}">${q.actOut ? '' : '<span class="card-label">מה כתוב כאן?</span>'}<div class="target-word" lang="he" dir="rtl">${q.word.scene ? wordText(q.word).split(' ').map(word => `<span class="reading-token">${word}</span>`).join(' ') : wordText(q.word)}</div>${q.actOut ? '' : '<span class="word-underline"></span>'}</div>`;
   if (q.type === 'listen') return `<button class="listen-orb" data-action="listen-word" aria-label="שמיעת המילה באנגלית">${uiIcon('sound')}<span class="sound-waves"><i></i><i></i><i></i><i></i><i></i></span><span>לחצי ושמעי את המילה</span></button>`;
   if (q.type === 'count') return `<div class="counting-stage">${tallyGroup(q.a, 0, q.item)}<p class="tally-instruction">אפשר לגעת בכל פריט ולספור ביחד</p></div>`;
   return `<div class="addition-stage ${Math.max(q.a, q.b) > 10 ? 'large-add' : ''}" dir="ltr"><div class="add-group">${tallyGroup(q.a, 0, q.item)}<span class="group-number">${q.a}</span></div><span class="plus-sign" aria-label="ועוד">+</span><div class="add-group">${tallyGroup(q.b, q.a, q.item)}<span class="group-number">${q.b}</span></div></div><div class="equation" dir="ltr" aria-label="${q.a} ועוד ${q.b}">${q.a} <span>+</span> ${q.b} <span>=</span> <b>?</b></div>`;
 }
 
+function familiarGlyph(letter) {
+  return `<bdi class="letter-familiar" dir="${letter.language === 'hebrew' ? 'rtl' : 'ltr'}">${letter.familiar}</bdi>`;
+}
+
 function answerVisual(q, option) {
   if (q.type === 'character') return characterAnswer(q, option, settings.nikud);
-  if (q.type === 'letter') return letterShape(option);
+  if (q.type === 'letter') return q.direction === 'to-main' ? familiarGlyph(option) : letterShape(option);
   if (q.type === 'clock') return `<span class="clock-answer-time" dir="ltr">${option.digital}</span><span class="clock-answer-name">${option.he}</span>`;
+  if (q.direction === 'picture-sentence') return `<span class="caption-text" lang="he" dir="rtl">${wordText(option)}</span>`;
   if (q.type === 'read') return art(option.id);
   if (q.kind === 'color') return `<span class="color-balloon" style="--balloon:${option.hex}"><i></i></span>`;
   if (q.type === 'count' || q.type === 'add' || q.kind === 'number') return `<span class="answer-number" dir="ltr">${option.number}</span>`;
@@ -544,7 +600,7 @@ function answerVisual(q, option) {
 
 function answerLabel(q, option) {
   if (q.type === 'character') return characterAnswerLabel(q, option);
-  if (q.type === 'letter') return `${option.name} ${option.language === 'hebrew' ? 'בכתב יד' : 'קטנה'}`;
+  if (q.type === 'letter') return `${option.name} ${letterFormName(option.language, q.direction === 'to-main' ? 'main' : 'alternate')}`;
   if (q.type === 'clock') return `השעה ${option.he}, ${option.digital}`;
   if (q.type === 'read') return option.he;
   if (typeof option.number === 'number') return String(option.number);
@@ -557,14 +613,14 @@ function renderGame() {
   const length = round.questions.length;
   learner.record({...questionLearning(q),eventId:`${round.id}:seen:${round.index}`},'seen');
   const actingTitle = settings.nikud ? 'מְשַׂחֲקוֹת אֶת הַסִּפּוּר' : 'משחקות את הסיפור';
-  const title = q.actOut ? actingTitle : q.type === 'character' ? q.direction === 'picture-name' ? 'מה השם של הדמות?' : 'איזו דמות מתאימה לשם?' : q.type === 'letter' ? 'איזו אות מתאימה?' : q.type === 'clock' ? 'מה השעה בשעון?' : q.type === 'read' ? q.word.scene ? 'איזו תמונה מתאימה למה שכתוב?' : 'איזו תמונה מתאימה למילה?' : q.type === 'listen' ? 'מה שמעת באנגלית?' : q.type === 'add' ? 'כמה יש ביחד?' : 'כמה יש בסל?';
+  const title = q.direction === 'picture-sentence' ? (settings.nikud ? CLIPS[q.prompt].text : 'איזה משפט מתאים לתמונה?') : q.actOut ? actingTitle : q.type === 'character' ? q.direction === 'picture-name' ? 'מה השם של הדמות?' : 'איזו דמות מתאימה לשם?' : q.type === 'letter' ? 'איזו אות מתאימה?' : q.type === 'clock' ? 'מה השעה בשעון?' : q.type === 'read' ? q.word.scene ? 'איזו תמונה מתאימה למה שכתוב?' : 'איזו תמונה מתאימה למילה?' : q.type === 'listen' ? 'מה שמעת באנגלית?' : q.type === 'add' ? 'כמה יש ביחד?' : 'כמה יש בסל?';
   const stage = q.type === 'read' ? round.reading === 'all' ? Object.values(READING_LEVELS).find(level => level.level === q.word.level) : READING_LEVELS[round.reading] : null;
   app.innerHTML = `${header()}<main id="main" class="game-page ${mission.color} ${q.type === 'character' ? 'character-game' : q.type === 'clock' ? 'clock-game' : q.type === 'letter' ? 'letter-game' : q.type === 'read' ? 'reading-game' : ''}${q.actOut ? ' act-out-game' : ''}">
     <div class="game-topline"><button class="text-button back-button" data-action="${q.type === 'character' ? 'characters-menu' : q.type === 'read' ? 'reading-levels' : q.type === 'letter' ? 'letters-menu' : 'home'}">${uiIcon('home')} ${q.type === 'character' ? 'לבחירת חברים' : q.type === 'read' ? 'לבחירת שלב' : q.type === 'letter' ? 'למסלולי האותיות' : 'למפת ההרפתקאות'}</button><span class="mission-label">${mission.name}${q.type === 'character' ? ` · שלב ${CHARACTER_LEVELS[round.characterLevel].number}` : ''}${q.type === 'letter' ? ' · משחק זיהוי' : ''}${stage ? ` · ${stage.number ? `שלב ${stage.number}` : stage.name}` : ''}</span><span class="step-label">צעד ${round.index + 1} מתוך ${length}</span></div>
     <div class="step-track" aria-label="התקדמות: ${round.index} מתוך ${length}">${round.questions.map((_, i) => `<span class="step-dot ${i < round.index ? 'done' : i === round.index ? 'current' : ''}">${i < round.index ? uiIcon('check') : i + 1}</span>`).join('')}</div>
     <section class="game-board"><div class="question-heading"><div><span class="section-kicker">${ADVENTURE_PHASES[q.phase]}</span><h1 id="question-title" tabindex="-1">${title}</h1></div><button class="circle-button replay-button" data-action="replay" aria-label="שמיעת ההוראות שוב">${uiIcon('sound')}</button></div>
       <div class="question-visual">${questionVisual(q)}</div>
-      ${q.actOut ? '<div id="act-out-root"></div>' : `<div class="answer-grid ${q.options.length === 2 ? 'two-options' : ''} ${q.type === 'character' ? q.direction === 'picture-name' ? 'character-names' : 'character-pictures' : ''} ${q.type === 'read' && q.word.scene ? 'scene-options' : ''} ${q.type === 'count' || q.type === 'add' || q.kind === 'number' ? 'numeric-options' : ''}" ${q.type === 'letter' ? `dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}"` : ''} role="group" aria-label="בחירת תשובה">${q.options.map(option => `${q.type === 'clock' ? '<div class="clock-choice">' : ''}<button class="answer-button ${round.attempted.has(option.id) ? 'try-again' : ''}" data-action="answer" data-answer="${option.id}" aria-label="${answerLabel(q, option)}" ${round.attempted.has(option.id) ? 'disabled' : ''}>${answerVisual(q, option)}<span class="answer-check">${uiIcon('check')}</span></button>${q.type === 'clock' ? `<button class="clock-option-sound" data-action="clock-option-audio" data-clips="${option.clips.join(' ')}" aria-label="שמיעת האפשרות ${option.he}">${uiIcon('sound')}</button></div>` : ''}`).join('')}</div>`}
+      ${q.actOut ? '<div id="act-out-root"></div>' : `<div class="answer-grid ${q.options.length === 2 ? 'two-options' : ''} ${q.type === 'character' ? q.direction === 'picture-name' ? 'character-names' : 'character-pictures' : ''} ${q.direction === 'picture-sentence' ? 'caption-options' : q.type === 'read' && q.word.scene ? 'scene-options' : ''} ${q.type === 'count' || q.type === 'add' || q.kind === 'number' ? 'numeric-options' : ''}" ${q.type === 'letter' ? `dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}"` : ''} role="group" aria-label="בחירת תשובה">${q.options.map(option => `${q.type === 'clock' ? '<div class="clock-choice">' : ''}<button class="answer-button ${round.attempted.has(option.id) ? 'try-again' : ''}" data-action="answer" data-answer="${option.id}" aria-label="${answerLabel(q, option)}" ${round.attempted.has(option.id) ? 'disabled' : ''}>${answerVisual(q, option)}<span class="answer-check">${uiIcon('check')}</span></button>${q.type === 'clock' ? `<button class="clock-option-sound" data-action="clock-option-audio" data-clips="${option.clips.join(' ')}" aria-label="שמיעת האפשרות ${option.he}">${uiIcon('sound')}</button></div>` : ''}`).join('')}</div>`}
       <div class="feedback-row"><div class="feedback" id="feedback" role="status" aria-live="polite">קחי את הזמן. החברים כאן איתך ♡</div><button class="hint-button" data-action="hint">${uiIcon('hint')} רמז קטן</button><button class="primary-button next-button" data-action="next" hidden>ממשיכות ${uiIcon('arrow')}</button></div>
       <div id="letter-success-examples">${round.resolved && q.type==='letter' ? letterExampleCards(q.letter,settings.nikud) : ''}</div><p id="audio-notice" class="audio-notice" role="status" hidden></p>
     </section><div class="buddy-bar">${pup(mission.pup)}<span id="buddy-message">${{ luli: 'לולי', bobi: 'בובי', tofi: 'טופי' }[mission.pup]} כאן לעזור לך!</span><span class="buddy-hearts">♡ ♡ ♡</span></div>
@@ -632,6 +688,7 @@ function renderReadingLevels() {
     <div class="reading-levels-topline"><button class="text-button" data-action="home">${uiIcon('home')} לבית החברים</button><span>גינת המילים · כל פעם מגלות עוד</span></div>
     <section class="reading-levels-heading"><div><span class="section-kicker">לולי קוראת איתך</span><h1 tabindex="-1">מה נקרא היום?</h1><p>${WORDS.filter(word => !word.scene).length} מילים ו־${WORDS.filter(word => word.scene).length} צירופים ומשפטים · בכל פעם מגלות עוד ♡</p></div><button class="circle-button" data-action="replay" aria-label="שמיעת ההסבר שוב">${uiIcon('sound')}</button></section>
     <section class="reading-continue"><div class="reading-continue-art">${art(selected.art || 'flower')}</div><div><span class="section-kicker">נמשיך מאיפה שעצרנו?</span><h2>${selected.number ? `שלב ${selected.number} · ` : ''}${selected.name}</h2></div><button class="primary-button" data-action="reading-level" data-level="${settings.reading}">בואי נקרא ${uiIcon('arrow')}</button></section>
+    <button class="secondary-button reading-caption-entry" data-action="reading-level" data-level="captions">${settings.nikud ? 'מִתְּמוּנָה לְמִשְׁפָּט' : 'מתמונה למשפט'} ${uiIcon('arrow')}</button>
     <nav class="reading-path" aria-label="קפיצה לשלבי הקריאה">${stages.map(([key, stage]) => `<a href="#reading-stage-${key}" aria-label="מעבר לשלב ${stage.number}: ${stage.name}" ${settings.reading === key ? 'aria-current="step"' : ''}><bdi dir="ltr">${stage.number}</bdi></a>`).join('')}</nav>
     <div class="reading-stage-grid">${stages.map(([key, stage]) => `<article id="reading-stage-${key}" class="reading-stage ${stage.color} ${stage.number >= 6 ? 'long-samples' : ''} ${settings.reading === key ? 'last-chosen' : ''}">
       <button class="reading-stage-start" data-action="reading-level" data-level="${key}" aria-label="שלב ${stage.number}: ${stage.name}"><span class="reading-stage-number" aria-hidden="true"><bdi dir="ltr">${stage.number}</bdi></span>${stage.fresh ? '<span class="reading-new">חדש בגינה ✦</span>' : ''}
@@ -684,6 +741,7 @@ function render() {
   dailyController?.destroy(); dailyController=null;
   theaterController?.destroy(); theaterController=null;
   letterPad?.destroy(); letterPad = null;
+  wordPad?.destroy(); wordPad = null;
   clockSchool?.destroy(); clockSchool = null;
   applyPreferences();
   document.body.classList.toggle('playing', view === 'game');
@@ -718,6 +776,7 @@ function render() {
   else if (view === 'game') { renderGame(); restoreQuestionState(); }
   else if (view === 'clock-school') renderClockSchool();
   else if (view === 'letters-lesson') renderLetterLesson();
+  else if (view === 'letters-word') renderWritingWord();
   else if (view === 'letters-menu') renderLetterMenu();
   else if (view === 'letters-writing') renderLetterWriting();
   else if (view === 'letters-recognition') renderLetterRecognition();
@@ -757,7 +816,7 @@ function startMission(mission, skipLesson = false) {
   render();
   focusTitle();
   const q = current();
-  announcements.say(['good-luck', ...(mission === 'characters' ? round.characterMode === 'mixed' ? ['characters-intro', q.prompt] : [q.prompt] : mission === 'hebrew' ? [READING_LEVELS[round.reading].clip, q.prompt] : [mission === 'letters' ? q.prompt : MISSIONS[mission].intro]), ...(q.showModel ? ['letters-recognition-hint'] : []), ...(q.targetClip ? [q.targetClip] : [])]);
+  announcements.say(['good-luck', ...(mission === 'characters' ? round.characterMode === 'mixed' ? ['characters-intro', q.prompt] : [q.prompt] : mission === 'hebrew' ? [...new Set([READING_LEVELS[round.reading].clip, q.prompt])] : [mission === 'letters' ? q.prompt : MISSIONS[mission].intro]), ...(q.showModel ? ['letters-recognition-hint'] : []), ...(q.targetClip ? [q.targetClip] : [])]);
 }
 
 function startReadingLevel(level) {
@@ -777,6 +836,7 @@ function leaveTo(destination) {
 }
 
 function replay() {
+  if (view === 'letters-word') { wordPad.replay(); return; }
   if (!settings.sound) { settings.sound = true; save(); narrator.enabled = true; renderSoundButton(); }
   if(view==='journey'){journeyController?.replay();return;}
   if (['number-round', 'number-writing', 'number-dictation', 'fruit-cutting'].includes(view)) { numberController?.replay(); return; }
@@ -858,6 +918,11 @@ function hint() {
     if (guideStory(firstStoryClue(q))) return;
   }
   round.helped.add(round.index); checkpoint();
+  if (q.direction === 'picture-sentence') {
+    document.querySelector('#feedback').textContent = settings.nikud ? CLIPS[q.hint].text : 'בואי נשמע מה רואים בתמונה.';
+    announcements.say([q.hint, `he-${q.word.id}`], { slow: true });
+    return;
+  }
   if (q.type === 'character') {
     document.querySelector('#feedback').textContent = 'נשמע את השם ביחד, ונמשיך לנסות ♡';
     announcements.say([q.hint, q.character.clip]); return;
@@ -865,7 +930,7 @@ function hint() {
   if (q.type === 'letter') {
     document.querySelector('#letter-recognition-model').hidden = false;
     document.querySelector('#feedback').textContent = 'זו אותה אות. נסתכל על הצורה שלה ונמצא אותה למטה.';
-    announcements.say(['letters-recognition-hint', q.targetClip]); return;
+    announcements.say(['letters-recognition-hint', q.letter.clip]); return;
   }
   if (q.type === 'clock') {
     document.querySelector('#feedback').textContent = q.time.minute === 0 ? 'נתחיל מהמחוג הקצר והסגול. על איזה מספר הוא מצביע?' : 'נבדוק את המחוג הארוך, ואז נסתכל על המחוג הקצר.';
@@ -1186,7 +1251,7 @@ function openNumberDictation() {
 function renderNumberDictation() {
   app.innerHTML = `${header()}<main id="main" class="number-workshop"><div id="number-dictation-root"></div></main>${footer()}`;
   numberController = mountNumberDictation(document.querySelector('#number-dictation-root'), {
-    speak: clips => announcements.say(clips),
+    getItems: () => learner.items, speak: clips => announcements.say(clips),
     onPractice: number => learner.record({ item: numberDictationKey(number), domain: 'math' }, 'practice', 'dictation'),
   });
 }
@@ -1512,8 +1577,10 @@ function renderLearningHub(){
   const hebrew = hub === 'hebrew';
   let sections;
   if (hebrew) {
+    const captionStage = READING_LEVELS.captions;
     const reading = card('garden', '', 'כָּל שְׁלָבֵי הַקְּרִיאָה', 'מִמִּלִּים קְצָרוֹת וְעַד מִשְׁפָּטִים.', 'flower')
-      + card(LITTLE_STORIES.route.action, `data-level="${LITTLE_STORIES.route.level}"`, ...LITTLE_STORIES.he, LITTLE_STORIES.icon);
+      + card(LITTLE_STORIES.route.action, `data-level="${LITTLE_STORIES.route.level}"`, ...LITTLE_STORIES.he, LITTLE_STORIES.icon)
+      + card('reading-level', 'data-level="captions"', 'מִתְּמוּנָה לְמִשְׁפָּט', captionStage.description, captionStage.art);
     const workshop = ['חֲלָקִים קְטַנִּים וּמִלִּים מֻכָּרוֹת', 'מִלִּים אֲרֻכּוֹת יוֹתֵר', 'עוֹד אוֹתִיּוֹת וְצֵרוּפִים', 'אֶתְגָּר לְבִנְיַן מִלִּים']
       .map((description, i) => journeyChoice('workshop', i + 1, `שָׁלָב ${i + 1}`, description, 'pencil')).join('');
     sections = group('קוֹרְאוֹת וּמְשַׂחֲקוֹת', reading) + group('סַדְנַת הַמִּלִּים', workshop)
@@ -1629,6 +1696,7 @@ app.addEventListener('click', event => {
     case 'letter-previous': selectLetter(letterDemo.index - 1); break;
     case 'letter-next': selectLetter(letterDemo.index + 1); break;
     case 'letter-example': if(CLIPS[button.dataset.clip]) clockSpeak(button.dataset.clip); break;
+    case 'write-word': if (view === 'letters-lesson') openWritingWord(button.dataset.word); break;
     case 'letter-sound': clockSpeak(demoLetter().clip); break;
     case 'letter-demo': letterPad.demo(); announcements.say('letters-demo'); break;
     case 'letter-step': letterPad.step(); break;

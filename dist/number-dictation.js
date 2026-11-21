@@ -7,28 +7,36 @@ import { numberClip, spokenNumber } from './number-workshop.js?v=2.3.0-numbers';
 export const NUMBER_DICTATION_TITLE = 'מַקְשִׁיבוֹת וְכוֹתְבוֹת';
 export const numberDictationKey = number => `math:dictation:${number}`;
 
+const dictationRanges = {
+  all: { label: 'כָּל הַמִּסְפָּרִים', numbers: WRITING_NUMBERS },
+  digits: { label: 'סִפְרָה אַחַת', numbers: WRITING_NUMBERS.filter(n => n < 10) },
+  teens: { label: 'מֵעֶשֶׂר עַד תְּשַׁע עֶשְׂרֵה', numbers: WRITING_NUMBERS.filter(n => n >= 10 && n < 20) },
+  tens: { label: 'עֲשָׂרוֹת שְׁלֵמוֹת', numbers: WRITING_NUMBERS.filter(n => n > 0 && n % 10 === 0) },
+};
+
 export function dictationNumberClips(number) {
   return number === 8 ? [numberClip('dictation-8')] : spokenNumber(number);
 }
 
-export function numberDictationDraw(rng = Math.random) {
+export function numberDictationDraw(rng = Math.random, range = 'all', getItems = () => ({})) {
   let queue = [], previous;
   return () => {
     if (!queue.length) {
-      queue = shuffle(WRITING_NUMBERS, rng);
-      if (queue.at(-1) === previous) {
-        const other = Math.floor(rng() * (queue.length - 1));
-        [queue[other], queue[queue.length - 1]] = [queue.at(-1), queue[other]];
-      }
+      const items = getItems();
+      const practice = n => items[numberDictationKey(n)]?.practice || 0;
+      const last = n => items[numberDictationKey(n)]?.last || 0;
+      queue = shuffle(dictationRanges[range].numbers, rng)
+        .sort((a, b) => practice(a) - practice(b) || last(a) - last(b));
+      if (queue[0] === previous) [queue[0], queue[1]] = [queue[1], queue[0]];
     }
-    previous = queue.pop();
+    previous = queue.shift();
     return previous;
   };
 }
 
-export function mountNumberDictation(root, { speak, onPractice }) {
+export function mountNumberDictation(root, { speak, getItems, onPractice }) {
   const events = new AbortController();
-  const drawNumber = numberDictationDraw();
+  let drawNumber = numberDictationDraw(Math.random, 'all', getItems);
   let number = drawNumber(), revealed = false;
 
   root.innerHTML = `<div class="number-round-top">
@@ -39,6 +47,10 @@ export function mountNumberDictation(root, { speak, onPractice }) {
       <h1 id="number-dictation-title" tabindex="-1">${NUMBER_DICTATION_TITLE}</h1>
     </div>
     <div class="number-dictation-layout">
+      <label class="number-writing-picker"><span>טְוַח הַמִּסְפָּרִים</span>
+        <select data-dictation="range">${Object.entries(dictationRanges).map(([id, { label }]) =>
+          `<option value="${id}">${label}</option>`).join('')}</select>
+      </label>
       <button type="button" class="secondary-button number-dictation-listen" data-action="replay">${uiIcon('sound')} שׁוֹמְעוֹת שׁוּב</button>
       <svg class="free-writing-pad number-dictation-pad" viewBox="0 0 380 230" role="img" aria-label="משטח כתיבה חופשית למספר ששמעת" dir="ltr">
         <g class="writing-lines" aria-hidden="true"><path d="M18 124H362M18 190H362"/></g>
@@ -58,6 +70,7 @@ export function mountNumberDictation(root, { speak, onPractice }) {
   </section>`;
 
   const svg = root.querySelector('.number-dictation-pad');
+  const range = root.querySelector('[data-dictation="range"]');
   const listen = root.querySelector('[data-action="replay"]');
   const clear = root.querySelector('[data-dictation="clear"]');
   const reveal = root.querySelector('[data-dictation="reveal"]');
@@ -70,6 +83,7 @@ export function mountNumberDictation(root, { speak, onPractice }) {
 
   function updateControls() {
     clear.disabled = !pad.hasMarks();
+    range.disabled = pad.hasMarks() && !revealed;
     reveal.disabled = !pad.hasInk();
     clear.hidden = revealed;
     reveal.hidden = revealed;
@@ -78,6 +92,19 @@ export function mountNumberDictation(root, { speak, onPractice }) {
     svg.classList.toggle('is-locked', revealed);
   }
 
+  function newNumber() {
+    number = drawNumber();
+    revealed = false;
+    answerNumber.textContent = '';
+    pad.clear();
+    listen.focus();
+    void replay();
+  }
+
+  range.addEventListener('change', () => {
+    drawNumber = numberDictationDraw(Math.random, range.value, getItems);
+    newNumber();
+  }, { signal: events.signal });
   clear.addEventListener('click', () => {
     if (revealed) return;
     pad.clear();
@@ -94,12 +121,7 @@ export function mountNumberDictation(root, { speak, onPractice }) {
   }, { signal: events.signal });
   next.addEventListener('click', () => {
     if (!revealed) return;
-    number = drawNumber();
-    revealed = false;
-    answerNumber.textContent = '';
-    pad.clear();
-    listen.focus();
-    void replay();
+    newNumber();
   }, { signal: events.signal });
 
   return {
