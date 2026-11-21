@@ -27,3 +27,20 @@
 .story-counted{left:50%;right:auto;top:18%;width:max-content;transform:translateX(-50%);display:grid;grid-template-columns:repeat(var(--count-columns,4),48px);gap:6px;justify-content:center}.story-counted button{flex:none;width:48px;max-width:48px;min-width:48px;height:48px;min-height:48px;padding:3px}.story-counted button svg{width:42px;height:42px}.story-counted b{top:-5px;left:-4px;width:22px;height:22px;font-size:14px;line-height:22px}
 .blend-reading-word { display: flex; justify-content: center; align-items: baseline; gap: .4em; font-size: clamp(34px, 8vw, 50px); }
 .blend-reading-word span { font-size: .78em; }
+
+.match-model, .match-hint { display: grid; justify-items: center; align-items: center; margin: 12px auto 20px; }
+.match-model > svg, .match-model > .match-count { width: clamp(100px, 20vw, 160px); height: auto; }
+.match-hint > svg, .match-hint > .match-count { width: 85px; height: auto; }
+.match-word { display: flex; justify-content: center; align-items: center; gap: 12px; margin: 16px auto 24px; }
+.match-word b { font-size: clamp(23px, 5vw, 40px); line-height: 1.2; }
+.match-sound { flex: none; display: grid; place-items: center; min-width: 46px; min-height: 46px; border: 1px solid #a2c8be; border-radius: 50%; background: #edf7f3; color: #296354; }
+.match-sound svg { width: 23px; height: 23px; }
+.match-pictures > button { display: grid; place-items: center; }
+.match-count { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: center; justify-items: center; width: 100%; max-width: 150px; aspect-ratio: 1; }
+.match-count[data-count="1"] { grid-template-columns: 1fr; }
+.match-count[data-count="3"] > :last-child { grid-column: span 2; max-width: 50%; }
+.match-count > svg { width: 100%; height: auto; }
+.match-labels { display: grid; gap: 10px; max-width: 490px; margin: 14px auto; }
+.match-option { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+.match-option > [data-j="answer"] { width: 100%; min-height: 56px; background: #fffdf8; border: 2px solid #bccdc3; border-radius: 14px; padding: 8px 12px; color: #304c48; font-size: clamp(18px, 3.5vw, 26px); }
+.match-option > [data-j="answer"]:hover, .match-option > [data-j="answer"]:focus-visible { background: #eef7f0; border-color: #529985; }

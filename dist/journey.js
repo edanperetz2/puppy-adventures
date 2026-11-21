@@ -1,5 +1,6 @@
 import { WORDS, ANIMALS, COLORS, ENGLISH_OBJECTS } from './content.js?v=2.2.0-voices';
 import { MORE_PHONICS, BLEND_GROUPS, PICTURE_BLEND_GROUPS } from './english-expansion.js';
+import { MATCH_LEVELS, makeEnglishPictureBank, chooseEnglishPictureTargets, englishPictureChoices, validEnglishPictureChoices, englishPictureQuestions } from './english-picture-match.js';
 import { distinctWordPictures } from './vocabulary.js';
 import { WORKSHOP_WORDS, STORIES } from './journey-content.js';
 import { WORD_CONTEXTS } from './word-contexts.js';
@@ -48,6 +49,8 @@ for (const [letter, examples] of Object.entries(LETTER_EXAMPLES)) {
   }
 }
 export const ENGLISH_WORDS = [...listeningWords.values()];
+export const ENGLISH_PICTURES = makeEnglishPictureBank(ENGLISH_WORDS, WORDS, COLORS);
+const englishLevels = ['single', 'pairs', 'cars', ...Object.keys(MATCH_LEVELS)];
 export const STORY_RELATIONS = ['on', 'under', 'beside'];
 // Each route has the same opening and ending. Its middle pages keep related
 // events together and give the other illustrated pages a turn on later visits.
@@ -116,7 +119,7 @@ export const graphemes = text => [...text.normalize('NFC').matchAll(/[א-ת][\u0
 export function newJourney(mode,level,items={},options={}) {
   if(!JOURNEYS[mode])throw Error('unknown_journey');
   const rng=options.rng||Math.random, seed=Math.floor(rng()*0x100000000);
-  const cleanLevel=mode==='stories' ? STORIES.some(s=>s.id===level)?level:STORIES[0].id : mode==='english' ? ['single','pairs','cars'].includes(level)?level:'single' : mode==='objects' ? ['quantity','bonds','tens','takeaway'].includes(level)?level:'quantity' : mode==='sounds' ? ['sounds','blend'].includes(level)?level:'sounds' : Math.max(1,Math.min(4,Number(level)||1));
+  const cleanLevel=mode==='stories' ? STORIES.some(s=>s.id===level)?level:STORIES[0].id : mode==='english' ? englishLevels.includes(level)?level:'single' : mode==='objects' ? ['quantity','bonds','tens','takeaway'].includes(level)?level:'quantity' : mode==='sounds' ? ['sounds','blend'].includes(level)?level:'sounds' : Math.max(1,Math.min(4,Number(level)||1));
   const selected=mode==='workshop'?choosePractice(WORKSHOP_WORDS.filter(w=>w.level<=cleanLevel),items,w=>`workshop:${w.id}`,SESSION_LENGTH,Date.now(),rng):[];
   const words=selected.length?Array.from({length:SESSION_LENGTH},(_,i)=>selected[i%selected.length]).sort((a,b)=>a.level-b.level).map(w=>w.id):[];
   const familiar=['dog','cat','red','blue'];
@@ -138,14 +141,24 @@ export function newJourney(mode,level,items={},options={}) {
   // Save the shuffled list in the round, so reopening preserves the clue and
   // newly learned words also get a turn as the easy opening questions.
   const english = (mode === 'english' && cleanLevel === 'single' ? mix(warm, rng) : warm).concat(fresh);
-  return {id:globalThis.crypto.randomUUID(),revision:2,length:SESSION_LENGTH,shuffleAnswers:true,varietyFrom:0,...(distinctReview ? { distinctReview } : {}),...(storyRoute !== undefined ? { storyRoute } : {}),introducing:Boolean(newWord),mode,level:cleanLevel,seed,words,soundIds,blendWords,pairColors,examples:mode==='objects'?objectExamples(cleanLevel,max,items,rng):[],english,max,index:0,state:{},helped:[],observed:[],at:Date.now()};
+  const pictureTargets = mode === 'english' && Object.hasOwn(MATCH_LEVELS, cleanLevel)
+    ? chooseEnglishPictureTargets(ENGLISH_PICTURES, cleanLevel, items, rng) : null;
+  const pictureRound = pictureTargets ? { pictureTargets, pictureChoices: englishPictureChoices(ENGLISH_PICTURES, pictureTargets, seeded(seed)) } : {};
+  return {id:globalThis.crypto.randomUUID(),revision:2,length:SESSION_LENGTH,shuffleAnswers:true,varietyFrom:0,...pictureRound,...(distinctReview ? { distinctReview } : {}),...(storyRoute !== undefined ? { storyRoute } : {}),introducing:Boolean(newWord),mode,level:cleanLevel,seed,words,soundIds,blendWords,pairColors,examples:mode==='objects'?objectExamples(cleanLevel,max,items,rng):[],english,max,index:0,state:{},helped:[],observed:[],at:Date.now()};
 }
 export function cleanJourney(raw) {
   if(!raw||!Object.hasOwn(JOURNEYS,raw.mode)||!/^[0-9a-f-]{36}$/i.test(raw.id)||!Number.isInteger(raw.seed))return null;
   const length = journeyLength(raw);
   if (!Number.isInteger(raw.index) || raw.index < 0 || raw.index >= length) return null;
-  const allowed=raw.mode==='workshop'?[1,2,3,4]:raw.mode==='stories'?STORIES.map(s=>s.id):raw.mode==='english'?['single','pairs','cars']:raw.mode==='objects'?['quantity','bonds','tens','takeaway']:['sounds','blend'];
+  const allowed=raw.mode==='workshop'?[1,2,3,4]:raw.mode==='stories'?STORIES.map(s=>s.id):raw.mode==='english'?englishLevels:raw.mode==='objects'?['quantity','bonds','tens','takeaway']:['sounds','blend'];
   if(!allowed.includes(raw.level))return null;
+  let pictureRound = {};
+  if (raw.mode === 'english' && Object.hasOwn(MATCH_LEVELS, raw.level)) {
+    if (length !== SESSION_LENGTH || !Array.isArray(raw.pictureTargets) || raw.pictureTargets.length !== length ||
+        !raw.pictureTargets.every(id => ENGLISH_PICTURES.byId.has(id)) || new Set(raw.pictureTargets).size !== length) return null;
+    if (!validEnglishPictureChoices(ENGLISH_PICTURES, raw.pictureTargets, raw.pictureChoices)) return null;
+    pictureRound = { pictureTargets: [...raw.pictureTargets], pictureChoices: raw.pictureChoices.map(row => [...row]) };
+  }
   const routes = raw.mode === 'stories' && length === SESSION_LENGTH ? STORIES.find(story => story.id === raw.level).routes : undefined;
   const storyRoute = Number.isInteger(raw.storyRoute) && raw.storyRoute >= 0 && raw.storyRoute < routes?.length ? raw.storyRoute : undefined;
   const words=(Array.isArray(raw.words)?raw.words:[]).filter(id=>WORKSHOP_WORDS.some(w=>w.id===id)).slice(0,length);
@@ -163,7 +176,7 @@ export function cleanJourney(raw) {
   if(revision===2&&raw.mode==='objects'&&examples.length!==length)return null;
   const steps = value => [...new Set((Array.isArray(value) ? value : []).filter(n => Number.isInteger(n) && n >= 0 && n < length))];
   const varietyFrom = Number.isInteger(raw.varietyFrom) && raw.varietyFrom >= 0 && raw.varietyFrom < length ? raw.varietyFrom : undefined;
-  return {id:raw.id,revision,length,shuffleAnswers:raw.shuffleAnswers===true,varietyFrom,...(distinctReview ? { distinctReview } : {}),...(storyRoute !== undefined ? { storyRoute } : {}),introducing:raw.introducing!==false,mode:raw.mode,level:raw.level,seed:raw.seed>>>0,words,soundIds,blendWords,pairColors,examples,english,max,index:raw.index,state:{chosen:Array.isArray(state.chosen)?state.chosen.filter(n=>Number.isInteger(n)&&n>=0&&n<24).slice(0,24):[],tokens:Array.isArray(state.tokens)?[...new Set(state.tokens.filter(n=>Number.isInteger(n)&&n>=0&&n<100))].slice(0,100):[],quantity:Math.max(0,Math.min(100,Math.floor(state.quantity)||0)),resolved:state.resolved===true,placed:state.placed===true,showModel:state.showModel===true,attempted:Array.isArray(state.attempted)?state.attempted.filter(id=>typeof id==='string'&&/^[a-z0-9-]{1,40}$/.test(id)).slice(0,4):[]},helped:steps(raw.helped),observed:steps(raw.observed),at:Number.isSafeInteger(raw.at)?raw.at:Date.now()};
+  return {id:raw.id,revision,length,shuffleAnswers:raw.shuffleAnswers===true,varietyFrom,...pictureRound,...(distinctReview ? { distinctReview } : {}),...(storyRoute !== undefined ? { storyRoute } : {}),introducing:raw.introducing!==false,mode:raw.mode,level:raw.level,seed:raw.seed>>>0,words,soundIds,blendWords,pairColors,examples,english,max,index:raw.index,state:{chosen:Array.isArray(state.chosen)?state.chosen.filter(n=>Number.isInteger(n)&&n>=0&&n<24).slice(0,24):[],tokens:Array.isArray(state.tokens)?[...new Set(state.tokens.filter(n=>Number.isInteger(n)&&n>=0&&n<100))].slice(0,100):[],quantity:Math.max(0,Math.min(100,Math.floor(state.quantity)||0)),resolved:state.resolved===true,placed:state.placed===true,showModel:state.showModel===true,attempted:Array.isArray(state.attempted)?state.attempted.filter(id=>typeof id==='string'&&/^[a-z0-9-]{1,40}$/.test(id)).slice(0,4):[]},helped:steps(raw.helped),observed:steps(raw.observed),at:Number.isSafeInteger(raw.at)?raw.at:Date.now()};
 }
 
 export function resumeJourney(raw) {
@@ -185,6 +198,7 @@ function soundReview(phoneme, previous, rng) {
 
 export function journeyQuestions(plan) {
   const rng=seeded(plan.seed),result=[];
+  if (plan.mode === 'english' && Object.hasOwn(MATCH_LEVELS, plan.level)) return englishPictureQuestions(ENGLISH_PICTURES, plan);
   const length = journeyLength(plan), short = length === SESSION_LENGTH;
   const story = plan.mode === 'stories' ? STORIES.find(entry => entry.id === plan.level) : null;
   let storyPages;

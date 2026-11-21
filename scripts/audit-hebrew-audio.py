@@ -53,6 +53,8 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--keys', nargs='+')
     parser.add_argument('--no-quantize', action='store_true')
+    parser.add_argument('--short-clips', action='store_true',
+                        help='For short recordings, reduce the silence padding in the encoder input')
     args = parser.parse_args()
     clips = json.loads(args.source.read_text(encoding='utf-8-sig'))
     selected = {key: clip for key, clip in clips.items() if clip['lang'] == 'he-IL' and (not args.keys or key in args.keys)}
@@ -83,13 +85,25 @@ def main():
         path = args.audio_dir / f'{key}.mp3'
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         cached = report['clips'].get(key, {})
-        if cached.get('sha256') == digest and cached.get('expected_ipa') == expected:
+        if (cached.get('sha256') == digest and cached.get('expected_ipa') == expected
+                and ('encoder_frames' in cached) == args.short_clips):
             continue
         start = time.monotonic()
         data = samples(path)
         utterances = []
+        analysis_windows = []
         for offset in range(0, len(data), 25 * 16000):
-            inputs = processor(data[offset:offset + 25 * 16000], sampling_rate=16000, return_tensors='pt', return_attention_mask=True)
+            section = data[offset:offset + 25 * 16000]
+            inputs = processor(section, sampling_rate=16000, return_tensors='pt', return_attention_mask=True)
+            if args.short_clips:
+                # Preserve every sample and at least a second of padding after
+                # the recording. Reuse the model's original positional weights.
+                frames = min(3000, max(500, int(np.ceil((len(section) / 160 + 100) / 100)) * 100))
+                analysis_windows.append(frames)
+                model.config.max_source_positions = frames // 2
+                model.model.encoder.embed_positions.num_embeddings = frames // 2
+                inputs['input_features'] = inputs['input_features'][:, :, :frames]
+                inputs['attention_mask'] = inputs['attention_mask'][:, :frames]
             with torch.inference_mode():
                 tokens = model.generate(**inputs, language='he', task='transcribe', max_new_tokens=440, do_sample=False, num_beams=1, use_cache=True)
             utterances.append(processor.batch_decode(tokens, skip_special_tokens=True)[0])
@@ -100,6 +114,8 @@ def main():
             'phoneme_edit_ratio': round(distance(expected_normal, actual_normal) / max(1, len(expected_normal)), 4),
             'seconds': round(time.monotonic() - start, 2),
         }
+        if args.short_clips:
+            record['encoder_frames'] = analysis_windows[0] if len(analysis_windows) == 1 else analysis_windows
         report['clips'][key] = record
         pending = args.output.with_suffix('.json.part')
         pending.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')

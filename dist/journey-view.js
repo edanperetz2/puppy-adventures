@@ -5,6 +5,8 @@ import { adventurePhase } from './adventure.js?v=2.2.2-six';
 import { escapeHtml as esc } from './profiles.js?v=2.2.0-voices';
 import { chunkClip, GIVING_CLIPS } from './journey-audio.js?v=2.2.0-voices';
 import { STORIES } from './journey-content.js';
+import { englishPictureView } from './english-picture-view.js';
+import { MATCH_LEVELS } from './english-picture-match.js';
 
 const color = id => COLORS.find(c=>c.id===id)?.hex || '#7baebc';
 export function pairPicture(pair) {
@@ -85,6 +87,9 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
     if (task.operation === 'takeaway') {
       const toGive = task.known - s().tokens.length;
       clips.push(toGive > 0 ? GIVING_CLIPS[toGive] : 'journey-apples-left');
+    } else if (task.kind === 'english-picture' && task.level === 'picture-words') {
+      clips.push(task.prompt);
+      if (s().showModel) clips.push(task.clip);
     } else if (task.readPicture) {
       clips.push(task.prompt);
       if (s().showModel) clips.push(task.clip);
@@ -135,6 +140,7 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
     return `<div class="story-reading"><span>סִפּוּר ${STORIES.findIndex(story=>story.id===plan.level)+1} · עַמּוּד ${plan.index+1}</span><p dir="rtl" lang="he">${nikud?p.text:p.text.replace(/[\u0591-\u05c7]/gu,'')}</p><button data-j="read-story" class="text-button">${uiIcon('sound')} קוֹרְאִים יַחַד</button></div>${scene}<p class="journey-instruction">${p.prompt}</p>${answers}`;
   }
   function englishView(task){
+    if (task.kind === 'english-picture') return englishPictureView(task, s());
     if (task.readPicture) {
       return `<p class="journey-instruction">קִרְאִי אֶת הַמִּלָּה וּבַחֲרִי תְּמוּנָה.</p>
         <div class="blend-reading-word" lang="en" dir="ltr"><strong>${task.word.toUpperCase()}</strong> <span>${task.word}</span></div>
@@ -186,7 +192,7 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
   function render(){
     const task=q(),done=s().resolved;
     root.innerHTML=`<div class="journey-top"><button class="text-button" data-j="home">${uiIcon('home')} הַהַרְפַּתְקָה נִשְׁמֶרֶת</button><span>צַעַד ${plan.index+1} מִתּוֹךְ ${questions.length}</span></div><div class="step-track">${questions.map((_,i)=>`<span class="step-dot ${i<plan.index?'done':i===plan.index?'current':''}">${i<plan.index?'✓':i+1}</span>`).join('')}</div>
-      <section class="journey-board ${done?'journey-done':''} ${celebrating?'journey-celebrate':''}"><div class="question-heading"><div><span class="section-kicker">${phase()==='warmup'?'מַתְחִילִים יַחַד':phase()==='practice'?'מְתַרְגְּלִים בְּנַחַת':'עוֹד צַעַד קָטָן'}</span><h1 tabindex="-1">${plan.mode==='stories'?task.story.title:JOURNEYS[plan.mode].title}</h1></div><button data-j="replay" class="circle-button" aria-label="שמיעת ההוראות">${uiIcon('sound')}</button></div>
+      <section class="journey-board ${done?'journey-done':''} ${celebrating?'journey-celebrate':''}"><div class="question-heading"><div><span class="section-kicker">${phase()==='warmup'?'מַתְחִילִים יַחַד':phase()==='practice'?'מְתַרְגְּלִים בְּנַחַת':'עוֹד צַעַד קָטָן'}</span><h1 tabindex="-1">${plan.mode==='stories'?task.story.title:task.kind==='english-picture'?MATCH_LEVELS[task.level].title:JOURNEYS[plan.mode].title}</h1></div><button data-j="replay" class="circle-button" aria-label="שמיעת ההוראות">${uiIcon('sound')}</button></div>
       ${plan.mode==='workshop'?wordView(task):plan.mode==='stories'?storyView(task):plan.mode==='objects'?objectsView(task):englishView(task)}
       <div class="journey-feedback" role="status" aria-live="polite">${message|| (done?'כָּל הַכָּבוֹד! אֶפְשָׁר לְהַמְשִׁיךְ.':'אֶפְשָׁר לְנַסּוֹת וּלְבַקֵּשׁ עֶזְרָה. אֲנַחְנוּ כָּאן בְּיַחַד ♡')}</div><div class="journey-controls">${done?`<button class="primary-button" data-j="next">${atEnd()?'לַמַּדְבֵּקָה שֶׁלִּי':'מַמְשִׁיכִים'} ${uiIcon('arrow')}</button>`:`<button class="hint-button" data-j="hint">${uiIcon('hint')} רֶמֶז קָטָן</button>`}</div></section>`;
   }
@@ -198,6 +204,11 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
     if(action==='home'){persist();onHome();return;}
     if(action==='replay'){replay(true);return;}
     if(action==='listen'){if(task.readPicture&&!s().resolved)help();say(task.clip,true);return;}
+    if(action==='match-option-voice' && task.kind==='english-picture' && task.level==='picture-words'){
+      const entry = task.choices.find(choice => choice.id === b.dataset.voice);
+      if (entry) say(entry.clip, true);
+      return;
+    }
     if(action==='word'){say(`he-${task.word.id}`,true);return;}
     if(action==='read-story'){help();replay(true);return;}
     if(action==='pair-color'){say(`en-${task.target.color}`,true);return;}

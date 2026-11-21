@@ -83,11 +83,15 @@ export function nextReadingStage(key, assisted) {
 
 export function readingTargets(pool, recent, count, rng = Math.random) {
   if (!pool.length || count <= 0) return [];
-  const ids = new Set(pool.map(word => word.id));
-  const order = [...new Set((Array.isArray(recent) ? recent : []).filter(id => ids.has(id)))];
-  const newWords = pool.filter(word => !order.includes(word.id));
+  const byId = new Map(pool.map(word => [word.id, word]));
+  const seen = new Set((Array.isArray(recent) ? recent : []).filter(id => byId.has(id)));
+  const newWords = pool.filter(word => !seen.has(word.id));
   for (let i = newWords.length - 1; i > 0; i--) { const n = Math.floor(rng() * (i + 1)); [newWords[i], newWords[n]] = [newWords[n], newWords[i]]; }
-  const queue = [...newWords, ...order.map(id => pool.find(word => word.id === id))].slice(0, count);
+  const queue = newWords.slice(0, count);
+  for (const id of seen) {
+    if (queue.length >= count) break;
+    queue.push(byId.get(id));
+  }
   for (let i = queue.length - 1; i > 0; i--) { const n = Math.floor(rng() * (i + 1)); [queue[i], queue[n]] = [queue[n], queue[i]]; }
   return Array.from({ length: count }, (_, i) => queue[i % queue.length]);
 }

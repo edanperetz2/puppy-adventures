@@ -80,13 +80,20 @@ function chooseSentenceWords(pool, settings, count, rng, first) {
   return targets;
 }
 
-// Later answers share a detail with the target wherever the family permits.
-// Reading the noun alone cannot distinguish the sentences.
-function captionOptions(family, target, count, rng, close) {
-  const differences = other => Object.keys(target.scene).filter(field => target.scene[field] !== other.scene[field]).length;
+// In later steps, one picture can differ in color and another in position.
+// Read the whole sentence to tell a green balloon under a chair from both.
+function storyOptions(family, target, count, rng, close) {
   const others = shuffle(family.filter(other => other.id !== target.id), rng);
-  if (close) others.sort((a, b) => differences(a) - differences(b));
-  return [target, ...others.slice(0, count - 1)];
+  if (!close) return [target, ...others.slice(0, count - 1)];
+  const fields = Object.keys(target.scene);
+  const ranked = others.map(word => ({ word, changes: fields.filter(key => word.scene[key] !== target.scene[key]) }))
+    .sort((a, b) => a.changes.length - b.changes.length);
+  const contrasts = new Map();
+  for (const { word, changes } of ranked) {
+    if (changes.length === 1 && !contrasts.has(changes[0])) contrasts.set(changes[0], word);
+  }
+  const ordered = new Set([...contrasts.values(), ...ranked.map(option => option.word)]);
+  return [target, ...[...ordered].slice(0, count - 1)];
 }
 
 function chooseActionStory(settings, rng) {
@@ -156,9 +163,11 @@ function buildSession(mission, rawSettings, rng) {
       const choices = word.family ? pool.filter(item => item.family === word.family) : pool.filter(item => !item.family && distinctWordPictures(word, item));
       if (settings.reading === 'captions') return {
         id: `he-${i}`, type: 'read', direction: 'picture-sentence', word, answer: word.id, phase: adventurePhase(i),
-        options: captionOptions(choices, word, choiceCount(i), rng, i >= 2), prompt: CAPTION_PROMPT, hint: CAPTION_HINT,
+        options: storyOptions(choices, word, choiceCount(i), rng, i >= 2), prompt: CAPTION_PROMPT, hint: CAPTION_HINT,
       };
-      return { id: `he-${i}`, type: 'read', word, answer: word.id, phase: adventurePhase(i), options: optionsFrom(choices, word, rng, choiceCount(i)), prompt: word.scene ? 'reading-phrase' : 'read', hint: word.scene ? 'reading-phrase-hint' : 'read-hint' };
+      const options = settings.reading === 'sentences' && i >= 2
+        ? storyOptions(choices, word, choiceCount(i), rng, true) : optionsFrom(choices, word, rng, choiceCount(i));
+      return { id: `he-${i}`, type: 'read', word, answer: word.id, phase: adventurePhase(i), options, prompt: word.scene ? 'reading-phrase' : 'read', hint: word.scene ? 'reading-phrase-hint' : 'read-hint' };
     });
   }
   if (mission === 'english') {

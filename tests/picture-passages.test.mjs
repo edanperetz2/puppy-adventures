@@ -6,6 +6,7 @@ import { releasedRecording } from './fixtures/released-recording.mjs';
 import { WORDS, CLIPS } from '../dist/content.js';
 import { PICTURE_PLACE_PASSAGES } from '../dist/reading-picture-places.js';
 import { PICTURE_SCENE_PASSAGES } from '../dist/reading-picture-scenes.js';
+import { PICTURE_WORLD_STORIES } from '../dist/reading-picture-world.js';
 import { STORY_MOMENTS } from '../dist/reading-story-moments.js';
 import { WORD_FORM_CLIPS } from '../dist/word-form-audio.js';
 import { ANIMAL_STORIES, PLAYABLE_STORIES } from '../dist/reading-animal-stories.js';
@@ -20,6 +21,31 @@ const ids=new Set(additions.map(word=>word.id));
 const actionIds = new Set(PLAYABLE_STORIES.map(word => word.id));
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const rng=seed=>()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
+
+test('824 new short Hebrew scenes are reversible and their hints select the depicted detail', () => {
+  const captionIds = new Set(readingWords('captions').map(word => word.id));
+  const storyIds = new Set(readingWords('sentences').map(word => word.id));
+  const kinds = { position: 0, moment: 0, nature: 0 };
+  for (const word of PICTURE_WORLD_STORIES) {
+    kinds[word.scene.kind]++;
+    assert.ok(storyIds.has(word.id) && captionIds.has(word.id));
+    assert.equal(CLIPS[`he-${word.id}`].speech, word.spoken);
+    assert.ok(word.he.split(' ').length <= 5, word.he);
+    assert.equal(word.he.split(' ').length, word.pointed.split(' ').length);
+    const detail = word.scene.kind === 'moment' ? 'prop' : 'anchor';
+    const { start, end } = storyClue(word, detail);
+    const words = word.he.slice(0, -1).split(' ');
+    assert.ok(start >= 0 && start < end && end <= words.length, word.id);
+    if (word.scene.kind === 'moment') assert.ok(hasArt(word.scene.prop), word.id);
+  }
+  assert.deepEqual(kinds, { position: 432, moment: 312, nature: 80 });
+  const underChair = PICTURE_WORLD_STORIES.find(word => word.he === 'בלון ירוק מתחת לכיסא.');
+  assert.equal(underChair.pointed, 'בָּלוֹן יָרֹק מִתַּחַת לַכִּסֵּא.');
+  assert.deepEqual(underChair.scene, { kind: 'position', object: 'balloon', anchor: 'chair', position: 'under', color: 'green' });
+  for (const text of ['חולצה כחולה על המיטה.', 'מתנה צהובה ליד הספסל.', 'הכבשה עוטפת ספר בנייר.', 'הצב עוטף ספר בנייר.']) {
+    assert.ok(PICTURE_WORLD_STORIES.some(word => word.he === text), text);
+  }
+});
 
 test('each everyday story has a distinct illustrated action, a recorded reading and an exact Hebrew clue', () => {
   assert.equal(STORY_MOMENTS.length, 48);
@@ -51,9 +77,26 @@ test('each everyday story has a distinct illustrated action, a recorded reading 
   assert.equal(selected('moment-mouse-music-trumpet', 'action'), 'מנגן');
 });
 
+test('later placement questions require reading two different details in either direction', () => {
+  for (const reading of ['captions', 'sentences']) {
+    let checked = 0;
+    for (let seed = 1; seed <= 35; seed++) {
+      const round = createSession('hebrew', { reading }, rng(seed));
+      for (const q of round.slice(2).filter(q => q.word.family.startsWith('world-home-'))) {
+        const differences = q.options.filter(option => option.id !== q.answer).map(option =>
+          Object.keys(q.word.scene).filter(field => option.scene[field] !== q.word.scene[field]));
+        assert.deepEqual(differences.map(fields => fields.length), [1, 1], q.answer);
+        assert.notEqual(differences[0][0], differences[1][0], q.answer);
+        checked++;
+      }
+    }
+    assert.ok(checked > 0, reading);
+  }
+});
+
 test('Picture-to-sentence rounds offer distinct illustrated subjects and resume their text choices', () => {
   const pool = readingWords('captions');
-  assert.equal(pool.length, 734);
+  assert.equal(pool.length, 734 + PICTURE_WORLD_STORIES.length);
   const original = createSession('hebrew', { reading: 'captions' }, rng(3));
   const recentlyPlayed = original.map(question => question.answer);
   const weak = Object.fromEntries(recentlyPlayed.map(id => [`read:${id}`, { seen: 1, helped: 1, last: Date.now() }]));
@@ -80,8 +123,8 @@ test('Picture-to-sentence rounds offer distinct illustrated subjects and resume 
 
 test('Short picture stories more than double at the same reading level and length',()=>{
   assert.equal(additions.length,360);
-  assert.equal(readingWords('sentences').length,738);
-  assert.equal(WORDS.length,1549);
+  assert.equal(readingWords('sentences').length,738 + PICTURE_WORLD_STORIES.length);
+  assert.equal(WORDS.length,1549 + PICTURE_WORLD_STORIES.length);
   assert.equal(new Set(WORDS.map(word=>word.he)).size,WORDS.length);
   assert.equal(new Set(WORDS.map(word=>art(word.id))).size,WORDS.length);
   for(const word of additions){
@@ -123,10 +166,10 @@ test('A practiced sentence bank keeps its history and offers the new passages be
 
 test('Every previous reading target and all 2114 historical voice records match their release',async()=>{
   const baseline=JSON.parse(await readFile(new URL('./fixtures/release-2.1-reading.json',import.meta.url),'utf8'));
-  const originalWords=WORDS.filter(word=>!ids.has(word.id)&&!actionIds.has(word.id)&&!word.id.startsWith('nature-') && word.scene?.kind !== 'moment');
+  const originalWords=WORDS.filter(word=>!ids.has(word.id)&&!actionIds.has(word.id)&&!word.id.startsWith('picture-world-')&&!word.id.startsWith('nature-') && word.scene?.kind !== 'moment');
   assert.equal(originalWords.length,baseline.wordCount);
   assert.equal(hash(originalWords),baseline.wordDigest);
-  const previouslyReleased = ([key]) => !Object.hasOwn(WORD_FORM_CLIPS, key) && !/^(?:he-picture-|he-story-(?:animal|action)-|he-nature-|he-moment-|reading-caption-|characters-(?:menu|level)-together|character-(?:pikachu|stitch)$|story-clue-|picnic-|delivery-|boatyard-|daily-|theater-|listen-pick-animal$|profile-good-luck|journey-give-|journey-apples-left$|journey-story-(?:grandma-letter|garden-concert|treasure-map)-|number-workshop-|science-|act-out(?:-jump|-feed|-move-animal|-water|-door)?$)/u.test(key);
+  const previouslyReleased = ([key]) => !Object.hasOwn(WORD_FORM_CLIPS, key) && !/^(?:picture-en-|he-picture-|he-story-(?:animal|action)-|he-nature-|he-moment-|reading-caption-|characters-(?:menu|level)-together|character-(?:pikachu|stitch)$|story-clue-|picnic-|delivery-|boatyard-|daily-|theater-|listen-pick-animal$|profile-good-luck|journey-give-|journey-apples-left$|journey-story-(?:grandma-letter|garden-concert|treasure-map)-|number-workshop-|science-|act-out(?:-jump|-feed|-move-animal|-water|-door)?$)/u.test(key);
   const originalClips=Object.fromEntries(Object.entries(CLIPS).filter(previouslyReleased));
   assert.equal(Object.keys(originalClips).length,baseline.clipCount);
   assert.equal(hash(originalClips),baseline.clipDigest);

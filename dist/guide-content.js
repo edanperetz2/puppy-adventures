@@ -16,8 +16,8 @@ export const GUIDE_ITEMS = [
     en: ['Playable Stories', 'Choose a story. Help Luli draw a picture for Grandma or follow Tofi’s treasure map.'] },
   { icon: 'letters', he: ['סְטוּדְיוֹ הָאוֹתִיּוֹת', 'מְזַהוֹת אוֹתִיּוֹת וּמְתַרְגְּלוֹת כְּתִיבָה. מַתְאִימוֹת מִלִּים מִדְּפוּס לִכְתַב יָד, וּבְאַנְגְּלִית מֵאוֹתִיּוֹת גְּדוֹלוֹת לִקְטַנּוֹת.'],
     en: ['Letter Studio', 'Match letters and practice writing. Match whole words from Hebrew print to handwriting or English capitals to lowercase.'] },
-  { icon: 'boat', he: ['מִפְרַץ הָאַנְגְּלִית', 'מַקְשִׁיבוֹת לְמִלָּה אַחַת. אֶפְשָׁר לְהַמְשִׁיךְ לְצֵרוּפִים, לִצְלִילִים וְלִקְרִיאָה.'],
-    en: ['English Bay', 'Hear one word and choose its picture. Try pairs, first sounds and short written words when ready.'] },
+  { icon: 'boat', he: ['מִפְרַץ הָאַנְגְּלִית', 'מַתְאִימוֹת מִלִּים וּמִשְׁפָּטִים לִתְמוּנוֹת בִּשְׁנֵי הַכִּוּוּנִים. מַקְשִׁיבוֹת לְמִלִּים וּמְזַהוֹת צְלִיל פּוֹתֵחַ.'],
+    en: ['English Bay', 'Match words and short sentences to pictures both ways. Listen to the choices or practise first sounds.'] },
   { icon: 'apple', he: ['סַדְנַת הַמִּסְפָּרִים', 'סְפִירָה, חִבּוּר, כַּמָּה נִשְׁאֲרוּ, עֲשָׂרוֹת וִיחִידוֹת. כּוֹתְבוֹת מֵ־0 עַד 100 גַּם מִשְּׁמִיעָה, וְחוֹתְכוֹת פֵּרוֹת.'],
     en: ['Number Workshop', 'Count in frames, add, find what is left, and practise tens and ones. Write 0–100 by sight or dictation. Slice fruit into halves.'] },
   ...(CLOCK_ACTIVITIES_ENABLED ? [

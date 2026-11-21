@@ -1,6 +1,11 @@
 {
   "voice": "en-US-AvaNeural",
   "rate": "-8%",
+  "voiceByClip": {
+    "picture-en-coat": "en-US-AvaMultilingualNeural",
+    "picture-en-see-1-boat": "en-US-AvaMultilingualNeural",
+    "picture-en-wheel": "en-US-AvaMultilingualNeural"
+  },
   "words": [
     "ant",
     "bat",
@@ -9,6 +14,7 @@
     "dig",
     "fig",
     "jar",
+    "peas",
     "sit",
     "tap",
     "van"

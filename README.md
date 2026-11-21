@@ -10,10 +10,10 @@ Ariel’s learning game for phones, tablets and computers. Ava gives instruction
 | --- | --- |
 | **משימה קטנה להיום** | Listen to English animal names and move the right animals to the pond in six steps. A worked example leads to a fresh try at the same step. |
 | **המסע שלי** | Read and add at the friends’ picnic. Listen for an English word and choose a picture on Bobi’s delivery route. Both chapters have six-step missions. Bobi offers an optional two-word prompt after independent practice with both words on different days. |
-| **גינת המילים** | Ten Hebrew stages, from short words to little stories. Read a sentence and choose a picture, act it out, or choose **מתמונה למשפט** to find the written sentence for a picture. The two reading directions save separately. |
+| **גינת המילים** | Ten Hebrew stages, from short words to little stories. The two matching paths share 1,558 illustrated sentences, including a green balloon under a chair, animals playing instruments and scenes outdoors. Read the sentence in **סיפורים קטנים** or start with the picture in **מתמונה למשפט**. The two paths save separately. |
 | **סדנת המילים** | Build words from parts and letters, fill gaps and finish short sentences across four stages. |
 | **סיפור שמשחקים** | Eleven playable Hebrew stories with six pages per playthrough. Help Luli draw a picture for Grandma, put on a garden concert or follow Tofi’s treasure map. |
-| **מפרץ האנגלית** | Listen for one word and choose a picture. The listening library has 106 words. Optional routes introduce two-word phrases, first sounds and short written words. In reading practice, illustrated groups end with matching the printed word to a picture. |
+| **מפרץ האנגלית** | Choose **מאנגלית לתמונה** to hear and read English and pick a picture, or **מתמונה לאנגלית** to see a picture and choose the matching words. Each written choice has a listen button. Rounds start with single words and build to color phrases and short sentences. The original listening, sounds and reading activities are also available. |
 | **סטודיו האותיות** | Match individual letters in both directions. In the whole-word game, read a word in Hebrew print and choose it in handwriting, or match an English word in capitals to its lowercase spelling. Writing practice also offers single-letter tracing and 79 Hebrew and 68 English illustrated words to write one letter at a time. |
 | **סדנת המספרים** | Count objects in rows and frames, add groups including zero, find how many remain, and work with tens and ones. Trace 0–100 or take Hebrew dictation. Dictation also offers single digits, 10–19 and whole tens. Slice fruit to practise halves. |
 | **חברים מהמסך** | Read the Hebrew names of Rubble & Crew and PAW Patrol characters, or choose **כולם יחד** to include Pikachu and Stitch. The combined cast grows from 3 to 12 to 17. All three collections support picture-to-name, name-to-picture and mixed rounds. |
@@ -38,7 +38,7 @@ Open the game online once to install the offline game and starter sounds. Additi
 
 Ava’s Hebrew and English recordings play with a short silent lead-in, including on replay. Reward sounds wait for speech to finish. The offline library stores the reviewed voice masters. The service worker adds the same lead-in used by the release build when serving a recording from the library.
 
-New or edited English words use English-only Ava. The generator keeps approved multilingual Ava recordings for existing words and applies the reviewed pace in `scripts/english-voice-settings.json` across activities. The Hebrew generator uses the reviewed phonetic spelling and take for each recording.
+New English recordings default to English-only Ava. The generator keeps approved takes and applies the voice and pace choices in `scripts/english-voice-settings.json`, including multilingual Ava for “coat,” “wheel,” and “I see one boat.” The Hebrew generator uses the reviewed phonetic spelling and take for each recording.
 
 Use Node.js 20 or newer.
 

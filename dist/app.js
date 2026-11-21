@@ -2,6 +2,7 @@ import { LearningStore } from './learning-sync.js?v=2.2.2-six';
 import { questionLearning } from './learning.js';
 import { packRound, unpackRound, cleanDrafts, roundKey } from './session-state.js?v=2.7.1-pepper';
 import { JOURNEYS, newJourney, cleanJourney, resumeJourney, englishPairsReady, journeyLength } from './journey.js?v=2.2.5-practice';
+import { MATCH_LEVELS } from './english-picture-match.js';
 import { STORIES } from './journey-content.js';
 import { mountJourney } from './journey-view.js?v=2.2.5-practice';
 import { mountPark } from './park.js';
@@ -1195,7 +1196,8 @@ function describeDraft({ kind, path, value }) {
   } else if (kind === 'journey') {
     const journey = JOURNEYS[value.mode];
     title = value.mode === 'stories' ? STORIES.find(story => story.id === value.level).title
-      : value.mode === 'english' && value.level === 'single' ? ENGLISH_LISTENING.he[0] : journey.title;
+      : value.mode === 'english' && value.level === 'single' ? ENGLISH_LISTENING.he[0]
+      : value.mode === 'english' && Object.hasOwn(MATCH_LEVELS, value.level) ? MATCH_LEVELS[value.level].title : journey.title;
     icon = journey.icon;
     length = journeyLength(value);
   } else if (kind === 'numbers') {
@@ -1644,7 +1646,9 @@ function renderLearningHub(){
       + journeyChoice('english', 'cars', 'צֶבַע וּמְכוֹנִית', 'מַכִּירוֹת אֶת הַמְּכוֹנִית וּמְחַבְּרוֹת לָהּ צֶבַע.', 'car');
     const sounds = journeyChoice('sounds', 'sounds', 'מְגַלּוֹת צְלִילִים', 'אוֹת גְּדוֹלָה, אוֹת קְטַנָּה וְצָלִיל בִּתְחִלַּת מִלָּה.', 'bird')
       + journeyChoice('sounds', 'blend', 'מְחַבְּרוֹת צְלִילִים', 'קוֹרְאוֹת מִלִּים קְצָרוֹת מִצְּלִילִים מֻכָּרִים.', 'fish');
-    sections = group('מַתְחִילוֹת בְּהַקְשָׁבָה', listening) + group('שְׁתֵּי מִלִּים בְּיַחַד', pairs) + group('צְלִילִים וּקְרִיאָה', sounds);
+    const matching = Object.entries(MATCH_LEVELS).map(([level, path]) => journeyChoice('english', level, path.title, path.description, path.icon)).join('');
+    sections = group('מַתְחִילוֹת בְּהַקְשָׁבָה', listening) + group('מִלִּים וּתְמוּנוֹת', matching)
+      + group('שְׁתֵּי מִלִּים בְּיַחַד', pairs) + group('צְלִילִים וּקְרִיאָה', sounds);
   }
   app.innerHTML = `${header()}<main id="main" class="learning-hub" data-hub="${hub}"><button class="text-button back-button" data-action="home">${uiIcon('home')} לְבֵית הַחֲבֵרִים</button><section class="learning-hub-heading"><h1 tabindex="-1">${hebrew ? 'עִבְרִית' : 'מִפְרַץ הָאַנְגְּלִית'}</h1>${pup(hebrew ? 'luli' : 'bobi')}</section>${sections}</main>${footer()}`;
 }

@@ -1,6 +1,6 @@
 // Classic workers also support browsers without module service workers.
 importScripts('./narration-mp3.js?v=1');
-const CACHE = 'puppy-adventures-shell-2.20.1';
+const CACHE = 'puppy-adventures-shell-2.21.0';
 const RECORDINGS = 'puppy-adventures-recordings-v1';
 const BASE = new URL('./', self.location.href);
 const asset = path => new URL(path, BASE).href;

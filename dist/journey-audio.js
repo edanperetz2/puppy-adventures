@@ -1,6 +1,7 @@
 import { WORKSHOP_WORDS, STORIES, JOURNEY_HEBREW_CLIPS } from './journey-content.js';
 import { WORD_CONTEXTS } from './word-contexts.js';
 import { MORE_PHONICS, BLEND_GROUPS } from './english-expansion.js';
+import { ENGLISH_PICTURE_CLIPS } from './english-picture-content.js';
 // These isolated renders failed phonetic review. Their approved whole-word
 // recording supplies the sound model while the visual tile keeps the word part.
 export const WHOLE_WORD_CHUNKS = new Set(["dog:0","snail:0","bat:0","bed:1","crocodile:0","dinosaur:0","dinosaur:1","dinosaur:2","dinosaur:3","duck:1","gift:1","leopard:0","notebook:2","pan:2","pants:2","parrot:1","peach:0","pear:0","pineapple:0","scissors:1","socks:1","spider:0","spider:1","spider:2","suitcase:1","telescope:0"]);
@@ -11,6 +12,7 @@ export const GIVING_CLIPS = {
   3: 'journey-give-three-apples',
 };
 export function installJourneyClips(clips) {
+  Object.assign(clips, ENGLISH_PICTURE_CLIPS);
   for(const [id,clip] of Object.entries(JOURNEY_HEBREW_CLIPS))clips[id]={lang:'he-IL',...clip};
   const giving = [
     ['נִתֵּן לְלוּלִי תַּפּוּחַ אֶחָד. נִגַּע בּוֹ.', 'nitˈen lelˈuli tapˈuaχ ʔeχˈad. niɡˈa bˈo.'],

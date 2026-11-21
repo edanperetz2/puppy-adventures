@@ -1,9 +1,10 @@
 import { READING_SCENES } from './reading-advanced.js?v=2.7.0-science';
 import { readingMomentArt } from './reading-moment-art.js';
+import { furnitureScene } from './reading-furniture-art.js';
 
 const palette = {
-  red: ['#e47176', '#f5bec1'], blue: ['#579dce', '#badced'], green: ['#65a575', '#c3dfb9'],
-  pink: ['#e9a2c5', '#f7d8e5'], purple: ['#9d75c3', '#d9c5eb'], yellow: ['#edc85b', '#fff0b3'],
+  red: ['#e47176', '#f5bec1', '#a94750'], blue: ['#579dce', '#badced', '#36719e'], green: ['#65a575', '#c3dfb9', '#39734b'],
+  pink: ['#e9a2c5', '#f7d8e5', '#ae6487'], purple: ['#9d75c3', '#d9c5eb', '#704e90'], yellow: ['#edc85b', '#fff0b3', '#a88429'],
 };
 const ground = '<ellipse cx="101" cy="185" rx="87" ry="7" fill="#e9e5d9"/>';
 const moon = '<path d="M34 25A19 19 0 1 0 59 50A19 19 0 0 1 34 25" fill="#dfc98d"/>';
@@ -12,8 +13,21 @@ export function hasReadingScene(id) { return Object.hasOwn(READING_SCENES, id); 
 
 export function paintedReadingObject(object, color, body) {
   if (!palette[color]) return body;
-  const [tone, light] = palette[color];
-  const replacements = { ball: { '#f0b15f': tone, '#6aafa9': light }, flower: { '#e7a4ac': tone }, car: { '#82b5ad': tone }, butterfly: { '#b49ace': tone, '#edb4c1': light, '#f2c976': light }, bird: { '#85b8cd': tone, '#6ca7c2': tone, '#c0dce5': light }, star: { '#f3c65c': tone, '#e5aa3b': tone, '#ffedaa': light }, heart: { '#ec859c': tone, '#ffc0ce': light }, balloon: { '#BB1A34': tone } }[object] || {};
+  const [tone, light, shade] = palette[color];
+  const replacements = {
+    ball: { '#f0b15f': tone, '#6aafa9': light }, flower: { '#e7a4ac': tone }, car: { '#82b5ad': tone },
+    butterfly: { '#b49ace': tone, '#edb4c1': light, '#f2c976': light }, bird: { '#85b8cd': tone, '#6ca7c2': tone, '#c0dce5': light },
+    star: { '#f3c65c': tone, '#e5aa3b': tone, '#ffedaa': light }, heart: { '#ec859c': tone, '#ffc0ce': light }, balloon: { '#BB1A34': tone },
+    door: { '#BF6952': tone, '#AC5640': shade, '#854836': shade }, hat: { '#2B7BB9': tone, '#1C6399': shade, '#50A5E6': tone },
+    shoe: { '#DD2E44': tone, '#BE1931': tone, '#A0041E': shade }, kite: { '#55ACEE': tone, '#3B88C3': shade, '#9266CC': light },
+    umbrella: { '#bea5d0': tone, '#e6afc3': light, '#d29cb6': shade },
+    bucket: { '#88C9F9': tone, '#3B88C3': shade, '#55ACEE': tone, '#004A77': shade },
+    chair: { '#A4523A': shade, '#C1694F': tone, '#D99E82': light }, bus: { '#e9bd6b': tone, '#bd975e': shade, '#fff0bc': light },
+    cup: { '#eaf5f8': tone, '#7da6b8': shade, '#b6d7e2': light }, pencil: { '#FFCC4D': tone },
+    drum: { '#F18F26': tone, '#9D0522': shade, '#FCAB40': light, '#DA2F47': tone },
+    shirt: { '#3B88C3': shade, '#55ACEE': tone }, gift: { '#FDD888': light, '#FCAB40': tone },
+    backpack: { '#b19ac9': tone, '#a68abb': shade, '#c1aad5': light, '#9e81b5': shade, '#dfafc0': light, '#bd92aa': tone },
+  }[object] || {};
   for (const [from, to] of Object.entries(replacements)) body = body.replaceAll(from, to);
   return body;
 }
@@ -64,7 +78,9 @@ export function readingScene(id, baseArt) {
   }
   if (spec.kind === 'position') {
     body = ground;
-    if (spec.anchor === 'table') {
+    if (spec.anchor === 'chair' || spec.anchor === 'bench' || spec.anchor === 'bed') {
+      body += furnitureScene(spec, raw(spec.object, spec.color));
+    } else if (spec.anchor === 'table') {
       body += at('table', 43, 64, 148);
       const pos = { on: [84, 40, 58], under: [85, 131, 58], near: [0, 131, 58] }[spec.position];
       body += at(spec.object, ...pos, spec.color);

@@ -41,13 +41,13 @@ async def main():
         speech = clip.get('speech', clip['text'])
         reviewed_word = speech.strip().lower().rstrip('.!?') in reviewed_words
         previous = manifest['clips'].get(key, {})
-        # Keep approved recordings of unchanged scripts. New or edited English uses
-        # English-only Ava so a short word cannot switch languages during synthesis.
+        # Keep approved recordings of unchanged scripts. New English defaults to
+        # English-only Ava, with explicit exceptions for reviewed pronunciations.
         keep_voice = not reviewed_word and previous.get('speech') == speech and previous.get('lang') == clip['lang']
         voice = previous.get('voice') if keep_voice else None
         desired = {
             'lang': clip['lang'], 'speech': speech,
-            'voice': args.voice_en or voice or english_settings['voice'],
+            'voice': args.voice_en or english_settings['voiceByClip'].get(key) or voice or english_settings['voice'],
             'rate': args.rate_en or (english_settings['rate'] if reviewed_word else '+0%'),
         }
         if not args.force and path.exists() and path.stat().st_size > 1000:

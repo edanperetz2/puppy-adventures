@@ -56,6 +56,282 @@
       "window": "full clip",
       "phones": "hɹ̩ɔtpejsʌfɪtʰ",
       "check": "letter name"
+    },
+    "he-picture-world-moment-hedgehog-draw-leaf": {
+      "sha256": "e315171bf6802beda424685f8fe5d1d2cceb8357f8fa45bc0bf9aef472bbc1b0",
+      "window": "full clip",
+      "phones": "hɒwkiːpɔdmiːsɒjɛɾəlɛləndʌf",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-draw-balloon": {
+      "sha256": "fe2d90a02e5b2f6bade4228fcc416ea6ac9689176037f275c62e711ab2e42195",
+      "window": "full clip",
+      "phones": "hɒwkiːpɔdmiːtʰsɒjɛlb̥ɑlonɒlɒdʌf",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-draw-moon": {
+      "sha256": "012853c4983a1c279f148b23057fd91288d9205650e6077c37d6d84b159438e2",
+      "window": "full clip",
+      "phones": "hɒwkiːpɔdmɪt̪sɹ̩jɛl̪jəðɛɹxɒlədʌf",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-photo-kite": {
+      "sha256": "75682154d36f4e8fa6f3021d68064478d731fd51d52913cacd8d64010ffdc231",
+      "window": "full clip",
+      "phones": "hækiːpɔdmɪtʰsəlɛməfiːfɔn",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-photo-ladybug": {
+      "sha256": "ac0d1d4e2edee80b0c7b420d1dd38dd2b76be235d476a6a6abf9ef3a57e4ae71",
+      "window": "full clip",
+      "phones": "hækiːpuəɔdmetsʰɒlɛnʁipuəʂɪt",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-wrap-drum": {
+      "sha256": "739b1dc76bf265d7028f6a7f3ed2ecd69693ff6e5f7e28df0088a82fd55dda9b",
+      "window": "full clip",
+      "phones": "hɒkiːpɒdoðetɒfbiːɴnjæl̪",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-wrap-flute": {
+      "sha256": "e02c948cf231453ac80d832d65c5349171b22278fb40f6ce357d22ea4e9c8bc0",
+      "window": "full clip",
+      "phones": "xakiːpuəoðotefxɒlilbiɲiəð",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-pack-pencil": {
+      "sha256": "277d635b8f18ef7b0ee08c343668118083a3e8de21bd41fe915c14426890e068",
+      "window": "full clip",
+      "phones": "xak̟ʲipodob̞eɪðiːpaɡoɴletiːouəl",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-pack-flashlight": {
+      "sha256": "52cd1ddfbc76c00fa960c7737d4cdd5567c6216f9f4b1d2a72c4fd76cfbee83f",
+      "window": "full clip",
+      "phones": "ɒkiːpɔdɔwezpənasəletiːuuəl",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-wash-tomato": {
+      "sha256": "3a5aefe985568023ae4a4da7fc9fd54303de30d2ce43ac5c2328724fc649e35c",
+      "window": "full clip",
+      "phones": "xakipɔdʂouətefaɡʌvʌniæbɨk̟ʲiouə",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-music-drum": {
+      "sha256": "fab672baca949f11947674d13dd735b0707d40db7d1dbf5666c26500ed3067bf",
+      "window": "full clip",
+      "phones": "akiːpɔdmeɪnaɡænbʌtuəf",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-dream-boat": {
+      "sha256": "5d6a82345a153be82154166d6b3028bc82d2dbd88e88c1c22341d3748eabfd00",
+      "window": "full clip",
+      "phones": "akiːpodxuəleɪmʌl̪ɕiːða",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-giraffe-draw-leaf": {
+      "sha256": "115e306b35b17b185a1b987f4b3362a9b44cd5e17c961e784a15b28d31626411",
+      "window": "full clip",
+      "phones": "had͡ʒuːʀɒfɹ̩met̪tsʰʌjɛʀet̪əlealəndʌf",
+      "check": "picture story phrase"
+    },
+    "he-picture-world-moment-giraffe-draw-balloon": {
+      "sha256": "60cfcff43e76ac57aabb27459e2b8785f003505b0083ca807195fbe1821f2fa0",
+      "window": "full clip",
+      "phones": "hantɕyʀafameɪt̪tsʰʌjɛʀet̪bəlonalʌdaf",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-giraffe-wrap-flute": {
+      "sha256": "903245124e3078b5f26a8b802c3ea5d074dc994bc2d085b911d442c5237c7c1d",
+      "window": "full clip",
+      "phones": "hantɕixafaotefɹ̩t̪tʰʁʌlilbiniaðo",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-giraffe-music-drum": {
+      "sha256": "825a3537fdb2f7800eaf65e81c010494f42e69a500d86b34492e32a80b4120b0",
+      "window": "full clip",
+      "phones": "xaɴtɕyʀafameɴnageænet̪bʌtuəf",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-giraffe-dream-boat": {
+      "sha256": "6b065bff52ea7d21f1aad07554ea49b0937b091613811d9a9d26d98853fdef3c",
+      "window": "full clip",
+      "phones": "hantɕylafaxuəol̪eɪmeɪtɒls̪iːðɒ",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-draw-house": {
+      "sha256": "af542bd03daae356111258754a0f4333254fdc555990a88945a2c9dc60cd1f21",
+      "window": "full clip",
+      "phones": "hækiːpɔdmɪdsɹ̩jɛl̪lb̥ajtələdʌf",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-draw-sun": {
+      "sha256": "e35344e97bb22f05ab495b785eea28bdc3dd2250d643ba9cf402458a3f1600ef",
+      "window": "full clip",
+      "phones": "hæk͡p̚kiːpuəodmɪsəjɪlʃɻ̩miːʃələdʌf",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-photo-frog": {
+      "sha256": "4b3e2717c50d7dc641c62bccf7de6cf9c75bd74d07b3e2137ccfbe4eabdc745e",
+      "window": "full clip",
+      "phones": "hævkjiːpɔdmɪdsɹ̩ləmɛfɑl̪wdɛɹ",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-photo-sunflower": {
+      "sha256": "cd9b68da0791e5ed83a11dd862b6eece92138320912c94110adc682a7c378b7f",
+      "window": "full clip",
+      "phones": "hɒkiːpɔdmɪsəlɛmxɑməniːə",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-wrap-book": {
+      "sha256": "f15bd71dc06df45cc4da246d17452b33f7bee297980202a3d67ba05fd2504431",
+      "window": "full clip",
+      "phones": "akiːpuəoðuətesefəl̪b̥iɲiæŋ",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-wrap-ball": {
+      "sha256": "d22efa7d49173f1f094b315b4bb875c420a9f0d8816974d6fca83d35cb971245",
+      "window": "full clip",
+      "phones": "ɒkiːpɒðotɪfkʰʌnduəb̥iɲiæðo",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-pack-apple": {
+      "sha256": "55d66318f023e815d8f5fd61e6bd3dc7286c45c648f2819942b4c473b1cce6ac",
+      "window": "full clip",
+      "phones": "ɒatɕʰipɒdob̞estʌpuəaʁletiːouəl",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-pack-map": {
+      "sha256": "fe0dbc2f05c2bcd2e82d27826a87fb857b9e9bf00d836ed37172ae18e7625384",
+      "window": "full clip",
+      "phones": "atɕʰipodob̞ezmʌpalestiːul̪",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-wash-carrot": {
+      "sha256": "c2698cfc313fd2e94a0179bd73a7a801c45f5f74894882f4ed3c8dada6b1816c",
+      "window": "full clip",
+      "phones": "ɒkipɔdɹ̩ʂʌt̪tesgeðʌlb̞ʌk̟ʲiːouə",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-music-flute": {
+      "sha256": "363184d1f97369377bcad9cca1c7fe7bc4148ab444b71469aa5270972f6affe3",
+      "window": "full clip",
+      "phones": "ɒkjiːpɔdmenagænb̥ɪxalʲiːz",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-dream-cake": {
+      "sha256": "00d66b779142c87a943419c5940ae4958bfec06f918895d2be241883d4f85aaa",
+      "window": "full clip",
+      "phones": "ɒak̟ʲiːpuəodxuəlʲemʌluga",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-dream-ball": {
+      "sha256": "a5b07e5476d916a7ad0eec073b702a678d916a262352c5b54e0755c1b3ff4d2c",
+      "window": "full clip",
+      "phones": "ɒakipɔdxuəleɪmʌl̪kʰʌduə",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-giraffe-draw-sun": {
+      "sha256": "4be6d21683e6675077dab1086c7a3614ee9573bb939fda5ca1e3f2dc90fd20a5",
+      "window": "full clip",
+      "phones": "hædd͡ʒyxɒfɒmiːt̪sɤjɛʀɪtʰʃɛmiːxələdʌf",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-giraffe-wrap-ball": {
+      "sha256": "71825bdb8a646f893a32974bf7bebfe5ee51365ea885eb928a86e4f6a5fbd44f",
+      "window": "full clip",
+      "phones": "hætɕixafɒuətɪfɛt̪kəduəb̥ɪnijæl",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-giraffe-pack-map": {
+      "sha256": "6687e0198f2712157977e16cb24aa8eff7b1e28dc1f152b50c45be793d417335",
+      "window": "full clip",
+      "phones": "hantɕiʀafaovezɹ̩t̪məpalɪtɨjuuəl̪l",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-giraffe-wash-carrot": {
+      "sha256": "fa4769a0a7eb1fadfff6b6ae1f7d0ac54813e3a4fa2fb4582b22dc6c5777dac4",
+      "window": "full clip",
+      "phones": "hand͡ʒyʀafaʂouətɪfɹ̩t̪gæzʌb̞ʌk̟ʲiouə",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-giraffe-wash-cucumber": {
+      "sha256": "92a11dfa0546a3040a27bcfd87e35b4a02290ac705bd116a6def91d32ab2c39a",
+      "window": "full clip",
+      "phones": "hænd͡ʒiːʀafaʂʌtʰðefɹ̩t̪mɪlɒfəfuənbʌk̟ʲiːouə",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-giraffe-dream-ball": {
+      "sha256": "ade2287f0239e4040bed700e95ab17ec3da1e85abf00c6cd117b35c86cefba0d",
+      "window": "full clip",
+      "phones": "hantɕyʀafaxuəleɪmetɒlkʰʌduə",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-draw-boat": {
+      "sha256": "8e3e5c8dc2c1c243c13ef6831c091286c31a5ee1eba27664c9fbc142ac0857cb",
+      "window": "full clip",
+      "phones": "hɒwkiːpɔdmɪtsʰɹ̩jɛl̪siːʁalətʌf",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-draw-flower": {
+      "sha256": "66fa3ff4469dacb4b988e0e9278c6e607bcd7a9fcccf3097a8912fba810ae4e7",
+      "window": "full clip",
+      "phones": "hɒkiːpɔdmɪt̪səjɛl̪pɪʀɒxɒl̪lənʌf",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-photo-flower": {
+      "sha256": "0c094e24476d297b9a212cb019f8ea33f290cce33fff64e95118eb1cf647dd37",
+      "window": "full clip",
+      "phones": "hɒwkiːpɔdmɪtsʰəlɛmpəl",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-wrap-hat": {
+      "sha256": "5356a881e336f5e571ed3ded8bbbb56d64b934945d22477014c0f883b8697361",
+      "window": "full clip",
+      "phones": "ɒak̟ʲiːpoðuətefkʰovʌbiɲjæð",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-wrap-robot": {
+      "sha256": "f133d0dae44ea11475f09a1737c637a987fe48c635c1fb66d93aff3cf739e690",
+      "window": "full clip",
+      "phones": "akiːpodoteuəʌbuət̪əb̞iɲjað",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-pack-scarf": {
+      "sha256": "5bd906b6b5b84e6e66fc1fb487bceeecec5ffd5640e4e56ec829db44499a9e76",
+      "window": "full clip",
+      "phones": "hɒkiːpɔdɔwestsʰɹ̩iflətiːjouəl̪l",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-hedgehog-dream-moon": {
+      "sha256": "08bbd7bac55bf1b0a3502e41a044c706dfae6735642255790e3471863075e2cf",
+      "window": "full clip",
+      "phones": "ʁakipuəodxuəlʲemʌlajʌðe",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-elephant-wash-pepper": {
+      "sha256": "7cc1cf6b3df8e3b8fdfbaf29a277ce3ed3c70a26705581825ae01fd681cc2272",
+      "window": "full clip",
+      "phones": "xapilʂuət̪epəl̪pelbʌk̟ʲiouə",
+      "check": "picture story phrase"
+    },
+    "he-picture-world-moment-giraffe-wrap-robot": {
+      "sha256": "9ddf8e91a20b8220bc8d056be60b63db011bfa2a4dbcce9b9abd90eb485ab357",
+      "window": "full clip",
+      "phones": "hand͡ʒyxafaotefet̪ʁʀobuətbiɴjæðo",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-giraffe-pack-cookie": {
+      "sha256": "512a19818550c6e2143987a5ee7ad6596422ee0b8a34ef833dde398aa7dc5793",
+      "window": "full clip",
+      "phones": "hantɕyʀafaoʀezɪeuəgiːæletʰiːouəl",
+      "check": "picture story subject"
+    },
+    "he-picture-world-moment-giraffe-wash-pepper": {
+      "sha256": "f63dc5d812022d701a854dca19f38ce03eb0cf3eed983995b7a15477d8c071fe",
+      "window": "full clip",
+      "phones": "xantɕd͡ʒiʀafaʂuət̪ɛfɪt̪pʲɪlpel̪lb̥ʌk̟ʲiːjouə",
+      "check": "picture story subject"
     }
   }
 }
