@@ -1,0 +1,277 @@
+/* The trailheads have illustrated margins. All the lettering and controls stay live. */
+.learning-hub-heading, .reading-levels-heading, .letter-path-heading, .number-workshop-heading {
+  --scene: 0% 0%;
+  --cover: #e7f1dd;
+  --cover-edge: #c7d6b9;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  box-sizing: border-box;
+  min-height: clamp(132px, 18vw, 190px);
+  padding: clamp(16px, 2.8vw, 34px);
+  margin-block: 16px 24px;
+  border: 1px solid var(--cover-edge);
+  border-radius: clamp(20px, 3vw, 34px);
+  background: linear-gradient(110deg, var(--cover), #fffcf4 92%);
+  box-shadow: inset 0 2px 0 #ffffffc4, 0 4px 0 var(--cover-edge), 0 10px 24px #374c4110;
+}
+.learning-hub[data-hub="english"] .learning-hub-heading {
+  --scene: 100% 0%;
+  --cover: #d6eceb;
+  --cover-edge: #b5d5d3;
+}
+.number-workshop-heading { --scene: 0% 100%; --cover: #f3e1bb; --cover-edge: #decba4; }
+.letter-path-heading { --scene: 100% 100%; --cover: #e6e5f3; --cover-edge: #d0cce3; text-align: start; }
+:is(.learning-hub-heading, .reading-levels-heading, .letter-path-heading, .number-workshop-heading)::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  top: 50%;
+  width: 53%;
+  min-width: 176px;
+  aspect-ratio: 1.5;
+  transform: translateY(-50%);
+  background: var(--cover) url("./assets/discovery-worlds.webp") var(--scene) / 200% 200% no-repeat;
+  -webkit-mask-image: linear-gradient(90deg, #000 0 65%, transparent);
+  mask-image: linear-gradient(90deg, #000 0 65%, transparent);
+  pointer-events: none;
+}
+:is(.learning-hub-heading, .reading-levels-heading, .letter-path-heading, .number-workshop-heading) h1 {
+  color: #253e40;
+  margin-block: 4px;
+  line-height: 1.44;
+  text-wrap: balance;
+}
+:is(.reading-levels-heading, .letter-path-heading) p { color: #4a5b5a; line-height: 1.6; }
+.letter-path-heading :is(h1,p,.section-kicker), .reading-levels-heading > div { max-width: 54%; }
+.learning-hub-heading > .pup {
+  align-self: end;
+  margin-inline-end: 12%;
+  width: clamp(65px, 11vw, 108px);
+  margin-block-end: -12px;
+  filter: drop-shadow(0 3px 0 #fdf7e5) drop-shadow(0 6px 4px #463a2a33);
+}
+:is(.number-workshop-heading, .reading-levels-heading) .circle-button {
+  border: 1px solid #c9d2ca;
+  background: #fffaf0;
+  color: #215c59;
+  box-shadow: 0 3px 0 #49625d36;
+}
+
+/* A seal identifies each activity by its existing illustration and topic. */
+.learning-group { --seal: #dfedcf; --seal-edge: #94aa79; }
+.learning-group:has([data-journey="workshop"]), .learning-group:has([data-journey="sounds"]) {
+  --seal: #e5e2f2; --seal-edge: #a499bb;
+}
+.learning-group:has([data-journey="english"]) { --seal: #d7e9ec; --seal-edge: #91b4bc; }
+.learning-group:has([data-journey="stories"]) { --seal: #f8dfba; --seal-edge: #c39f73; }
+.learning-group + .learning-group { margin-block-start: clamp(25px, 4vw, 42px); }
+.learning-group-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #2b5250;
+  margin-block-end: 15px;
+}
+.learning-group-title::after { content: ""; flex: 1; height: 1px; background: #cdd5c9; }
+.learning-paths .learning-path-card {
+  background: linear-gradient(135deg, #fffdf7, #fffaf0);
+  border: 1px solid #d8d3bf;
+  border-radius: 22px;
+  box-shadow: inset 0 2px 0 #fff, 0 3px 0 #dbd5c1, 0 8px 16px #3541360d;
+}
+.learning-path-card .learning-path-art, .reading-stage-art, .picnic-mission-art {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  background: radial-gradient(at 30% 20%, #fffdf5 4%, var(--seal, var(--stage, #e6edda)) 88%);
+  border: 1px solid #ffffffd4;
+  border-radius: 39% 48% 42% 45%;
+  box-shadow: 0 2px 0 var(--seal-edge, #bdc5ab), 0 5px 8px #34534110;
+}
+.learning-path-card .learning-path-art { padding: 8px; margin-block-end: 5px; }
+.learning-path-art svg, .number-path > svg, .reading-stage-art > svg, .picnic-mission-art svg {
+  filter: drop-shadow(0 2px 0 #fff9ed) drop-shadow(0 4px 2px #55453326);
+}
+.learning-group .learning-path-card h3 { color: #253e40; }
+.learning-group .learning-path-card p { color: #49595a; }
+.learning-path-card[data-journey="stories"] {
+  border-inline-start: 7px solid var(--seal-edge);
+  border-radius: 10px 18px 18px 10px;
+  background: linear-gradient(270deg, #e9ddc680 0 2px, transparent 2px 100%), #fffbef;
+}
+.learning-path-card[data-journey="stories"] .learning-path-art { border-radius: 46% 46% 7px 7px; }
+
+/* Letter tiles, number trays and chapter cards share a raised paper edge. */
+.letter-path-grid .letter-path-card, .character-level-card, .reading-stage,
+.number-paths .number-path, .chapter-choice, .picnic-mission {
+  border-width: 1px;
+  box-shadow: inset 0 2px 0 #ffffffb3, 0 3px 0 #38433726, 0 8px 18px #3c453613;
+}
+.letter-path-grid .letter-path-card { border-radius: 22px; }
+.letter-path-card :is(h2,p,small), .letter-path-note { color: #514d68; }
+.writing-path :is(h2,p,small) { color: #395c46; }
+.word-form-path :is(h2,p,small) { color: #684f31; }
+.letter-path-picture:not(.word-form-menu-art) { color: #74558d; }
+.letter-menu-page .letter-language-tabs, .letter-writing-menu .letter-language-tabs,
+.letter-recognition-page .letter-language-tabs { border: 1px solid #d7d9ce; background: #eaece3; }
+.letter-language-tabs button[aria-pressed="true"] { color: #235c55; background: #fffdf4; box-shadow: 0 2px 0 #b6c5b8; }
+.letter-menu-page .letter-path-go, .letter-writing-menu .letter-path-go { color: #285f54; }
+.letter-recognition-preview > div { background: #faf5ff; border-color: #d8cce6; box-shadow: 0 3px 0 #e4dbe9; }
+.number-paths .number-path {
+  background-image: linear-gradient(155deg, #ffffff70, transparent 68%);
+  border-radius: 21px;
+}
+.reading-stage.last-chosen, .character-level-card[aria-pressed="true"] {
+  outline: 2px solid #29756b;
+  outline-offset: -2px;
+}
+.reading-stage :is(p, .reading-stage-range, .reading-stage-count, .reading-last-choice),
+.character-menu-page :is(.character-welcome p, .character-level-card p, .character-level-card small) { color: #605d65; }
+.reading-stage .reading-stage-number { color: #4b4057; }
+.reading-stage .reading-stage-samples { color: #4e425c; }
+.reading-path a { color: #424f51; background: #e4ece3; }
+.reading-path a[aria-current] { color: white; background: #2b6d61; }
+.character-welcome { background: linear-gradient(120deg, #f6dfa9, #fff5df 55%, #fffaf0); border-color: #dfcca2; }
+.character-welcome h1, .character-menu-page h2 { color: #334948; }
+.character-collection-tabs button[aria-pressed="true"], .character-mode-tabs button[aria-pressed="true"] {
+  border-color: #438574; color: #235a4e; background: #dceee3;
+}
+.chapter-choice-copy { background: linear-gradient(150deg,#fffdf8,#f7f2e6); }
+.chapter-choice-title { color: #244744; }
+.picnic-map-hero { border-color: #bccfc2; box-shadow: 0 4px 0 #cdd8c8, 0 10px 24px #263d3114; }
+.picnic-page :is(.chapter-choice, .picnic-map-hero) .picnic-landscape,
+.picnic-result > .picnic-landscape {
+  background: #c5dda8 url("./assets/park-horizon.webp") 98% 68% / auto 115% no-repeat;
+}
+.picnic-page :is(.chapter-choice, .picnic-map-hero) .delivery-landscape,
+.picnic-result > .delivery-landscape {
+  background: #bddfdc url("./assets/park-horizon.webp") left 78% / auto 190% no-repeat;
+}
+.picnic-page :is(.chapter-choice, .picnic-map-hero, .picnic-landscape, .delivery-landscape)
+  :is(.picnic-sun,.picnic-hill,.picnic-tree,.delivery-sun,.delivery-island,.delivery-land-tree) {
+  display: none;
+}
+.picnic-page :is(.chapter-choice, .picnic-map-hero) .pup {
+  filter: drop-shadow(0 2px 0 #fff7df) drop-shadow(0 4px 3px #453c2945);
+}
+
+/* A linen cover, page edges and collected stickers keep the album recognizable. */
+.album-page .album-heading {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(22px, 4vw, 40px) 24px;
+  color: #fff7df;
+  border-radius: 15px 27px 27px 15px;
+  border: 1px solid #386e65;
+  background:
+    linear-gradient(90deg, #1a4e48 0 9px, #f7e2a252 9px 11px, transparent 11px 100%),
+    repeating-linear-gradient(8deg, transparent 0 3px, #dae8d80a 3px 4px),
+    linear-gradient(115deg, #225d59, #316861 65%, #254d50);
+  box-shadow: inset 0 0 0 6px #ffffff06, inset 0 0 0 7px #f5dfa060, 0 3px 0 #dfd6bc,
+    0 5px 0 #efe6ce, 0 7px 0 #bbaa86, 0 12px 22px #35453116;
+}
+.album-heading::before {
+  content: "";
+  position: absolute;
+  left: 9%;
+  top: -2px;
+  width: clamp(14px, 2.8vw, 27px);
+  height: clamp(28px, 4.5vw, 51px);
+  background: linear-gradient(90deg,#d8a550,#f3ce85 48%,#e0b665);
+  clip-path: polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);
+}
+.album-page .album-heading :is(h1, .eyebrow) { color: #fff4d5; }
+.album-page .album-heading p { color: #fff7e8; }
+.album-page .album-progress { background: #164b46; accent-color: #f6d28a; }
+.album-page .album-progress::-webkit-progress-bar { background: #164b46; }
+.album-page .album-progress::-webkit-progress-value { background: #f6d28a; }
+.album-page .album-progress::-moz-progress-bar { background: #f6d28a; }
+.album-page .album-connect-note { background: #edf4e8; border-color: #cad9c6; color: #34604d; }
+.album-page .album-page-range, .album-page .album-latest { color: #536b68; }
+.album-page .sticker-grid {
+  padding: clamp(10px, 2.8vw, 28px);
+  gap: clamp(9px, 2.4vw, 22px);
+  border: 1px solid #dcd1b7;
+  border-radius: 20px;
+  background: radial-gradient(circle,#c9bda2 0.7px,transparent 1px) 0 0 / 12px 12px, #faf2df;
+  box-shadow: inset 0 0 0 4px #fff9e9, 0 3px 0 #e2d6b9, 0 5px 0 #fff9e9, 0 7px 0 #d4c7ac;
+}
+.album-page .sticker.unlocked {
+  background: #fffdf6;
+  border-color: #d9d0ba;
+  border-radius: 16px;
+  box-shadow: 0 3px 0 #ddcfad, 0 6px 11px #64573e1c;
+}
+.album-page .sticker.locked { background: #f3ead5; border: 1px dashed #bbac8d; border-radius: 16px; }
+.album-page .sticker-index { color: #6e624e; font-weight: 650; }
+.album-page .sticker-mystery { color: #978975; }
+
+/* The horizon is static. The planting area keeps its exact forty hit targets. */
+.park-page .puppy-park {
+  background: linear-gradient(165deg, #edf0c5 0, #dce8b3 55%, #c1d8a3);
+  border: 2px solid #abc298;
+  box-shadow: inset 0 0 0 5px #ffffff36, 0 4px 0 #c2cdb5, 0 12px 26px #27493118;
+}
+.park-page .park-sky {
+  height: clamp(85px, 17vw, 173px);
+  font-size: 0;
+  background: #c8e5da url("./assets/park-horizon.webp") center 63% / cover no-repeat;
+  border-bottom: 3px solid #98b686;
+}
+.park-page .park-sky span { font-size: 0; }
+.park-page .park-grid > button { background-color: #f5f4ca4a; border-color: #7e9d6882; }
+.park-page .park-grid > button:has(svg, .park-pond, .park-sign) {
+  border-style: solid; background-color: #f2f3c3; box-shadow: inset 0 -3px 0 #9bb37d50;
+}
+.park-page .park-grid > button > span:not(.park-sign, .park-pond, .park-emoji) { color: #507d4f; }
+.park-page .park-tray { scrollbar-color: #a4b49b #e5e8d8; }
+.park-page .park-tray > button { border-width: 1px; border-color: #cdcdb8; box-shadow: 0 3px 0 #d5d2bb; }
+.park-page .park-tray > button[aria-pressed="true"] { background: #e0f0df; border-color: #3f8169; box-shadow: inset 0 0 0 1px #3f8169, 0 3px 0 #a6bda4; }
+
+/* A quiet medal-shaped stage frames the sticker earned at the end of a round. */
+.completion-page .reward-art, .journey-complete-art {
+  background: radial-gradient(circle at 42% 37%, #fffae9 15%, #f9e1a5 76%, #e9c47e);
+  border: 1px solid #e2c385;
+  box-shadow: inset 0 0 0 5px #fff5d6, inset 0 0 0 7px #e4c789, 0 5px 0 #e2cd9e, 0 12px 28px #6e583820;
+}
+.journey-complete-art {
+  max-width: 91%;
+  width: max-content;
+  border-radius: 40% / 50%;
+  margin: 8px auto 22px;
+  padding: 14px clamp(14px, 3vw, 38px);
+}
+.journey-complete-art svg { min-width: 0; }
+.completion-page h1, .journey-complete h1, .picnic-result h1 { color: #245c53; }
+.completion-page > p, .completion-page .reward-caption, .journey-complete p { color: #4f615a; }
+.picnic-result :is(.picnic-landscape, .delivery-landscape) { border: 1px solid #c0d2bf; box-shadow: 0 5px 0 #d3dccb; }
+.game-guide, #parent-dialog { border-color: #cfcbbd; box-shadow: 0 16px 70px #152c2940; }
+.guide-tools, .guide-bottom { background: #f6f4e8; }
+
+@media (max-width: 570px) {
+  .learning-hub-heading, .reading-levels-heading, .letter-path-heading, .number-workshop-heading {
+    min-height: 128px;
+    margin-block: 13px 20px;
+    padding: 14px;
+  }
+  :is(.learning-hub-heading, .reading-levels-heading, .letter-path-heading, .number-workshop-heading)::before {
+    width: auto;
+    height: 100%;
+    min-width: 0;
+    -webkit-mask-image: linear-gradient(90deg, #000 0 14vw, transparent 33vw);
+    mask-image: linear-gradient(90deg, #000 0 14vw, transparent 33vw);
+  }
+  .reading-levels-heading > div, .letter-path-heading :is(h1,p,.section-kicker) { max-width: 68%; }
+  .reading-levels-heading p { text-wrap: pretty; }
+  .letter-path-heading h1 { font-size: clamp(24px,5vw,31px); }
+  .letter-path-heading p, .reading-levels-heading p { font-size: 13px; }
+  .learning-hub-heading > .pup { margin-inline-end: 4%; }
+  .learning-paths .learning-path-card { border-radius: 17px; }
+  .learning-paths .learning-path-card[data-journey="stories"] { border-radius: 8px 17px 17px 8px; }
+  .album-page .sticker-grid { padding: 11px; gap: 9px; }
+  .album-page .sticker { padding: 10px 8px 15px; }
+  .album-page .sticker-index { font-size: 9px; }
+  .park-page .park-grid > button { min-height: 44px; }
+}

@@ -520,7 +520,7 @@ function homeAdventureContent() {
   const choice = draft ? describeDraft(draft) : homeSuggestion();
   const { activity, reason } = choice;
   const text = value => settings.nikud ? value : value.replace(/\p{M}/gu, '');
-  return `<span class="home-adventure-art" aria-hidden="true">${art(activity.icon)}</span><div class="home-adventure-copy">
+  return `<div class="home-adventure-copy">
     <p class="home-adventure-label">${text(draft ? 'הַהַרְפַּתְקָה שֶׁלָּךְ' : 'הַהַרְפַּתְקָה הַבָּאָה')}</p>
     <h2 id="home-adventure-title">${text(activity.he[0])}</h2><p id="home-adventure-detail">${text(reason)}</p>
     <button class="primary-button hero-start" ${activityButton(draft ? { action: 'resume' } : activity.route)} aria-describedby="home-adventure-title home-adventure-detail">${text(draft ? 'מַמְשִׁיכוֹת' : 'יוֹצְאוֹת לְהַרְפַּתְקָה')} ${uiIcon('arrow')}</button>
@@ -536,7 +536,7 @@ function homeDailyContent() {
 
 function renderHome() {
   const cards = Object.values(MISSIONS).filter(m => isPracticeAvailable(m.id)).map(m => `<button class="mission-card ${m.color}" data-action="mission" data-mission="${m.id}" aria-label="${m.name} — ${m.description}">
-    <div class="mission-art"><span class="art-orbit"></span>${m.id === 'characters' ? characterMissionArt() : art(m.icon, 'mission-object') + pup(m.pup, 'mission-pup')}</div>
+    <div class="mission-art" aria-hidden="true">${m.id === 'characters' ? characterMissionArt() : ['hebrew', 'english', 'letters', 'math'].includes(m.id) ? '<span class="location-picture"></span>' : art(m.icon, 'mission-object') + pup(m.pup, 'mission-pup')}</div>
     <div class="mission-body"><span class="subject-tag" ${m.id === 'english' ? 'lang="en" dir="ltr"' : ''}>${m.subject}</span><h3>${m.name}</h3><p>${m.subtitle}</p><span class="mission-go" aria-hidden="true">${uiIcon('arrow')}</span></div>
     ${activityCount(m.id) ? `<span class="mission-done" aria-label="כבר סיימת ${activityCount(m.id)} הרפתקאות">${uiIcon('check')}</span>` : ''}
   </button>`);
@@ -550,22 +550,26 @@ function renderHome() {
         <div class="hero-greeting">
           <h1 id="hero-title" tabindex="-1">שלום <bdi>${ARIEL.name}</bdi>!</h1>
         </div>
-        <div class="home-companions">
-          <button type="button" class="home-pika-link home-pika-start companion-entry" data-action="pikachu">${pikachuImage('home-pikachu')}<span>${settings.nikud ? PIKACHU_TITLE : 'מחפשות עם פיקאצ׳ו'}</span></button>
-          <button type="button" class="home-stitch-link companion-entry" data-action="stitch">${stitchImage('home-stitch')}<span>${settings.nikud ? STITCH_TITLE : 'מחפשות עם סטיץ׳'}</span></button>
-        </div>
         <section class="home-adventure" id="home-adventure" aria-labelledby="home-adventure-title">${homeAdventureContent()}</section>
-        <section class="daily-home" id="home-daily" aria-labelledby="daily-home-title">${homeDailyContent()}</section>
-        <div class="hero-actions"><button class="text-button welcome-listen" data-action="welcome">${uiIcon('sound')} לחצי ונכיר את החברים</button></div>
         <p id="audio-notice" class="audio-notice" role="status" hidden></p>
-      </div><div class="hero-world">${scene()}</div>
+      </div>
+      <div class="hero-world">${scene()}<button class="text-button welcome-listen" data-action="welcome">${uiIcon('sound')} לחצי ונכיר את החברים</button></div>
     </section>
-    ${chapterEntry(settings.nikud)}
+    <div class="home-shortcuts">
+      <div class="home-companions">
+        <button type="button" class="home-pika-link home-pika-start companion-entry" data-action="pikachu">${pikachuImage('home-pikachu')}<span>${settings.nikud ? PIKACHU_TITLE : 'מחפשות עם פיקאצ׳ו'}</span>${uiIcon('arrow')}</button>
+        <button type="button" class="home-stitch-link companion-entry" data-action="stitch">${stitchImage('home-stitch')}<span>${settings.nikud ? STITCH_TITLE : 'מחפשות עם סטיץ׳'}</span>${uiIcon('arrow')}</button>
+      </div>
+      <section class="daily-home" id="home-daily" aria-labelledby="daily-home-title">${homeDailyContent()}</section>
+    </div>
     <section class="missions" aria-labelledby="missions-title"><div class="section-heading"><h2 id="missions-title">לאן נצא היום?</h2></div>
       <div class="mission-grid">${[...cards.slice(0, 2), science, ...cards.slice(2)].join('')}</div>
     </section>
+    ${chapterEntry(settings.nikud)}
+    <div class="home-collection">
     <section class="home-feature-card park-feature"><div>${pup('tofi')}</div><span><h3>הַפָּארְק שֶׁלִּי</h3><p>קִשּׁוּטִים, חֲבֵרִים וּמָקוֹם לַדִּמְיוֹן</p></span><button class="primary-button" data-action="park">בּוֹנִים וּמְשַׂחֲקִים ${uiIcon('arrow')}</button></section>
     <section class="home-feature-card album-feature"><div>${art(progress.stickers.at(-1) || 'star')}</div><span><h3>הָאַלְבּוֹם שֶׁלִּי</h3><p>${progress.stickers.length ? `${progress.stickers.length} מדבקות מחכות לך באלבום` : 'בכל הרפתקה שלמה מגלות מדבקה חדשה'}</p></span><button class="primary-button" data-action="album">לאלבום שלי ${uiIcon('arrow')}</button></section>
+    </div>
   </main>${footer()}`;
 }
 
@@ -1631,7 +1635,7 @@ function renderLearningHub(){
       + journeyChoice('sounds', 'blend', 'מְחַבְּרוֹת צְלִילִים', 'קוֹרְאוֹת מִלִּים קְצָרוֹת מִצְּלִילִים מֻכָּרִים.', 'fish');
     sections = group('מַתְחִילוֹת בְּהַקְשָׁבָה', listening) + group('שְׁתֵּי מִלִּים בְּיַחַד', pairs) + group('צְלִילִים וּקְרִיאָה', sounds);
   }
-  app.innerHTML = `${header()}<main id="main" class="learning-hub"><button class="text-button back-button" data-action="home">${uiIcon('home')} לְבֵית הַחֲבֵרִים</button><section class="learning-hub-heading"><h1 tabindex="-1">${hebrew ? 'עִבְרִית' : 'מִפְרַץ הָאַנְגְּלִית'}</h1>${pup(hebrew ? 'luli' : 'bobi')}</section>${sections}</main>${footer()}`;
+  app.innerHTML = `${header()}<main id="main" class="learning-hub" data-hub="${hub}"><button class="text-button back-button" data-action="home">${uiIcon('home')} לְבֵית הַחֲבֵרִים</button><section class="learning-hub-heading"><h1 tabindex="-1">${hebrew ? 'עִבְרִית' : 'מִפְרַץ הָאַנְגְּלִית'}</h1>${pup(hebrew ? 'luli' : 'bobi')}</section>${sections}</main>${footer()}`;
 }
 function startJourney(mode,level){
   if(!JOURNEYS[mode])return;checkpoint();narrator.stop();round=null;

@@ -1,0 +1,260 @@
+/* Each activity is a page on the same worktable. The teaching diagrams keep
+   their own dimensions, direction, illustrations and semantic colours. */
+:is(.game-page, .journey-page, .letter-lesson-page, .number-workshop, .pikachu-page, .picnic-play) {
+  --page-ink: #243d48;
+  --page-accent: #287369;
+  --page-wash: #e2f1e6;
+  --page-edge: #c6d9cc;
+  --paper-stroke: #d8d4c6;
+  --paper-depth: 0 4px 0 #ded9ca, 0 12px 30px rgb(42 53 49 / 8%);
+  --tile-depth: inset 0 1px 0 #fff, 0 3px 0 #d5cfbe, 0 5px 9px rgb(50 48 37 / 7%);
+}
+.game-page:is(.reading-game, .peach), .picnic-play {
+  --page-accent: #99553d; --page-wash: #fff0dc; --page-edge: #ebc7a5;
+}
+.game-page:is(.letter-game, .word-form-game), .letter-lesson-page {
+  --page-accent: #69547e; --page-wash: #f0eaf7; --page-edge: #d5c8dd;
+}
+.number-workshop, .pikachu-page {
+  --page-accent: #835a22; --page-wash: #fff0ce; --page-edge: #e6ce9c;
+}
+.game-page.character-game, .stitch-match, .picnic-play:is(.delivery-page, .daily-page) {
+  --page-accent: #285d74; --page-wash: #e3f0f4; --page-edge: #bad6da;
+}
+
+:is(.game-page .game-board, .journey-page .journey-board, .number-workshop .number-board,
+    .pikachu-page .pika-board, .letter-lesson-page .letter-lesson-card, .picnic-play .picnic-step-card) {
+  color: var(--page-ink);
+  background: linear-gradient(155deg, #fffefa 35%, #fffcf4);
+  border: 1px solid var(--paper-stroke);
+  box-shadow: var(--paper-depth);
+}
+
+.game-board > .question-heading, .journey-board > .question-heading,
+.letter-lesson-card > .question-heading, .number-board .number-question-heading,
+.pika-board > .pika-heading, .picnic-step-card > .picnic-task-title {
+  padding: clamp(8px, 1.45vw, 15px) clamp(10px, 2vw, 23px);
+  border-radius: 12px 18px 18px 12px;
+  border-inline-start: 5px solid var(--page-accent);
+  background: linear-gradient(105deg, #fffefa, var(--page-wash) 82%);
+}
+:is(.question-heading, .number-question-heading, .picnic-task-title, .pika-heading) h1 {
+  color: var(--page-ink, var(--ink));
+}
+.game-page .question-heading h1, .picnic-play .picnic-task-title h1 { line-height: 1.45; }
+.game-page .section-kicker, .journey-board .section-kicker, .letter-lesson-card .section-kicker {
+  color: var(--page-accent);
+  font-weight: 600;
+}
+:is(.game-board, .journey-board, .number-board, .letter-lesson-card, .picnic-step-card)
+  :is(.question-heading, .number-question-heading, .picnic-task-title) .circle-button {
+  width: 46px; height: 46px; flex-shrink: 0;
+  border: 1px solid var(--page-edge);
+  color: var(--page-accent); background: #fffefa;
+  box-shadow: 0 2px 0 var(--page-edge);
+}
+.game-board .replay-button .ui-icon { color: var(--page-accent); }
+.game-page .mission-label { color: var(--page-accent); }
+.game-page .step-label { color: #485b61; font-variant-numeric: tabular-nums; }
+.step-track .step-dot {
+  background: #fffcf4;
+  color: #596869;
+  border: 1px solid #d3d6c7;
+  font-weight: 600;
+}
+.step-track .step-dot:not(:last-child)::after {
+  background: #c6cec0;
+  width: clamp(4px, 1.4vw, 12px);
+}
+.step-track .step-dot.current {
+  background: #ffdc89; color: #573c1c; border-color: #ba8b3d;
+  box-shadow: 0 0 0 3px #fffaf0, 0 0 0 4px #d6b874;
+}
+.step-track .step-dot.done { background: #237663; color: white; border-color: #216a5b; }
+.picnic-play .picnic-track .current { background: #ad7624; }
+
+/* The raised edge belongs to each response, never to the item being counted. */
+.game-page .answer-button,
+.journey-board .journey-choices > button,
+.pikachu-page .pika-choice,
+.number-workshop .number-answer,
+.picnic-play .picnic-answer {
+  color: var(--page-ink);
+  background: linear-gradient(155deg, white, #fffcf5);
+  border: 2px solid var(--paper-stroke);
+  box-shadow: var(--tile-depth);
+}
+.game-board .answer-button > :is(.art, .pup):not(.reading-scene),
+.journey-choices > button > svg:not(.reading-scene),
+.pika-choice > svg {
+  filter: drop-shadow(0 2px 1px rgb(40 54 43 / 13%));
+}
+.game-page .answer-button.correct, .pikachu-page .pika-choice.pika-found,
+.number-workshop .number-answer.number-correct, .picnic-play .picnic-answer.correct {
+  color: #185549; border-color: #31836b; background: #e5f5e9;
+  box-shadow: inset 0 0 0 1px white, 0 3px 0 #a4c9b0;
+}
+.game-page .answer-button.try-again, .number-workshop .number-answer.number-wrong {
+  border: 2px dashed #968c81; box-shadow: none; opacity: .64;
+}
+.game-page .answer-check {
+  background: #1d725c;
+  box-shadow: 0 2px 4px rgb(41 63 52 / 18%);
+}
+.game-page .feedback-row {
+  border-block-start: 1px solid #e5dfd1;
+  padding-block-start: 9px;
+}
+.game-page .feedback { color: #536264; }
+.game-page .feedback.success { color: #236855; }
+.game-page .hint-button, .journey-board .hint-button, .number-board .hint-button {
+  border: 1px solid #e3d2aa;
+  color: #725225; background: #fbf1d8;
+}
+.game-page .buddy-bar { color: #495c60; }
+
+/* Flashcards are unruled inside the reading area. The punched edge and
+   offset sheet are outside the letters, so even low vowel marks stay clear. */
+.game-board :is(.word-card, .word-form-prompt, .letter-question-card) {
+  color: var(--page-ink);
+  border: 1px solid #ddcba4;
+  border-radius: 16px 20px 20px 16px;
+  background:
+    radial-gradient(circle, #c6af86 0 2px, transparent 2.5px) 7px center / 8px 16px repeat-y,
+    linear-gradient(120deg, #f5e2b9 0, #ffedc6 17px, #fff3d5 18px, #fff6dc 80%, #f9eac4);
+  box-shadow: 0 3px 0 -1px #fff9e8, 0 4px 0 #d7c8a8, 0 7px 0 -2px #eee2c6;
+  transform: none;
+}
+.game-board :is(.target-word, .letter-question-card .letter-familiar) { color: #463c38; }
+.game-board .card-label { color: #745f42; }
+.game-board .word-underline { background: #c09d62; }
+.game-board .caption-picture, .game-board .character-picture-halo {
+  background: radial-gradient(ellipse at 48% 38%, #fff7dd 20%, #e7edd9 85%);
+  box-shadow: inset 0 0 0 1px #d7dfca;
+}
+.game-board .character-target p { color: #58696b; }
+
+/* Stage scenery is confined behind the character. Every reading choice is
+   presented on its own neutral tile, independent of the illustration. */
+.pika-board .pika-stage {
+  container-type: inline-size;
+  box-shadow: inset 0 0 0 1px var(--page-edge);
+}
+.pika-board .pika-stage::before {
+  content: "";
+  position: absolute; inset: 0; z-index: -1;
+  pointer-events: none; border-radius: inherit;
+  background-image: linear-gradient(to top, #faefcd61, transparent 65%), url("./assets/discovery-worlds.webp");
+  background-repeat: no-repeat;
+  background-size: 100% 100%, 200% auto;
+  background-position: center, left calc(50% + 33.333cqi);
+}
+.stitch-match .pika-stage::before {
+  background-image: linear-gradient(to top, #e9f7fa45, transparent 65%), url("./assets/discovery-worlds.webp");
+  background-position: center, right calc(50% + 33.333cqi);
+}
+.pikachu-page .pika-clue {
+  border-color: var(--page-edge); color: var(--page-ink); background: var(--page-wash);
+  box-shadow: 0 2px 0 var(--page-edge);
+}
+.pikachu-page .pika-shadow { background: #263c342e; }
+
+.journey-board .story-reading {
+  position: relative;
+  color: #493e33; border: 1px solid #d9caa6;
+  border-inline-start: 7px solid #d0ae73;
+  border-radius: 15px 10px 10px 15px;
+  background: linear-gradient(270deg, #f2e2ba, #fff6dd 25px, #fff8e6 70%, #ffefd4);
+  box-shadow: 0 3px 0 -1px #fffaf0, 0 4px 0 #d8cbb2, 0 7px 0 -2px #e8ddc6;
+}
+.journey-board .story-reading::before {
+  content: "";
+  position: absolute; inset-block-start: -1px; inset-inline-end: 17px;
+  width: 13px; height: 24px;
+  background: #d78562;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 77%, 0 100%);
+  pointer-events: none;
+}
+.journey-board .story-reading > span { color: #735a36; font-weight: 600; }
+.journey-board .story-reading p { color: #403a32; }
+.journey-board .story-scene {
+  background:
+    radial-gradient(ellipse 84% 53% at 13% 110%, #b2d499 0 98%, transparent 100%),
+    radial-gradient(ellipse 105% 45% at 76% 105%, #d7e6ab 0 98%, transparent 100%),
+    linear-gradient(#d5edee, #eff7e9 75%, #d9e5bc 76%);
+}
+.journey-board .story-tree { top: auto; bottom: 32%; }
+.journey-board .story-scene :is(.story-tree, .story-table) > svg {
+  filter: drop-shadow(0 2px 1px rgb(51 67 48 / 16%));
+}
+:is(.journey-board .story-scene, .act-playfield, .daily-pond, .delivery-landscape) {
+  box-shadow: inset 0 -3px 5px rgb(64 98 71 / 9%), 0 2px 0 rgb(98 125 84 / 13%);
+}
+.journey-board .word-slots { background: #eef2e8; box-shadow: inset 0 1px 4px #bcc8b88c; }
+.journey-board .word-tiles button:not(:disabled) { box-shadow: var(--tile-depth); }
+.journey-board .listen-orb, .game-page .listen-orb {
+  border: 2px solid #b8dace;
+  color: #245c53;
+  background: radial-gradient(ellipse at 30% 24%, #fcfff6, #d4ebdf);
+  box-shadow: 0 3px 0 #a8c4b3, 0 6px 13px rgb(50 89 64 / 10%);
+}
+
+.number-board .number-scene {
+  border-radius: 16px;
+  background: linear-gradient(155deg, #f7f0df, #fff8e9);
+  padding-block: clamp(10px, 2vw, 18px);
+}
+.number-board .number-tray {
+  box-shadow: inset 0 2px 3px rgb(67 67 43 / 9%), 0 2px 0 #fffefa;
+}
+.number-board .number-equation {
+  padding: 2px 12px;
+  border-radius: 9px;
+  color: #334744; background: #fffcf4;
+  font-variant-numeric: tabular-nums;
+}
+.number-board .fruit-tray {
+  background:
+    repeating-linear-gradient(3deg, transparent 0 13px, #bf905022 14px, transparent 16px 37px),
+    linear-gradient(145deg, #f6e4c4, #e7c591);
+  box-shadow: inset 0 0 0 2px #fff1d7, 0 3px 0 #d6bc95;
+}
+.number-board .fruit-piece:not(.fruit-cut) { background: #fff6df; box-shadow: 0 2px 0 #d6b582; }
+.letter-lesson-card .letter-form-card { color: #6c5845; background: #f8ecd5; border: 1px solid #e9d9bb; }
+.letter-lesson-card .letter-form-card.new-form { color: #655075; background: #eee8f3; border-color: #d7cadd; }
+.letter-lesson-card .letter-pad-card {
+  background: linear-gradient(145deg, #fff4dc, #f5e6c8);
+  border-color: #d8c6a1;
+  box-shadow: 0 3px 0 #ded1b7;
+}
+.letter-lesson-card .letter-pad-card h2, .letter-lesson-card .letter-pad-caption { color: #695735; }
+:is(.letter-lesson-card, .number-board) :is(.letter-pad, .free-writing-pad) {
+  box-shadow: 0 2px 0 #e3ddd0, inset 0 2px 4px rgb(54 48 39 / 6%);
+}
+.picnic-play :is(.picnic-food-board, .delivery-board, .daily-animal-board) {
+  box-shadow: inset 0 1px 3px rgb(34 76 62 / 10%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :is(.game-page .answer-button, .journey-board .journey-choices > button,
+      .number-workshop .number-answer, .pikachu-page .pika-choice, .picnic-play .picnic-answer):hover:enabled {
+    border-color: var(--page-accent);
+    box-shadow: inset 0 0 0 1px var(--page-wash), 0 3px 0 var(--page-edge);
+    background: white;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.still) :is(.game-page .answer-button, .number-workshop .number-answer,
+      .journey-board .journey-choices > button, .pikachu-page .pika-choice, .picnic-play .picnic-answer):active:enabled {
+    transform: translateY(2px);
+    box-shadow: inset 0 1px 2px #39462d22;
+  }
+}
+@media (max-width: 570px) {
+  .step-track .step-dot:not(:last-child)::after { width: 4px; }
+  .game-board > .question-heading, .journey-board > .question-heading,
+  .number-board .number-question-heading, .picnic-step-card > .picnic-task-title {
+    gap: 7px; padding: 6px 8px; border-inline-start-width: 3px;
+  }
+  .game-page .question-heading .section-kicker { margin-block-end: 1px; }
+}

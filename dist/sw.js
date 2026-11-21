@@ -1,5 +1,5 @@
 // Classic workers also support browsers without module service workers.
-const CACHE = 'puppy-adventures-shell-2.18.0';
+const CACHE = 'puppy-adventures-shell-2.19.0';
 const RECORDINGS = 'puppy-adventures-recordings-v1';
 const BASE = new URL('./', self.location.href);
 const asset = path => new URL(path, BASE).href;

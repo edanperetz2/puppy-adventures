@@ -1,0 +1,220 @@
+/* The playroom shares ink, paper and tactile controls. Lesson objects keep
+   their own colors, outlines and proportions: many are part of the question. */
+:root {
+  --paper: #faf6ec;
+  --ink: #233c43;
+  --muted: #53666a;
+  --green: #176e65;
+  --green-dark: #10594f;
+  --line: #dedace;
+  --paper-shadow: 0 3px 0 #cdbf9d45, 0 9px 22px #3048440c;
+}
+body { background: linear-gradient(165deg, #f0f5ec 0, var(--paper) 310px, #faf6ef 100%); }
+.topbar { height: 86px; padding-block: 12px; }
+.brand { color: #234b49; }
+.brand-mark {
+  background: #147366;
+  box-shadow: inset 0 2px 0 #ffffff45, inset 0 -3px 0 #174c4b65, 0 3px 0 #c6cec0;
+}
+.topbar .nav-button, .topbar .sound-toggle {
+  border: 1px solid #d9d9cc;
+  background: #fffdf5;
+  color: #345252;
+  box-shadow: 0 2px 0 #cfc9b549;
+}
+.topbar .guide-nav .ui-icon { color: #166c65; }
+.topbar .album-nav .ui-icon { color: #754d83; }
+.topbar .parent-button { color: #485f62; }
+.topbar .sound-toggle[aria-pressed=false] { background: #e8e4da; color: #586566; }
+.nav-count { background: #efe7f2; color: #553661; }
+.primary-button {
+  box-shadow: inset 0 1px 0 #ffffff35, 0 3px 0 #17463c36;
+}
+:where(button, a, input, select, summary):focus-visible {
+  outline: 3px solid #18729b;
+  outline-offset: 3px;
+}
+.footer { color: #596962; border-color: #d8d7c9; }
+
+/* One illustrated spread, with all text on the solid cloth side. */
+.home-page .hero {
+  display: grid;
+  grid-template-columns: minmax(0, .81fr) minmax(0, 1.19fr);
+  align-items: stretch;
+  gap: 0;
+  min-height: 0;
+  padding: 0;
+  margin-block: 6px 18px;
+  border: 1px solid #c4cbb8;
+  border-radius: clamp(20px, 3vw, 34px);
+  box-shadow: var(--paper-shadow);
+  overflow: hidden;
+  background: #164f4e;
+}
+.home-page .hero-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: center;
+  padding: clamp(22px, 3.4vw, 48px);
+  color: #fffdf4;
+  text-align: start;
+  background: radial-gradient(ellipse at 100% 0, #287165, transparent 75%), #184e4e;
+}
+.home-page .hero-greeting h1 {
+  margin: 0;
+  font-size: clamp(40px, 4.6vw, 67px);
+  line-height: 1.16;
+  letter-spacing: normal;
+  word-spacing: .035em;
+  color: #fffdf5;
+}
+.home-page .hero-greeting bdi { color: #ffe39a; }
+.home-page .home-adventure {
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  margin-block-start: clamp(12px, 2.4vw, 30px);
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.home-page .home-adventure-label { color: #bbe9ce; font-size: 14px; }
+.home-page .home-adventure h2 { color: #fffdf3; font-size: clamp(22px, 2.5vw, 33px); line-height: 1.42; }
+.home-page #home-adventure-detail { color: #e1f2e9; margin: 4px 0 15px; font-size: clamp(14px, 1.5vw, 17px); }
+.home-page .hero-start {
+  color: #233f38; background: #ffe4a2; box-shadow: 0 3px 0 #ad915d;
+  border-radius: 15px; min-height: 49px; gap: 20px;
+}
+.home-page .hero-start:hover { background: #ffecb9; }
+.home-page .hero-world {
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  max-width: none;
+  min-height: clamp(285px, 30vw, 372px);
+  background: #baddc3;
+}
+.clubhouse-scene { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 53%; }
+.hero-world .welcome-listen {
+  position: absolute;
+  inset: auto auto clamp(8px, 1.5vw, 18px) clamp(8px, 1.5vw, 18px);
+  min-height: 44px;
+  margin: 0;
+  padding: 6px 14px;
+  border: 1px solid #fff7d5;
+  border-radius: 24px;
+  background: #fffbed;
+  color: #284740;
+  font-size: 13px;
+  box-shadow: 0 3px 10px #243b352f;
+}
+.hero-world .welcome-listen .ui-icon { width: 19px; }
+.hero-copy .audio-notice { color: #ffebaf; }
+.home-shortcuts {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 14px;
+}
+.home-shortcuts .home-companions { width: 100%; margin: 0; gap: 14px; }
+.home-shortcuts .companion-entry {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  align-content: center;
+  justify-items: start;
+  gap: 5px;
+  padding: 5px 10px;
+  text-align: start;
+  line-height: 1.45;
+  box-shadow: var(--paper-shadow);
+}
+.home-shortcuts .companion-entry img { width: clamp(72px, 7.5vw, 107px); max-width: 100%; }
+.home-shortcuts .companion-entry > .ui-icon { width: 17px; }
+.home-shortcuts .home-pika-link { background: linear-gradient(125deg, #fff4cd, #fff8e4); }
+.home-shortcuts .home-stitch-link { background: linear-gradient(125deg, #dceff3, #f0faf5); }
+.home-shortcuts .daily-home { margin: 0; padding: 12px; box-shadow: var(--paper-shadow); background: #eff5e9; border-color: #cedcc9; }
+.home-shortcuts .daily-home-art { background: #dae8cf; }
+.home-shortcuts .daily-home .primary-button { background: #2c6253; }
+
+.home-page .missions { padding-block: clamp(24px,4.2vw,48px) 26px; }
+.home-page .section-heading { margin-bottom: 15px; }
+.home-page .section-heading h2 { color: #244b47; font-size: clamp(25px,3vw,39px); }
+.home-page .mission-grid { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: clamp(10px,1.4vw,18px); }
+.home-page .mission-card {
+  display: flex; flex-direction: column; align-items: stretch; justify-content: start;
+  min-width: 0; border-radius: 20px; background: #fffdf7; border: 1px solid #dad5c5;
+  box-shadow: var(--paper-shadow);
+}
+.home-page .mission-art {
+  height: auto; min-height: 0; aspect-ratio: 3 / 2; border-radius: 0;
+  background-color: #e7e6cc;
+}
+.home-page .mission-art::after { display: none; }
+.location-picture {
+  position: absolute; inset: 0; background-image: url('./assets/discovery-worlds.webp');
+  background-size: 200% 200%; background-repeat: no-repeat; background-position: left top;
+}
+[data-mission=english] .location-picture { background-position: right top; }
+[data-mission=math] .location-picture { background-position: left bottom; }
+[data-mission=letters] .location-picture { background-position: right bottom; }
+.home-page [data-mission=characters] .mission-art { background: linear-gradient(140deg, #f2dcc0, #c6dfd4); }
+.home-page .mission-body { flex: 1; padding: 12px 14px 18px; }
+.home-page .mission-body h3 { font-size: clamp(17px,1.65vw,24px); line-height: 1.3; }
+.home-page .subject-tag { color: #486558; font-size: 11px; margin-bottom: 5px; }
+.home-page .mission-body p { font-size: 14px; line-height: 1.4; color: #526466; padding-inline-end: 19px; }
+.home-page .mission-go { inset-inline-end: 9px; bottom: 12px; color: #316758; }
+.home-page .chapter-entry { box-shadow: var(--paper-shadow); margin: 4px 0 18px; }
+.home-collection { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 15px; margin-bottom: 30px; }
+.home-collection .home-feature-card { display: grid; grid-template-columns: 65px 1fr; gap: 8px 16px; margin: 0; padding: 20px; box-shadow: var(--paper-shadow); }
+.home-collection .home-feature-card > div { width: 65px; grid-row: span 2; align-self: center; }
+.home-collection .home-feature-card .primary-button { grid-column: 2; justify-self: start; width: auto; min-height: 44px; padding: 6px 15px; font-size: 15px; }
+.home-collection .home-feature-card p { margin: 3px 0; line-height: 1.45; }
+
+@media (max-width: 1000px) {
+  .home-page .mission-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .home-shortcuts { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); }
+  .home-shortcuts .companion-entry { grid-template-columns: auto minmax(0,1fr); }
+  .home-shortcuts .companion-entry > .ui-icon { display: none; }
+}
+@media (max-width: 760px) {
+  .topbar { height: 68px; padding-block: 8px; }
+  .home-shortcuts { grid-template-columns: minmax(0,1fr); gap: 10px; }
+  .home-shortcuts .companion-entry { grid-template-columns: minmax(0, .85fr) minmax(0, 1fr); justify-items: center; padding: 5px 8px; }
+  .home-shortcuts .companion-entry img { width: 85px; }
+  .home-shortcuts .home-companions { gap: 10px; }
+  .home-shortcuts .daily-home { grid-template-columns: 44px minmax(0,1fr) auto; padding: 8px 12px; }
+  .home-shortcuts .daily-home-art { grid-row: auto; align-self: center; }
+  .home-collection .home-feature-card { grid-template-columns: 48px minmax(0,1fr); padding: 14px; gap: 7px 10px; }
+  .home-collection .home-feature-card > div { width: 48px; }
+}
+@media (max-width: 600px) {
+  .home-page .hero {
+    position: relative;
+    grid-template-columns: minmax(0,1fr);
+    grid-template-rows: auto auto;
+    grid-template-areas: 'world' 'copy';
+    padding: 0; gap: 0; margin-top: 2px; margin-bottom: 12px;
+  }
+  .home-page .hero-world { grid-area: world; width: 100%; min-height: 0; height: clamp(148px,44vw,224px); }
+  .home-page .hero-copy { grid-area: copy; display: grid; padding: 15px 18px 17px; gap: 5px; }
+  .home-page .hero-greeting h1 { font-size: clamp(36px,9vw,49px); }
+  .home-page .home-adventure { margin-top: 0; }
+  .home-page .home-adventure-label { margin: 1px 0; font-size: 13px; }
+  .home-page .home-adventure h2 { font-size: 22px; line-height: 1.3; }
+  .home-page #home-adventure-detail { font-size: 14px; margin: 3px 0 8px; }
+  .home-page .hero-start { min-height: 44px; padding: 8px 15px; }
+  .hero-world .welcome-listen { padding: 5px 10px; font-size: 12px; }
+  .home-page .mission-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .home-page .mission-body { padding: 9px 10px 15px; }
+  .home-page .mission-body p { font-size: 13px; }
+  .home-collection { grid-template-columns: minmax(0,1fr); gap: 10px; }
+}
+@media (max-width: 370px) {
+  .home-shortcuts .companion-entry { grid-template-columns: minmax(0,1fr); gap: 0; text-align: center; font-size: 14px; }
+  .home-shortcuts .daily-home { grid-template-columns: 35px minmax(0,1fr) auto; padding-inline: 7px; }
+  .home-shortcuts .daily-home-art { height: 35px; }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not(.still) .location-picture { transition: transform 220ms ease-out; }
+  html:not(.still) .mission-card:hover .location-picture { transform: scale(1.035); }
+}

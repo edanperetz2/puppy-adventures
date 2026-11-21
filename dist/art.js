@@ -10,8 +10,15 @@ import { stickerDefinition } from './stickers.js';
 const svg = (body, cls = '', viewBox = '0 0 200 200') => `<svg class="${cls}" viewBox="${viewBox}" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${body}</svg>`;
 const eye = (x, y) => `<ellipse cx="${x}" cy="${y}" rx="5" ry="7" fill="#343247"/><circle cx="${x + 1.5}" cy="${y - 2}" r="1.8" fill="white"/>`;
 
+// Curriculum scenes can recolor the vector dog. The three named play guides
+// use their own transparent portraits inside the same square stage.
 export function pup(name = 'luli', cls = '') {
-  const p = { luli: ['#d89561', '#ae6c47', '#f9d9ad', '#9e84c5'], bobi: ['#899ab2', '#647891', '#e0e6e9', '#64b6bf'], tofi: ['#dbaf67', '#b28648', '#f9dfaa', '#efae47'] }[name] || ['#d89561', '#ae6c47', '#f9d9ad', '#9e84c5'];
+  const guide = ['luli', 'bobi', 'tofi'].includes(name) ? name : 'luli';
+  return svg(`<image href="./assets/guide-${guide}.webp" x="6" y="2" width="188" height="193" preserveAspectRatio="xMidYMax meet"/>`, `pup ${cls}`);
+}
+
+function lessonDog(cls) {
+  const p = ['#d89561', '#ae6c47', '#f9d9ad', '#9e84c5'];
   return svg(`<ellipse cx="101" cy="187" rx="63" ry="8" fill="#383a4f" opacity=".1"/>
     <path class="pup-tail" d="M144 144Q184 154 175 117Q168 132 150 126" fill="${p[1]}"/>
     <path d="M59 149Q44 154 40 140Q43 126 64 126M139 149Q158 156 161 138Q157 125 137 126" fill="${p[0]}"/>
@@ -23,7 +30,7 @@ export function pup(name = 'luli', cls = '') {
     <ellipse cx="100" cy="107" rx="40" ry="26" fill="${p[2]}"/>
     ${eye(76, 82)}${eye(126, 82)}<ellipse cx="63" cy="103" rx="8" ry="4" fill="#e89591" opacity=".7"/><ellipse cx="139" cy="103" rx="8" ry="4" fill="#e89591" opacity=".7"/>
     <path d="M89 99Q100 93 111 99Q111 110 100 113Q89 110 89 99" fill="#343247"/><path d="M100 112V119Q88 128 81 116M100 119Q113 127 120 116" stroke="#343247" stroke-width="3" stroke-linecap="round"/>
-    ${name === 'luli' ? '<path d="M137 44Q130 20 148 27L151 36Q170 20 172 41L156 48Z" fill="#9e84c5"/><circle cx="150" cy="42" r="6" fill="#d8c9ee"/>' : name === 'tofi' ? '<path d="M49 57Q52 12 101 15Q148 13 153 57Z" fill="#f5bd52"/><path d="M100 15V49M64 54H144" stroke="#d59630" stroke-width="7" stroke-linecap="round"/><rect x="37" y="53" width="128" height="11" rx="5" fill="#ffce70"/>' : '<path d="M58 52Q73 20 101 21Q134 20 148 51Z" fill="#64b6bf"/><path d="M140 48Q162 39 171 53L141 61" fill="#398f9e"/><path d="M82 31L78 47" stroke="#caeef0" stroke-width="7" stroke-linecap="round"/>'}
+    <path d="M137 44Q130 20 148 27L151 36Q170 20 172 41L156 48Z" fill="#9e84c5"/><circle cx="150" cy="42" r="6" fill="#d8c9ee"/>
     <circle cx="101" cy="157" r="11" fill="#fff4d9"/><path d="M101 149L103 154L109 155L105 159L106 165L101 162L96 165L97 159L93 155L99 154Z" fill="${p[3]}"/>`, `pup ${cls}`);
 }
 
@@ -65,7 +72,7 @@ export function art(name, cls = '') {
   if (sticker !== null) return svg(sticker, `art sticker-scene ${cls}`);
   const scene = readingScene(name, object => art(object));
   if (scene !== null) return svg(scene, `art reading-scene ${cls}`);
-  if (name === 'dog') return pup('luli', cls);
+  if (name === 'dog') return lessonDog(cls);
   return svg(drawings[name] || drawings.star, `art ${cls}`);
 }
 
@@ -90,23 +97,5 @@ export function uiIcon(name) {
 }
 
 export function scene() {
-  return `<div class="world-scene" aria-label="לולי, בובי וטופי ליד בית החברים בגבעות ירוקות" role="img">
-    ${svg(`<defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#e9f2eb"/><stop offset="1" stop-color="#f7edd9"/></linearGradient></defs>
-      <rect x="0" y="0" width="680" height="420" rx="60" fill="url(#sky)"/>
-      <g fill="#fffdf3" opacity=".9"><path d="M45 83Q29 56 63 52Q67 16 103 39Q133 23 142 54Q169 58 158 82Z"/><path d="M467 89Q452 67 480 59Q482 29 514 44Q537 34 546 58Q577 67 563 89Z"/></g>
-      <circle cx="559" cy="133" r="40" fill="#f7d58a"/><path d="M0 263Q145 122 338 258Q510 118 680 228V420H0Z" fill="#c3d6ab"/>
-      <path d="M0 323Q151 209 340 306Q512 217 680 301V420H0Z" fill="#9cbd96"/>
-      <path d="M305 420Q243 365 333 291L375 284Q308 356 421 420" fill="#f6dfb7"/>
-      <path d="M205 153H391V289H205Z" fill="#f4d9af"/><path d="M183 159L296 64L413 159Z" fill="#cf8880"/><path d="M188 159L296 72L407 159" stroke="#b96f6b" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-      <rect x="273" y="205" width="48" height="84" rx="24" fill="#6b9f98"/><circle cx="308" cy="250" r="4" fill="#f3d48a"/>
-      <rect x="221" y="185" width="34" height="38" rx="8" fill="#fff7e4"/><rect x="340" y="185" width="34" height="38" rx="8" fill="#fff7e4"/>
-      <path d="M238 185V223M221 204H255M357 185V223M340 204H374" stroke="#c49b73" stroke-width="3"/>
-      <circle cx="296" cy="145" r="27" fill="#fff3d9"/><path d="M296 127L301 139L314 140L304 149L307 163L296 156L284 163L287 149L277 140L291 139Z" fill="#d3a457"/>
-      <path d="M57 257V185M592 274V193" stroke="#a58c61" stroke-width="14" stroke-linecap="round"/><g fill="#80a98a"><circle cx="54" cy="174" r="46"/><circle cx="35" cy="199" r="34"/><circle cx="85" cy="198" r="37"/><circle cx="590" cy="183" r="45"/><circle cx="560" cy="208" r="33"/><circle cx="620" cy="212" r="31"/></g>
-      <g fill="#f5e8c9"><path d="M458 300V249H502V305M462 250L480 228L499 250"/><path d="M509 303V256H549V308M512 256L529 233L546 256"/></g>
-      <g fill="#f4d787"><circle cx="48" cy="349" r="5"/><circle cx="60" cy="337" r="5"/><circle cx="549" cy="342" r="5"/><circle cx="563" cy="354" r="5"/><circle cx="614" cy="375" r="6"/></g>
-      <g fill="#d5a3b3"><circle cx="133" cy="302" r="5"/><circle cx="146" cy="308" r="5"/><circle cx="524" cy="387" r="5"/></g>`, 'landscape', '0 0 680 420')}
-    <div class="scene-pup scene-luli">${pup('luli')}</div><div class="scene-pup scene-bobi">${pup('bobi')}</div><div class="scene-pup scene-tofi">${pup('tofi')}</div>
-    <span class="scene-butterfly">${art('butterfly')}</span><span class="scene-sparkle sparkle-one">✦</span><span class="scene-sparkle sparkle-two">✧</span>
-  </div>`;
+  return '<img class="clubhouse-scene" src="./assets/clubhouse-welcome.webp" width="1152" height="768" fetchpriority="high" alt="לולי, בובי וטופי מסתכלים יחד במפה ליד בית החברים">';
 }
