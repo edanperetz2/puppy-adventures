@@ -190,6 +190,26 @@
 :is(.journey-board .story-scene, .act-playfield, .daily-pond, .delivery-landscape) {
   box-shadow: inset 0 -3px 5px rgb(64 98 71 / 9%), 0 2px 0 rgb(98 125 84 / 13%);
 }
+.act-playfield .act-scenery {
+  background: linear-gradient(118deg, #fffbe861, transparent 50%, #63785d0d);
+}
+.act-playfield .act-tray {
+  box-shadow: inset 0 1px 0 #fffdf4, 0 2px 3px #63513721;
+}
+.act-playfield .act-piece:not([aria-pressed="true"]):enabled {
+  box-shadow: inset 0 1px 0 white, 0 2px 0 #d7c5a1;
+}
+.act-garden-pot .act-pot {
+  background:
+    linear-gradient(to bottom, #8b5437 0 7%, #e2a27a 8% 18%, #b97755 19% 23%, transparent 24%),
+    linear-gradient(100deg, #b96c54, #dc9974 38%, #ce8464 75%, #b4644c);
+}
+.act-entry .act-doorway { box-shadow: inset 1px 3px 7px #3c354357, 0 2px 0 #a97f6233; }
+.act-entry .act-door-panel {
+  background:
+    repeating-linear-gradient(88deg, transparent 0 11px, #9b66401a 12px, transparent 14px 26px),
+    linear-gradient(95deg, #b9785d, #e5b590 24%, #d99b77 84%, #bf7b60);
+}
 .journey-board .word-slots { background: #eef2e8; box-shadow: inset 0 1px 4px #bcc8b88c; }
 .journey-board .word-tiles button:not(:disabled) { box-shadow: var(--tile-depth); }
 .journey-board .listen-orb, .game-page .listen-orb {
