@@ -27,6 +27,25 @@
 .letter-path-go{display:flex;align-items:center;justify-content:center;gap:20px;font-size:14px;font-weight:600;margin-top:8px;color:var(--green)}
 .letter-path-note{text-align:center;margin-top:25px;font-size:12px}
 .letter-route-description{font-size:15px;color:#97839f;line-height:1.8;margin:15px 0;text-align:center}
+.question-heading .practice-letter-heading {
+  display: grid;
+  place-items: center;
+  width: fit-content;
+  min-height: 70px;
+  margin: 0;
+  color: #584765;
+}
+.practice-letter-heading > .letter-shape {
+  width: clamp(92px, 14vw, 124px);
+  height: auto;
+  color: inherit;
+}
+.practice-letter-heading > .letter-familiar {
+  font-size: clamp(58px, 9vw, 78px);
+  line-height: 1.25;
+  color: inherit;
+}
+.memory-model-hidden :is(.letter-pair, .letter-book-note, .letter-name-row, .letter-final-note, .letter-word-examples) { display: none; }
 .letter-route-progress{text-align:center;font-size:13px;color:#8c7698;margin:10px 0 15px}
 .letter-recognition-preview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;max-width:570px;margin:20px auto}
 .letter-recognition-preview>div{min-width:0;display:flex;flex-direction:column;align-items:center;gap:10px;padding:13px 10px;background:#f5eff7;border:1px solid #eee4f0;border-radius:19px}
@@ -40,7 +59,7 @@
 .letter-writing-continue button:disabled{opacity:.4}
 .letter-library-grid button.practiced{border-color:#b4d0be;background:#eff5ed}
 .letter-library-grid .letter-practiced{position:absolute;top:3px;left:6px;font-size:13px;color:#7aa389}
-.letter-recognition-model{display:flex;align-items:center;justify-content:center;gap:15px;max-width:310px;padding:8px 16px;background:#eaf1e8;border-radius:16px;color:#7d947b;font-size:12px}
+.letter-recognition-model{display:flex;grid-column:1/-1;align-items:center;justify-content:center;gap:15px;max-width:310px;margin:0 auto 12px;padding:8px 16px;background:#eaf1e8;border-radius:16px;color:#526650;font-size:12px}
 .letter-recognition-model .letter-shape{width:65px;height:65px;flex-shrink:0}
 .letter-next-offer{display:flex;flex-direction:column;align-items:center;gap:15px;margin-top:20px}
 .letter-next-offer .letter-group-preview{font-size:30px}
@@ -75,6 +94,7 @@
 .word-trace-title{display:flex;align-items:center;justify-content:center;gap:12px}.word-trace-title .art{width:64px;height:64px}
 .word-trace-title h1{font-size:clamp(28px,5vw,38px);line-height:1.5;margin:0}.word-trace-card .word-letter-count{margin:0}
 .written-word{display:flex;max-width:100%;gap:4px}.word-glyph{width:clamp(32px,8vw,66px);aspect-ratio:1;border-radius:10px;background:#f4eff5}
+.written-word h2.word-glyph{margin:0}
 .word-glyph .letter-shape{color:#867b88}.word-glyph[aria-current]{outline:2px solid #80569c;background:#efdff8}.word-glyph.written{background:#e6f3e9}.word-glyph.written .letter-shape{color:#33775b}
 .word-trace-card .letter-pad-card{width:min(100%,330px)}
 

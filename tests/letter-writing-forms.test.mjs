@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { LETTERS, WRITING_FORMS, writingLetter, writingMode, writingPositionKey, letterShape } from '../dist/letters.js';
+import { LETTERS, WRITING_FORMS, writingLetter, writingMode, writingPositionKey, letterShape, letterHeading } from '../dist/letters.js';
 import { MAIN_LETTER_STROKES } from '../dist/letter-main-forms.js';
 import { CLIPS } from '../dist/content.js';
 import { freshProgress, sanitizeProgress, sanitizeSettings } from '../dist/engine.js';
@@ -46,6 +46,36 @@ test('Print landmarks distinguish easily confused Hebrew letters and keep final 
   for (const char of ['ך', 'ן', 'ף', 'ץ']) assert.ok(form(char).strokes.some(d => /V224/u.test(d)), `${char} must descend`);
   assert.ok(form('ם').strokes.every(d => !/22[0-9]/u.test(d)), 'Final mem stays on the baseline');
   assert.notDeepEqual(form('ף').strokes, form('ץ').strokes);
+});
+
+test('Each of the 106 writing titles uses the exact practiced strokes, language and form', () => {
+  for (const [language, letters] of Object.entries(LETTERS)) {
+    for (const form of WRITING_FORMS) {
+      for (const index of letters.keys()) {
+        const letter = writingLetter(language, index, form);
+        const title = letterHeading(letter, { id: 'writing-letter-title' });
+        assert.match(title, /^<h1 [^>]*id="writing-letter-title" tabindex="-1"/u);
+        const attributes = title.slice(0, title.indexOf('>'));
+        assert.ok(attributes.includes(language === 'hebrew' ? 'lang="he" dir="rtl"' : 'lang="en" dir="ltr"'));
+        const label = language === 'hebrew'
+          ? `${letter.spoken} ${form === 'main' ? 'בדפוס' : 'בכתב יד'}`
+          : form === 'main' ? `uppercase ${letter.familiar}` : `lowercase ${letter.small}`;
+        assert.ok(attributes.includes(`aria-label="${label}"`));
+        assert.ok(title.endsWith(`>${letterShape(letter)}</h1>`));
+        assert.deepEqual([...title.matchAll(/<path d="([^"]+)"/gu)].map(match => match[1]), letter.strokes);
+      }
+    }
+  }
+});
+
+test('Covered memory writing removes the target from the visual and accessible title', () => {
+  for (const language of Object.keys(LETTERS)) {
+    const letter = writingLetter(language, 0);
+    const covered = letterHeading(letter, { id: 'writing-letter-title', hiddenModel: true });
+    assert.match(covered, /^<h1 [^>]*lang="he" dir="rtl">כותבות מהזיכרון<\/h1>$/u);
+    assert.doesNotMatch(covered, /<svg|<bdi|aria-label=/u);
+    assert.ok(letterHeading(letter, { hiddenModel: false }).includes(letterShape(letter)));
+  }
 });
 
 test('Capitals have full-height forms, separate crossbars and pen lifts', () => {

@@ -76,7 +76,9 @@ export function mountWritingWord(root, { language, form, word, index, nikud, mot
   function draw() {
     pad?.destroy();
     const finished = index === models.length;
-    const forms = models.map((letter, i) => `<span class="word-glyph ${i < index ? 'written' : ''}" ${i === index ? 'aria-current="step"' : ''}>${letterShape(letter)}</span>`).join('');
+    const forms = models.map((letter, i) => i === index
+      ? `<h2 class="word-glyph" id="word-current-letter" aria-current="step" tabindex="-1" lang="${he ? 'he' : 'en'}" dir="${dir}">${letterShape(letter)}</h2>`
+      : `<span class="word-glyph ${i < index ? 'written' : ''}">${letterShape(letter)}</span>`).join('');
     root.innerHTML = `<button type="button" class="text-button" data-word-button="back">${uiIcon('arrow')} בחזרה לאותיות</button>
       <section class="letter-lesson-card word-trace-card"><div class="word-trace-title">${art(word.id)}
         <div><h1 tabindex="-1" lang="${he ? 'he' : 'en'}" dir="${dir}">${text}</h1>
@@ -85,7 +87,7 @@ export function mountWritingWord(root, { language, form, word, index, nikud, mot
         <div class="written-word" dir="${dir}" aria-label="${text}">${forms}</div>
         ${finished ? `<button type="button" class="primary-button" data-word-button="back">נבחר מילה נוספת ${uiIcon('arrow')}</button>` :
           `<p class="word-letter-count">אוֹת ${index + 1} מִתּוֹךְ ${models.length}</p>
-          <div class="letter-pad-card"><div class="word-tracing-pad">${letterShape(models[index], { guide: true, pad: true })}<p class="letter-pad-caption" role="status" aria-live="polite"></p></div>
+          <div class="letter-pad-card"><div class="word-tracing-pad" role="group" aria-labelledby="word-current-letter">${letterShape(models[index], { guide: true, pad: true })}<p class="letter-pad-caption" role="status" aria-live="polite"></p></div>
           <div class="letter-pad-controls"><button type="button" data-word-button="demo">${uiIcon('pencil')} הראי לי איך</button></div></div>
           <button class="primary-button" type="button" data-word-button="next" disabled>${index === models.length - 1 ? 'לַמִּלָּה הַשְּׁלֵמָה' : 'לָאוֹת הַבָּאָה'} ${uiIcon('arrow')}</button>`}</section>`;
     if (finished) return;
@@ -106,7 +108,7 @@ export function mountWritingWord(root, { language, form, word, index, nikud, mot
     if (action === 'demo') { pad.demo(); speak('letters-demo'); }
     if (action !== 'next' || !traced) return;
     index++; traced = false; draw();
-    root.querySelector('h1').focus({ preventScroll: true });
+    (root.querySelector('#word-current-letter') || root.querySelector('h1')).focus();
     speak(currentClip() || ['correct-1', word.clip]);
   }, { signal: events.signal });
   draw();

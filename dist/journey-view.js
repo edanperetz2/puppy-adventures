@@ -150,6 +150,9 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
       : `<div class="journey-choices">${task.choices.map(id=>`<button data-j="answer" data-answer="${id}" aria-label="${p.task==='count'?id:WORDS.find(w=>w.id===id)?.he||ANIMALS.find(w=>w.id===id)?.he||COLORS.find(w=>w.id===id)?.he||id}" ${done?'disabled':''}>${p.task==='count'?`<b class="quantity-number">${id}</b>`:learningPicture(id)}</button>`).join('')}</div>`;
     return `${scene}<p class="journey-instruction">${hebrew(p.prompt)}</p>${answers}`;
   }
+  function showsSoundLetter(task) {
+    return task.kind === 'sound' && (task.model || s().showModel || s().resolved);
+  }
   function englishView(task){
     if (task.kind === 'english-picture') return englishPictureView(task, s());
     if (task.readPicture) {
@@ -159,8 +162,19 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
     if(task.kind==='sound'||task.kind==='blend') {
       const picture = task.example?.id || (task.phoneme.word === 'insect' ? 'butterfly' : task.phoneme.word);
       const exampleText = task.example?.text || task.phoneme.word.toUpperCase();
-      const letters=task.kind==='sound'?`<bdi class="sound-letters" dir="ltr">${task.phoneme.capital} <span>${task.phoneme.small}</span></bdi>`:`<div class="blend-pieces" dir="ltr">${task.word.split('').map(l=>`<button data-j="phoneme" data-phoneme="${l}" aria-label="דוגמה למילה שמתחילה בצליל ${l.toUpperCase()}">${l.toUpperCase()}<small>${l}</small>${uiIcon('sound')}</button>`).join('')}</div>`;
-      return `<p class="journey-instruction">${task.kind==='sound'?'מַקְשִׁיבִים לַמִּלָּה וּמְחַפְּשִׂים אֶת הַצְּלִיל הָרִאשׁוֹן.':'הַקְשִׁיבִי לַמִּלָּה וּבַחֲרִי אֵיךְ כּוֹתְבִים אוֹתָהּ.'}</p>${(task.model||s().showModel)?letters:''}${task.kind==='sound'?`<div class="phonics-example">${learningPicture(picture)}${task.model||s().showModel?`<bdi dir="ltr" lang="en">${exampleText}</bdi>`:''}</div>`:task.pictured && (task.model || s().showModel) ? `<div class="phonics-example">${learningPicture(task.word)}</div>` : ''}<button class="listen-orb" data-j="listen" aria-label="שמיעת מילת הדוגמה">${uiIcon('sound')}</button><div class="journey-choices">${task.choices.map(c=>`<button data-j="answer" data-answer="${task.kind==='sound'?c.id:c}" ${s().resolved?'disabled':''} dir="ltr">${task.kind==='sound'?`<b class="sound-choice">${c.capital}<small>${c.small}</small></b>`:`<b class="sound-choice">${c.toUpperCase()}</b>`}</button>`).join('')}</div><p class="parent-note">${task.kind==='sound'?'מקשיבים לצליל בתחילת מילת דוגמה שלמה. אין צורך לקרוא את המילה.':'אפשר לחזור למסלול הצלילים בכל זמן.'}</p>`;
+      const sound = task.kind === 'sound';
+      const guided = task.model || s().showModel;
+      const pieces = !sound && guided ? `<div class="blend-pieces" dir="ltr">${task.word.split('').map(l=>`<button data-j="phoneme" data-phoneme="${l}" aria-label="דוגמה למילה שמתחילה בצליל ${l.toUpperCase()}">${l.toUpperCase()}<small>${l}</small>${uiIcon('sound')}</button>`).join('')}</div>` : '';
+      const example = sound
+        ? `<div class="phonics-example">${learningPicture(picture)}${guided ? `<bdi dir="ltr" lang="en">${exampleText}</bdi>` : ''}</div>`
+        : task.pictured && guided ? `<div class="phonics-example">${learningPicture(task.word)}</div>` : '';
+      const listen = showsSoundLetter(task)
+        ? `<button class="listen-orb" data-j="replay">${uiIcon('sound')}<span>${hebrew('שׁוּב אֶת הַהוֹרָאוֹת')}</span></button>`
+        : `<button class="listen-orb" data-j="listen" aria-label="שמיעת מילת הדוגמה">${uiIcon('sound')}</button>`;
+      return `<p class="journey-instruction">${sound?'מַקְשִׁיבִים לַמִּלָּה וּמְחַפְּשִׂים אֶת הַצְּלִיל הָרִאשׁוֹן.':'הַקְשִׁיבִי לַמִּלָּה וּבַחֲרִי אֵיךְ כּוֹתְבִים אוֹתָהּ.'}</p>
+        ${pieces}${example}${listen}
+        <div class="journey-choices">${task.choices.map(c=>`<button data-j="answer" data-answer="${sound?c.id:c}" ${s().resolved?'disabled':''} dir="ltr">${sound?`<b class="sound-choice">${c.capital}<small>${c.small}</small></b>`:`<b class="sound-choice">${c.toUpperCase()}</b>`}</button>`).join('')}</div>
+        <p class="parent-note">${sound?'מקשיבים לצליל בתחילת מילת דוגמה שלמה. אין צורך לקרוא את המילה.':'אפשר לחזור למסלול הצלילים בכל זמן.'}</p>`;
     }
     const pair=task.kind==='pair';
     return `<p class="journey-instruction">${task.newWord?'מִלָּה חֲדָשָׁה אַחַת! נַכִּיר אוֹתָה יַחַד.':pair?'כְּבָר מַכִּירִים אֶת הַצֶּבַע וְאֶת הַחֵפֶץ. נַקְשִׁיב לִשְׁתֵּי מִלִּים.':'מַקְשִׁיבִים לְמִלָּה אַחַת וּבוֹחֲרִים תְּמוּנָה.'}</p>
@@ -221,6 +235,9 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
     }
     if (task.readPicture) return heading(esc(task.word.toUpperCase()), {
       lang: 'en', action: 'listen', voice: 'שמיעת המילה באנגלית', lowercase: task.word,
+    });
+    if (showsSoundLetter(task)) return heading(`<span class="sound-letters">${esc(task.phoneme.capital)} <span>${esc(task.phoneme.small)}</span></span>`, {
+      lang: 'en', action: 'listen', voice: 'שמיעת מילת הדוגמה',
     });
     if (workshopShowsWord(task)) return heading(esc(nikud ? task.word.pointed : task.word.he), {
       action: 'word', voice: 'שמיעת המילה',

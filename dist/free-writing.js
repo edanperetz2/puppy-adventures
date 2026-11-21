@@ -3,7 +3,7 @@ import { uiIcon } from './art.js';
 import { cleanInk, mountInkPad } from './ink-pad.js?v=2.3.3-dictation';
 export { cleanInk };
 export const WRITING_STEPS={trace:'עוֹקְבִים עַל הַקַּו',copy:'מַעְתִּיקִים לְיַד הַדֻּגְמָה',memory:'מְנַסִּים מֵהַזִּכָּרוֹן',paper:'כּוֹתְבִים עַל דַּף'};
-export function mountFreeWriting(root,{letter,mode='copy',saved={},onSave=()=>{},onComplete=()=>{},speak=()=>{}}) {
+export function mountFreeWriting(root,{letter,mode='copy',saved={},onSave=()=>{},onComplete=()=>{},onCoverChange=()=>{},speak=()=>{}}) {
   const events=new AbortController();let lines=cleanInk(saved.lines),hidden=mode==='memory'&&saved.hidden===true,done=saved.done===true,pad;
   const save=()=>onSave({lines,hidden,done});
   const canDraw = () => !done && (mode !== 'memory' || hidden);
@@ -15,6 +15,18 @@ export function mountFreeWriting(root,{letter,mode='copy',saved={},onSave=()=>{}
     if (svg) pad = mountInkPad(svg, { saved: lines, canDraw, onChange: ink => { lines = ink; updateFinish(); save(); } });
     updateFinish();
   }
-  root.addEventListener('click',e=>{const b=e.target.closest('[data-w]');if(!b||b.disabled)return;if(b.dataset.w==='clear'){lines=[];done=false;save();render();}if(b.dataset.w==='hide'){hidden=!hidden;save();render();}if(b.dataset.w==='done'){done=true;save();onComplete(mode);render();speak('journey-practice');}},{signal:events.signal});
+  root.addEventListener('click', e => {
+    const button = e.target.closest('[data-w]');
+    if (!button || button.disabled) return;
+    if (button.dataset.w === 'clear') { lines=[];done=false;save();render(); }
+    if (button.dataset.w === 'hide') {
+      hidden = !hidden;
+      save();
+      render();
+      onCoverChange(hidden);
+      root.querySelector('[data-w="hide"]').focus({ preventScroll: true });
+    }
+    if (button.dataset.w === 'done') { done=true;save();onComplete(mode);render();speak('journey-practice'); }
+  }, { signal: events.signal });
   render();return{destroy:()=>{events.abort();pad?.destroy();save();}};
 }

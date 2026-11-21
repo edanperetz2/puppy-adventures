@@ -97,6 +97,21 @@ export function letterShape(letter, { guide = false, pad = false } = {}) {
   </svg>`;
 }
 
+export function familiarGlyph(letter) {
+  const hebrew = letter.language === 'hebrew';
+  return `<bdi class="letter-familiar" dir="${hebrew ? 'rtl' : 'ltr'}" lang="${hebrew ? 'he' : 'en'}">${letter.familiar}</bdi>`;
+}
+
+export function letterHeading(letter, { familiar = false, id = '', hiddenModel = false } = {}) {
+  const attributes = `${id ? ` id="${id}"` : ''} tabindex="-1"`;
+  if (hiddenModel) return `<h1${attributes} lang="he" dir="rtl">כותבות מהזיכרון</h1>`;
+  const hebrew = letter.language === 'hebrew';
+  const main = familiar || letter.form === 'main';
+  const label = hebrew ? `${letter.spoken} ${main ? 'בדפוס' : 'בכתב יד'}`
+    : main ? `uppercase ${letter.familiar}` : `lowercase ${letter.small}`;
+  return `<h1 class="practice-letter-heading"${attributes} lang="${hebrew ? 'he' : 'en'}" dir="${hebrew ? 'rtl' : 'ltr'}" aria-label="${label}">${familiar ? familiarGlyph(letter) : letterShape(letter)}</h1>`;
+}
+
 // Follow nearby points in order, tolerating a small child's finger movements.
 export function advanceTrace(points, progress, point, tolerance = 25, previousPoint = points[progress]) {
   let best = progress, distance = tolerance;

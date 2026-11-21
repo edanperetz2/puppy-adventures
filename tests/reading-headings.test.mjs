@@ -4,6 +4,30 @@ import { journeyQuestions, newJourney, seeded } from '../dist/journey.js';
 import { journeyReadingText } from '../dist/journey-content.js';
 import { PICTURE_BLEND_GROUPS } from '../dist/english-expansion.js';
 import { mountJourney } from '../dist/journey-view.js';
+import { classicReadingHeading } from '../dist/classic-reading-heading.js';
+import { LETTERS, familiarGlyph, letterShape } from '../dist/letters.js';
+
+test('recognition titles show the printed or handwritten prompt in its original form in both directions', () => {
+  for (const [language, letters] of Object.entries(LETTERS)) {
+    const hebrew = language === 'hebrew';
+    for (const letter of letters) for (const direction of ['to-main', 'to-alternate']) {
+      const reverse = direction === 'to-main';
+      const question = { type: 'letter', letter, direction };
+      const expected = reverse ? letterShape(letter) : familiarGlyph(letter);
+      const form = hebrew ? (reverse ? 'בדפוס' : 'בכתב יד') : (reverse ? 'גדולה' : 'קטנה');
+      for (const nikud of [true, false]) {
+        const title = classicReadingHeading(question, nikud);
+        assert.ok(title.html.startsWith('<h1 '));
+        assert.ok(title.html.includes('id="question-title"'));
+        assert.ok(title.html.includes(hebrew ? 'lang="he" dir="rtl"' : 'lang="en" dir="ltr"'));
+        assert.ok(title.html.endsWith(`>${expected}</h1>`));
+        assert.equal(title.clip, letter.clip);
+        assert.equal(/\p{M}/u.test(title.instruction), nikud);
+        assert.equal(title.instruction.replace(/\p{M}/gu, ''), `איזו אות ${form} מתאימה?`);
+      }
+    }
+  }
+});
 
 function openPage(plan, index, nikud, state = {}) {
   let click;
@@ -78,6 +102,26 @@ test('Hebrew word building puts a displayed model in the heading and keeps indep
   }
 });
 
+test('first sounds show the two practiced letter forms when modeled, hinted or solved, and leave independent listening open', () => {
+  const plan = newJourney('sounds', 'sounds', {}, { rng: seeded(42) });
+  const tasks = journeyQuestions(plan);
+  assert.ok(tasks.some(task => task.model) && tasks.some(task => !task.model));
+  for (const [index, task] of tasks.entries()) {
+    for (const state of [{}, { showModel: true }, { resolved: true }]) {
+      const page = openPage(plan, index, true, state);
+      const showsLetter = Boolean(task.model || state.showModel || state.resolved);
+      const { capital, small } = task.phoneme;
+      assert.equal(page.heading.includes(`class="sound-letters">${capital} <span>${small}</span>`), showsLetter);
+      assert.ok(page.heading.includes(showsLetter ? 'lang="en" dir="ltr"' : 'lang="he" dir="rtl"'));
+      assert.equal(page.html.match(/data-j="listen"/gu).length, 1);
+      assert.equal(page.html.match(/data-j="replay"/gu).length, 1);
+      page.tap('listen');
+      assert.equal(page.heard.at(-1), task.clip);
+      page.destroy();
+    }
+  }
+});
+
 test('English phonics uses a word heading only for reading a word and choosing its picture', () => {
   for (const trio of PICTURE_BLEND_GROUPS) {
     const plan = { ...newJourney('sounds', 'blend'), blendWords: trio };
@@ -89,6 +133,8 @@ test('English phonics uses a word heading only for reading a word and choosing i
         assert.equal(page.html.match(/data-j="listen"/gu).length, 1);
         page.tap('listen');
         assert.equal(page.heard.at(-1), task.clip);
+      } else if (task.kind === 'sound' && task.model) {
+        assert.ok(page.heading.includes(`class="sound-letters">${task.phoneme.capital} <span>${task.phoneme.small}</span>`));
       } else {
         assert.match(page.heading, /lang="he" dir="rtl"/u);
         assert.ok(!page.heading.includes(task.word.toUpperCase()));
