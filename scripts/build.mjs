@@ -40,6 +40,12 @@ for (const file of await readdir(site)) {
   if (/^game-[A-Z0-9]+\.(js|css)$/.test(file) && !assets.includes(`./${file}`)) await unlink(new URL(file, site));
 }
 await cp(source, site, { recursive: true, filter: name => !/^offline(?:-(?:core|audio))?\.json$/.test(basename(name)) });
+await Promise.all([
+  writeFile(new URL('index.html', site), page),
+  ...[script, style].map(file => writeFile(file.path, file.contents)),
+]);
+const core = await offlineFiles(site, assets);
+const { onsets } = JSON.parse(await readFile(new URL('offline-audio.json', site), 'utf8'));
 // First visits and browsers without a service worker play the same bytes as
 // installed copies. Only the reviewed masters enter the offline download.
 const voiceFolder = new URL('assets/voice/', site);
@@ -48,14 +54,9 @@ const voiceKeys = Object.keys(CLIPS);
 for (let i = 0; i < voiceKeys.length; i += 32) {
   await Promise.all(voiceKeys.slice(i, i + 32).map(async key => {
     const master = await readFile(new URL(`assets/audio/${key}.mp3`, source));
-    await writeFile(new URL(`${key}.mp3`, voiceFolder), globalThis.prepareNarrationMp3(master));
+    await writeFile(new URL(`${key}.mp3`, voiceFolder), globalThis.prepareNarrationMp3(master, onsets[key]));
   }));
 }
-await Promise.all([
-  writeFile(new URL('index.html', site), page),
-  ...[script, style].map(file => writeFile(file.path, file.contents)),
-]);
-const core = await offlineFiles(site, assets);
 // Changes to an image, the page, or a recording must also update installed copies.
 const checksums = await Promise.all([...core, ...onDemandPictures, './offline-audio.json'].map(async path => {
   const file = await readFile(new URL(path, site));

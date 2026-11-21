@@ -36,7 +36,9 @@ Open the game online once to install the offline game and starter sounds. Additi
 
 ## Develop and deploy
 
-Ava’s Hebrew and English recordings play with a short silent lead-in, including on replay. Reward sounds wait for speech to finish. The offline library stores the reviewed voice masters. The service worker adds the same lead-in used by the release build when serving a recording from the library.
+When Ariel reports a problem in one activity, use her example to reproduce it. Trace the shared behavior, check the other games that use it, and verify the fix in both the reported activity and another affected path.
+
+Ava’s Hebrew and English recordings play with a short silent lead-in, including on replay. During a build, the game checks eligible recordings for a quiet opening consonant followed by a much louder vowel. It raises the consonant only when decoding confirms that the vowel stays at its original level. The offline library stores the reviewed masters. The service worker applies the same adjustments as online playback. Reward sounds wait for speech to finish, and answer buttons respond while Ava speaks.
 
 New English recordings default to English-only Ava. The generator keeps approved takes and applies the voice and pace choices in `scripts/english-voice-settings.json`, including multilingual Ava for “coat,” “wheel,” and “I see one boat.” The Hebrew generator uses the reviewed phonetic spelling and take for each recording.
 

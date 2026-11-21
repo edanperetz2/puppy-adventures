@@ -44,3 +44,10 @@
 .match-option { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; }
 .match-option > [data-j="answer"] { width: 100%; min-height: 56px; background: #fffdf8; border: 2px solid #bccdc3; border-radius: 14px; padding: 8px 12px; color: #304c48; font-size: clamp(18px, 3.5vw, 26px); }
 .match-option > [data-j="answer"]:hover, .match-option > [data-j="answer"]:focus-visible { background: #eef7f0; border-color: #529985; }
+
+.story-drop-zones .story-drop {
+  display: grid;
+  place-items: center;
+  min-width: 54px;
+  min-height: clamp(52px, 12vw, 62px);
+}

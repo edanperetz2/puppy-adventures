@@ -2,13 +2,14 @@ import { art, uiIcon } from './art.js?v=2.7.0-science';
 import { CLIPS, COLORS, WORDS } from './content.js?v=2.7.1-pepper';
 import { paintedReadingObject, sleepingReadingAnimal } from './reading-scenes.js?v=2.7.0-science';
 import { actOutMatches, actOutPlan, actOutPrompt } from './act-out.js?v=2.7.0-science';
+import { dropTargetAt } from './drag.js';
 
 const names = new Map([...WORDS, ...COLORS].map(word => [word.id, word.he]));
 const points = {
   box: { on: [39, 15], in: [39, 48], near: [77, 55] },
-  table: { on: [41, 23], under: [41, 65], near: [78, 63] },
-  tree: { above: [42, 11], on: [51, 37], near: [79, 63] },
-  flower: { above: [42, 11], on: [42, 36], near: [78, 63] },
+  table: { on: [41, 23], under: [41, 62], near: [78, 61] },
+  tree: { above: [42, 13], on: [51, 39], near: [79, 61] },
+  flower: { above: [42, 13], on: [42, 39], near: [78, 61] },
   basket: { in: [39, 48], near: [76, 55] },
 };
 const travelPoints = [[26, 56], [74, 56]];
@@ -235,15 +236,15 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
     onMove([...played], complete);
     if (complete) {
       flight = animation;
-      if (!animation) onFinish();
-      else void animation.finished.then(() => {
+      if (animation) void animation.finished.then(() => {
+        if (events.signal.aborted) return;
         if ((feeding || watering) && landed.lastElementChild) {
           landed.lastElementChild.hidden = true;
           animation.cancel();
         }
         if (movingAnimal) showAnimalAtDestination(landed.lastElementChild);
-        onFinish();
       }, () => {});
+      onFinish();
     }
   }
 
@@ -254,7 +255,8 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
   }
 
   root.addEventListener('click', event => {
-    const button = event.target.closest('button');
+    let button = event.target.closest('button');
+    if (!button && selected !== null && event.detail && field.contains(event.target)) button = placeAtPointer(event);
     if (!button || button.disabled || complete) return;
     if (button.hasAttribute('data-act-piece')) {
       if (button === suppressClick && event.detail) return;
@@ -272,9 +274,10 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
     }
   }, { signal: events.signal });
 
-  function hoverAt(event) {
-    const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-act-place]');
-    return target && root.contains(target) ? target.dataset.actPlace : null;
+  function placeAtPointer(event) {
+    const { clientX: x, clientY: y } = event;
+    if (!dropTargetAt([field], x, y, 0) || (tray && dropTargetAt([tray], x, y, 0))) return null;
+    return dropTargetAt(places, x, y);
   }
 
   function clearDrag() {
@@ -286,7 +289,8 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
   }
 
   root.addEventListener('pointerdown', event => {
-    const button = event.target.closest('button');
+    let button = event.target.closest('button');
+    if (!button && selected !== null && event.pointerType === 'touch' && field.contains(event.target)) button = placeAtPointer(event);
     if (!button || button.disabled || event.button !== 0 || !event.isPrimary) return;
     suppressClick = null;
     placementTap = null;
@@ -312,11 +316,12 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
       drag.ghost.style.width = `${drag.width}px`;
       document.body.append(drag.ghost);
       drag.button.classList.add('act-dragging-piece');
+      showMoves();
     }
     drag.ghost.style.left = `${event.clientX}px`;
     drag.ghost.style.top = `${event.clientY}px`;
-    preview = hoverAt(event);
-    showMoves();
+    const destination = placeAtPointer(event)?.dataset.actPlace;
+    if (preview !== destination) { preview = destination; showMoves(); }
   }, { signal: events.signal });
 
   root.addEventListener('touchmove', event => {
@@ -327,7 +332,7 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
     if (placementTap?.pointer === event.pointerId) {
       const { button, x, y } = placementTap;
       placementTap = null;
-      if (Math.hypot(event.clientX - x, event.clientY - y) < 12 && hoverAt(event) === button.dataset.actPlace) {
+      if (Math.hypot(event.clientX - x, event.clientY - y) < 12 && placeAtPointer(event) === button) {
         // The browser can suppress a compatibility click when a tap follows a drag.
         suppressClick = button;
         place(button);
@@ -336,7 +341,7 @@ export function mountActOut(root, { word, roundId, moves, resolved, nikud, motio
     }
     if (drag?.pointer !== event.pointerId) return;
     const { button, active, width } = drag;
-    const destination = active && hoverAt(event);
+    const destination = active && placeAtPointer(event)?.dataset.actPlace;
     if (active) suppressClick = button;
     clearDrag();
     if (destination) move(Number(button.dataset.actPiece), destination, { x: event.clientX, y: event.clientY, width });

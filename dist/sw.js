@@ -1,6 +1,6 @@
 // Classic workers also support browsers without module service workers.
-importScripts('./narration-mp3.js?v=1');
-const CACHE = 'puppy-adventures-shell-2.21.0';
+importScripts('./narration-mp3.js?v=2');
+const CACHE = 'puppy-adventures-shell-2.21.1';
 const RECORDINGS = 'puppy-adventures-recordings-v1';
 const BASE = new URL('./', self.location.href);
 const asset = path => new URL(path, BASE).href;
@@ -96,11 +96,15 @@ async function getRecording(url, sha, shell, recordings) {
   return response;
 }
 
+async function recordingMatches(bytes, sha) {
+  const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+  return Array.from(digest, n => n.toString(16).padStart(2, '0')).join('') === sha;
+}
+
 async function rememberRecording(response, cache, key, sha) {
   if (response.status !== 200) return false;
   const bytes = await response.clone().arrayBuffer();
-  const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
-  if (Array.from(digest, n => n.toString(16).padStart(2, '0')).join('') !== sha) return false;
+  if (!await recordingMatches(bytes, sha)) return false;
   const headers = new Headers(response.headers);
   headers.delete('Content-Encoding');
   try {
@@ -114,12 +118,18 @@ async function gameAsset(request, url) {
   // Derive playback from the existing verified offline pack, including packs
   // downloaded before the lead-in was added. Apply ranges to the final bytes.
   if (url.href.startsWith(asset('./assets/voice/')) && url.pathname.endsWith('.mp3')) {
-    const master = './assets/audio/' + url.pathname.split('/').pop();
-    const sha = (await audioCatalog(shell)).recordings[master];
+    const filename = url.pathname.split('/').pop();
+    const master = './assets/audio/' + filename;
+    const catalog = await audioCatalog(shell);
+    const sha = catalog.recordings[master];
     if (!sha) return Response.error();
     const response = await getRecording(asset(master), sha, shell, await caches.open(RECORDINGS));
     if (!response.ok) return response;
-    const voice = prepareNarrationMp3(new Uint8Array(await response.arrayBuffer()));
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    const onset = catalog.onsets?.[filename.slice(0, -4)];
+    // A CDN may have moved to a newer take while this worker still has the
+    // previous catalog. A measured frame range belongs only to its own master.
+    const voice = prepareNarrationMp3(bytes, onset && await recordingMatches(bytes, sha) ? onset : undefined);
     return serveRange(request, new Response(voice, { headers: {
       'Content-Type': 'audio/mpeg', 'Content-Length': String(voice.length), 'Accept-Ranges': 'bytes',
     } }));

@@ -78,15 +78,17 @@ export function mountTheaterStudio(root, { studio, items, nikud, motion, play, o
   function listen(first = false) {
     if (!cast) return;
     const tag = ++castSerial, word = cast.word;
-    cast.speaking = true; draw(); focus('listen');
+    cast.speaking = true;
+    find('[data-th-action="listen"]').setAttribute('aria-busy', 'true');
     const keys = [...(first ? ['theater-cast'] : []), `en-${word}`];
     void Promise.resolve(play(keys, true)).then(played => {
       if (destroyed || tag !== castSerial || !cast) return;
       cast.speaking = false;
-      cast.heard ||= played === true;
-      if (!cast.heard) feedback = label('לִחְצִי שׁוּב עַל הָרַמְקוֹל.');
-      const active = root.contains(document.activeElement);
-      draw(); if (active) focus('listen');
+      find('[data-th-action="listen"]')?.setAttribute('aria-busy', 'false');
+      if (!played) {
+        feedback = label('לִחְצִי שׁוּב עַל הָרַמְקוֹל.');
+        find('.th-feedback').textContent = feedback;
+      }
     });
   }
 
@@ -137,13 +139,16 @@ export function mountTheaterStudio(root, { studio, items, nikud, motion, play, o
     if (action === 'cast') {
       if (cast) { closeCast(); draw(); focus('cast'); return; }
       const word = castingWord(items, lastWord);
-      cast = { word, choices: shuffle(SHADOW_ACTORS), heard: false, speaking: false };
-      lastWord = word; feedback = ''; listen(true); return;
+      cast = { word, choices: shuffle(SHADOW_ACTORS), speaking: false };
+      lastWord = word; feedback = ''; draw(); focus('listen'); listen(true); return;
     }
     if (action === 'listen') { listen(); return; }
     if (action === 'choose-cast' && cast?.choices.includes(value)) {
-      if (!cast.heard) { if (!cast.speaking) listen(true); return; }
-      if (value !== cast.word) { feedback = theaterNote('try-again', label); listen(); return; }
+      if (value !== cast.word) {
+        feedback = theaterNote('try-again', label);
+        find('.th-feedback').textContent = feedback;
+        listen(); return;
+      }
       draft.actor = value; closeCast(); edited(); void play('correct-1'); focus('actor', value); return;
     }
     if (action === 'save') {

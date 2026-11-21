@@ -1,6 +1,6 @@
 {
   "name": "puppy-adventures",
-  "version": "2.21.0",
+  "version": "2.21.1",
   "private": true,
   "type": "module",
   "description": "A family learning game for phones, tablets and computers, with a shared sticker album.",
@@ -17,6 +17,7 @@
     "node": ">=20"
   },
   "devDependencies": {
-    "esbuild": "0.28.2"
+    "esbuild": "0.28.2",
+    "mpg123-decoder": "1.0.3"
   }
 }

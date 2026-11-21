@@ -661,10 +661,7 @@ function renderGame() {
     nikud: settings.nikud, motion: () => settings.motion,
     onMove: (moves, complete) => {
       round.actOutMoves = moves;
-      if (complete) {
-        resolveAnswer(q);
-        if (q.word.playOnly) document.querySelector('.next-button').hidden = true;
-      }
+      if (complete) resolveAnswer(q);
       else {
         checkpoint();
         document.querySelector('#feedback').textContent = settings.nikud ? `הֻנְּחוּ ${moves.length}. הַמְשִׁיכִי לְפִי הַמִּשְׁפָּט.` : `הונחו ${moves.length}. המשיכי לפי המשפט.`;
@@ -673,7 +670,7 @@ function renderGame() {
     onFinish: () => {
       const next = document.querySelector('.next-button');
       next.hidden = false;
-      next.focus({ preventScroll: false });
+      next.focus({ preventScroll: true });
     },
     onRetry: wrongPlace => {
       const [place, piece] = actOutDetails(q.word);

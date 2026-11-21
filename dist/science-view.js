@@ -1,5 +1,6 @@
 import { art, uiIcon } from './art.js?v=2.7.0-science';
 import { shuffle } from './answer-order.js';
+import { dropTargetAt } from './drag.js';
 import { SCIENCE_TITLE, SCIENCE_EXPERIMENTS, SCIENCE_ACTIONS, SCIENCE_CLIPS, scienceClip } from './science-content.js?v=2.7.1-pepper';
 
 const localText = (text, nikud) => nikud ? text : text.replace(/[\u0591-\u05bd\u05bf-\u05c7]/gu, '');
@@ -197,8 +198,8 @@ export function mountScience(root, { path, saved, nikud, motion, speak, onSave, 
   });
 
   function dropAt(event) {
-    const zone = document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-lab-drop]');
-    return zone && root.contains(zone) && ['main', drag.id].includes(zone.dataset.labDrop) ? zone : null;
+    const zone = dropTargetAt(root.querySelectorAll('[data-lab-drop]'), event.clientX, event.clientY);
+    return zone && ['main', drag.id].includes(zone.dataset.labDrop) ? zone : null;
   }
   function clearDrag() {
     drag?.ghost?.remove();

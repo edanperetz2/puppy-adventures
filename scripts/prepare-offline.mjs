@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { CLIPS } from '../dist/content.js';
 import { STORY_CLUE_CLIPS } from '../dist/story-clue-content.js';
 import { WORD_FORM_CLIPS } from '../dist/word-form-audio.js';
+import { narrationOnsets } from './narration-onsets.mjs';
 
 export const styleLinks = /<link\b[^>]*\brel=["']stylesheet["'][^>]*\bhref=["']([^"']+)["'][^>]*>/g;
 export const scriptLinks = /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*><\/script>/g;
@@ -17,12 +18,13 @@ const narrationFolder = './assets/audio/';
 export async function offlineFiles(root, bundle = []) {
   const html = await readFile(new URL('index.html', root), 'utf8');
   const entryUrls = [...html.matchAll(styleLinks), ...html.matchAll(scriptLinks)].map(match => match[1]);
-  const explicitlyLoaded = ['./index.html', './manifest.webmanifest', './narration-mp3.js?v=1', ...entryUrls];
+  const explicitlyLoaded = ['./index.html', './manifest.webmanifest', './narration-mp3.js?v=2', ...entryUrls];
   const sourceModules = bundle.length ? bundle : await findModules(root, entryUrls.filter(url => url.endsWith('.js') || url.includes('.js?')));
   const pictures = (await readdir(new URL('assets/', root)))
     .filter(file => /\.(?:svg|png|jpe?g|webp|woff2|txt|wav)$/.test(file) && !archivedAssets.test(file))
     .map(file => `./assets/${file}`).filter(url => !onDemandPictures.includes(url));
   const audio = JSON.parse(await readFile(new URL('assets/audio/manifest.json', root), 'utf8')).clips;
+  const onsets = await narrationOnsets(root, CLIPS, audio);
   const keys = [...Object.keys(CLIPS), 'pikachu-greeting'];
   const localCall = await readFile(new URL(`${narrationFolder}pikachu-greeting.mp3`, root));
   const localHash = createHash('sha256').update(localCall).digest('hex');
@@ -35,7 +37,7 @@ export async function offlineFiles(root, bundle = []) {
   await Promise.all([
     writeFile(new URL('offline.json', root), JSON.stringify(assets, null, 2) + '\n'),
     writeFile(new URL('offline-core.json', root), JSON.stringify(core, null, 2) + '\n'),
-    writeFile(new URL('offline-audio.json', root), JSON.stringify({ bytes: sizes.reduce((total, size) => total + size, 0), recordings }) + '\n'),
+    writeFile(new URL('offline-audio.json', root), JSON.stringify({ bytes: sizes.reduce((total, size) => total + size, 0), recordings, onsets }) + '\n'),
   ]);
   console.log(`${core.length} files for offline startup, ${keys.length} recordings available to download.`);
   return core;

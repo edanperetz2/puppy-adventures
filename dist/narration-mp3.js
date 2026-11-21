@@ -1,6 +1,6 @@
 // Shared by the classic service worker, local server and static release build.
 // The reviewed masters use 24 kHz mono MPEG-2 Layer III (576 samples per frame).
-globalThis.prepareNarrationMp3 = function prepareNarrationMp3(source) {
+globalThis.prepareNarrationMp3 = function prepareNarrationMp3(source, onset) {
   let start = 0;
   const tagged = source[0] === 0x49 && source[1] === 0x44 && source[2] === 0x33;
   if (tagged) {
@@ -35,12 +35,27 @@ globalThis.prepareNarrationMp3 = function prepareNarrationMp3(source) {
   for (let offset = start; offset < source.length; offset += frameBytes) {
     if (!validHeader(offset)) throw new Error('Unexpected frame in narration master');
   }
-  // Eight independent frames of digital silence give output time to open
-  // before even a quiet consonant. Never trim, fade or re-encode the voice.
+  // Eight independent frames of digital silence give the output time to open.
   const leadBytes = 8 * frameBytes;
   const result = new Uint8Array(leadBytes + source.length - start);
   const header = source.subarray(start, start + 4);
   for (let offset = 0; offset < leadBytes; offset += frameBytes) result.set(header, offset);
   result.set(source.subarray(start), leadBytes);
+  if (onset) {
+    const [first, last, steps] = onset;
+    if (!Number.isInteger(first) || !Number.isInteger(last) || !Number.isInteger(steps) ||
+        first < 0 || last < first || last >= (source.length - start) / frameBytes || steps < 1 || steps > 6) {
+      throw new Error('Invalid narration onset adjustment');
+    }
+    for (let frame = first; frame <= last; frame++) {
+      // MPEG-2 mono Layer III global_gain is an eight-bit field crossing two
+      // side-information bytes. Each step is 1.505 dB. Keep spectral data,
+      // reservoir offsets, playback length and all subsequent frames intact.
+      const offset = leadBytes + frame * frameBytes + 7;
+      const gain = Math.min(255, ((result[offset] & 3) << 6 | result[offset + 1] >> 2) + steps);
+      result[offset] = (result[offset] & 252) | (gain >> 6);
+      result[offset + 1] = (result[offset + 1] & 3) | ((gain & 63) << 2);
+    }
+  }
   return result;
 };

@@ -7,6 +7,7 @@ import { chunkClip, GIVING_CLIPS } from './journey-audio.js?v=2.2.0-voices';
 import { STORIES } from './journey-content.js';
 import { englishPictureView } from './english-picture-view.js';
 import { MATCH_LEVELS } from './english-picture-match.js';
+import { dropTargetAt } from './drag.js';
 
 const color = id => COLORS.find(c=>c.id===id)?.hex || '#7baebc';
 export function pairPicture(pair) {
@@ -34,7 +35,12 @@ export function mountDrops(root, selector, targetSelector, onDrop, signal, onDra
   },{signal});
   root.addEventListener('pointerup',e=>{
     if(!dragging)return;const source=dragging;
-    if(moved){const target=document.elementFromPoint(e.clientX,e.clientY)?.closest(targetSelector);source.dataset.suppressClick='yes';setTimeout(()=>delete source.dataset.suppressClick,0);if(target)onDrop(source,target);}
+    if (moved) {
+      const target = dropTargetAt(root.querySelectorAll(targetSelector), e.clientX, e.clientY);
+      source.dataset.suppressClick = 'yes';
+      setTimeout(() => delete source.dataset.suppressClick, 0);
+      if (target) onDrop(source, target);
+    }
     clear();
   },{signal});
   root.addEventListener('pointercancel',clear,{signal});signal.addEventListener('abort',clear,{once:true});

@@ -8,7 +8,7 @@ const worker = await readFile(new URL('../dist/sw.js', import.meta.url), 'utf8')
 const mp3Helper = await readFile(new URL('../dist/narration-mp3.js', import.meta.url), 'utf8');
 function loadWorker(context) {
   context.importScripts = path => {
-    assert.equal(path, './narration-mp3.js?v=1');
+    assert.equal(path, './narration-mp3.js?v=2');
     vm.runInContext(mp3Helper, context);
   };
   vm.runInContext(worker, context);
@@ -53,12 +53,12 @@ test('A navigation can open the saved game when a connection stops responding', 
   assert.equal(timedOut, 7);
 });
 
-async function offlineFixture(legacyClip, bytes = 'verified Ava MP3', savedMaster) {
+async function offlineFixture(legacyClip, bytes = 'verified Ava MP3', savedMaster, onset) {
   const base = 'https://game.example/';
   const digest = createHash('sha256').update(bytes).digest('hex');
   const remote = {
     'offline-core.json': JSON.stringify(['./index.html']),
-    'offline-audio.json': JSON.stringify({ bytes: bytes.length, recordings: { './assets/audio/sample.mp3': digest } }),
+    'offline-audio.json': JSON.stringify({ bytes: bytes.length, recordings: { './assets/audio/sample.mp3': digest }, onsets: { sample: onset } }),
     'index.html': 'home',
     'assets/audio/sample.mp3': bytes,
   };
@@ -173,4 +173,22 @@ test('Installed Hebrew and English voices have a silent lead-in and retain every
     assert.equal(boundary.headers.get('content-range'), `bytes ${lead - 2}-${lead + 3}/${audio.length}`);
     assert.deepEqual(Buffer.from(await boundary.arrayBuffer()), audio.subarray(lead - 2, lead + 4));
   }
+});
+
+test('an existing cached cat recording plays offline with the new onset at the same byte ranges as the release build', async () => {
+  const base = new URL('../dist/', import.meta.url);
+  const master = await readFile(new URL('assets/audio/en-cat.mp3', base));
+  const { onsets } = JSON.parse(await readFile(new URL('offline-audio.json', base), 'utf8'));
+  const onset = onsets['en-cat'];
+  assert.ok(onset);
+  assert.deepEqual(onsets['journey-en-cat'], onset);
+  await import('../dist/narration-mp3.js');
+  const expected = Buffer.from(globalThis.prepareNarrationMp3(master, onset));
+  const fixture = await offlineFixture(undefined, master, master, onset);
+  fixture.disconnect();
+  assert.deepEqual(Buffer.from(await (await fixture.request('bytes=0-', 'voice')).arrayBuffer()), expected);
+  const from = (8 + onset[0]) * 144;
+  const excerpt = await fixture.request(`bytes=${from}-${from + 18}`, 'voice');
+  assert.equal(excerpt.status, 206);
+  assert.deepEqual(Buffer.from(await excerpt.arrayBuffer()), expected.subarray(from, from + 19));
 });

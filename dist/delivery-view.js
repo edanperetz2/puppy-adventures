@@ -92,7 +92,7 @@ export function mountDeliveryRound(root, { round, nikud, motion, play, onSave, o
   const last = () => round.index === round.questions.length - 1;
   const find = selector => root.querySelector(selector);
   const controls = new AbortController();
-  let alive = true, heard = false, request = 0, loading = false;
+  let alive = true, request = 0;
 
   function note(text, success = false) {
     const feedback = find('.picnic-feedback');
@@ -106,24 +106,18 @@ export function mountDeliveryRound(root, { round, nikud, motion, play, onSave, o
       return true;
     }
     const attempt = ++request;
-    loading = true;
     const button = find('[data-delivery-action="listen"]');
     button.classList.add('is-speaking');
     button.setAttribute('aria-busy', 'true');
     const played = await play([...(instructions ? [mission.prompt] : afterRetry ? ['try-again'] : []), question().clip], manual);
     if (!alive || attempt !== request) return false;
-    loading = false;
-    heard ||= played === true;
-    root.dataset.deliveryAudio = heard ? 'ready' : 'waiting';
+    root.dataset.deliveryAudio = played ? 'ready' : 'waiting';
     button.classList.remove('is-speaking');
     button.removeAttribute('aria-busy');
-    for (const choice of root.querySelectorAll('[data-delivery-choice]')) {
-      choice.disabled = !heard || round.resolved || round.state.attempted.includes(choice.dataset.deliveryChoice);
-    }
-    if (!heard) note(navigator.onLine
+    if (!played && !round.resolved) note(navigator.onLine
       ? 'כְּדֵי לִשְׁמֹעַ, לִחְצִי עַל הָרַמְקוֹל.'
       : 'אֶפְשָׁר לְנַסּוֹת שׁוּב כְּשֶׁיִּהְיֶה אִינְטֶרְנֶט.');
-    return heard;
+    return played;
   }
 
   function showBoard() {
@@ -131,7 +125,7 @@ export function mountDeliveryRound(root, { round, nikud, motion, play, onSave, o
     const cards = q.choices.map(value => {
       const right = value === q.answer;
       const sent = right && done;
-      const disabled = !heard || done || round.state.attempted.includes(value);
+      const disabled = done || round.state.attempted.includes(value);
       return `<button class="delivery-piece${sent ? ' is-delivered' : ''}${round.state.hint && right && !done ? ' has-clue' : ''}"
         data-delivery-choice="${value}" ${route ? 'data-delivery-target' : 'data-delivery-source'}
         aria-label="${choiceLabel(q, value)}" ${disabled ? 'disabled' : ''}>
@@ -162,7 +156,7 @@ export function mountDeliveryRound(root, { round, nikud, motion, play, onSave, o
   }
 
   function showStep() {
-    heard = false; loading = false; ++request;
+    ++request;
     root.dataset.deliveryAudio = 'waiting';
     root.innerHTML = `<div class="picnic-topline">
       <button class="text-button back-button" data-action="${DELIVERY.route.action}">${uiIcon('arrow')} ${label('לְמַפַּת הַמִּשְׁלוֹחִים')}</button>
@@ -194,7 +188,6 @@ export function mountDeliveryRound(root, { round, nikud, motion, play, onSave, o
   function send(value, origin) {
     const q = question();
     if (round.resolved || !q.choices.includes(value) || round.state.attempted.includes(value)) return;
-    if (!heard) { if (!loading) void listen({ manual: true }); return; }
     if (value !== q.answer) {
       round.state.attempted.push(value); recordHelp(); onSave(round);
       const failed = find(`[data-delivery-choice="${value}"]`);
@@ -229,17 +222,13 @@ export function mountDeliveryRound(root, { round, nikud, motion, play, onSave, o
 
   function tapPiece(button) {
     if (!route) { choose(button); return; }
-    if (!heard && !loading) void listen({ manual: true });
     find('[data-delivery-choice]:not(:disabled)')?.focus({ preventScroll: true });
   }
 
-  async function demonstrate(button) {
-    if (button.disabled || round.resolved) return;
-    button.disabled = true;
-    if (!heard) await listen({ manual: true });
-    if (!alive || !button.isConnected || round.resolved) return;
-    if (heard) choose(find(`[data-delivery-choice="${question().answer}"]`));
-    else button.disabled = false;
+  function demonstrate() {
+    if (round.resolved) return;
+    choose(find(`[data-delivery-choice="${question().answer}"]`));
+    void listen({ manual: true });
   }
 
   const acceptsClick = mountDrag(root, {
@@ -255,7 +244,7 @@ export function mountDeliveryRound(root, { round, nikud, motion, play, onSave, o
     const action = button.dataset.deliveryAction;
     if (action === 'listen' && !round.resolved) note('');
     if (action === 'listen') void listen({ manual: true });
-    if (action === 'model') void demonstrate(button);
+    if (action === 'model') demonstrate();
     if (action === 'hint' && !round.resolved) {
       recordHelp(); round.state.hint = true; onSave(round);
       find(`[data-delivery-choice="${question().answer}"]`).classList.add('has-clue');

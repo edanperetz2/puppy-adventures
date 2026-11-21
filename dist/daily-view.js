@@ -67,7 +67,7 @@ export function mountDaily(root, { round, nikud, motion, play, onSave, onSuccess
   const label = dailyText(nikud), clock = round.path === 'clock', path = DAILY_PATHS[round.path];
   const events = new AbortController();
   const find = selector => root.querySelector(selector), task = () => dailyQuestion(round);
-  let dial, saveTimer, exampleTimer, sequence = 0, heard = false, speaking = false, alive = true;
+  let dial, saveTimer, exampleTimer, sequence = 0, alive = true;
   const last = () => round.index === round.questions.length - 1;
 
   function note(text, good = false) {
@@ -89,21 +89,15 @@ export function mountDaily(root, { round, nikud, motion, play, onSave, onSuccess
     if (clock) return play([...prefix, ...trainCue(q)], manual);
     const tag = ++sequence;
     const listen = find('[data-daily-action=listen]');
-    speaking = true;
     listen?.setAttribute('aria-busy', 'true');
     return Promise.resolve(play([...prefix, ...(first ? [LISTEN_AND_CHOOSE_ANIMAL] : []), targetClip(q)], manual)).then(played => {
       if (!alive || tag !== sequence) return false;
-      speaking = false;
-      heard ||= played === true;
-      root.dataset.dailyAudio = heard ? 'ready' : 'waiting';
+      root.dataset.dailyAudio = played ? 'ready' : 'waiting';
       listen?.removeAttribute('aria-busy');
-      for (const choice of root.querySelectorAll('[data-daily-piece]')) {
-        choice.disabled = !heard || round.resolved || round.state.attempted.includes(choice.dataset.dailyPiece);
-      }
-      if (!heard && !round.resolved) note(navigator.onLine
+      if (!played && !round.resolved) note(navigator.onLine
         ? 'כְּדֵי לִשְׁמֹעַ, לִחְצִי עַל הָרַמְקוֹל.'
         : 'אֶפְשָׁר לְנַסּוֹת שׁוּב כְּשֶׁיִּהְיֶה אִינְטֶרְנֶט.');
-      return heard;
+      return played;
     });
   }
 
@@ -164,13 +158,13 @@ export function mountDaily(root, { round, nikud, motion, play, onSave, onSuccess
     find('.daily-stage').innerHTML = `<button class="primary-button daily-listen" data-daily-action="listen">${uiIcon('sound')} ${label('שִׁמְעִי אֶת הַמִּלָּה')}</button>
       <div class="daily-animal-board"><div class="daily-animal-choices" role="group" aria-label="בחירת חיה">
         ${q.choices.map(word => `<button class="delivery-piece${placed && word === q.word ? ' daily-placed-choice' : ''}"
-          data-daily-piece="${word}" aria-label="${animals[word]}" ${!heard || placed || round.state.attempted.includes(word) ? 'disabled' : ''}>
+          data-daily-piece="${word}" aria-label="${animals[word]}" ${placed || round.state.attempted.includes(word) ? 'disabled' : ''}>
           <span class="delivery-picture">${art(word)}</span></button>`).join('')}</div>${shore(q, placed)}</div>`;
   }
 
   function draw() {
     clearTimeout(exampleTimer); dial?.destroy(); dial = null;
-    sequence++; heard = false; speaking = false;
+    sequence++;
     root.dataset.dailyAudio = 'waiting';
     root.dataset.dailyPhase = stance(round);
     root.dataset.dailyVariant = round.state.renewed ? 'fresh' : 'first';
@@ -205,10 +199,6 @@ export function mountDaily(root, { round, nikud, motion, play, onSave, onSuccess
   }
 
   function check(answer, button = null) {
-    if (!clock && !heard) {
-      if (!speaking) void prompt({ manual: true });
-      return;
-    }
     flush();
     const from = button?.getBoundingClientRect();
     const result = attemptDaily(round, answer);
