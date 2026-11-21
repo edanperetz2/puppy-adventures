@@ -41042,6 +41042,81 @@
       "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
       "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
       "sha256": "c6eb223b9b7e7509df63d6ac155493faa93c510c7fcd0083953bf6db77cdfd48"
+    },
+    "word-form-english": {
+      "take": 0,
+      "segments": [
+        "habˈiti bamilˈa ʃelemˈala. mitsʔˈi ʔotˈa beʔotijˈot ktanˈot."
+      ],
+      "lang": "he-IL",
+      "speech": "habˈiti bamilˈa ʃelemˈala. mitsʔˈi ʔotˈa beʔotijˈot ktanˈot.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "19b26dd6f44fff5316f1d8c193f04f236aecca34576a0b11554e89fe0ad843e2"
+    },
+    "word-form-hebrew": {
+      "take": 0,
+      "segments": [
+        "habˈiti bamilˈa ʃelemˈala. mitsʔˈi ʔotˈa biχtˈav jˈad."
+      ],
+      "lang": "he-IL",
+      "speech": "habˈiti bamilˈa ʃelemˈala. mitsʔˈi ʔotˈa biχtˈav jˈad.",
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "f8536ab6c4dac21109c46a98dd4ccbfe6b544c6959805c6ac75b9f646a1ba1b3"
+    },
+    "word-form-english-hint": {
+      "lang": "he-IL",
+      "speech": "hatχˈili mismˈol. bidkˈi ʔˈot ʔaχˈaʁ ʔˈot.",
+      "segments": [
+        "hatχˈili mismˈol. bidkˈi ʔˈot ʔaχˈaʁ ʔˈot."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 1,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "d8b4bb1de5d575a651e45d9734114552f25d7b6b31f2bc88365e7bd45a8ef8d8"
+    },
+    "word-form-hebrew-hint": {
+      "lang": "he-IL",
+      "speech": "hatχˈili mijamˈin. bidkˈi ʔˈot ʔaχˈaʁ ʔˈot.",
+      "segments": [
+        "hatχˈili mijamˈin. bidkˈi ʔˈot ʔaχˈaʁ ʔˈot."
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "df15930d9213e12b586e5aecf640cd307a649bbc2e3a9119871c0a60b3564b3a"
+    },
+    "letters-paths-words": {
+      "lang": "he-IL",
+      "speech": "mˈa tiʁtsˈi laʔasˈot? lezahˈot ʔotijˈot, lehatʔˈim milˈim ʔˈo liχtˈov?",
+      "segments": [
+        "mˈa tiʁtsˈi laʔasˈot? lezahˈot ʔotijˈot, lehatʔˈim milˈim ʔˈo liχtˈov?"
+      ],
+      "voice": "Ava reference",
+      "engine": "BlueTTS phonemes",
+      "rate": 0.95,
+      "steps": 16,
+      "take": 0,
+      "style_sha256": "a34580da7904b20abbcd4527ce30f840615df18ded6121856666dfd5f6fa4c3d",
+      "model_sha256": "48a6eed8ebfba831739d30b4f14399fd8ee7df89ef28a28e4fa041a647fcb6c7",
+      "sha256": "425534536a03bdf797bcc9fc789c9d9f90ecd77f96d49774a3b9648f93af7c37"
     }
   }
 }

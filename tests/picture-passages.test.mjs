@@ -6,6 +6,7 @@ import { WORDS, CLIPS } from '../dist/content.js';
 import { PICTURE_PLACE_PASSAGES } from '../dist/reading-picture-places.js';
 import { PICTURE_SCENE_PASSAGES } from '../dist/reading-picture-scenes.js';
 import { STORY_MOMENTS } from '../dist/reading-story-moments.js';
+import { WORD_FORM_CLIPS } from '../dist/word-form-audio.js';
 import { ANIMAL_STORIES, PLAYABLE_STORIES } from '../dist/reading-animal-stories.js';
 import { readingWords, readingTargets, sanitizeReadingPractice, finishReadingPractice } from '../dist/reading.js';
 import { createSession, DEFAULT_SETTINGS } from '../dist/engine.js';
@@ -124,7 +125,7 @@ test('Every previous reading target and all 2114 original voice records remain u
   const originalWords=WORDS.filter(word=>!ids.has(word.id)&&!actionIds.has(word.id)&&!word.id.startsWith('nature-') && word.scene?.kind !== 'moment');
   assert.equal(originalWords.length,baseline.wordCount);
   assert.equal(hash(originalWords),baseline.wordDigest);
-  const previouslyReleased = ([key]) => !/^(?:he-picture-|he-story-(?:animal|action)-|he-nature-|he-moment-|reading-caption-|characters-(?:menu|level)-together|character-(?:pikachu|stitch)$|story-clue-|picnic-|delivery-|boatyard-|daily-|theater-|listen-pick-animal$|profile-good-luck|journey-give-|journey-apples-left$|journey-story-(?:grandma-letter|garden-concert|treasure-map)-|number-workshop-|science-|act-out(?:-jump|-feed|-move-animal|-water|-door)?$)/u.test(key);
+  const previouslyReleased = ([key]) => !Object.hasOwn(WORD_FORM_CLIPS, key) && !/^(?:he-picture-|he-story-(?:animal|action)-|he-nature-|he-moment-|reading-caption-|characters-(?:menu|level)-together|character-(?:pikachu|stitch)$|story-clue-|picnic-|delivery-|boatyard-|daily-|theater-|listen-pick-animal$|profile-good-luck|journey-give-|journey-apples-left$|journey-story-(?:grandma-letter|garden-concert|treasure-map)-|number-workshop-|science-|act-out(?:-jump|-feed|-move-animal|-water|-door)?$)/u.test(key);
   const originalClips=Object.fromEntries(Object.entries(CLIPS).filter(previouslyReleased));
   assert.equal(Object.keys(originalClips).length,baseline.clipCount);
   assert.equal(hash(originalClips),baseline.clipDigest);

@@ -4,11 +4,12 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CLIPS } from '../dist/content.js';
 import { STORY_CLUE_CLIPS } from '../dist/story-clue-content.js';
+import { WORD_FORM_CLIPS } from '../dist/word-form-audio.js';
 
 export const styleLinks = /<link\b[^>]*\brel=["']stylesheet["'][^>]*\bhref=["']([^"']+)["'][^>]*>/g;
 export const scriptLinks = /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*><\/script>/g;
 const starter = ['welcome', 'meet-friends', 'choose-activity', 'try-again', 'correct-1', 'correct-2', 'correct-3', 'complete', 'complete-all',
-  'profile-good-luck-ariel', 'pikachu-greeting', ...Object.keys(STORY_CLUE_CLIPS)];
+  'profile-good-luck-ariel', 'pikachu-greeting', ...Object.keys(STORY_CLUE_CLIPS), ...Object.keys(WORD_FORM_CLIPS)];
 const archivedAssets = /^(?:game-guide\.png|game-guide-(?:six|ariel)\.webp|rubik-\d+\.ttf)$/;
 export const onDemandPictures = ['./assets/theater-stage.webp'];
 const narrationFolder = './assets/audio/';

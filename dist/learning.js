@@ -72,6 +72,7 @@ export function englishPairsReady(items) {
   return known.length>=8 && new Set(known.flatMap(([,v])=>v.days)).size>=2;
 }
 export function questionLearning(q) {
+  if(q.type==='word-form')return {item:`word-form:${q.word.language}:${q.word.id}`,domain:'letters'};
   if(q.type==='read')return {item:`read:${q.word.id}`,domain:'hebrew'};
   if(q.type==='listen')return {item:`english:single:${q.target.id}`,domain:'english'};
   if(q.type==='letter')return {item:`letter:${q.letter.language}:${q.letter.id}:recognition`,domain:'letters'};

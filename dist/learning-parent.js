@@ -1,6 +1,7 @@
 import { learningSummary, learningStage, reviewPriority } from './learning.js';
 import { WORDS, ANIMALS, COLORS, MISSIONS } from './content.js';
 import { LETTERS } from './letters.js';
+import { WORD_FORM_WORDS } from './word-form-match.js';
 import { CHARACTERS } from './characters.js';
 import { escapeHtml as esc } from './profiles.js';
 import { CLOCK_MINUTES, CLOCK_TRANSFER, dailyRecall } from './daily.js';
@@ -8,6 +9,10 @@ import { isChapterAvailable, isPracticeAvailable } from './availability.js';
 import { THEATER_PROPS, THEATER_SETS, theaterRecall } from './theater.js';
 export function itemLabel(id){
   const parts=id.split(':'),last=parts.at(-1);
+  if (parts[0] === 'word-form' && Object.hasOwn(WORD_FORM_WORDS, parts[1])) {
+    const word = WORD_FORM_WORDS[parts[1]].find(entry => entry.id === last);
+    return `התאמת מילים · ${word?.plain || last}`;
+  }
   if(['read','workshop'].includes(parts[0]))return `${parts[0]==='workshop'?'בניית מילה':'קריאה'} · ${WORDS.find(w=>w.id===parts[1])?.pointed||parts[1]}`;
   if(parts[0]==='character')return `שמות · ${CHARACTERS.find(c=>c.id===parts[1])?.he||parts[1]}`;
   if(parts[0]==='letter'){const letter=LETTERS[parts[1]]?.find(l=>l.id===parts[2]);return `אות ${letter?.familiar||parts[2]} · ${last==='recognition'?'זיהוי':parts.includes('main')?'כתיבת דפוס / גדולה':'כתיבה'}`;}

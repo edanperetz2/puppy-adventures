@@ -16,6 +16,7 @@ import { ACTION_STORY_INSTRUCTIONS } from './reading-animal-stories.js?v=2.7.0-s
 import { SCIENCE_CLIPS } from './science-content.js?v=2.7.1-pepper';
 import { CAPTION_CLIPS } from './reading-nature.js';
 import { STORY_CLUE_CLIPS } from './story-clue-content.js';
+import { WORD_FORM_CLIPS } from './word-form-audio.js';
 import { PICNIC_CLIPS } from './picnic-content.js';
 import { DELIVERY_CLIPS } from './delivery-content.js';
 import { BOATYARD_CLIPS } from './boatyard-content.js';
@@ -161,4 +162,4 @@ CLIPS['listen-pick-animal'] = {
   lang: 'he-IL', text: 'הַקְשִׁיבִי לַמִּלָּה. בַּחֲרִי אֶת הַחַיָּה.',
   speech: 'hakʃˈivi lamilˈa. baχaʁˈi ʔˈet haχajˈa.',
 };
-Object.assign(CLIPS, STORY_CLUE_CLIPS, PICNIC_CLIPS, DELIVERY_CLIPS, BOATYARD_CLIPS, DAILY_CLIPS, THEATER_CLIPS);
+Object.assign(CLIPS, STORY_CLUE_CLIPS, WORD_FORM_CLIPS, PICNIC_CLIPS, DELIVERY_CLIPS, BOATYARD_CLIPS, DAILY_CLIPS, THEATER_CLIPS);

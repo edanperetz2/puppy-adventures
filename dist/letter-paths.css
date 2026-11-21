@@ -77,3 +77,98 @@
 .written-word{display:flex;max-width:100%;gap:4px}.word-glyph{width:clamp(32px,8vw,66px);aspect-ratio:1;border-radius:10px;background:#f4eff5}
 .word-glyph .letter-shape{color:#867b88}.word-glyph[aria-current]{outline:2px solid #80569c;background:#efdff8}.word-glyph.written{background:#e6f3e9}.word-glyph.written .letter-shape{color:#33775b}
 .word-trace-card .letter-pad-card{width:min(100%,330px)}
+
+.letter-path-card.word-form-path {
+  background: #fbf2df;
+  border-color: #e7d8b6;
+  box-shadow: 0 7px 0 #eee0c570;
+}
+.word-form-path h2 { color: #77552d; }
+.word-form-path p { color: #765f46; }
+.word-form-menu-art {
+  position: relative;
+  inline-size: 154px;
+  min-block-size: 125px;
+}
+.word-form-menu-art .word-form-slip {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  inline-size: 70%;
+  block-size: 56%;
+  border: 1px solid #ddcbaa;
+  border-radius: 14px;
+  box-shadow: 0 3px 0 #d9c29b6b;
+  font-size: 32px;
+  line-height: 1.2;
+}
+.word-form-menu-art .print-slip {
+  inset-block-start: 4%;
+  inset-inline-start: 3%;
+  transform: rotate(-5deg);
+  background: #fffcf5;
+  color: #695345;
+  font-weight: 600;
+}
+.word-form-menu-art .alternate-slip {
+  inset-block-end: 2%;
+  inset-inline-end: 2%;
+  transform: rotate(4deg);
+  background: #ffedbd;
+  color: #694b2f;
+}
+.word-form-menu-art .word-handwriting { block-size: 85%; max-inline-size: 80%; }
+@media (min-width: 800px) {
+  .word-form-menu-grid { grid-template-columns: repeat(3,minmax(0,1fr)); max-width: 1030px; gap: 18px; }
+}
+@media (min-width: 571px) and (max-width: 799px) {
+  .word-form-menu-grid > :last-child { grid-column: 1 / -1; inline-size: calc(50% - 11px); justify-self: center; }
+}
+@media (max-width: 570px) {
+  .letter-path-picture.word-form-menu-art { inline-size: 90px; min-block-size: 90px; }
+  .word-form-menu-art .word-form-slip { border-radius: 10px; font-size: 23px; }
+}
+
+.word-form-game .question-visual { min-height: 0; padding-block: 18px 24px; }
+.word-form-prompt {
+  display: grid;
+  place-items: center;
+  width: min(100%, 410px);
+  padding: 10px 16px 12px;
+  min-height: 120px;
+  color: #513d30;
+  background: #fbf0d9;
+  border: 1px solid #e4cfaa;
+  border-bottom: 4px solid #e5cdaa;
+  border-radius: 22px;
+}
+.word-form-prompt bdi { font-size: clamp(38px, 7vw, 64px); font-weight: 600; line-height: 1.45; }
+.word-form-game .answer-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  width: min(100%, 760px);
+  max-width: none;
+}
+.word-form-game .answer-grid.two-options { grid-template-columns: repeat(2, minmax(0,1fr)); max-width: 540px; }
+.word-form-game .answer-button {
+  min-width: 0;
+  min-height: 100px;
+  padding: 6px 9px;
+  color: #4f415d;
+}
+.word-form-lowercase { font-size: clamp(25px, 4vw, 42px); font-weight: 400; line-height: 1.25; }
+.word-handwriting { display: block; width: auto; }
+.word-form-game .answer-button .word-handwriting { height: 79px; max-width: 100%; }
+@media (max-width: 650px) {
+  .word-form-game .question-visual { padding-block: 8px 16px; }
+  .word-form-prompt { min-height: 83px; padding: 5px 10px 8px; border-radius: 17px; }
+  .word-form-game .answer-grid,
+  .word-form-game .answer-grid.two-options {
+    grid-template-columns: minmax(0, 1fr);
+    width: min(100%, 360px);
+    gap: 8px;
+  }
+  .word-form-game .answer-button { min-height: 56px; padding: 0 26px; border-radius: 15px; }
+  .word-form-game .answer-button .word-handwriting { height: 55px; }
+  .word-form-lowercase { font-size: 32px; }
+}

@@ -2,12 +2,16 @@ import { WORDS, ANIMALS, COLORS, NUMBERS, CLIPS, MISSIONS, READING_LEVELS } from
 import { LETTERS } from './letters.js';
 import { clockTime, CLOCK_LEVELS } from './clock.js';
 import { CHARACTERS, CHARACTER_COLLECTIONS, CHARACTER_LEVELS, CHARACTER_MODES } from './characters.js?v=2.2.2-six';
-import { adventurePhase, isSessionLength } from './adventure.js?v=2.2.2-six';
+import { adventurePhase, isSessionLength, SESSION_LENGTH } from './adventure.js?v=2.2.2-six';
 import { actOutPrompt, canActOut, cleanActOutMoves } from './act-out.js?v=2.7.0-science';
 import { LITTLE_STORIES } from './activities.js';
 import { storyClue } from './story-practice.js';
+import { restoreWordFormQuestion } from './word-form-match.js';
 
-export const roundKey = (mission,settings) => `${mission}:${mission==='hebrew'?settings.reading:mission==='letters'?settings.letterLanguage:mission==='clock'?settings.clockLevel:mission==='characters'?`${settings.characterLevel}:${settings.characterMode}`:'default'}`;
+export function roundKey(mission, settings) {
+  if (mission === 'letters') return `letters:${settings.letterLanguage}${settings.letterMode === 'words' ? ':words' : ''}`;
+  return `${mission}:${mission==='hebrew'?settings.reading:mission==='clock'?settings.clockLevel:mission==='characters'?`${settings.characterLevel}:${settings.characterMode}`:'default'}`;
+}
 export function packRound(round) {
   if(!round||round.awarded)return null;
   return {...round,questions:round.questions.map(q=>({...q,word:q.word?.id,letter:q.letter?{id:q.letter.id,language:q.letter.language}:undefined,character:q.character?.id,target:q.target?.id,options:q.options.map(o=>o.id),time:q.time?{hour:q.time.hour,minute:q.time.minute}:undefined})),attempted:[...round.attempted],helped:[...round.helped],counted:[...round.counted],observed:[...(round.observed||[])],at:round.at||Date.now()};
@@ -15,7 +19,21 @@ export function packRound(round) {
 export function unpackRound(raw) {
   if(!raw || !Object.hasOwn(MISSIONS,raw.mission)||!Array.isArray(raw.questions)||!isSessionLength(raw.questions.length)||!/^[0-9a-f-]{36}$/i.test(raw.id||'')||!Number.isInteger(raw.index)||raw.index<0||raw.index>=raw.questions.length)return null;
   try {
+    const matchingWords = raw.questions.some(q => q.type === 'word-form') || raw.mission === 'letters' && raw.key?.endsWith(':words');
+    if (matchingWords) {
+      const prompt = `word-form-${raw.letterLanguage}`;
+      if (raw.mission !== 'letters' || !Object.hasOwn(LETTERS, raw.letterLanguage) ||
+        raw.key !== roundKey('letters', { letterLanguage: raw.letterLanguage, letterMode: 'words' }) ||
+        raw.questions.length !== SESSION_LENGTH ||
+        !raw.questions.every(q => q.type === 'word-form' && q.prompt === prompt && q.hint === `${prompt}-hint`) ||
+        new Set(raw.questions.map(q => q.word)).size !== SESSION_LENGTH) return null;
+    }
     const questions=raw.questions.map((d,i)=>{
+      if (matchingWords) {
+        const question = restoreWordFormQuestion(raw.letterLanguage, d, i);
+        if (!question) throw Error();
+        return question;
+      }
       const q={id:`${raw.mission}-${i}`,type:d.type,phase:adventurePhase(i,raw.questions.length),prompt:d.prompt,hint:d.hint};
       if(!CLIPS[q.prompt]||!CLIPS[q.hint]||!Array.isArray(d.options)||d.options.length<2||d.options.length>3)throw Error();
       let pool;

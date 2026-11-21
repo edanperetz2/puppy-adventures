@@ -18406,6 +18406,41 @@
       "detected_ipa": "haʔaχbˈaʁ ʔoʁˈez duvdevanˈim lamesibˈa.",
       "phoneme_edit_ratio": 0,
       "seconds": 7.06
+    },
+    "word-form-english": {
+      "sha256": "19b26dd6f44fff5316f1d8c193f04f236aecca34576a0b11554e89fe0ad843e2",
+      "expected_ipa": "habˈiti bamilˈa ʃelemˈala. mitsʔˈi ʔotˈa beʔotijˈot ktanˈot.",
+      "detected_ipa": "habˈiti bamilˈa ʃelemˈaʔla, mitsˈi ʔotˈa beʔotijˈot ktanˈot.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.03
+    },
+    "word-form-hebrew": {
+      "sha256": "f8536ab6c4dac21109c46a98dd4ccbfe6b544c6959805c6ac75b9f646a1ba1b3",
+      "expected_ipa": "habˈiti bamilˈa ʃelemˈala. mitsʔˈi ʔotˈa biχtˈav jˈad.",
+      "detected_ipa": "habˈiti bamilˈa ʃelemˈaʔla, mitsˈi ʔotˈa biχtˈav jˈad.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.05
+    },
+    "word-form-english-hint": {
+      "sha256": "d8b4bb1de5d575a651e45d9734114552f25d7b6b31f2bc88365e7bd45a8ef8d8",
+      "expected_ipa": "hatχˈili mismˈol. bidkˈi ʔˈot ʔaχˈaʁ ʔˈot.",
+      "detected_ipa": "hatχˈili mismˈol, bidkˈi ʔˈot ʔaχˈaʁ ʔˈot.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.44
+    },
+    "word-form-hebrew-hint": {
+      "sha256": "df15930d9213e12b586e5aecf640cd307a649bbc2e3a9119871c0a60b3564b3a",
+      "expected_ipa": "hatχˈili mijamˈin. bidkˈi ʔˈot ʔaχˈaʁ ʔˈot.",
+      "detected_ipa": "hatχˈili mijamˈin, bidkˈi ʔˈot ʔaχˈaʁ ʔˈot.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.08
+    },
+    "letters-paths-words": {
+      "sha256": "425534536a03bdf797bcc9fc789c9d9f90ecd77f96d49774a3b9648f93af7c37",
+      "expected_ipa": "mˈa tiʁtsˈi laʔasˈot? lezahˈot ʔotijˈot, lehatʔˈim milˈim ʔˈo liχtˈov?",
+      "detected_ipa": "mˈa tiʁtsˈi laʔasˈot? lezahˈot ʔotijˈot, lehatʔˈim milˈim ʔˈo liχtˈov?",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.77
     }
   }
 }

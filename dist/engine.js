@@ -12,6 +12,7 @@ import { CHARACTER_MODES, createCharacterSession, sanitizeCharacterSelection } f
 import { answerShuffler, shuffle } from './answer-order.js';
 import { PLAYABLE_STORIES } from './reading-animal-stories.js?v=2.7.0-science';
 import { CAPTION_PROMPT, CAPTION_HINT } from './reading-nature.js';
+import { makeWordFormQuestions } from './word-form-match.js';
 export { SESSION_LENGTH } from './adventure.js?v=2.2.2-six';
 export { shuffle };
 
@@ -97,6 +98,15 @@ function chooseActionStory(settings, rng) {
 }
 
 export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Math.random) {
+  if (mission === 'letters' && rawSettings?.letterMode === 'words') {
+    const language = rawSettings.letterLanguage === 'english' ? 'english' : 'hebrew';
+    const prefix = `word-form:${language}:`;
+    const recent = Object.entries(rawSettings.learning || {})
+      .filter(([key]) => key.startsWith(prefix))
+      .sort((a, b) => a[1].last - b[1].last)
+      .map(([key]) => key.slice(prefix.length));
+    return makeWordFormQuestions(language, recent, rng);
+  }
   const orderAnswers = answerShuffler(rng);
   return buildSession(mission, rawSettings, rng).map(question => ({
     ...question,
