@@ -7,6 +7,7 @@ import { mountClockDial } from './clock-dial.js?v=2.2.4-practice';
 import { learningTime } from './clock-learning.js?v=2.2.4-practice';
 import { CLIPS } from './content.js';
 import { nextPicnicStep, picnicClockCorrect, picnicReadingModel, picnicWord } from './picnic.js';
+import { spokenNumber } from './number-workshop.js?v=2.3.0-numbers';
 import { storyClue } from './story-practice.js';
 import { mountDrag } from './drag.js';
 import { chapterMissions, chapterText } from './chapter-ui.js';
@@ -61,7 +62,7 @@ export function picnicPrompt(round, readAloud = false) {
     return ['act-out'];
   }
   if (round.path === 'addition') {
-    if (round.index === 0 && round.resolved) return ['picnic-add-model'];
+    if (round.resolved) return round.index === 0 && !readAloud ? ['picnic-add-model'] : spokenNumber(q.a + q.b);
     if (q.move && round.state.groups.length < 2) return [round.state.groups.length ? 'picnic-tap-next' : 'picnic-tap-apples'];
     return ['picnic-add-choose', 'number-workshop-choose'];
   }
@@ -160,8 +161,15 @@ export function mountPicnicRound(root, {
     const task = q(), { a, b, choices, move, item } = task;
     const joined = move && state().groups.length === 2;
     const total = round.resolved ? a + b : '?';
-    const cue = picnicPrompt(round).map(clipText).join(' ');
-    find('.picnic-cue').textContent = label(cue);
+    const cue = find('.picnic-cue');
+    cue.hidden = round.resolved && !model();
+    if (!cue.hidden) cue.textContent = label(picnicPrompt(round).map(clipText).join(' '));
+    if (round.resolved) {
+      const title = find('.picnic-task-title h1');
+      title.dir = 'ltr';
+      title.textContent = total;
+      find('[data-picnic-action="replay"]').setAttribute('aria-label', 'שמיעת המספר');
+    }
     const groups = [a, b].map((amount, group) => additionGroups(task, amount, group)).join('<span class="picnic-plus" aria-hidden="true">+</span>');
     const landed = [a, b].map((amount, group) => state().groups.includes(group)
       ? `<span class="picnic-food" data-picnic-landed="${group}" role="img" aria-label="${amount} ${label(foodNames[item][amount === 1 ? 0 : 1])}">${art(item).repeat(amount)}</span>` : '').join('');

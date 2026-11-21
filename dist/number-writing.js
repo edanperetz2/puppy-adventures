@@ -33,15 +33,25 @@ export function nextWritingNumber(items, after = null) {
   return order.find(number => !wasPracticed(items, number)) ?? order[0];
 }
 
-export function numberWritingPad(number) {
+function numberStrokes(number) {
   const digits = Array.from(String(number), Number);
   const digitSpacing = 116;
   const inset = 54;
   const width = 240 + (digits.length - 1) * digitSpacing - 2 * inset;
-  const lineEnd = width - 15;
   const strokes = digits.flatMap((digit, column) => DIGIT_STROKES[digit].map(([x, y, path]) => ({
     d: `M${x - inset + column * digitSpacing} ${y} ${path}`, column,
   })));
+  return { width, strokes };
+}
+
+export function numberWritingModel(number) {
+  const { width, strokes } = numberStrokes(number);
+  return `<span>${number}</span><svg viewBox="0 32 ${width} 172" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">${strokes.map(({ d }) => `<path d="${d}"/>`).join('')}</svg>`;
+}
+
+export function numberWritingPad(number) {
+  const { width, strokes } = numberStrokes(number);
+  const lineEnd = width - 15;
   return `<svg class="letter-shape letter-pad number-writing-pad" viewBox="0 0 ${width} 216" lang="he" dir="ltr"
     role="img" aria-label="משטח כתיבה של המספר ${number}">
     <g class="writing-lines" aria-hidden="true"><path d="M15 46H${lineEnd}M15 118H${lineEnd}M15 190H${lineEnd}"/></g>
@@ -67,16 +77,14 @@ export function mountNumberWriting(root, { getItems, motion, speak, onPractice }
   </div>
   <section class="number-board number-writing-board" aria-labelledby="number-writing-title">
     <div class="number-question-heading">
-      <h1 id="number-writing-title" tabindex="-1">${NUMBER_WRITING_TITLE}</h1>
+      <div><span class="section-kicker">${NUMBER_WRITING_TITLE}</span>
+        <h1 class="number-writing-example" id="number-writing-title" lang="he" dir="ltr" tabindex="-1"></h1></div>
       <button type="button" class="circle-button" data-action="replay" aria-label="שמיעת ההסבר שוב">${uiIcon('sound')}</button>
     </div>
     <div class="number-writing-layout">
       <div class="number-writing-tools">
-        <bdi class="number-writing-example" dir="ltr"></bdi>
-        <div>
-          <button type="button" class="secondary-button" data-number-writing="demo">${uiIcon('pencil')} <span>${demoCaption()}</span></button>
-          <button type="button" class="text-button" data-number-writing="reset">${uiIcon('again')} מֵחָדָשׁ</button>
-        </div>
+        <button type="button" class="secondary-button" data-number-writing="demo">${uiIcon('pencil')} <span>${demoCaption()}</span></button>
+        <button type="button" class="text-button" data-number-writing="reset">${uiIcon('again')} מֵחָדָשׁ</button>
       </div>
       <div class="number-writing-surface"></div>
       <div class="number-writing-navigation">
@@ -98,7 +106,7 @@ export function mountNumberWriting(root, { getItems, motion, speak, onPractice }
   </section>`;
 
   const surface = root.querySelector('.number-writing-surface');
-  const example = root.querySelector('.number-writing-example');
+  const title = root.querySelector('#number-writing-title');
   const next = root.querySelector('[data-number-writing="next"]');
   const count = root.querySelector('.number-writing-count');
   const range = root.querySelector('.number-writing-picker select');
@@ -135,7 +143,7 @@ export function mountNumberWriting(root, { getItems, motion, speak, onPractice }
   function selectNumber(value) {
     pad?.destroy();
     number = value; recorded = false; showedDemo = false; lastHint = 0;
-    example.textContent = number;
+    title.innerHTML = numberWritingModel(number);
     surface.dataset.digitCount = String(number).length;
     showRange(groupFor(number));
     next.hidden = true;
@@ -168,7 +176,7 @@ export function mountNumberWriting(root, { getItems, motion, speak, onPractice }
     if (Object.hasOwn(button.dataset, 'writeNumber')) {
       const value = Number(button.dataset.writeNumber);
       if (value !== number) selectNumber(value);
-      surface.scrollIntoView({ block: 'nearest' });
+      title.focus();
       void replay();
       return;
     }
@@ -188,8 +196,7 @@ export function mountNumberWriting(root, { getItems, motion, speak, onPractice }
         break;
       case 'next':
         selectNumber(nextWritingNumber(getItems(), number));
-        root.querySelector('[data-number-writing="demo"]').focus({ preventScroll: true });
-        surface.scrollIntoView({ block: 'nearest' });
+        title.focus();
         void replay();
         break;
     }

@@ -12,6 +12,12 @@ function heading(text, lang, clip, speakerLabel, sentence = false) {
 }
 
 export function classicReadingHeading(q, nikud) {
+  if (q.type === 'listen' && q.kind === 'number') {
+    return {
+      ...heading(String(q.target.number), 'en', q.targetClip, 'השמעת המספר באנגלית'),
+      instruction: nikud ? 'בַּחֲרִי אֶת הַמִּסְפָּר.' : 'בחרי את המספר.',
+    };
+  }
   if (q.type === 'letter') {
     const toMain = q.direction === 'to-main';
     const form = q.letter.language === 'hebrew'

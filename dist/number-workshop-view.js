@@ -133,6 +133,16 @@ export function mountNumberRound(root, {
     persist();
   }
 
+  function showHeading(number = null) {
+    const question = root.querySelector('.number-question-caption');
+    const title = root.querySelector('#number-question');
+    const numeric = number !== null;
+    question.hidden = !numeric;
+    title.dir = numeric ? 'ltr' : 'rtl';
+    title.classList.toggle('number-model-total', numeric);
+    title.textContent = numeric ? String(number) : question.textContent;
+  }
+
   function render() {
     const q = task();
     root.innerHTML = `<div class="number-round-top">
@@ -142,11 +152,11 @@ export function mountNumberRound(root, {
     <div class="step-track" aria-hidden="true">${round.questions.map((_, i) => `<span class="step-dot ${i < round.index || i === round.index && round.resolved ? 'done' : i === round.index ? 'current' : ''}">${i + 1}</span>`).join('')}</div>
     <section class="number-board" aria-labelledby="number-question">
       <div class="number-question-heading">
-        <h1 id="number-question" tabindex="-1">${labelFor(numberQuestionClip(round.path), nikud)}</h1>
-        <button type="button" class="circle-button" data-action="replay" aria-label="שמיעת השאלה שוב">${uiIcon('sound')}</button>
+        <div><span class="section-kicker number-question-caption" hidden>${labelFor(numberQuestionClip(round.path), nikud)}</span>
+          <h1 id="number-question" lang="he" tabindex="-1"></h1></div>
+        <button type="button" class="circle-button" data-action="replay" aria-label="${round.resolved ? 'שמיעת המספר' : 'שמיעת השאלה שוב'}">${uiIcon('sound')}</button>
       </div>
       ${questionPicture(round.path, q, round.resolved, animate && motion())}
-      <div class="number-model-total" hidden dir="ltr" aria-live="off"></div>
       <div class="number-choices" role="group" aria-label="בחירת מספר">
         ${q.choices.map(n => {
           const correct = round.resolved && n === q.answer;
@@ -164,14 +174,14 @@ export function mountNumberRound(root, {
       </div>
       <p id="audio-notice" class="audio-notice" role="status" hidden></p>
     </section>`;
+    showHeading(round.resolved ? q.answer : null);
     animate = false;
   }
 
   function modelStep(step) {
     const group = root.querySelector(round.path === 'left' ? '.number-basket-items' : '.number-scene');
     group?.querySelector(`[data-model-step="${step.index}"]`)?.classList.add('number-counted');
-    const readout = root.querySelector('.number-model-total');
-    if (readout) { readout.textContent = step.number; readout.hidden = false; }
+    showHeading(step.number);
   }
 
   function cancelModel() {
@@ -192,7 +202,7 @@ export function mountNumberRound(root, {
     const q = task(), model = numberModel(round.path, q);
     root.querySelector('[data-number-step="hint"]').disabled = true;
     root.querySelectorAll('.number-counted').forEach(node => node.classList.remove('number-counted'));
-    root.querySelector('.number-model-total').hidden = true;
+    showHeading();
     const stillShowing = () => id === demonstration && !events.signal.aborted;
     if (audioEnabled()) await speak(model.intro);
     if (!stillShowing()) return;
@@ -209,6 +219,7 @@ export function mountNumberRound(root, {
   function replay() {
     cancelModel();
     if (round.resolved) return speak(spokenNumber(task().answer));
+    showHeading();
     return speak(prompt());
   }
 

@@ -68,7 +68,10 @@ export function mountFruitCutting(root, { nikud, speak }) {
     next.hidden = !solved || finished;
     track.innerHTML = stages.map((_, i) => `<span class="step-dot${finished || i < index || i === index && solved ? ' done' : i === index ? ' current' : ''}">${i + 1}</span>`).join('');
     if (finished) return;
-    const count = index >= 2 ? `${halves} / ${stage().goal}` : halves;
+    const hasTarget = !stage().outcome;
+    title.textContent = hasTarget || solved ? String(stage().goal) : label(FRUIT_CUTTING_TITLE);
+    title.dir = hasTarget || solved ? 'ltr' : 'rtl';
+    const count = hasTarget ? `${halves} / ${stage().goal}` : halves;
     counter.innerHTML = `<b dir="ltr">${count}</b> ${label('חֲצָאִים')}`;
     counter.classList.toggle('fruit-goal-met', solved);
   }
@@ -77,7 +80,6 @@ export function mountFruitCutting(root, { nikud, speak }) {
     const task = stage(), order = shuffle(Object.keys(fruits));
     halves = task.startCut ? 2 : 0;
     swipe = null;
-    title.textContent = label(FRUIT_CUTTING_TITLE);
     step.textContent = `${index + 1} / ${stages.length}`;
     next.innerHTML = `${label(index === stages.length - 1 ? 'לַסִּיּוּם' : 'לַצַּעַד הַבָּא')} ${uiIcon('arrow')}`;
     prompt.hidden = tray.hidden = counter.hidden = replayButton.hidden = false;
@@ -143,6 +145,7 @@ export function mountFruitCutting(root, { nikud, speak }) {
       if (index === stages.length - 1) {
         finished = true;
         title.textContent = label('כָּל הַכָּבוֹד! חָתַכְתְּ אֶת הַפֵּרוֹת');
+        title.dir = 'rtl';
         step.textContent = '';
         prompt.hidden = tray.hidden = counter.hidden = replayButton.hidden = true;
         again.hidden = false;

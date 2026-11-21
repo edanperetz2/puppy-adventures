@@ -12,6 +12,7 @@ import {
   cleanPicnic, cleanPicnicRound, createPicnicRound, nextPicnicStep, packPicnicRound, picnicClockCorrect, picnicReadingModel, picnicWord,
 } from '../dist/picnic.js';
 import { picnicMap, picnicPrompt } from '../dist/picnic-view.js';
+import { spokenNumber } from '../dist/number-workshop.js';
 
 test('fresh picnic readings vary the object and destination, while old bookmarks keep their exact sentences', () => {
   const bookmark = { id: '12345678-1111-4111-b111-000000000000', path: 'reading', revision: 1, cap: 5, index: 1 };
@@ -63,6 +64,10 @@ test('the guide and chapter share a six-step curriculum with distinct, solvable 
           } else if (path === 'addition') {
             assert.ok(q.a + q.b <= cap);
             assert.equal(q.move, index < 4);
+            const result = spokenNumber(q.a + q.b);
+            assert.deepEqual(picnicPrompt({ ...step, resolved: true }, true), result);
+            assert.deepEqual(picnicPrompt({ ...step, resolved: true }), index === 0 ? ['picnic-add-model'] : result);
+            assert.ok(!picnicPrompt(step, true).some(clip => result.includes(clip)));
             if (q.move) {
               assert.equal(q.item, 'apple');
               assert.deepEqual(picnicPrompt(step), ['picnic-tap-apples']);

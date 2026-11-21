@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import { CLIPS } from '../dist/content.js';
 import { hasArt } from '../dist/art.js';
 import { NUMBER_PATHS, cleanNumberRound, newNumberRound, numberModel, numberPrompt, numberQuestion, numberQuestionClip, spokenNumber } from '../dist/number-workshop.js';
-import { questionPicture } from '../dist/number-workshop-view.js';
-import { numberWritingKey, numberWritingPad, nextWritingNumber, WRITING_NUMBERS } from '../dist/number-writing.js';
+import { mountNumberRound, questionPicture } from '../dist/number-workshop-view.js';
+import { classicReadingHeading } from '../dist/classic-reading-heading.js';
+import { createSession } from '../dist/engine.js';
+import { numberWritingKey, numberWritingModel, numberWritingPad, nextWritingNumber, WRITING_NUMBERS } from '../dist/number-writing.js';
 import { dictationNumberClips, numberDictationDraw, numberDictationKey } from '../dist/number-dictation.js';
 import { applyObservation, learningStage } from '../dist/learning.js';
 import { SESSION_LENGTH } from '../dist/adventure.js';
@@ -68,6 +70,61 @@ test('Each Number Workshop path gives six distinct, progressively harder questio
       if (path === 'count') assert.ok(openingCounts.size > 1);
       assert.ok(examples.size >= SESSION_LENGTH);
     }
+  }
+});
+
+test('English number recognition titles each numeral and replays the corresponding English recording', () => {
+  const questions = createSession('english', { englishMax: 20 }, seeded(864));
+  for (const q of questions) {
+    const heading = classicReadingHeading(q, false);
+    if (q.kind !== 'number') { assert.equal(heading, null); continue; }
+    assert.ok(heading.html.endsWith(`lang="en" dir="ltr">${q.target.number}</h1>`));
+    assert.equal(heading.clip, `en-${q.target.number}`);
+    assert.equal(CLIPS[heading.clip].lang, 'en-US');
+  }
+  assert.equal(questions.filter(q => q.kind === 'number').length, 2);
+});
+
+test('workshop titles the counted hint and the solved number, keeping new and retried puzzles open', () => {
+  for (const path of Object.keys(NUMBER_PATHS)) {
+    const round = newNumberRound(path, 10, {}, seeded(20));
+    const q = numberQuestion(round);
+    const question = CLIPS[numberQuestionClip(path)].text;
+    const caption = { textContent: question };
+    const title = { classList: { toggle() {} } };
+    const hint = {};
+    const recordings = [];
+    let click;
+    const host = {
+      addEventListener(type, cb) { if (type === 'click') click = cb; },
+      querySelector: selector => ({ '#number-question': title, '.number-question-caption': caption, '[data-number-step="hint"]': hint })[selector],
+      querySelectorAll: () => [],
+    };
+    const mount = saved => mountNumberRound(host, { round: saved, nikud: true, motion: () => false,
+      audioEnabled: () => false, speak: keys => recordings.push(keys), onObservation() {}, onSave() {}, onSuccess() {},
+    });
+    const tap = dataset => click({ target: { closest: () => ({dataset}) } });
+    const check = (text, direction) => {
+      assert.equal(title.textContent, text);
+      assert.equal(title.dir, direction);
+      assert.equal(caption.hidden, direction === 'rtl');
+    };
+    const view = mount(round);
+    check(question, 'rtl');
+    tap({numberAnswer:String(q.choices.find(n => n !== q.answer))});
+    check(question, 'rtl');
+    tap({numberStep:'hint'});
+    check(String(q.answer), 'ltr');
+    view.replay();
+    check(question, 'rtl');
+    tap({numberAnswer:String(q.answer)});
+    check(String(q.answer), 'ltr');
+    view.destroy();
+    const reopened = mount(cleanNumberRound(structuredClone(round)));
+    check(String(q.answer), 'ltr');
+    reopened.replay();
+    assert.deepEqual(recordings.at(-1), spokenNumber(q.answer));
+    reopened.destroy();
   }
 });
 
@@ -143,6 +200,10 @@ test('Writing models for 0 through 100 draw each complete number in left-to-righ
     const markup = numberWritingPad(number);
     assert.match(markup, /dir="ltr"/u);
     const paths = guideStrokes(markup);
+    const model = numberWritingModel(number);
+    assert.ok(model.startsWith(`<span>${number}</span><svg`));
+    assert.match(model, /aria-hidden="true"/u);
+    assert.deepEqual([...model.matchAll(/<path d="([^"]+)"/gu)].map(match => match[1]), paths.map(match => match[1]));
     const expected = Array.from(String(number), (digit, column) => digitModels[digit].map(path => ({ path, column }))).flat();
     assert.equal(paths.length, expected.length);
     for (const [index, [, path, stroke, column]] of paths.entries()) {
