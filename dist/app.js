@@ -1591,8 +1591,9 @@ function renderLearningHub(){
       + card('reading-level', 'data-level="captions"', 'מִתְּמוּנָה לְמִשְׁפָּט', captionStage.description, captionStage.art);
     const workshop = ['חֲלָקִים קְטַנִּים וּמִלִּים מֻכָּרוֹת', 'מִלִּים אֲרֻכּוֹת יוֹתֵר', 'עוֹד אוֹתִיּוֹת וְצֵרוּפִים', 'אֶתְגָּר לְבִנְיַן מִלִּים']
       .map((description, i) => journeyChoice('workshop', i + 1, `שָׁלָב ${i + 1}`, description, 'pencil')).join('');
+    const shelf = [...STORIES].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
     sections = group('קוֹרְאוֹת וּמְשַׂחֲקוֹת', reading) + group('סַדְנַת הַמִּלִּים', workshop)
-      + group('סִפּוּרִים שֶׁמְּשַׂחֲקִים', STORIES.map(story => journeyChoice('stories', story.id, story.title, story.description, 'house')).join(''));
+      + group('סִפּוּרִים שֶׁמְּשַׂחֲקִים', shelf.map(story => journeyChoice('stories', story.id, story.title, story.description, story.icon || 'house')).join(''));
   } else {
     const listening = journeyChoice(ENGLISH_LISTENING.route.mode, ENGLISH_LISTENING.route.level, ...ENGLISH_LISTENING.he, ENGLISH_LISTENING.icon)
       + card('mission-direct', 'data-mission="english"', 'מִלִּים, צְבָעִים וּמִסְפָּרִים', 'מַקְשִׁיבוֹת לְמִלִּים מֵהַמִּשְׂחָק הַמֻּכָּר.', 'star');

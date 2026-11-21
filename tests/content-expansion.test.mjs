@@ -6,6 +6,7 @@ import { CLIPS,WORDS,COLORS } from '../dist/content.js';
 import { createSession,freshProgress,sanitizeProgress } from '../dist/engine.js';
 import { newJourney,cleanJourney,journeyQuestions,seeded,ENGLISH_WORDS,ENGLISH_PAIRS,PHONICS,objectCases } from '../dist/journey.js';
 import { STORIES,WORKSHOP_WORDS } from '../dist/journey-content.js';
+import { STORY_OUTINGS } from '../dist/story-outings.js';
 import { BLEND_GROUPS } from '../dist/english-expansion.js';
 import { CLOCK_LESSONS,clockLessonTasks,sanitizeClockPosition } from '../dist/clock-learning.js';
 import { LETTERS } from '../dist/letters.js';
@@ -43,13 +44,43 @@ test('Original recordings and unfinished journeys are preserved, with two explic
 
 test('Every existing content bank is substantially larger, without adding a new alphabet or cast',()=>{
   assert.ok(WORDS.length>=416*2);assert.equal(WORKSHOP_WORDS.length,64);
-  assert.equal(STORIES.length,8);assert.ok(ENGLISH_WORDS.length>=15*4);
+  assert.ok(STORIES.length>=11);assert.ok(ENGLISH_WORDS.length>=15*4);
   assert.equal(ENGLISH_PAIRS.length,20);assert.equal(PHONICS.length,20);
   assert.equal(new Set(BLEND_GROUPS.flat()).size,30);
   assert.equal(new Set(WORDS.map(w=>w.id)).size,WORDS.length);
   for(const word of WORKSHOP_WORDS)word.chunks.forEach((_,index)=>assert.ok(CLIPS[chunkClip(word.id,index)]));
   for(const [stage,previous]of [[6,33],[7,36],[8,27],[9,20],[10,24]])assert.ok(WORDS.filter(w=>w.level===stage).length>=previous*2);
   for(const story of STORIES){assert.equal(story.pages.length,10);for(const page of story.pages){assert.ok(hasArt(page.target)||COLORS.some(c=>c.id===page.target));assert.ok(page.speech&&!/[א-ת]/u.test(page.speech));if(page.choices){assert.equal(new Set(page.choices).size,page.choices.length);assert.equal(page.choices.filter(c=>c===page.target).length,1);}}}
+});
+
+test('Replaying each new book opens four fresh middle pages and keeps a saved outing together', () => {
+  for (const story of STORY_OUTINGS) {
+    const rng = () => 0;
+    const start = items => newJourney('stories', story.id, items, { rng });
+    const first = journeyQuestions(start({}));
+    const middle = round => round.slice(1, -1).map(question => question.key);
+    const progress = Object.fromEntries(first.map(question => [question.key, { seen: 1, last: 1000 }]));
+    const replay = start(progress);
+    const second = journeyQuestions(replay);
+    assert.equal(first[0].key, second[0].key);
+    assert.equal(first.at(-1).key, second.at(-1).key);
+    assert.equal(new Set([...middle(first), ...middle(second)]).size, 8);
+    assert.deepEqual(journeyQuestions(cleanJourney({ ...replay, index: 3 })), second);
+    const onlyOneVisit = { [first[1].key]: { seen: 1, last: 1200 } };
+    assert.deepEqual(middle(journeyQuestions(start(onlyOneVisit))), middle(second));
+    for (const question of second) progress[question.key] = { seen: 1, last: 2000 };
+    assert.deepEqual(middle(journeyQuestions(start(progress))), middle(first));
+    for (const round of [first, second]) {
+      assert.equal(new Set(round.map(question => question.page.target)).size, 6, story.id);
+      assert.ok(round.some(question => question.page.task === 'count'));
+      assert.ok(round.some(question => question.page.task === 'place'));
+      for (const { page } of round) {
+        for (const id of [page.target, ...(page.choices || [])]) {
+          assert.ok(hasArt(id) && WORDS.some(word => word.id === id), `${story.id}: ${id}`);
+        }
+      }
+    }
+  }
 });
 
 test('All 53 letters have at least two truthful illustrated and spoken examples',()=>{

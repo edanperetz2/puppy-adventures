@@ -4,7 +4,7 @@ import { shuffle } from './answer-order.js';
 import { LITTLE_STORIES } from './activities.js';
 import { readingWords } from './reading.js?v=2.7.0-science';
 
-const fields = ['position', 'color', 'count', 'action', 'anchor', 'food', 'size', 'object'];
+const fields = ['position', 'color', 'count', 'action', 'anchor', 'food', 'prop', 'size', 'object'];
 const clips = { position: 'place', anchor: 'place', color: 'color', count: 'count', action: 'action' };
 const stories = readingWords(LITTLE_STORIES.route.level);
 const families = new Map();
@@ -29,8 +29,9 @@ export function storyClue(word, field) {
     case 'anchor': start = scene.kind === 'action' ? length - 1 : length - 2; end = length; break;
     case 'count': start = 0; break;
     case 'color': start = scene.kind === 'count' ? 2 : 1; break;
-    case 'action': start = scene.size ? 2 : 1; break;
+    case 'action': start = word.actionIndex ?? (scene.size ? 2 : 1); break;
     case 'food': start = 2; end = length; break;
+    case 'prop': [start, end] = word.propRange; break;
     case 'size': start = 1; break;
     case 'object': start = scene.action === 'water' ? length - 1 : scene.count ? 1 : 0; break;
   }

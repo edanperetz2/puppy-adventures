@@ -5,21 +5,53 @@ import { createHash } from 'node:crypto';
 import { WORDS, CLIPS } from '../dist/content.js';
 import { PICTURE_PLACE_PASSAGES } from '../dist/reading-picture-places.js';
 import { PICTURE_SCENE_PASSAGES } from '../dist/reading-picture-scenes.js';
+import { STORY_MOMENTS } from '../dist/reading-story-moments.js';
 import { ANIMAL_STORIES, PLAYABLE_STORIES } from '../dist/reading-animal-stories.js';
 import { readingWords, readingTargets, sanitizeReadingPractice, finishReadingPractice } from '../dist/reading.js';
 import { createSession, DEFAULT_SETTINGS } from '../dist/engine.js';
 import { art, hasArt } from '../dist/art.js';
 import { actOutMatches, actOutPlan, actOutPrompt, actOutSteps, canActOut } from '../dist/act-out.js';
 import { packRound, unpackRound } from '../dist/session-state.js';
+import { pictureClue, storyClue } from '../dist/story-practice.js';
 const additions=[...PICTURE_PLACE_PASSAGES,...PICTURE_SCENE_PASSAGES];
 const ids=new Set(additions.map(word=>word.id));
 const actionIds = new Set(PLAYABLE_STORIES.map(word => word.id));
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const rng=seed=>()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
 
+test('each everyday story has a distinct illustrated action, a recorded reading and an exact Hebrew clue', () => {
+  assert.equal(STORY_MOMENTS.length, 48);
+  const captions = new Set(readingWords('captions').map(word => word.id));
+  for (const word of STORY_MOMENTS) {
+    const { object, prop } = word.scene;
+    assert.ok(captions.has(word.id) && hasArt(object) && hasArt(prop), word.id);
+    assert.equal(CLIPS[`he-${word.id}`].speech, word.spoken);
+    const words = word.he.split(' ');
+    assert.ok(words.length >= 3 && words.length <= 5, word.he);
+    assert.equal(words.length, word.pointed.split(' ').length);
+    const alternatives = STORY_MOMENTS.filter(other => other !== word && other.family === word.family);
+    assert.equal(alternatives.length, 5);
+    for (const other of alternatives) {
+      assert.ok(['action', 'prop'].includes(pictureClue(word, other)), `${word.id} vs ${other.id}`);
+    }
+    const { start, end } = storyClue(word, 'prop');
+    assert.ok(start >= 2 && start < end && end <= words.length, word.id);
+    assert.ok(!['את', 'על', 'מאחורי'].includes(words[start]));
+  }
+  const selected = (id, field) => {
+    const word = STORY_MOMENTS.find(word => word.id === id);
+    const { start, end } = storyClue(word, field);
+    return word.he.replace(/\.$/u, '').split(' ').slice(start, end).join(' ');
+  };
+  assert.equal(selected('moment-dog-wrap-book', 'prop'), 'הספר');
+  assert.equal(selected('moment-mouse-draw-cake', 'prop'), 'עוגת יום הולדת');
+  assert.equal(selected('moment-bird-carry-leaf', 'action'), 'מחזיקה');
+  assert.equal(selected('moment-mouse-music-trumpet', 'action'), 'מנגן');
+});
+
 test('Picture-to-sentence rounds offer distinct illustrated subjects and resume their text choices', () => {
   const pool = readingWords('captions');
-  assert.equal(pool.length, 686);
+  assert.equal(pool.length, 734);
   const original = createSession('hebrew', { reading: 'captions' }, rng(3));
   const recentlyPlayed = original.map(question => question.answer);
   const weak = Object.fromEntries(recentlyPlayed.map(id => [`read:${id}`, { seen: 1, helped: 1, last: Date.now() }]));
@@ -46,8 +78,8 @@ test('Picture-to-sentence rounds offer distinct illustrated subjects and resume 
 
 test('Short picture stories more than double at the same reading level and length',()=>{
   assert.equal(additions.length,360);
-  assert.equal(readingWords('sentences').length,690);
-  assert.equal(WORDS.length,1501);
+  assert.equal(readingWords('sentences').length,738);
+  assert.equal(WORDS.length,1549);
   assert.equal(new Set(WORDS.map(word=>word.he)).size,WORDS.length);
   assert.equal(new Set(WORDS.map(word=>art(word.id))).size,WORDS.length);
   for(const word of additions){
@@ -89,10 +121,10 @@ test('A practiced sentence bank keeps its history and offers the new passages be
 
 test('Every previous reading target and all 2114 original voice records remain unchanged',async()=>{
   const baseline=JSON.parse(await readFile(new URL('./fixtures/release-2.1-reading.json',import.meta.url),'utf8'));
-  const originalWords=WORDS.filter(word=>!ids.has(word.id)&&!actionIds.has(word.id)&&!word.id.startsWith('nature-'));
+  const originalWords=WORDS.filter(word=>!ids.has(word.id)&&!actionIds.has(word.id)&&!word.id.startsWith('nature-') && word.scene?.kind !== 'moment');
   assert.equal(originalWords.length,baseline.wordCount);
   assert.equal(hash(originalWords),baseline.wordDigest);
-  const previouslyReleased = ([key]) => !/^(?:he-picture-|he-story-(?:animal|action)-|he-nature-|reading-caption-|characters-(?:menu|level)-together|character-(?:pikachu|stitch)$|story-clue-|picnic-|delivery-|boatyard-|daily-|theater-|listen-pick-animal$|profile-good-luck|journey-give-|journey-apples-left$|number-workshop-|science-|act-out(?:-jump|-feed|-move-animal|-water|-door)?$)/u.test(key);
+  const previouslyReleased = ([key]) => !/^(?:he-picture-|he-story-(?:animal|action)-|he-nature-|he-moment-|reading-caption-|characters-(?:menu|level)-together|character-(?:pikachu|stitch)$|story-clue-|picnic-|delivery-|boatyard-|daily-|theater-|listen-pick-animal$|profile-good-luck|journey-give-|journey-apples-left$|journey-story-(?:grandma-letter|garden-concert|treasure-map)-|number-workshop-|science-|act-out(?:-jump|-feed|-move-animal|-water|-door)?$)/u.test(key);
   const originalClips=Object.fromEntries(Object.entries(CLIPS).filter(previouslyReleased));
   assert.equal(Object.keys(originalClips).length,baseline.clipCount);
   assert.equal(hash(originalClips),baseline.clipDigest);

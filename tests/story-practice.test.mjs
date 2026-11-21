@@ -8,6 +8,7 @@ import { readingWords } from '../dist/reading.js';
 import { awardLocalRound, checkpointScoredRound, finishScoredRound } from '../dist/round-lifecycle.js';
 import { packRound, unpackRound } from '../dist/session-state.js';
 import { firstStoryClue, pictureClue, storyClue, storyReviewQuestion } from '../dist/story-practice.js';
+import { seeded } from '../dist/journey.js';
 
 const level = LITTLE_STORIES.route.level;
 const stories = readingWords(level);
@@ -19,6 +20,26 @@ const selectedText = (word, field, script = 'he') => {
   const { start, end } = storyClue(word, field);
   return word[script].split(' ').slice(start, end).join(' ').replace(/[.!?]$/u, '');
 };
+
+test('both reading directions bring unfamiliar everyday stories into six-step rounds', () => {
+  for (const reading of [level, 'captions']) {
+    const recent = [];
+    const seen = new Set();
+    let lastMoment;
+    for (let i = 0; i < 12; i++) {
+      const round = createSession('hebrew', { reading, readingRecent: recent }, seeded(i));
+      assert.equal(round.length, 6);
+      assert.ok(new Set(round.map(q => q.word.scene.kind)).size >= 4);
+      const moment = round.find(q => q.word.scene.kind === 'moment').word;
+      assert.ok(!seen.has(moment.id));
+      assert.notEqual(moment.scene.object, lastMoment?.scene.object);
+      assert.notEqual(moment.scene.action, lastMoment?.scene.action);
+      seen.add(moment.id);
+      recent.push(...round.map(q => q.word.id));
+      lastMoment = moment;
+    }
+  }
+});
 
 test('Story clues point at the detail that differs and preserve Hebrew pointing', () => {
   assert.equal(pictureClue(target, byTheTable), 'position');

@@ -61,6 +61,21 @@ const STORY_ROUTES = {
   'after-rain': [[1, 3, 4, 7], [2, 3, 5, 8], [1, 3, 4, 6], [1, 3, 7, 8]],
   'little-party': [[1, 2, 4, 6], [2, 3, 4, 8], [1, 4, 6, 7], [1, 2, 4, 5]],
 };
+// The new books have two different outings between the same opening and ending.
+// A page counts as familiar once it was opened, even if the child left it unfinished.
+function replayRoute(story, items, seed) {
+  if (!story.routes) return undefined;
+  const ranked = story.routes.map((pages, route) => {
+    const visits = pages.map(index => items[`story:${story.id}:${index}`]);
+    const seen = visits.reduce((count, visit) => count + (visit?.seen || 0), 0);
+    const last = Math.max(...visits.map(visit => visit?.last || 0));
+    return { route, seen, last };
+  });
+  if (!ranked.some(candidate => candidate.seen)) return undefined;
+  const preferred = seed % ranked.length;
+  return ranked.sort((a, b) => a.seen - b.seen || a.last - b.last ||
+    Number(b.route === preferred) - Number(a.route === preferred))[0].route;
+}
 export const journeyLength = plan => plan.length === SESSION_LENGTH ? SESSION_LENGTH : LEGACY_SESSION_LENGTH;
 export function seeded(seed) { let n=seed>>>0;return()=>{n=(Math.imul(1664525,n)+1013904223)>>>0;return n/4294967296;}; }
 
@@ -119,10 +134,11 @@ export function newJourney(mode,level,items={},options={}) {
   const max=[5,10,20].includes(options.mathMax)?options.mathMax:10;
   const distinctReview = mode === 'english' && cleanLevel === 'single' && !newWord;
   const warm = [...familiar, ...review];
+  const storyRoute = mode === 'stories' ? replayRoute(STORIES.find(story => story.id === cleanLevel), items, seed) : undefined;
   // Save the shuffled list in the round, so reopening preserves the clue and
   // newly learned words also get a turn as the easy opening questions.
   const english = (mode === 'english' && cleanLevel === 'single' ? mix(warm, rng) : warm).concat(fresh);
-  return {id:globalThis.crypto.randomUUID(),revision:2,length:SESSION_LENGTH,shuffleAnswers:true,varietyFrom:0,...(distinctReview ? { distinctReview } : {}),introducing:Boolean(newWord),mode,level:cleanLevel,seed,words,soundIds,blendWords,pairColors,examples:mode==='objects'?objectExamples(cleanLevel,max,items,rng):[],english,max,index:0,state:{},helped:[],observed:[],at:Date.now()};
+  return {id:globalThis.crypto.randomUUID(),revision:2,length:SESSION_LENGTH,shuffleAnswers:true,varietyFrom:0,...(distinctReview ? { distinctReview } : {}),...(storyRoute !== undefined ? { storyRoute } : {}),introducing:Boolean(newWord),mode,level:cleanLevel,seed,words,soundIds,blendWords,pairColors,examples:mode==='objects'?objectExamples(cleanLevel,max,items,rng):[],english,max,index:0,state:{},helped:[],observed:[],at:Date.now()};
 }
 export function cleanJourney(raw) {
   if(!raw||!Object.hasOwn(JOURNEYS,raw.mode)||!/^[0-9a-f-]{36}$/i.test(raw.id)||!Number.isInteger(raw.seed))return null;
@@ -130,6 +146,8 @@ export function cleanJourney(raw) {
   if (!Number.isInteger(raw.index) || raw.index < 0 || raw.index >= length) return null;
   const allowed=raw.mode==='workshop'?[1,2,3,4]:raw.mode==='stories'?STORIES.map(s=>s.id):raw.mode==='english'?['single','pairs','cars']:raw.mode==='objects'?['quantity','bonds','tens','takeaway']:['sounds','blend'];
   if(!allowed.includes(raw.level))return null;
+  const routes = raw.mode === 'stories' && length === SESSION_LENGTH ? STORIES.find(story => story.id === raw.level).routes : undefined;
+  const storyRoute = Number.isInteger(raw.storyRoute) && raw.storyRoute >= 0 && raw.storyRoute < routes?.length ? raw.storyRoute : undefined;
   const words=(Array.isArray(raw.words)?raw.words:[]).filter(id=>WORKSHOP_WORDS.some(w=>w.id===id)).slice(0,length);
   if(raw.mode==='workshop'&&!words.length)return null;
   const english=(Array.isArray(raw.english)?raw.english:[]).filter(id=>ENGLISH_WORDS.some(x=>x.id===id)).slice(0,13);
@@ -145,7 +163,7 @@ export function cleanJourney(raw) {
   if(revision===2&&raw.mode==='objects'&&examples.length!==length)return null;
   const steps = value => [...new Set((Array.isArray(value) ? value : []).filter(n => Number.isInteger(n) && n >= 0 && n < length))];
   const varietyFrom = Number.isInteger(raw.varietyFrom) && raw.varietyFrom >= 0 && raw.varietyFrom < length ? raw.varietyFrom : undefined;
-  return {id:raw.id,revision,length,shuffleAnswers:raw.shuffleAnswers===true,varietyFrom,...(distinctReview ? { distinctReview } : {}),introducing:raw.introducing!==false,mode:raw.mode,level:raw.level,seed:raw.seed>>>0,words,soundIds,blendWords,pairColors,examples,english,max,index:raw.index,state:{chosen:Array.isArray(state.chosen)?state.chosen.filter(n=>Number.isInteger(n)&&n>=0&&n<24).slice(0,24):[],tokens:Array.isArray(state.tokens)?[...new Set(state.tokens.filter(n=>Number.isInteger(n)&&n>=0&&n<100))].slice(0,100):[],quantity:Math.max(0,Math.min(100,Math.floor(state.quantity)||0)),resolved:state.resolved===true,placed:state.placed===true,showModel:state.showModel===true,attempted:Array.isArray(state.attempted)?state.attempted.filter(id=>typeof id==='string'&&/^[a-z0-9-]{1,40}$/.test(id)).slice(0,4):[]},helped:steps(raw.helped),observed:steps(raw.observed),at:Number.isSafeInteger(raw.at)?raw.at:Date.now()};
+  return {id:raw.id,revision,length,shuffleAnswers:raw.shuffleAnswers===true,varietyFrom,...(distinctReview ? { distinctReview } : {}),...(storyRoute !== undefined ? { storyRoute } : {}),introducing:raw.introducing!==false,mode:raw.mode,level:raw.level,seed:raw.seed>>>0,words,soundIds,blendWords,pairColors,examples,english,max,index:raw.index,state:{chosen:Array.isArray(state.chosen)?state.chosen.filter(n=>Number.isInteger(n)&&n>=0&&n<24).slice(0,24):[],tokens:Array.isArray(state.tokens)?[...new Set(state.tokens.filter(n=>Number.isInteger(n)&&n>=0&&n<100))].slice(0,100):[],quantity:Math.max(0,Math.min(100,Math.floor(state.quantity)||0)),resolved:state.resolved===true,placed:state.placed===true,showModel:state.showModel===true,attempted:Array.isArray(state.attempted)?state.attempted.filter(id=>typeof id==='string'&&/^[a-z0-9-]{1,40}$/.test(id)).slice(0,4):[]},helped:steps(raw.helped),observed:steps(raw.observed),at:Number.isSafeInteger(raw.at)?raw.at:Date.now()};
 }
 
 export function resumeJourney(raw) {
@@ -168,9 +186,10 @@ function soundReview(phoneme, previous, rng) {
 export function journeyQuestions(plan) {
   const rng=seeded(plan.seed),result=[];
   const length = journeyLength(plan), short = length === SESSION_LENGTH;
+  const story = plan.mode === 'stories' ? STORIES.find(entry => entry.id === plan.level) : null;
   let storyPages;
-  if (plan.mode === 'stories' && short) {
-    const routes = STORY_ROUTES[plan.level], routeIndex = plan.seed % routes.length;
+  if (story && short) {
+    const routes = story.routes || STORY_ROUTES[plan.level], routeIndex = plan.storyRoute ?? plan.seed % routes.length;
     const middle = plan.level === 'lost-ball' && plan.varietyFrom === undefined && routeIndex === 1
       ? [3, 5, 6, 8]
       : routes[routeIndex];
@@ -189,7 +208,7 @@ export function journeyQuestions(plan) {
       result.push({kind,word,entry,pieces,tiles,missing,choices,context:WORD_CONTEXTS[word.id],answer:word.id,key:`workshop:${word.id}${kind==='context'?':sentence':''}`,prompt:kind==='context'?'journey-context-intro':kind==='missing'?'journey-workshop-missing':'journey-workshop-build',model:warmup});
     } else if(plan.mode==='stories') {
       const pageIndex = storyPages?.[i] ?? i;
-      const story=STORIES.find(s=>s.id===plan.level),page=story.pages[pageIndex];
+      const page=story.pages[pageIndex];
       const countChoices=plan.revision===2?[page.count-1,page.count+1,page.count-2,page.count+2].filter(n=>n>=1&&n<=10):[1,2,3,4,5].filter(n=>n!==page.count);
       const choices=page.task==='count'?mix([page.count,...countChoices.slice(0,warmup?1:2)],rng).map(String):page.task==='place'?[]:mix(page.choices,rng);
       result.push({kind:'story',story,page,choices,answer:page.task==='count'?String(page.count):page.target,key:`story:${story.id}:${pageIndex}`,prompt:`journey-story-${story.id}-${pageIndex}-prompt`});

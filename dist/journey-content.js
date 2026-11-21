@@ -1,5 +1,6 @@
 // Curriculum data only. Speech is reviewed, explicit Hebrew IPA for the local
 import { EXPANDED_STORIES } from './story-expansion.js';
+import { STORY_OUTINGS } from './story-outings.js';
 import { EXPANDED_WORKSHOP_WORDS } from './word-practice-expansion.js';
 // Ava-reference pipeline; it must not be guessed from the displayed Hebrew.
 // Chunk text joins back to the existing pointed word, with graphemes intact.
@@ -140,7 +141,7 @@ export const STORIES = [
   },
 ];
 
-STORIES.push(...EXPANDED_STORIES);
+STORIES.push(...EXPANDED_STORIES, ...STORY_OUTINGS);
 WORKSHOP_WORDS.push(...EXPANDED_WORKSHOP_WORDS);
 
 export const JOURNEY_HEBREW_CLIPS = {

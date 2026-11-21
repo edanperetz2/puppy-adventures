@@ -238,7 +238,24 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
     }
   },{signal:events.signal});
   mountDrops(root,'[data-j="tile"]','[data-word-drop]',source=>tile(Number(source.dataset.tile)),events.signal);
-  mountDrops(root, '[data-j="source"]', '[data-drop-place]', (_, target) => place(target.dataset.dropPlace), events.signal, dragging => {
+  mountDrops(root, '[data-j="source"]', '[data-drop-place]', (_, target) => {
+    place(target.dataset.dropPlace);
+    const next = root.querySelector('[data-j="next"]');
+    if (!next) return;
+    // Some touch browsers suppress the click immediately after a drag. Forward
+    // a stationary tap to the normal button action, once, while allowing swipes.
+    let start;
+    next.addEventListener('touchstart', event => {
+      start = event.touches.length === 1 ? event.touches[0] : null;
+    }, { passive: true });
+    next.addEventListener('touchend', event => {
+      const end = event.changedTouches[0];
+      if (!start || !event.cancelable || event.touches.length || end.identifier !== start.identifier ||
+          Math.hypot(end.clientX - start.clientX, end.clientY - start.clientY) > 8) return;
+      event.preventDefault();
+      next.click();
+    }, { passive: false });
+  }, events.signal, dragging => {
     const zones = root.querySelector('.story-drop-zones');
     if (zones) zones.hidden = !dragging;
   });

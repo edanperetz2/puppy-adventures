@@ -12,7 +12,7 @@ Ariel’s learning game for phones, tablets and computers. Ava gives instruction
 | **המסע שלי** | Read and add at the friends’ picnic. Listen for an English word and choose a picture on Bobi’s delivery route. Both chapters have six-step missions. Bobi offers an optional two-word prompt after independent practice with both words on different days. |
 | **גינת המילים** | Ten Hebrew stages, from short words to little stories. Read a sentence and choose a picture, act it out, or choose **מתמונה למשפט** to find the written sentence for a picture. The two reading directions save separately. |
 | **סדנת המילים** | Build words from parts and letters, fill gaps and finish short sentences across four stages. |
-| **סיפור שמשחקים** | Eight playable Hebrew stories with illustrated choices and actions such as moving objects into place. |
+| **סיפור שמשחקים** | Eleven playable Hebrew stories with six pages per playthrough. Help Luli draw a picture for Grandma, put on a garden concert or follow Tofi’s treasure map. |
 | **מפרץ האנגלית** | Listen for one word and choose a picture. The listening library has 106 words. Optional routes introduce two-word phrases, first sounds and short written words. In reading practice, illustrated groups end with matching the printed word to a picture. |
 | **סטודיו האותיות** | Match Hebrew print and handwriting or English capitals and lowercase in both directions. In each writing form, trace single letters or write an illustrated word one letter at a time. There are 79 Hebrew words and 68 English words. |
 | **סדנת המספרים** | Count objects in rows and frames, add groups including zero, find how many remain, and work with tens and ones. Trace 0–100 or take Hebrew dictation. Dictation also offers single digits, 10–19 and whole tens. Slice fruit to practise halves. |
@@ -26,7 +26,7 @@ Tap the Pikachu or Stitch sticker on any screen to hear “Pika pika” or Stitc
 
 The home screen offers **ממשיכות** when there’s a round in progress. Otherwise **יוצאות להרפתקה** opens the specific game on the card. The suggestions use recent practice in Hebrew reading, single-word English, and basic numbers. The game map is always available.
 
-In **סיפורים קטנים**, the first clue highlights a detail in the sentence and Ava asks a short question about it. A later step can practice that detail with a different sentence. The clue and picture choices stay with the saved round. Number Workshop remembers which choices were tried and lets Ariel replay a used hint after reopening.
+In **סיפורים קטנים**, Ariel can tell the difference between a monkey playing a guitar and the same monkey taking its picture. These everyday scenes also appear in **מתמונה למשפט**. The first clue highlights a detail in the sentence and Ava asks a short question about it. A later step can practice that detail with a different sentence. The clue and picture choices stay with the saved round. Number Workshop remembers which choices were tried and lets Ariel replay a used hint after reopening.
 
 ## Save and play offline
 

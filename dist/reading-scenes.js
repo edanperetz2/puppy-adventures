@@ -1,4 +1,5 @@
 import { READING_SCENES } from './reading-advanced.js?v=2.7.0-science';
+import { readingMomentArt } from './reading-moment-art.js';
 
 const palette = {
   red: ['#e47176', '#f5bec1'], blue: ['#579dce', '#badced'], green: ['#65a575', '#c3dfb9'],
@@ -30,11 +31,13 @@ export function readingScene(id, baseArt) {
   const spec = READING_SCENES[id];
   const raw = (object, color) => {
     let body = baseArt(object).replace(/^<svg\b[^>]*>/u, '').replace(/<\/svg>$/u, '');
+    if (spec.kind === 'moment' && spec.action === 'dream' && spec.object === object) body = sleepingReadingAnimal(body);
     if (object === 'pencil' && spec.kind === 'position' && spec.position === 'on') body = `<g transform="rotate(-45 100 100)">${body}</g>`;
     return paintedReadingObject(object, color, body);
   };
   const place = (body, x, y, size, cls = '') => `<g transform="translate(${x} ${y}) scale(${size / 200})"><g class="${cls}">${body}</g></g>`;
   const at = (object, x, y, size, color, cls) => place(raw(object, color), x, y, size, cls);
+  if (spec.kind === 'moment') return readingMomentArt(spec, at);
   const actor = (object, asleep) => {
     if (object === 'cat' || object === 'rabbit') {
       const color = object === 'cat' ? '#dfb381' : '#d9cec6';

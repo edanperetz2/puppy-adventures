@@ -4,6 +4,7 @@ import { PICTURE_PLACE_PASSAGES } from './reading-picture-places.js';
 import { PICTURE_SCENE_PASSAGES } from './reading-picture-scenes.js';
 import { PLAYABLE_STORIES } from './reading-animal-stories.js?v=2.7.0-science';
 import { NATURE_STORIES } from './reading-nature.js';
+import { STORY_MOMENTS } from './reading-story-moments.js';
 
 // Curated language and scene facts stay together so every picture has one meaning.
 const entry = (id, he, pointed, level, family, scene) => ({ id, he, pointed, level, ...(family ? { family, scene } : {}) });
@@ -82,6 +83,6 @@ for (const [id, he, pointed, family, scene] of [
   ['bird-red-near', 'ציפור אדומה עומדת ליד עץ.', 'צִפּוֹר אֲדֻמָּה עוֹמֶדֶת לְיַד עֵץ.', 'facts-bird', { kind: 'position', object: 'bird', color: 'red', anchor: 'tree', position: 'near' }],
 ]) ADVANCED_WORDS.push(entry(`facts-${id}`, he, pointed, 10, family, scene));
 
-ADVANCED_WORDS.push(...EXTRA_READING_WORDS, ...PLAYABLE_STORIES, ...NATURE_STORIES);
+ADVANCED_WORDS.push(...EXTRA_READING_WORDS, ...PLAYABLE_STORIES, ...NATURE_STORIES, ...STORY_MOMENTS);
 
 export const READING_SCENES = Object.freeze(Object.fromEntries([...ADVANCED_WORDS,...EXPANDED_READING_WORDS,...PICTURE_PLACE_PASSAGES,...PICTURE_SCENE_PASSAGES].filter(word => word.scene).map(word => [word.id, Object.freeze(word.scene)])));

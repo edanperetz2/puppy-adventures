@@ -51,13 +51,29 @@ function chooseSentenceWords(pool, settings, count, rng, first) {
   let remaining = pool.filter(word => !lastRound.has(word.id));
   if (remaining.length < count) remaining = [...pool];
   const targets = [], objects = new Set(first ? [first.scene.object] : []);
+  const kinds = new Set(first ? [first.scene.kind] : []);
+  const lastMoments = pool.filter(word => word.scene.kind === 'moment' && lastRound.has(word.id));
   while (targets.length < count && remaining.length) {
     const unread = remaining.filter(word => !recent.has(word.id));
     const candidates = unread.length ? unread : remaining;
     const otherObjects = candidates.filter(word => !objects.has(word.scene.object));
-    const [word] = chooseReadingWords(otherObjects.length ? otherObjects : candidates, settings, 1, rng);
+    let choices = otherObjects.length ? otherObjects : candidates;
+    const otherKinds = choices.filter(word => !kinds.has(word.scene.kind));
+    if (otherKinds.length) choices = otherKinds;
+    // Give an unread story about an everyday action a place among the much
+    // larger banks of positions and quantities, in both reading directions.
+    if (targets.length === 0) {
+      const moments = choices.filter(word => word.scene.kind === 'moment' && !recent.has(word.id));
+      if (moments.length) {
+        const freshActions = moments.filter(word => lastMoments.every(last =>
+          last.scene.action !== word.scene.action && last.scene.object !== word.scene.object));
+        choices = freshActions.length ? freshActions : moments;
+      }
+    }
+    const [word] = chooseReadingWords(choices, settings, 1, rng);
     targets.push(word);
     objects.add(word.scene.object);
+    kinds.add(word.scene.kind);
     remaining = remaining.filter(other => other !== word);
   }
   return targets;
