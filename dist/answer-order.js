@@ -7,6 +7,28 @@ export function shuffle(values, rng = Math.random) {
   return copy;
 }
 
+// Keep a saved answer and all its usable distractors in their original slots.
+// A replacement must also be distinguishable from every other choice on the board.
+export function repairListeningChoices(choices, target, alternatives, distinct) {
+  const kept = [target];
+  const fits = candidate => kept.every(choice => distinct(choice, candidate));
+  const safe = choices.map(choice => {
+    if (choice === target) return true;
+    if (!fits(choice)) return false;
+    kept.push(choice);
+    return true;
+  });
+  if (safe.every(Boolean)) return choices;
+  return choices.flatMap((choice, i) => {
+    if (safe[i]) return [choice];
+    const pool = typeof alternatives === 'function' ? alternatives(choice) : alternatives;
+    const replacement = pool.find(fits);
+    if (replacement === undefined) return [];
+    kept.push(replacement);
+    return [replacement];
+  });
+}
+
 export function answerShuffler(rng = Math.random) {
   let lastSlot = -1, lastSize = 0, streak = 0;
 

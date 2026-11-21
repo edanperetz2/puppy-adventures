@@ -7,6 +7,7 @@ import { actOutPrompt, canActOut, cleanActOutMoves } from './act-out.js?v=2.7.0-
 import { LITTLE_STORIES } from './activities.js';
 import { storyClue } from './story-practice.js';
 import { restoreWordFormQuestion } from './word-form-match.js';
+import { clearListeningOptions } from './english-listening-contrast.js';
 
 export function roundKey(mission, settings) {
   if (mission === 'letters') return `letters:${settings.letterLanguage}${settings.letterMode === 'words' ? ':words' : ''}`;
@@ -68,7 +69,12 @@ export function unpackRound(raw) {
       else if(d.type==='listen'){if(!['animal','color','number'].includes(d.kind))throw Error();pool=d.kind==='animal'?ANIMALS:d.kind==='color'?COLORS:Array.from({length:21},(_,number)=>({id:String(number),number,en:NUMBERS[number]}));q.target=pool.find(t=>t.id===d.target);if(!q.target)throw Error();Object.assign(q,{kind:d.kind,answer:q.target.id,targetClip:`en-${q.target.id}`});}
       else if(['count','add'].includes(d.type)){if(![d.a,d.b,d.total].every(n=>Number.isInteger(n)&&n>=0&&n<=20)||d.a+d.b!==d.total||!['apple','flower','berry','ball','star','heart'].includes(d.item))throw Error();Object.assign(q,{a:d.a,b:d.b,total:d.total,item:d.item,answer:String(d.total)});pool=Array.from({length:21},(_,number)=>({id:String(number),number}));}
       else throw Error();
-      q.options=d.options.map(id=>pool.find(o=>o.id===id));if(q.options.some(o=>!o)||new Set(d.options).size!==d.options.length||!d.options.includes(q.answer))throw Error();return q;
+      q.options=d.options.map(id=>pool.find(o=>o.id===id));if(q.options.some(o=>!o)||new Set(d.options).size!==d.options.length||!d.options.includes(q.answer))throw Error();
+      if (q.type === 'listen') {
+        const cap = q.kind === 'number' ? [5, 10, 20].find(limit => q.options.every(o => o.number <= limit)) : null;
+        q.options = clearListeningOptions(q.options, q.target, cap ? pool.slice(0, cap + 1) : pool);
+      }
+      return q;
     });
     const ints=value=>new Set((Array.isArray(value)?value:[]).filter(n=>Number.isInteger(n)&&n>=0&&n<questions.length));
     const restored = {id:raw.id,key:typeof raw.key==='string'&&/^[a-z0-9:_-]{1,96}$/.test(raw.key)?raw.key:`${raw.mission}:default`,mission:raw.mission,questions,index:raw.index,resolved:raw.resolved===true,attempted:new Set((raw.attempted||[]).filter(id=>questions[raw.index].options.some(o=>o.id===id))),counted:new Set((raw.counted||[]).filter(n=>/^(\d{1,2})$/.test(String(n))&&Number(n)<40).map(String)),helped:ints(raw.helped),observed:ints(raw.observed),letterIds:Array.isArray(raw.letterIds)?raw.letterIds.filter(id=>LETTERS[raw.letterLanguage]?.some(l=>l.id===id)).slice(0,3):null,letterLanguage:raw.letterLanguage==='english'?'english':'hebrew',reading:Object.hasOwn(READING_LEVELS,raw.reading)?raw.reading:'short',clockLevel:Object.hasOwn(CLOCK_LEVELS,raw.clockLevel)?raw.clockLevel:'hours',characterLevel:Object.hasOwn(CHARACTER_LEVELS,raw.characterLevel)?raw.characterLevel:'friends',characterMode:Object.hasOwn(CHARACTER_MODES,raw.characterMode)?raw.characterMode:'mixed',sticker:null,awarded:false,at:Number.isSafeInteger(raw.at)?raw.at:0};

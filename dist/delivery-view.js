@@ -9,7 +9,7 @@ import { recordingPreloader } from './offline-audio.js';
 
 const pairTitle = 'מַקְשִׁיבוֹת לִשְׁתֵּי מִלִּים';
 const palette = { blue: '#3685ca', red: '#d75758', yellow: '#f4c73f', green: '#43a16a', pink: '#ed83a6', purple: '#a47aca', orange: '#ed913f' };
-const objects = { parcel: 'חבילה', bucket: 'דלי', ball: 'כדור', boat: 'סירה', gift: 'מתנה' };
+const objects = { parcel: 'חבילה', bucket: 'דלי', ball: 'כדור', boat: 'סירה', gift: 'מתנה', apple: 'תפוח' };
 const names = Object.fromEntries([...ANIMALS, ...COLORS].map(({ id, he }) => [id, he]));
 const clipLabel = key => CLIPS[key].text;
 
@@ -21,7 +21,7 @@ function coloredObject(object, color) {
     bucket: `<path d="M59 93a51 51 0 0 1 102 0" fill="none" stroke="#547077" stroke-width="10"/><path d="M53 91h114l-14 87H67z" fill="${paint}" stroke="#355966" stroke-width="4" stroke-linejoin="round"/><rect x="49" y="81" width="122" height="20" rx="9" fill="${paint}" stroke="#355966" stroke-width="4"/><path d="m75 117 7 42" stroke="#fff" stroke-opacity=".48" stroke-width="7" stroke-linecap="round"/>`,
     parcel: `<rect x="41" y="62" width="138" height="103" rx="15" fill="${paint}" stroke="#355966" stroke-width="4"/><path d="M42 98h136M108 62v102" stroke="#fff5dc" stroke-width="12"/><path d="M109 69c-48 0-42-43-10-26l10 18 12-18c29-17 37 26-12 26z" fill="#fff5dc"/>`,
   };
-  return `<svg viewBox="20 27 181 163" aria-hidden="true">${shapes[object]}</svg>`;
+  return `<svg viewBox="20 27 181 163" aria-hidden="true">${shapes[object === 'gift' ? 'parcel' : object]}</svg>`;
 }
 
 function choicePicture(q, value) {

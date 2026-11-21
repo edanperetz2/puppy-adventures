@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { CLIPS } from '../dist/content.js';
 import { hasArt } from '../dist/art.js';
 import { ENGLISH_PICTURES, cleanJourney, journeyQuestions, newJourney, seeded } from '../dist/journey.js';
-import { distinctMatchPictures, MATCH_LEVELS } from '../dist/english-picture-match.js';
+import { clearPictureContrast, distinctMatchPictures, englishPictureChoices, MATCH_LEVELS } from '../dist/english-picture-match.js';
 import { ANIMAL_ACTIONS, COUNTED_NOUNS, ENGLISH_PICTURE_CLIPS, MATCH_COLORS, PAINTED_NOUNS } from '../dist/english-picture-content.js';
 import { englishMatchPicture, englishPictureView } from '../dist/english-picture-view.js';
 import { mountJourney } from '../dist/journey-view.js';
@@ -76,7 +76,12 @@ test('both directions progress in six distinct steps, save the target and choice
         if (task.target.kind !== 'word') {
           assert.ok(task.choices.some(c => c.id !== task.answer && c.noun === task.target.noun));
           assert.ok(task.choices.every(c => c.family === task.target.family));
-          assert.ok(task.choices.some(c => c.noun !== task.target.noun && c.color === task.target.color && c.count === task.target.count && c.action === task.target.action));
+          const changesJustNoun = c => c.noun !== task.target.noun && c.color === task.target.color && c.count === task.target.count && c.action === task.target.action;
+          if (ENGLISH_PICTURES[task.target.kind].some(c => changesJustNoun(c) && clearPictureContrast(c, task.target))) {
+            assert.ok(task.choices.some(changesJustNoun));
+          } else {
+            assert.ok(task.choices.some(c => c.noun !== task.target.noun && clearPictureContrast(c, task.target)));
+          }
         }
         slots.add(task.choices.findIndex(c => c.id === task.answer));
         seen.add(task.answer);
@@ -85,6 +90,57 @@ test('both directions progress in six distinct steps, save the target and choice
     }
     assert.deepEqual([...slots].sort(), [0,1,2]);
     assert.ok(seen.size > 215, level);
+  }
+});
+
+test('every English picture and recorded sentence can fill a three-picture board with clearly different spoken choices', () => {
+  const bank = ENGLISH_PICTURES;
+  for (const [a, b] of [
+    ['boat', 'ball'], ['ship', 'sheep'], ['yellow-ball', 'yellow-balloon'],
+    ['pink-door', 'purple-door'], ['see-2-boat', 'see-2-ball'],
+    ['is-blue-car', 'is-blue-star'], ['does-dog-swim', 'does-duck-swim'],
+  ]) {
+    assert.equal(clearPictureContrast(bank.byId.get(a), bank.byId.get(b)), false, `${a} / ${b}`);
+  }
+  for (const [id, target] of bank.byId) {
+    for (let seed = 1; seed <= 3; seed++) {
+      const row = englishPictureChoices(bank, [id, id, id], seeded(seed))[2].map(choice => bank.byId.get(choice));
+      assert.equal(row.length, 3);
+      assert.ok(row.includes(target));
+      for (const [index, a] of row.entries()) for (const b of row.slice(index + 1)) {
+        assert.ok(clearPictureContrast(a, b), `${a.id} / ${b.id}`);
+      }
+    }
+  }
+});
+
+test('old listening and reverse-picture rounds replace only the confusing choice in its original slot', () => {
+  for (const level of Object.keys(MATCH_LEVELS)) {
+    const plan = newJourney('english', level, {}, { rng: seeded(11) });
+    plan.index = 4;
+    plan.pictureTargets = ['cat','hat','dog','red-door','see-2-boat','does-dog-swim'];
+    plan.pictureChoices = englishPictureChoices(ENGLISH_PICTURES, plan.pictureTargets, seeded(11));
+    plan.pictureChoices[4] = ['see-2-ball', 'see-1-boat', 'see-2-boat'];
+    plan.helped = [4]; plan.observed = [1];
+    plan.state = { attempted: ['see-2-ball','see-1-boat'], showModel: true };
+    for (const resolved of [false, true]) {
+      const restored = cleanJourney({ ...plan, state: { ...plan.state, resolved } });
+      assert.equal(restored.id, plan.id);
+      assert.equal(restored.index, 4);
+      assert.equal(restored.state.resolved, resolved);
+      assert.deepEqual(restored.helped, [4]);
+      assert.deepEqual(restored.observed, [1]);
+      assert.ok(restored.state.showModel);
+      assert.deepEqual(restored.state.attempted, ['see-1-boat']);
+      assert.deepEqual(restored.pictureTargets, plan.pictureTargets);
+      assert.deepEqual(restored.pictureChoices.slice(0, 4), plan.pictureChoices.slice(0, 4));
+      assert.deepEqual(restored.pictureChoices[5], plan.pictureChoices[5]);
+      const row = restored.pictureChoices[4];
+      assert.deepEqual(row.slice(1), ['see-1-boat', 'see-2-boat']);
+      assert.equal(ENGLISH_PICTURES.byId.get(row[0]).count, 2);
+      assert.ok(clearPictureContrast(ENGLISH_PICTURES.byId.get(row[0]), ENGLISH_PICTURES.byId.get(row[2])));
+      assert.deepEqual(cleanJourney(restored), restored);
+    }
   }
 });
 

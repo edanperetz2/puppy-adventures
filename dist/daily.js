@@ -1,5 +1,6 @@
 import { SESSION_LENGTH } from './adventure.js?v=2.2.2-six';
-import { answerShuffler, shuffle } from './answer-order.js';
+import { answerShuffler, repairListeningChoices, shuffle } from './answer-order.js';
+import { distinctSpokenWords } from './english-listening-contrast.js';
 import { CLOCK_ACTIVITIES_ENABLED, isPracticeAvailable } from './availability.js';
 import { clockTotal } from './clock-learning.js?v=2.2.4-practice';
 import { choosePractice, learningStage } from './learning.js';
@@ -66,6 +67,16 @@ function trainQuestions(recent, rng) {
   });
 }
 
+function distinctPondChoices(pair, animals = DAILY_ANIMALS) {
+  // Keep the second try fresh, including when repairing an older saved question.
+  const [first, second] = pair;
+  const repair = (q, reserved) => ({
+    ...q, choices: repairListeningChoices(q.choices, q.word, animals.filter(word => !reserved.includes(word)), distinctSpokenWords),
+  });
+  const initial = repair(first, second.choices);
+  return [initial, repair(second, initial.choices)];
+}
+
 function pondQuestions(items, rng, now) {
   const history = animalHistory(items);
   const familiar = DAILY_ANIMALS.slice(0, 6);
@@ -88,8 +99,8 @@ function pondQuestions(items, rng, now) {
     const second = shuffle(wrong.slice(count, count * 2), rng);
     const otherSlots = first.map((_, slot) => slot).filter(slot => slot !== first.indexOf(word));
     second.splice(otherSlots[Math.floor(rng() * otherSlots.length)], 0, word);
-    return [{ word, choices: first, scene: index % 3 },
-      { word, choices: second, scene: (index + 1) % 3 }];
+    return distinctPondChoices([{ word, choices: first, scene: index % 3 },
+      { word, choices: second, scene: (index + 1) % 3 }], wrong);
   });
 }
 
@@ -191,8 +202,9 @@ export function cleanDailyRound(saved) {
   if (!saved || saved.version !== 1 || !Object.hasOwn(DAILY_PATHS, saved.path) || typeof saved.id !== 'string'
     || !validId.test(saved.id) || !Number.isInteger(saved.index) || saved.index < 0 || saved.index >= SESSION_LENGTH
     || !Array.isArray(saved.questions) || saved.questions.length !== SESSION_LENGTH) return null;
-  const { id, path, questions, index } = saved;
-  if (questions.some(pair => !Array.isArray(pair) || pair.length !== 2 || !pair.every(q => validCase(q, path)))) return null;
+  const { id, path, index } = saved;
+  if (saved.questions.some(pair => !Array.isArray(pair) || pair.length !== 2 || !pair.every(q => validCase(q, path)))) return null;
+  const questions = path === 'english' ? saved.questions.map(pair => distinctPondChoices(pair)) : saved.questions;
   const renewed = saved.state?.renewed === true;
   const q = questions[index][renewed ? 1 : 0], state = { ...startState(q), renewed };
   const raw = saved.state;

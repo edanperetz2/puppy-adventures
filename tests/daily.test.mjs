@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { distinctSpokenWords } from '../dist/english-listening-contrast.js';
 import { test } from 'node:test';
 import { hasArt } from '../dist/art.js';
 import { CLOCK_ACTIVITIES_ENABLED } from '../dist/availability.js';
@@ -150,6 +151,9 @@ test('the pond varies the selection and presentation of equal-level animals acro
       words.forEach(word => reached.add(word));
       sets.add([...words].sort().join(','));
       for (const [first, second] of round.questions.slice(3)) {
+        for (const q of [first, second]) {
+          assert.ok(q.choices.every((word, i) => q.choices.slice(0, i).every(other => distinctSpokenWords(word, other))), q.choices.join(', '));
+        }
         secondSlots.add((second.choices.indexOf(first.word) - first.choices.indexOf(first.word) + 3) % 3);
       }
       assert.deepEqual(restored(round), round);
@@ -158,6 +162,25 @@ test('the pond varies the selection and presentation of equal-level animals acro
     assert.ok(sets.size > 2);
     assert.deepEqual(secondSlots, new Set([1, 2]));
   }
+});
+
+test('old pond rounds repair similar voices in both versions of a step without consuming progress', () => {
+  const saved = createDailyRound('english', {}, [], { rng: seeded(94), now });
+  saved.index = 3;
+  saved.questions[3] = [{word:'dog', scene:0, choices:['dog', 'duck', 'rabbit']},
+    {word:'dog', scene:1, choices:['cat', 'dog', 'mouse']}];
+  saved.state.attempted = ['duck', 'rabbit'];
+  saved.helped = [3];
+  const round = restored(saved);
+  const [first, second] = round.questions[3];
+  assert.equal(first.choices[0], 'dog');
+  assert.equal(first.choices[2], 'rabbit');
+  assert.ok(distinctSpokenWords(first.choices[1], 'dog'));
+  assert.deepEqual(second.choices, saved.questions[3][1].choices);
+  assert.deepEqual(first.choices.filter(word => second.choices.includes(word)), ['dog']);
+  assert.deepEqual(round.state.attempted, ['rabbit']);
+  assert.deepEqual(round.helped, [3]);
+  assert.deepEqual(restored(round), round);
 });
 
 test('the parent view describes independent recall only after success on another day', () => {

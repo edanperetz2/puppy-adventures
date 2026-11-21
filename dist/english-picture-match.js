@@ -1,6 +1,7 @@
 import { choosePractice } from './learning.js';
-import { shuffle, answerShuffler } from './answer-order.js';
+import { shuffle, answerShuffler, repairListeningChoices } from './answer-order.js';
 import { distinctWordPictures } from './vocabulary.js';
+import { distinctSpokenWords } from './english-listening-contrast.js';
 import {
   EXTRA_PICTURE_NOUNS, nounLabel, extraNounClip, PAINTED_NOUNS, MATCH_COLORS,
   colorClip, COUNTED_NOUNS, countSentence, countClip, colorSentence, colorSentenceClip, ANIMAL_ACTIONS,
@@ -85,23 +86,57 @@ export function chooseEnglishPictureTargets(bank, level, items, rng) {
   });
 }
 
+const countWords = ['', 'one', 'two', 'three'];
+
+// Compare the words that actually change in a phrase. "The ball is green"
+// and "The balloon is green" depend on hearing ball versus balloon.
+export function clearPictureContrast(a, b) {
+  if (a.id === b.id) return false;
+  if (a.noun !== b.noun && (!distinctMatchPictures(a.noun, b.noun) || !distinctSpokenWords(a.noun, b.noun))) return false;
+  if (a.color !== b.color && !distinctSpokenWords(a.color, b.color)) return false;
+  if (a.count !== b.count && !distinctSpokenWords(countWords[a.count], countWords[b.count])) return false;
+  return a.action === b.action || distinctSpokenWords(a.action, b.action);
+}
+
+function pictureAlternatives(bank, target, rng) {
+  return shuffle(bank[target.kind].filter(other => other.family === target.family && clearPictureContrast(target, other)), rng);
+}
+
+function sameModifier(a, b) {
+  return a.color === b.color && a.count === b.count && a.action === b.action;
+}
+
 export function englishPictureChoices(bank, targets, rng) {
   const order = answerShuffler(rng);
   return targets.map((id, index) => {
     const target = bank.byId.get(id);
-    const alternatives = bank[target.kind].filter(other => other.id !== id && other.family === target.family);
-    let wrong;
-    if (target.kind === 'word') {
-      const pool = shuffle(alternatives.filter(other => distinctMatchPictures(target.noun, other.noun)), rng);
-      wrong = [pool[0], pool.find(other => other !== pool[0] && distinctMatchPictures(other.noun, pool[0].noun))];
-    } else {
-      wrong = [
-        shuffle(alternatives.filter(other => other.noun === target.noun), rng)[0],
-        shuffle(alternatives.filter(other => other.noun !== target.noun && other.color === target.color && other.count === target.count && other.action === target.action &&
-          distinctWordPictures({ id: target.noun }, { id: other.noun })), rng)[0],
-      ];
+    const pool = pictureAlternatives(bank, target, rng);
+    const first = pool.find(other => other.noun === target.noun) || pool[0];
+    const row = [target, first];
+    if (index >= 2) {
+      const remaining = pool.filter(other => clearPictureContrast(first, other));
+      // Prefer changing only the noun. Some verbs have only two recorded
+      // animals (dog/duck swim); use another clear scene in that case.
+      row.push(remaining.find(other => sameModifier(other, target)) ||
+        remaining.find(other => other.noun !== target.noun) || remaining[0]);
     }
-    return order([target, ...wrong.slice(0, index < 2 ? 1 : 2)], id).map(entry => entry.id);
+    return order(row, id).map(entry => entry.id);
+  });
+}
+
+export function restoreEnglishPictureChoices(bank, targets, choices, rng) {
+  return choices.map((ids, index) => {
+    const target = bank.byId.get(targets[index]);
+    const row = ids.map(id => bank.byId.get(id));
+    let pool;
+    const replacements = old => {
+      pool ??= pictureAlternatives(bank, target, rng);
+      const preferred = old.noun === target.noun
+        ? pool.filter(other => other.noun === target.noun)
+        : pool.filter(other => sameModifier(target, other));
+      return [...preferred, ...pool];
+    };
+    return repairListeningChoices(row, target, replacements, clearPictureContrast).map(entry => entry.id);
   });
 }
 

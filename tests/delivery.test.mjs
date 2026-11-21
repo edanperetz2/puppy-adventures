@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { DELIVERY, DELIVERY_MISSIONS, MY_JOURNEY } from '../dist/activities.js';
 import { hasArt } from '../dist/art.js';
+import { distinctSpokenWords } from '../dist/english-listening-contrast.js';
 import { CLIPS } from '../dist/content.js';
 import { GUIDE_ITEMS } from '../dist/guide-content.js';
 import { applyObservations, DAY } from '../dist/learning.js';
@@ -36,6 +37,7 @@ test('Bobi has three six-step listening missions with a guided first step and kn
         assert.equal(q.choices.length, i < 3 ? 2 : 3);
         assert.equal(new Set(q.choices).size, q.choices.length);
         assert.ok(q.choices.includes(q.answer));
+        assert.ok(q.choices.every((word, slot) => q.choices.slice(0, slot).every(other => distinctSpokenWords(word, other))), q.choices.join(', '));
         if (q.kind !== 'color') assert.ok(q.choices.every(hasArt));
       }
       positions.add(round.questions[3].choices.indexOf(round.questions[3].answer));
@@ -88,6 +90,22 @@ test('a familiar boat or animal moves between review slots on fresh trips and st
   }
 });
 
+test('an older cargo trip replaces just the similar-sounding picture and retains its answer and progress', () => {
+  // This saved seed originally drew [boat, ball, gift] on the sixth step.
+  const saved = { version: 1, id: '00000006-aa11-4231-bc54-123456789123', path: 'cargo', index: 5,
+    targets: ['red', 'green', 'yellow', 'blue', 'orange', 'boat'], settings: ['cove', 'cove', 'river', 'river', 'harbor', 'harbor'],
+    state: { attempted: ['ball', 'gift'], hint: true }, helped: [0, 5], resolved: false, at: now };
+  const round = cleanDeliveryRound('cargo', saved);
+  const { choices } = round.questions[5];
+  assert.equal(choices[0], 'boat');
+  assert.equal(choices[2], 'gift');
+  assert.ok(distinctSpokenWords('boat', choices[1]));
+  assert.deepEqual(round.questions[0].choices, ['red', 'green']);
+  assert.deepEqual(round.state, { attempted: ['gift'], hint: true });
+  assert.deepEqual(round.helped, [0, 5]);
+  assert.deepEqual(cleanDeliveryRound('cargo', packDeliveryRound(round)), round);
+});
+
 test('the optional blue boat prompt requires separate-day independent results for both words', () => {
   const items = applyObservations({}, [
     event('blue', now - DAY), event('blue', now), event('boat', now - DAY),
@@ -99,7 +117,11 @@ test('the optional blue boat prompt requires separate-day independent results fo
   const bonus = createDeliveryBonus(() => .5);
   assert.equal(bonus.questions.length, 1);
   assert.equal(CLIPS[bonus.questions[0].clip].text, 'blue boat');
-  assert.ok(bonus.questions[0].choices.includes('blue-ball'));
+  assert.ok(bonus.questions[0].choices.includes('blue-gift'));
+  for (const choice of bonus.questions[0].choices.filter(value => value !== 'blue-boat')) {
+    const [color, object] = choice.split('-');
+    assert.ok(color === 'blue' ? distinctSpokenWords('boat', object) : object === 'boat' && distinctSpokenWords('blue', color));
+  }
   assert.ok(bonus.questions[0].choices.some(choice => !choice.startsWith('blue-') && choice.endsWith('-boat')));
   assert.equal(deliveryEvidence(bonus).item, 'english:pair:blue-boat');
 });

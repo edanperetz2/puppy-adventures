@@ -1,13 +1,14 @@
 import { WORDS, ANIMALS, COLORS, ENGLISH_OBJECTS } from './content.js?v=2.2.0-voices';
 import { MORE_PHONICS, BLEND_GROUPS, PICTURE_BLEND_GROUPS } from './english-expansion.js';
-import { MATCH_LEVELS, makeEnglishPictureBank, chooseEnglishPictureTargets, englishPictureChoices, validEnglishPictureChoices, englishPictureQuestions } from './english-picture-match.js';
+import { MATCH_LEVELS, makeEnglishPictureBank, chooseEnglishPictureTargets, englishPictureChoices, validEnglishPictureChoices, restoreEnglishPictureChoices, englishPictureQuestions } from './english-picture-match.js';
+import { distinctSpokenWords, clearListeningOptions } from './english-listening-contrast.js';
 import { distinctWordPictures } from './vocabulary.js';
 import { WORKSHOP_WORDS, STORIES } from './journey-content.js';
 import { WORD_CONTEXTS } from './word-contexts.js';
 import { choosePractice, englishPairsReady } from './learning.js';
 import { GIVING_CLIPS } from './journey-audio.js?v=2.2.0-voices';
 import { LETTER_EXAMPLES } from './word-practice-expansion.js';
-import { answerShuffler, shuffle as mix } from './answer-order.js';
+import { answerShuffler, repairListeningChoices, shuffle as mix } from './answer-order.js';
 import { SESSION_LENGTH, LEGACY_SESSION_LENGTH, adventurePhase } from './adventure.js?v=2.2.2-six';
 
 export const JOURNEYS = {
@@ -129,7 +130,9 @@ export function newJourney(mode,level,items={},options={}) {
   const fresh = (newWord || choosePractice(reviewPool, items, word => `english:single:${word.id}`, 1, Date.now(), rng)[0]).id;
   const review=choosePractice(ENGLISH_WORDS.filter(w=>known.includes(w.id)&&!familiar.includes(w.id)&&w.id!==fresh),items,w=>`english:single:${w.id}`,8,Date.now(),rng).map(w=>w.id);
   const knownColors=COLORS.filter(c=>['red','blue',...known].includes(c.id));
-  const pairColors=choosePractice(knownColors,items,c=>`english:pair:${c.id}-${cleanLevel==='cars'?'car':'ball'}`,2,Date.now(),rng).map(c=>c.id);
+  const rankedColors = choosePractice(knownColors,items,c=>`english:pair:${c.id}-${cleanLevel==='cars'?'car':'ball'}`,knownColors.length,Date.now(),rng);
+  const firstColor = rankedColors[0].id;
+  const pairColors = [firstColor, rankedColors.find(c => distinctSpokenWords(firstColor, c.id)).id];
   const introduced=PHONICS.filter(p=>items[`phonics:sound:${p.id}`]?.seen).length;
   const blendPool = mode === 'sounds' && cleanLevel === 'blend' ? blendLessons : BLEND_GROUPS;
   const blendWords=choosePractice(blendPool,items,g=>`phonics:blend:${g[0]}`,1,Date.now(),rng)[0];
@@ -157,7 +160,7 @@ export function cleanJourney(raw) {
     if (length !== SESSION_LENGTH || !Array.isArray(raw.pictureTargets) || raw.pictureTargets.length !== length ||
         !raw.pictureTargets.every(id => ENGLISH_PICTURES.byId.has(id)) || new Set(raw.pictureTargets).size !== length) return null;
     if (!validEnglishPictureChoices(ENGLISH_PICTURES, raw.pictureTargets, raw.pictureChoices)) return null;
-    pictureRound = { pictureTargets: [...raw.pictureTargets], pictureChoices: raw.pictureChoices.map(row => [...row]) };
+    pictureRound = { pictureTargets: [...raw.pictureTargets], pictureChoices: restoreEnglishPictureChoices(ENGLISH_PICTURES, raw.pictureTargets, raw.pictureChoices, seeded(raw.seed)) };
   }
   const routes = raw.mode === 'stories' && length === SESSION_LENGTH ? STORIES.find(story => story.id === raw.level).routes : undefined;
   const storyRoute = Number.isInteger(raw.storyRoute) && raw.storyRoute >= 0 && raw.storyRoute < routes?.length ? raw.storyRoute : undefined;
@@ -176,7 +179,13 @@ export function cleanJourney(raw) {
   if(revision===2&&raw.mode==='objects'&&examples.length!==length)return null;
   const steps = value => [...new Set((Array.isArray(value) ? value : []).filter(n => Number.isInteger(n) && n >= 0 && n < length))];
   const varietyFrom = Number.isInteger(raw.varietyFrom) && raw.varietyFrom >= 0 && raw.varietyFrom < length ? raw.varietyFrom : undefined;
-  return {id:raw.id,revision,length,shuffleAnswers:raw.shuffleAnswers===true,varietyFrom,...pictureRound,...(distinctReview ? { distinctReview } : {}),...(storyRoute !== undefined ? { storyRoute } : {}),introducing:raw.introducing!==false,mode:raw.mode,level:raw.level,seed:raw.seed>>>0,words,soundIds,blendWords,pairColors,examples,english,max,index:raw.index,state:{chosen:Array.isArray(state.chosen)?state.chosen.filter(n=>Number.isInteger(n)&&n>=0&&n<24).slice(0,24):[],tokens:Array.isArray(state.tokens)?[...new Set(state.tokens.filter(n=>Number.isInteger(n)&&n>=0&&n<100))].slice(0,100):[],quantity:Math.max(0,Math.min(100,Math.floor(state.quantity)||0)),resolved:state.resolved===true,placed:state.placed===true,showModel:state.showModel===true,attempted:Array.isArray(state.attempted)?state.attempted.filter(id=>typeof id==='string'&&/^[a-z0-9-]{1,40}$/.test(id)).slice(0,4):[]},helped:steps(raw.helped),observed:steps(raw.observed),at:Number.isSafeInteger(raw.at)?raw.at:Date.now()};
+  const plan = {id:raw.id,revision,length,shuffleAnswers:raw.shuffleAnswers===true,varietyFrom,...pictureRound,...(distinctReview ? { distinctReview } : {}),...(storyRoute !== undefined ? { storyRoute } : {}),introducing:raw.introducing!==false,mode:raw.mode,level:raw.level,seed:raw.seed>>>0,words,soundIds,blendWords,pairColors,examples,english,max,index:raw.index,state:{chosen:Array.isArray(state.chosen)?state.chosen.filter(n=>Number.isInteger(n)&&n>=0&&n<24).slice(0,24):[],tokens:Array.isArray(state.tokens)?[...new Set(state.tokens.filter(n=>Number.isInteger(n)&&n>=0&&n<100))].slice(0,100):[],quantity:Math.max(0,Math.min(100,Math.floor(state.quantity)||0)),resolved:state.resolved===true,placed:state.placed===true,showModel:state.showModel===true,attempted:Array.isArray(state.attempted)?state.attempted.filter(id=>typeof id==='string'&&/^[a-z0-9-]{1,40}$/.test(id)).slice(0,4):[]},helped:steps(raw.helped),observed:steps(raw.observed),at:Number.isSafeInteger(raw.at)?raw.at:Date.now()};
+  if (plan.mode === 'english' && plan.state.attempted.length) {
+    const currentChoices = pictureRound.pictureChoices?.[plan.index] ?? journeyQuestions(plan)[plan.index].choices.map(choice =>
+      choice.id ?? `${choice.color}-${choice.object}`);
+    plan.state.attempted = plan.state.attempted.filter(id => currentChoices.includes(id));
+  }
+  return plan;
 }
 
 export function resumeJourney(raw) {
@@ -243,7 +252,19 @@ export function journeyQuestions(plan) {
       const target=pair?targets[(i-3)%2]:plan.level!=='single'&&i===0?{id:object,en:object.toUpperCase(),he:object==='ball'?'כדור':'מכונית'}:singlePool.find(x=>x.id===(plan.level!=='single'?['', ...colors][i]:singleId));
       const pool=pair?targets:singlePool.filter(x=>((COLORS.some(c=>c.id===target.id))===COLORS.some(c=>c.id===x.id)) && [...warm,...(i>=introduction?[fresh]:[])].includes(x.id)&&(x.id===target.id||distinctWordPictures(target,x)));
       const id=x=>pair?`${x.color}-${x.object}`:x.id;
-      const choices=mix([target,...mix(pool.filter(x=>id(x)!==id(target)),rng).slice(0,challenge?2:1)],rng);
+      const initial=mix([target,...mix(pool.filter(x=>id(x)!==id(target)),rng).slice(0,challenge?2:1)],rng);
+      // Old plans recreate their choices from a seed. Repair only colliding
+      // slots with a separate RNG, keeping the saved targets and positions.
+      const contrastRng = seeded(plan.seed + i);
+      const choices = pair
+        ? repairListeningChoices(initial, target, () => mix(ENGLISH_PAIRS.filter(entry => entry.object === object && (warm.includes(entry.color) || ['red','blue'].includes(entry.color))), contrastRng),
+          (a, b) => distinctSpokenWords(a.color, b.color))
+        : clearListeningOptions(initial, target, () => [
+          ...mix(pool, contrastRng),
+          // A small beginner bank might contain only two clearly different
+          // animals. A familiar color is a gentler third choice than a new word.
+          ...mix(singlePool.filter(entry => warm.includes(entry.id) && !pool.includes(entry)), contrastRng),
+        ]);
       const newWord=plan.level==='single'?i===introduction&&(plan.revision!==2||plan.introducing!==false):i===0;
       const singleClip = target.clip || (['ball','car'].includes(target.id) ? `journey-en-${target.id}` : `en-${target.id}`);
       result.push({kind:pair?'pair':'single',target,choices,answer:id(target),key:pair?`english:pair:${id(target)}`:`english:single:${target.id}`,prompt:pair?'journey-english-two':'journey-english-one',clip:pair?`journey-en-${id(target)}`:singleClip,model:newWord||pair&&!challenge,newWord});

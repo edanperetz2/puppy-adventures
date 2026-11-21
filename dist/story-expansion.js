@@ -219,7 +219,7 @@ export const EXPANDED_STORIES = [
       },
       {
         text: 'בּוֹבִּי בּוֹחֵר גַּם צֶבַע כָּתֹם לַדּוּכָן.', speech: 'bˈobi boχˈeʁ ɡˈam tsˈeva katˈom ladukˈan.',
-        task: 'english', target: 'orange', english: 'orange', choices: ['purple', 'orange', 'pink'],
+        task: 'english', target: 'orange', english: 'orange', choices: ['purple', 'orange', 'blue'],
         prompt: 'נַקְשִׁיב לְמִלָּה אַחַת בְּאַנְגְּלִית.', promptSpeech: 'nakʃˈiv lemilˈa ʔaχˈat beʔanɡlˈit.',
       },
       {

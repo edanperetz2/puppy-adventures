@@ -6,6 +6,7 @@ import { READING_LEVELS, mixedReadingTargets, readingWords, readingTargets } fro
 import { isSticker } from './stickers.js';
 import { sanitizeLetterPractice, recordLetters, recognitionTargets } from './letter-progress.js';
 import { distinctWordPictures } from './vocabulary.js';
+import { clearListeningOptions } from './english-listening-contrast.js';
 import { SESSION_LENGTH, adventurePhase, choiceCount } from './adventure.js?v=2.2.2-six';
 import { sanitizeClockLessons } from './clock-learning.js?v=2.2.4-practice';
 import { CHARACTER_MODES, createCharacterSession, sanitizeCharacterSelection } from './characters.js?v=2.2.2-six';
@@ -193,7 +194,12 @@ function buildSession(mission, rawSettings, rng) {
     return [...starters, ...followups].map((kind, i) => {
       const n = kind === 'number' ? numbers[number++] : null;
       const target = kind === 'animal' ? animals[animal++] : kind === 'color' ? colors[color++] : { id: String(n), number: n, en: NUMBERS[n] };
-      const options = kind === 'number' ? numberOptions(n, max, rng, choiceCount(i)) : optionsFrom((kind === 'animal' ? ANIMALS : COLORS).filter(other=>other.id===target.id||distinctWordPictures(target,other)), target, rng, choiceCount(i));
+      const pool = kind === 'number'
+        ? Array.from({ length: max + 1 }, (_, number) => ({ id: String(number), number }))
+        : kind === 'animal' ? ANIMALS : COLORS;
+      const firstChoices = kind === 'number' ? numberOptions(n, max, rng, choiceCount(i))
+        : optionsFrom(pool.filter(other=>other.id===target.id||distinctWordPictures(target,other)), target, rng, choiceCount(i));
+      const options = clearListeningOptions(firstChoices, target, () => shuffle(pool, rng));
       return { id: `en-${i}`, type: 'listen', kind, target, answer: target.id, options, phase: adventurePhase(i), prompt: 'listen', targetClip: `en-${target.id}`, hint: 'english-hint' };
     });
   }
