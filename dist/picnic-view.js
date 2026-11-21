@@ -265,9 +265,11 @@ export function mountPicnicRound(root, {
       <span>${label(`צַעַד ${round.index + 1} מִתּוֹךְ ${round.questions.length}`)}</span></div>
       <div class="picnic-track" aria-hidden="true">${round.questions.map((_, i) => `<span class="${i < round.index ? 'passed' : i === round.index ? 'current' : ''}"></span>`).join('')}</div>
       <section class="picnic-step-card picnic-${round.path}">
-        <div class="picnic-task-title"><h1 tabindex="-1">${label(mission.title)}</h1>
-          <button class="circle-button" data-picnic-action="replay" aria-label="השמעת ההוראה">${uiIcon('sound')}</button></div>
-        <p class="picnic-cue"></p><div class="picnic-stage"></div>
+        <div class="picnic-task-title">
+          ${isReading ? '<h1 class="picnic-cue" lang="he" dir="rtl" tabindex="-1"></h1>' : `<h1 tabindex="-1">${label(mission.title)}</h1>`}
+          <button class="circle-button" data-picnic-action="replay" aria-label="${isReading ? 'השמעת המשפט' : 'השמעת ההוראה'}">${uiIcon('sound')}</button></div>
+        ${isReading ? '' : '<p class="picnic-cue"></p>'}
+        <div class="picnic-stage"></div>
         <p class="picnic-feedback" role="status"></p>
         <div class="picnic-controls">
           ${model() ? `<button class="secondary-button" data-picnic-action="model" ${round.resolved ? 'hidden' : ''}>${label('הַרְאִי לִי')}</button>` : ''}
