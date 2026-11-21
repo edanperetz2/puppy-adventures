@@ -56,7 +56,7 @@ test('A blocked opening welcome plays before the first activity, then only once'
     assert.equal(await announcements.say('intro-hebrew'), true);
     assert.equal(announcements.welcomePending, false);
     assert.equal(await announcements.say('read'), true);
-    assert.deepEqual(requests, ['welcome', 'welcome', 'intro-hebrew', 'read'].map(key => `./assets/audio/${key}.mp3`));
+    assert.deepEqual(requests, ['welcome', 'welcome', 'intro-hebrew', 'read'].map(key => `./assets/voice/${key}.mp3`));
   } finally {
     for (const [key, value] of Object.entries(original)) {
       if (value === undefined) delete globalThis[key]; else globalThis[key] = value;
@@ -81,7 +81,7 @@ test('An opening respects mute and retains the welcome until sound is enabled', 
     assert.deepEqual(requests, []);
     narrator.enabled = true;
     assert.equal(await announcements.say('try-again'), true);
-    assert.deepEqual(requests, ['welcome', 'try-again'].map(key => `./assets/audio/${key}.mp3`));
+    assert.deepEqual(requests, ['welcome', 'try-again'].map(key => `./assets/voice/${key}.mp3`));
   } finally {
     for (const [key, value] of Object.entries(original)) {
       if (value === undefined) delete globalThis[key]; else globalThis[key] = value;
@@ -110,7 +110,7 @@ test('Interrupting later instructions never repeats an already completed welcome
     audio.onended();
     assert.equal(await first, false);
     assert.equal(await feedback, true);
-    assert.deepEqual(requests, ['welcome', 'intro-hebrew', 'correct-1'].map(key => `./assets/audio/${key}.mp3`));
+    assert.deepEqual(requests, ['welcome', 'intro-hebrew', 'correct-1'].map(key => `./assets/voice/${key}.mp3`));
   } finally {
     for (const [key, value] of Object.entries(original)) {
       if (value === undefined) delete globalThis[key]; else globalThis[key] = value;

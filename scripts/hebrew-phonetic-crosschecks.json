@@ -1,0 +1,61 @@
+{
+  "model": "KitsuMate/uni2005-onnx@004577e41ea954fa6cfe9d8f209447780af104ca",
+  "model_sha256": "2a5fad69d2bf112b4ef2ca510ef17d8c2d134f5e7ab2b1ae505ac51ffaea0d04",
+  "method": "Decode MP3 to mono PCM at 8000 Hz. Use phoneFeatures from dist/name-voice-features.js and greedy CTC decoding. For full-clip runs keep silent frames instead of applying speechRange, so soft final consonants remain available. The raw phones are diagnostic evidence, not a reference transcription.",
+  "clips": {
+    "he-expanded-place-pear-table-on": {
+      "sha256": "8d6553ee5d84552d7190268e75e2cfadaee8cb1370f683a46e35ce87872919c9",
+      "window": "speechRange",
+      "phones": "angʌsɒlʌaoʂuəlxʁʌn",
+      "check": "pear vowel onset"
+    },
+    "he-expanded-place-pear-table-under": {
+      "sha256": "a23c84eee95b80258c4c5940c644519eae2ba8f41b6b70c5ee4536587946d55d",
+      "window": "speechRange",
+      "phones": "angɒsmiːtaxʌlɒʂuəxanɴ",
+      "check": "pear vowel onset"
+    },
+    "he-expanded-place-pear-table-near": {
+      "sha256": "c1e84be84961341e71ef544e0bb6f1f8f398812b12dd86bddd98db20639e5f6e",
+      "window": "speechRange",
+      "phones": "angɒsleɒðəʂuəxan",
+      "check": "pear vowel onset"
+    },
+    "letter-he-alef": {
+      "sha256": "d13e2d175686b42ab67e472815d6690651b382a0fa52ba3e2f474cefeeb6ff6b",
+      "window": "full clip",
+      "phones": "ɒutal̪ləf",
+      "check": "letter name"
+    },
+    "letter-he-he": {
+      "sha256": "4b18f85cd754c7406bf5cb45c5549f2f28f7c323751744cf168d21593257224b",
+      "window": "speechRange",
+      "phones": "hɒwɤhej",
+      "check": "letter name"
+    },
+    "letter-he-pe": {
+      "sha256": "d38ca6c2e1ee44ed51e0752e58e9d5577923576e42ff2ed92bc39f115c93684b",
+      "window": "full clip",
+      "phones": "hɒɔtəpʲej",
+      "check": "letter name"
+    },
+    "letter-he-mem": {
+      "sha256": "d7ceae46fcfb36ff024e7b1de75ea7799b7ee98198f84480d14dec5914200c6c",
+      "window": "speechRange",
+      "phones": "hɒʌtʰmɛm",
+      "check": "letter name"
+    },
+    "letter-he-nun": {
+      "sha256": "2213fdda778025777cb11cde4e501534fed779ab9b69eb090836c466caa3c873",
+      "window": "speechRange",
+      "phones": "hɒɔtnun",
+      "check": "letter name"
+    },
+    "letter-he-pe-final": {
+      "sha256": "4cae02537a8a38eebfa195b9b89f2d76a418ef9b87b73e8b9049f937e0dca78c",
+      "window": "full clip",
+      "phones": "hɹ̩ɔtpejsʌfɪtʰ",
+      "check": "letter name"
+    }
+  }
+}

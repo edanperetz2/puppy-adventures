@@ -9,11 +9,18 @@ export class Narrator {
     this.onStatus = onStatus;
     this.release = null;
     this.context = null;
+    this.speaking = false;
+    this.pendingChime = null;
+    this.chimeOutput = null;
     this.resolveKey = key => [key];
   }
 
   stop() {
     this.sequence++;
+    this.speaking = false;
+    this.pendingChime = null;
+    this.chimeOutput?.disconnect();
+    this.chimeOutput = null;
     this.audio.pause();
     this.audio.onended = null;
     this.audio.onerror = null;
@@ -24,8 +31,12 @@ export class Narrator {
   }
 
   async say(keys, { slow = false, quietFailure = false, onClipEnd = () => {} } = {}) {
+    // Some activities request their success sound just before starting the praise.
+    const sameTurnChime = this.pendingChime?.fresh ? this.pendingChime : null;
     this.stop();
     if (!this.enabled) return false;
+    this.pendingChime = sameTurnChime;
+    this.speaking = true;
     const sequence = this.sequence;
     this.onStatus('speaking');
     for (const logicalKey of Array.isArray(keys) ? keys : [keys]) {
@@ -36,13 +47,20 @@ export class Narrator {
         if (!ok) {
           const fallback = await this.deviceVoice(key, slow, sequence);
           if (sequence !== this.sequence) return false;
-          if (!fallback) { this.onStatus(quietFailure ? 'idle' : 'unavailable'); return false; }
+          if (!fallback) {
+            this.speaking = false;
+            this.pendingChime = null;
+            this.onStatus(quietFailure ? 'idle' : 'unavailable');
+            return false;
+          }
         }
       }
       onClipEnd(logicalKey);
     }
     if (sequence !== this.sequence) return false;
+    this.speaking = false;
     this.onStatus('idle');
+    this.playPendingChime();
     return true;
   }
 
@@ -57,14 +75,17 @@ export class Narrator {
         if (finished) return;
         finished = true;
         clearTimeout(watchdog);
+        this.audio.defaultPlaybackRate = 1;
         if (this.release === finish) this.release = null;
         resolve(value);
       };
       this.release = finish;
       this.audio.onended = () => finish(true);
       this.audio.onerror = () => finish(false);
-      this.audio.playbackRate = slow ? (clip.lang === 'he-IL' ? 0.92 : 0.82) : 1;
-      this.audio.src = clip.source || `./assets/audio/${key}.mp3`;
+      // Loading a new source resets the playback rate to the element's default.
+      this.audio.defaultPlaybackRate = slow ? (clip.lang === 'he-IL' ? 0.92 : 0.82) : 1;
+      this.audio.src = clip.source || `./assets/voice/${key}.mp3`;
+      this.audio.playbackRate = this.audio.defaultPlaybackRate;
       watchdog = setTimeout(() => {
         if (sequence === this.sequence) this.audio.pause();
         finish(false);
@@ -112,7 +133,22 @@ export class Narrator {
     if (!this.enabled) return;
     try {
       this.context ||= new (window.AudioContext || window.webkitAudioContext)();
-      if (this.context.state === 'suspended') this.context.resume();
+      if (this.context.state === 'suspended') void this.context.resume().catch(() => {});
+    } catch { return; }
+    const request = this.pendingChime = { fresh: true };
+    queueMicrotask(() => {
+      request.fresh = false;
+      if (this.pendingChime === request && !this.speaking) this.playPendingChime();
+    });
+  }
+
+  playPendingChime() {
+    if (!this.pendingChime || !this.enabled) return;
+    this.pendingChime = null;
+    try {
+      this.chimeOutput?.disconnect();
+      const output = this.chimeOutput = this.context.createGain();
+      output.connect(this.context.destination);
       const now = this.context.currentTime;
       [523.25, 659.25, 783.99].forEach((freq, i) => {
         const oscillator = this.context.createOscillator();
@@ -122,7 +158,13 @@ export class Narrator {
         gain.gain.setValueAtTime(0, now + i * 0.1);
         gain.gain.linearRampToValueAtTime(0.07, now + i * 0.1 + 0.015);
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.35);
-        oscillator.connect(gain).connect(this.context.destination);
+        oscillator.connect(gain).connect(output);
+        if (i === 2) oscillator.onended = () => {
+          if (this.chimeOutput === output) {
+            output.disconnect();
+            this.chimeOutput = null;
+          }
+        };
         oscillator.start(now + i * 0.1);
         oscillator.stop(now + i * 0.1 + 0.4);
       });

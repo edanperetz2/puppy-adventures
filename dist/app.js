@@ -11,7 +11,7 @@ import { CLIPS, MISSIONS, MISSION_IDS, STICKERS, WORDS, READING_LEVELS } from '.
 import { DEFAULT_SETTINGS, SESSION_LENGTH, createSession, freshProgress, sanitizeSettings, sanitizeProgress } from './engine.js?v=2.7.1-pepper';
 import { ADVENTURE_PHASES, adventurePhase } from './adventure.js?v=2.2.2-six';
 import { art, pup, scene, uiIcon } from './art.js?v=2.7.0-science';
-import { Narrator } from './audio.js?v=2.7.1-pepper';
+import { Narrator } from './audio.js?v=2.20.1';
 import { GameAnnouncements } from './announcements.js';
 import { SharedAlbum, normalizeCode } from './sync.js?v=2.2.6-album';
 import { SYNC_CONFIG } from './sync-config.js';

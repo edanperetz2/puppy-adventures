@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
+import { releasedRecording } from './fixtures/released-recording.mjs';
 import { WORDS, CLIPS } from '../dist/content.js';
 import { PICTURE_PLACE_PASSAGES } from '../dist/reading-picture-places.js';
 import { PICTURE_SCENE_PASSAGES } from '../dist/reading-picture-scenes.js';
@@ -120,7 +121,7 @@ test('A practiced sentence bank keeps its history and offers the new passages be
   }
 });
 
-test('Every previous reading target and all 2114 original voice records remain unchanged',async()=>{
+test('Every previous reading target and all 2114 historical voice records match their release',async()=>{
   const baseline=JSON.parse(await readFile(new URL('./fixtures/release-2.1-reading.json',import.meta.url),'utf8'));
   const originalWords=WORDS.filter(word=>!ids.has(word.id)&&!actionIds.has(word.id)&&!word.id.startsWith('nature-') && word.scene?.kind !== 'moment');
   assert.equal(originalWords.length,baseline.wordCount);
@@ -130,7 +131,7 @@ test('Every previous reading target and all 2114 original voice records remain u
   assert.equal(Object.keys(originalClips).length,baseline.clipCount);
   assert.equal(hash(originalClips),baseline.clipDigest);
   const recordings=JSON.parse(await readFile(new URL('../dist/assets/audio/manifest.json',import.meta.url),'utf8')).clips;
-  assert.equal(hash(Object.fromEntries(Object.entries(recordings).filter(previouslyReleased))),baseline.recordingsDigest);
+  assert.equal(hash(Object.fromEntries(Object.entries(recordings).filter(previouslyReleased).map(releasedRecording))),baseline.recordingsDigest);
 });
 
 test('Acting out a sentence tests the correct object detail and its destination', () => {

@@ -1,5 +1,6 @@
 // Classic workers also support browsers without module service workers.
-const CACHE = 'puppy-adventures-shell-2.20.0';
+importScripts('./narration-mp3.js?v=1');
+const CACHE = 'puppy-adventures-shell-2.20.1';
 const RECORDINGS = 'puppy-adventures-recordings-v1';
 const BASE = new URL('./', self.location.href);
 const asset = path => new URL(path, BASE).href;
@@ -13,6 +14,7 @@ self.addEventListener('install', event => {
     const assets = await response.json();
     const cache = await caches.open(CACHE);
     await cache.addAll(['./offline-core.json', './offline-audio.json', ...assets].map(asset));
+    await refreshSavedVoices(cache);
     await self.skipWaiting();
   })());
 });
@@ -58,6 +60,26 @@ function recordingKey(url, sha) {
   return key.href;
 }
 
+async function refreshSavedVoices(shell) {
+  const voices = await caches.open(RECORDINGS);
+  const saved = new Set((await voices.keys()).map(request => request.url));
+  if (!saved.size) return;
+  const paths = new Set([...saved].map(url => url.split('?')[0]));
+  const { recordings } = await audioCatalog(shell);
+  const retakes = Object.entries(recordings).filter(([path, sha]) =>
+    paths.has(asset(path)) && !saved.has(recordingKey(asset(path), sha)));
+  // Replace only voices this device has already downloaded. If a corrected
+  // word cannot be saved, keep the previous worker active and retry on update.
+  for (let i = 0; i < retakes.length; i += 4) {
+    await Promise.all(retakes.slice(i, i + 4).map(async ([path, sha]) => {
+      const url = asset(path);
+      if (await shell.match(url)) return;
+      const response = await fetch(url, { cache: 'reload' });
+      if (!await rememberRecording(response, voices, recordingKey(url, sha), sha)) throw new Error('Could not save updated voice');
+    }));
+  }
+}
+
 async function getRecording(url, sha, shell, recordings) {
   const key = recordingKey(url, sha);
   const cached = await shell.match(url) || await recordings.match(key);
@@ -81,12 +103,27 @@ async function rememberRecording(response, cache, key, sha) {
   if (Array.from(digest, n => n.toString(16).padStart(2, '0')).join('') !== sha) return false;
   const headers = new Headers(response.headers);
   headers.delete('Content-Encoding');
-  await cache.put(key, new Response(bytes, { headers })).catch(() => {});
-  return true;
+  try {
+    await cache.put(key, new Response(bytes, { headers }));
+    return true;
+  } catch { return false; }
 }
 
 async function gameAsset(request, url) {
   const shell = await caches.open(CACHE);
+  // Derive playback from the existing verified offline pack, including packs
+  // downloaded before the lead-in was added. Apply ranges to the final bytes.
+  if (url.href.startsWith(asset('./assets/voice/')) && url.pathname.endsWith('.mp3')) {
+    const master = './assets/audio/' + url.pathname.split('/').pop();
+    const sha = (await audioCatalog(shell)).recordings[master];
+    if (!sha) return Response.error();
+    const response = await getRecording(asset(master), sha, shell, await caches.open(RECORDINGS));
+    if (!response.ok) return response;
+    const voice = prepareNarrationMp3(new Uint8Array(await response.arrayBuffer()));
+    return serveRange(request, new Response(voice, { headers: {
+      'Content-Type': 'audio/mpeg', 'Content-Length': String(voice.length), 'Accept-Ranges': 'bytes',
+    } }));
+  }
   const cached = await shell.match(request);
   if (cached) return serveRange(request, cached);
   // On iOS, the first audio request can ask for only a few bytes. Store the

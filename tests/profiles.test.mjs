@@ -275,7 +275,7 @@ test('A custom voice plays whole local phrases and never splices in an older raw
     assert.equal(await announcements.start(), true);
     assert.equal(announcements.welcomePending, false);
     assert.equal(await announcements.say(['good-luck', 'read']), true);
-    assert.deepEqual(requests, ['blob:welcome', 'blob:good-luck', './assets/audio/address-male-read.mp3']);
+    assert.deepEqual(requests, ['blob:welcome', 'blob:good-luck', './assets/voice/address-male-read.mp3']);
   } finally {
     for (const [key, value] of Object.entries(original)) { if (value === undefined) delete globalThis[key]; else globalThis[key] = value; }
   }

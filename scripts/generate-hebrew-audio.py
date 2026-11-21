@@ -52,6 +52,7 @@ def main():
     args = parser.parse_args()
     clips = json.loads(args.source.read_text(encoding='utf-8-sig'))
     takes = json.loads(args.takes.read_text(encoding='utf-8'))
+    name_pauses = json.loads(Path(__file__).with_name('hebrew-name-pauses.json').read_text(encoding='utf-8'))
     for key, take in takes.items():
         if key not in clips or clips[key]['lang'] != 'he-IL' or type(take) is not int or take < 0:
             parser.error(f'Invalid reviewed take: {key}')
@@ -77,6 +78,9 @@ def main():
         # Keep long instructions in short sentences; long synthesis can swallow
         # a word even when the phonemes are explicit. Short clips stay intact.
         segments = re.split(r'(?<=[.!?])\s+', speech) if len(speech) > 140 else [speech]
+        if key in name_pauses:
+            # A short pause after "the letter" keeps the entire name audible.
+            segments = speech.split(' ', 1)
         desired = {'lang': 'he-IL', 'speech': speech, 'segments': segments, 'voice': 'Ava reference', 'engine': 'BlueTTS phonemes', 'rate': args.speed, 'steps': args.steps, 'take': take, 'style_sha256': style_hash, 'model_sha256': model_hash}
         path = args.output / f'{key}.mp3'
         previous = {'take': 0, 'segments': [speech], **manifest['clips'].get(key, {})}

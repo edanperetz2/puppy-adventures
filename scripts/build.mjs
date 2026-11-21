@@ -4,6 +4,8 @@ import { basename, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 import { offlineFiles, onDemandPictures, styleLinks, scriptLinks } from './prepare-offline.mjs';
+import '../dist/narration-mp3.js';
+import { CLIPS } from '../dist/content.js';
 
 const source = new URL('../dist/', import.meta.url);
 const site = new URL('../site/', import.meta.url);
@@ -38,6 +40,17 @@ for (const file of await readdir(site)) {
   if (/^game-[A-Z0-9]+\.(js|css)$/.test(file) && !assets.includes(`./${file}`)) await unlink(new URL(file, site));
 }
 await cp(source, site, { recursive: true, filter: name => !/^offline(?:-(?:core|audio))?\.json$/.test(basename(name)) });
+// First visits and browsers without a service worker play the same bytes as
+// installed copies. Only the reviewed masters enter the offline download.
+const voiceFolder = new URL('assets/voice/', site);
+await mkdir(voiceFolder, { recursive: true });
+const voiceKeys = Object.keys(CLIPS);
+for (let i = 0; i < voiceKeys.length; i += 32) {
+  await Promise.all(voiceKeys.slice(i, i + 32).map(async key => {
+    const master = await readFile(new URL(`assets/audio/${key}.mp3`, source));
+    await writeFile(new URL(`${key}.mp3`, voiceFolder), globalThis.prepareNarrationMp3(master));
+  }));
+}
 await Promise.all([
   writeFile(new URL('index.html', site), page),
   ...[script, style].map(file => writeFile(file.path, file.contents)),

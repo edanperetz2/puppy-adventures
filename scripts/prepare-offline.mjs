@@ -17,7 +17,7 @@ const narrationFolder = './assets/audio/';
 export async function offlineFiles(root, bundle = []) {
   const html = await readFile(new URL('index.html', root), 'utf8');
   const entryUrls = [...html.matchAll(styleLinks), ...html.matchAll(scriptLinks)].map(match => match[1]);
-  const explicitlyLoaded = ['./index.html', './manifest.webmanifest', ...entryUrls];
+  const explicitlyLoaded = ['./index.html', './manifest.webmanifest', './narration-mp3.js?v=1', ...entryUrls];
   const sourceModules = bundle.length ? bundle : await findModules(root, entryUrls.filter(url => url.endsWith('.js') || url.includes('.js?')));
   const pictures = (await readdir(new URL('assets/', root)))
     .filter(file => /\.(?:svg|png|jpe?g|webp|woff2|txt|wav)$/.test(file) && !archivedAssets.test(file))

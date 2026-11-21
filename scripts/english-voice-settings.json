@@ -1,0 +1,16 @@
+{
+  "voice": "en-US-AvaNeural",
+  "rate": "-8%",
+  "words": [
+    "ant",
+    "bat",
+    "cap",
+    "cat",
+    "dig",
+    "fig",
+    "jar",
+    "sit",
+    "tap",
+    "van"
+  ]
+}

@@ -48,7 +48,7 @@ test('repeated taps restart one effect and clearing it leaves later narration al
   assert.equal(dog.caption.textContent, '');
   assert.ok(cat.classes.has('is-reacting'));
   assert.equal(status.textContent, cat.caption.textContent);
-  audio.src = 'https://example.org/game/assets/audio/welcome.mp3';
+  audio.src = 'https://example.org/game/assets/voice/welcome.mp3';
   player.stop();
   assert.equal(pauses.length, 2);
   player.play(cat, { nikud: false, sound: false });

@@ -5,8 +5,16 @@ import { readFile } from 'node:fs/promises';
 import { createHash, webcrypto } from 'node:crypto';
 
 const worker = await readFile(new URL('../dist/sw.js', import.meta.url), 'utf8');
+const mp3Helper = await readFile(new URL('../dist/narration-mp3.js', import.meta.url), 'utf8');
+function loadWorker(context) {
+  context.importScripts = path => {
+    assert.equal(path, './narration-mp3.js?v=1');
+    vm.runInContext(mp3Helper, context);
+  };
+  vm.runInContext(worker, context);
+}
 const context = vm.createContext({ self: { location: { href: 'https://game.example/sw.js' }, addEventListener() {} }, URL, Request, Response, Headers });
-vm.runInContext(worker, context);
+loadWorker(context);
 const serve = range => context.serveRange(new Request('https://game.example/test.mp3', { headers: { Range: range } }), new Response('0123456789', { headers: { 'Content-Type': 'audio/mpeg' } }));
 
 test('Offline audio handles bounded, open-ended and suffix requests from mobile browsers', async () => {
@@ -37,7 +45,7 @@ test('A navigation can open the saved game when a connection stops responding', 
     clearTimeout(id) { timedOut = id; },
     caches: { open: async () => ({ match: async url => new Response(new URL(url).pathname) }) },
   });
-  vm.runInContext(worker, scenario);
+  loadWorker(scenario);
   const navigation = scenario.navigationResponse(new Request('https://game.example/'));
   onTimeout();
   assert.equal(await (await navigation).text(), '/index.html');
@@ -45,9 +53,8 @@ test('A navigation can open the saved game when a connection stops responding', 
   assert.equal(timedOut, 7);
 });
 
-async function offlineFixture(legacyClip) {
+async function offlineFixture(legacyClip, bytes = 'verified Ava MP3', savedMaster) {
   const base = 'https://game.example/';
-  const bytes = 'verified Ava MP3';
   const digest = createHash('sha256').update(bytes).digest('hex');
   const remote = {
     'offline-core.json': JSON.stringify(['./index.html']),
@@ -84,11 +91,16 @@ async function offlineFixture(legacyClip) {
     const old = await caches.open('puppy-adventures-2.7.1-pepper');
     await old.put(base + 'assets/audio/sample.mp3', new Response(legacyClip));
   }
+  if (savedMaster) {
+    const voices = await caches.open('puppy-adventures-recordings-v1');
+    const oldHash = createHash('sha256').update(savedMaster).digest('hex');
+    await voices.put(base + 'assets/audio/sample.mp3?v=' + oldHash, new Response(savedMaster));
+  }
   const context = vm.createContext({
     self: { location: { href: base + 'sw.js' }, skipWaiting() {}, clients: { claim() {} }, addEventListener(type, callback) { listeners[type] = callback; } },
     URL, Request, Response, Headers, Uint8Array, caches, fetch, crypto: webcrypto,
   });
-  vm.runInContext(worker, context);
+  loadWorker(context);
   async function message(type) {
     let ended, response;
     listeners.message({ data: { type }, ports: [{ postMessage(data) { response = data; } }], waitUntil(promise) { ended = promise; } });
@@ -100,8 +112,8 @@ async function offlineFixture(legacyClip) {
   await event.done;
   listeners.activate(event);
   await event.done;
-  const request = range => {
-    const req = new Request(base + 'assets/audio/sample.mp3', { headers: { Range: range } });
+  const request = (range, folder = 'audio') => {
+    const req = new Request(base + `assets/${folder}/sample.mp3`, { headers: { Range: range } });
     return context.gameAsset(req, new URL(req.url));
   };
   return { calls, message, request, disconnect() { online = false; } };
@@ -134,4 +146,31 @@ test('Downloading the offline pack restores playback before the clip has been pl
   assert.equal(outcome.incomplete, false);
   fixture.disconnect();
   assert.equal(await (await fixture.request('bytes=9-')).text(), 'Ava MP3');
+});
+
+test('A device with a downloaded word gets its corrected take during upgrade', async () => {
+  const fixture = await offlineFixture(null, 'corrected recording', 'missed consonant');
+  fixture.disconnect();
+  assert.equal((await fixture.message('offline-status')).count, 1);
+  assert.equal(await (await fixture.request('bytes=0-')).text(), 'corrected recording');
+});
+
+test('Installed Hebrew and English voices have a silent lead-in and retain every sound frame offline', async () => {
+  for (const [key, frameBytes, firstSoundFrame] of [['en-mouse', 144, 0], ['he-octopus', 192, 45 + 192]]) {
+    const master = await readFile(new URL(`../dist/assets/audio/${key}.mp3`, import.meta.url));
+    const fixture = await offlineFixture(master, master);
+    fixture.disconnect();
+    const response = await fixture.request('bytes=0-', 'voice');
+    assert.equal(response.status, 206);
+    const audio = Buffer.from(await response.arrayBuffer());
+    const lead = 8 * frameBytes;
+    for (let offset = 0; offset < lead; offset += frameBytes) {
+      assert.deepEqual(audio.subarray(offset, offset + 4), master.subarray(firstSoundFrame, firstSoundFrame + 4));
+      assert.ok(audio.subarray(offset + 4, offset + frameBytes).every(byte => byte === 0));
+    }
+    assert.deepEqual(audio.subarray(lead), master.subarray(firstSoundFrame));
+    const boundary = await fixture.request(`bytes=${lead - 2}-${lead + 3}`, 'voice');
+    assert.equal(boundary.headers.get('content-range'), `bytes ${lead - 2}-${lead + 3}/${audio.length}`);
+    assert.deepEqual(Buffer.from(await boundary.arrayBuffer()), audio.subarray(lead - 2, lead + 4));
+  }
 });

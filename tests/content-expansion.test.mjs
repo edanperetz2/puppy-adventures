@@ -17,18 +17,19 @@ import { cleanItem,cleanItems,applyObservation,MAX_LEARNING_ITEMS } from '../dis
 import { createCharacterSession } from '../dist/characters.js';
 import { profileSpeech } from '../dist/profile-speech.js';
 import { chunkClip } from '../dist/journey-audio.js';
+import { releasedRecording } from './fixtures/released-recording.mjs';
 const canonical=value=>Array.isArray(value)?value.map(canonical):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(key=>[key,canonical(value[key])])):value;
 const hash=value=>createHash('sha256').update(JSON.stringify(canonical(value))).digest('hex');
 const baseline=JSON.parse(await readFile(new URL('./fixtures/release-2.0.1.json',import.meta.url),'utf8'));
 
-test('Original recordings and unfinished journeys are preserved, with two explicit pronunciation corrections',async()=>{
+test('Original scripts, reviewed recording updates and unfinished journeys match the release history',async()=>{
   assert.equal(baseline.ids.length,1020);assert.deepEqual(baseline.corrected,['he-parrot','he-pineapple']);
   assert.equal(CLIPS['he-parrot'].speech,'hamilˈa hˈi tˈuki.');
   assert.equal(CLIPS['he-pineapple'].speech,'hamilˈa hˈi ʔananˈas.');
   assert.equal(WORDS.find(w=>w.id==='pineapple').pointed,'אָנָנָס');
   assert.equal(hash(baseline.ids.map(id=>[id,CLIPS[id]])),baseline.scripts);
   const recordings=JSON.parse(await readFile(new URL('../dist/assets/audio/manifest.json',import.meta.url),'utf8')).clips;
-  assert.equal(hash(baseline.ids.map(id=>[id,recordings[id]])),baseline.recordings);
+  assert.equal(hash(baseline.ids.map(id=>releasedRecording([id,recordings[id]]))),baseline.recordings);
   for (const fixture of baseline.journeys) {
     const questions = journeyQuestions(cleanJourney(fixture.plan)).map(({ choices, ...question }) => {
       if (question.operation === 'takeaway') return { ...question, prompt: 'journey-take-away' };

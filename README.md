@@ -36,6 +36,10 @@ Open the game online once to install the offline game and starter sounds. Additi
 
 ## Develop and deploy
 
+Ava’s Hebrew and English recordings play with a short silent lead-in, including on replay. Reward sounds wait for speech to finish. The offline library stores the reviewed voice masters. The service worker adds the same lead-in used by the release build when serving a recording from the library.
+
+New or edited English words use English-only Ava. The generator keeps approved multilingual Ava recordings for existing words and applies the reviewed pace in `scripts/english-voice-settings.json` across activities. The Hebrew generator uses the reviewed phonetic spelling and take for each recording.
+
 Use Node.js 20 or newer.
 
 ```sh

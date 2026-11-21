@@ -7,9 +7,19 @@ import { createSession, DEFAULT_SETTINGS } from '../dist/engine.js';
 
 const root = new URL('../dist/', import.meta.url);
 const recordings = JSON.parse(await readFile(new URL('assets/audio/manifest.json', root), 'utf8')).clips;
+const englishSettings = JSON.parse(await readFile(new URL('../scripts/english-voice-settings.json', root), 'utf8'));
 const voiceStyle = createHash('sha256').update(await readFile(new URL('../scripts/ava-style.json', root))).digest('hex');
 const reviewedTakes = JSON.parse(await readFile(new URL('../scripts/hebrew-takes.json', root), 'utf8'));
 const phoneticAudit = JSON.parse(await readFile(new URL('../scripts/hebrew-audio-audit.json', root), 'utf8')).clips;
+const namePauses = JSON.parse(await readFile(new URL('../scripts/hebrew-name-pauses.json', root), 'utf8'));
+for (const key of namePauses) {
+  if (!key.startsWith('letter-he-') || !CLIPS[key]?.speech.startsWith('haʔˈot ')) throw new Error(`Invalid Hebrew letter-name pause: ${key}`);
+}
+function firstSound(ipa) {
+  // A vowel can start with a glottal closure. Keep /h/ and affricates distinct.
+  return ipa.trim().replace(/^[ʔˈ]+/u, '').match(/^(?:tʃ|dʒ|ts|\p{L})/u)?.[0];
+}
+const phoneChecks = JSON.parse(await readFile(new URL('../scripts/hebrew-phonetic-crosschecks.json', root), 'utf8')).clips;
 for (const file of (await readdir(root)).filter(file => file.endsWith('.js'))) {
   execFileSync(process.execPath, ['--check', fileURLToPath(new URL(file, root))], { stdio: 'pipe' });
 }
@@ -21,11 +31,27 @@ for (const [key, clip] of Object.entries(CLIPS)) {
   if (!['he-IL', 'en-US'].includes(clip.lang)) throw new Error(`Unexpected language: ${key}`);
   const recording = recordings[key];
   if (!recording || recording.lang !== clip.lang || recording.speech !== (clip.speech || clip.text)) throw new Error(`Recording uses an outdated script: ${key}`);
+  if (clip.lang === 'en-US' && englishSettings.words.includes(recording.speech.trim().toLowerCase().replace(/[.!?]+$/u, ''))) {
+    if (recording.voice !== englishSettings.voice || recording.rate !== englishSettings.rate) throw new Error(`English word needs its reviewed voice settings: ${key}`);
+  }
   if (recording.sha256 !== createHash('sha256').update(bytes).digest('hex')) throw new Error(`Recording does not match its manifest: ${key}`);
   if (clip.lang === 'he-IL' && (recording.engine !== 'BlueTTS phonemes' || recording.style_sha256 !== voiceStyle)) throw new Error(`Hebrew recording needs the reviewed voice pipeline: ${key}`);
   if (clip.lang === 'he-IL' && recording.take !== (reviewedTakes[key] || 0)) throw new Error(`Hebrew recording needs its reviewed take: ${key}`);
-  if (clip.lang === 'he-IL' && JSON.stringify(recording.segments) !== JSON.stringify(clip.speech.length > 140 ? clip.speech.split(/(?<=[.!?])\s+/u) : [clip.speech])) throw new Error(`Hebrew recording needs updated sentence breaks: ${key}`);
+  if (clip.lang === 'he-IL') {
+    const segments = namePauses.includes(key) ? clip.speech.match(/^(\S+) (.+)$/u)?.slice(1)
+      : clip.speech.length > 140 ? clip.speech.split(/(?<=[.!?])\s+/u) : [clip.speech];
+    if (JSON.stringify(recording.segments) !== JSON.stringify(segments)) throw new Error(`Hebrew recording needs updated speech breaks: ${key}`);
+  }
   if (clip.lang === 'he-IL' && (phoneticAudit[key]?.sha256 !== recording.sha256 || phoneticAudit[key]?.expected_ipa !== clip.speech)) throw new Error(`Hebrew recording needs an updated phonetic audit: ${key}`);
+  if (clip.lang === 'he-IL') {
+    const detected = firstSound(phoneticAudit[key].detected_ipa);
+    const expected = firstSound(clip.speech);
+    const second = phoneChecks[key];
+    if (second && second.sha256 !== recording.sha256) throw new Error(`Hebrew phone cross-check needs renewal: ${key}`);
+    const reviewedAspiration = expected === 'a' && detected === 'h' && second?.check === 'pear vowel onset' && firstSound(second.phones) === 'a';
+    if (!detected || (detected !== expected && !reviewedAspiration)) throw new Error(`Hebrew onset needs review: ${key} (${expected} → ${detected})`);
+    if (key.startsWith('letter-he-') && phoneticAudit[key].phoneme_edit_ratio !== 0 && second?.check !== 'letter name') throw new Error(`Whole Hebrew letter name needs review: ${key}`);
+  }
   if (key.startsWith('journey-chunk-') && phoneticAudit[key].phoneme_edit_ratio !== 0) throw new Error(`Word-part recording failed phonetic review: ${key}`);
 }
 for (const word of WORDS) if (!CLIPS[`he-${word.id}`]) throw new Error(`Missing reading audio: ${word.id}`);
