@@ -65,6 +65,7 @@ import { cleanTheater, cleanTheaterRound, createTheaterRound, packTheaterRound, 
 import { prepareTheaterAudio, theaterComplete, theaterMap } from './theater-ui.js';
 import { mountTheaterRound } from './theater-round-view.js';
 import { mountTheaterStudio } from './theater-studio.js';
+import { clearTrialSaves, mountTrialPath } from './trial-path.js';
 
 const gameStorage = openAriel();
 let pendingJoinCode = null;
@@ -105,9 +106,11 @@ let daily = cleanDaily(null), dailyRound = null, dailyController = null, dailySt
 let dailyDraftKey = 'today';
 let theater = cleanTheater(null), theaterRound = null, theaterController = null, theaterSticker = null;
 let homeItems = null;
+let trialController = null;
+const trialRoute = { area:null, game:null };
 const progressScreens = ['home', 'album', 'letters-menu', 'letters-writing', 'letters-recognition', 'characters-menu'];
 const availableMissionIds = MISSION_IDS.filter(isPracticeAvailable);
-const preferenceScreens = [...progressScreens, 'learning-hub', 'reading-levels', 'science-menu', 'number-menu', 'theater-map', 'theater-round', 'theater-studio', 'theater-complete'];
+const preferenceScreens = [...progressScreens, 'learning-hub', 'reading-levels', 'science-menu', 'number-menu', 'theater-map', 'theater-round', 'theater-studio', 'theater-complete', 'trial'];
 
 try {
   const saved = JSON.parse(gameStorage.getItem(STORAGE_KEY) || 'null');
@@ -189,6 +192,7 @@ const stickerPlayer = createStickerPlayer({
   status: document.querySelector('#sticker-announcement'),
 });
 function stopStickerPlayback() {
+  trialController?.pause();
   companions.stop();
   stickerPlayer.stop();
 }
@@ -596,6 +600,7 @@ function renderHome() {
     <section class="home-feature-card park-feature"><div>${pup('tofi')}</div><span><h3>הַפָּארְק שֶׁלִּי</h3><p>קִשּׁוּטִים, חֲבֵרִים וּמָקוֹם לַדִּמְיוֹן</p></span><button class="primary-button" data-action="park">בּוֹנִים וּמְשַׂחֲקִים ${uiIcon('arrow')}</button></section>
     <section class="home-feature-card album-feature"><div>${rewardSticker(progress.stickers.at(-1), 'star', 'home-album-sticker')}</div><span><h3>הָאַלְבּוֹם שֶׁלִּי</h3><p>${progress.stickers.length ? `${progress.stickers.length} מדבקות מחכות לך באלבום` : 'בכל הרפתקה שלמה מגלות מדבקה חדשה'}</p></span><button class="primary-button" data-action="album">לאלבום שלי ${uiIcon('arrow')}</button></section>
     </div>
+    <div class="trial-entry"><button type="button" data-action="trial"><span class="trial-entry-art" aria-hidden="true">${art('boat')}</span><span><strong>ניסיון</strong><small>${settings.nikud?'מִשְׂחָקִים חֲדָשִׁים לְנַסּוֹת':'משחקים חדשים לנסות'}</small></span>${uiIcon('arrow')}</button></div>
   </main>${footer()}`;
 }
 
@@ -773,6 +778,7 @@ function turnAlbumPage(index) {
 
 function render() {
   stopStickerPlayback();
+  trialController?.destroy(); trialController=null;
   freeWriting?.destroy(); freeWriting=null;
   journeyController?.destroy(); journeyController=null;
   numberController?.destroy(); numberController=null;
@@ -791,6 +797,13 @@ function render() {
   applyPreferences();
   document.body.classList.toggle('playing', view === 'game');
   if (view === 'journey') renderJourney();
+  else if (view === 'trial') {
+    app.innerHTML = header() + '<main id="main" class="trial-page" dir="rtl"></main>' + footer();
+    trialController = mountTrialPath(app.querySelector('main'), {
+      storage:gameStorage, route:trialRoute, nikud:settings.nikud, motion:motionEnabled(), sound:()=>settings.sound, enableSound,
+      say:key=>key ? announcements.say(key) : Promise.resolve(false), stop:()=>narrator.stop(), home:()=>leaveTo('home'),
+    });
+  }
   else if (view === 'learning-hub') renderLearningHub();
   else if (view === 'number-menu') app.innerHTML = header() + numberMenu(numberDrafts) + footer();
   else if (view === 'number-round') renderNumberRound();
@@ -885,9 +898,13 @@ function leaveTo(destination) {
   dialog.querySelector('[data-dialog="leave"]').onclick = () => { closeDialog(); leave(); };
 }
 
+function enableSound() {
+  if (!settings.sound) { settings.sound = true; save(); narrator.enabled = true; renderSoundButton(); }
+}
 function replay() {
   if (view === 'letters-word') { wordPad.replay(); return; }
-  if (!settings.sound) { settings.sound = true; save(); narrator.enabled = true; renderSoundButton(); }
+  enableSound();
+  if(view==='trial'){void trialController?.replay();return;}
   if(view==='journey'){journeyController?.replay();return;}
   if (['number-round', 'number-writing', 'number-dictation', 'fruit-cutting'].includes(view)) { numberController?.replay(); return; }
   if (view === 'number-menu') { announcements.say(numberClip('menu')); return; }
@@ -1167,6 +1184,7 @@ function renderSettings() {
     openDialog(`<h2 id="parent-title">לאפס את המכשיר הזה?</h2><p>המדבקות וההתקדמות בדפדפן הזה יימחקו. הגדרות המשחק יישמרו.${album.linked ? ' החיבור לאלבום המשפחתי יוסר. האלבום שכבר סונכרן יישמר עבור המכשירים האחרים.' : ''}</p><div class="dialog-actions"><button class="secondary-button" data-dialog="cancel-reset">ביטול</button><button class="primary-button" data-dialog="confirm-reset">איפוס ההתקדמות</button></div>`);
     dialog.querySelector('[data-dialog="cancel-reset"]').onclick = renderSettings;
     dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => {
+      try { clearTrialSaves(gameStorage); } catch { /* A blocked browser store cannot be cleared. */ }
       try { gameStorage.removeItem(STITCH_KEY); } catch { /* Storage may be unavailable. */ }
       if (album.linked) album.disconnect(); learner.reset(); drafts={};journeyDrafts={};numberDrafts={};numberRound=null;scienceDrafts={};picnicController?.destroy({discard:true});picnicController=null;picnic=cleanPicnic(null);picnicRound=null;delivery=cleanDelivery(null);deliveryRound=null;boatyard=cleanBoatyard(null);boatRound=null;dailyController?.destroy({discard:true});dailyController=null;daily=cleanDaily(null);dailyRound=null;theater=cleanTheater(null);theaterRound=null;awardedRounds=[];writingPractice={mode:'trace',drafts:{}}; progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
   };
@@ -1698,6 +1716,9 @@ app.addEventListener('click', event => {
   if (button.disabled) return;
   switch (button.dataset.action) {
     case 'home': leaveTo('home'); break;
+    case 'trial':
+      narrator.stop(); Object.assign(trialRoute,{area:null,game:null}); view='trial'; render(); focusTitle();
+      void trialController.replay(); break;
     case 'guide': stopStickerPlayback(); narrator.stop(); openGameGuide(button, stopStickerPlayback); break;
     case 'learning-hub': openLearningHub(button.dataset.hub); break;
     case 'number-menu': openNumberMenu(); break;

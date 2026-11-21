@@ -8,7 +8,8 @@ export const LEGACY_PROFILE_ID = 'ariel-legacy';
 export const ARIEL = Object.freeze({ name: 'אריאל', address: 'female', voice: 'ariel' });
 const ARIEL_STORAGE_KEY = 'puppy-adventures-ariel-storage-v1';
 const allowedId = id => id === LEGACY_PROFILE_ID || /^[0-9a-f]{8}-[0-9a-f-]{27}$/u.test(id || '');
-const allowedKey = key => [GAME_KEY, FAMILY_KEY, STITCH_KEY, `${FAMILY_KEY}-check`, `${FAMILY_KEY}-retry`, `${FAMILY_KEY}-creation-retry`, 'name-recording', 'learning-state'].includes(key);
+const trialKey = /^puppy-trial-v1:(?:science|boatyard|theater|numbers):[a-z][a-z0-9-]{0,35}$/u;
+const allowedKey = key => [GAME_KEY, FAMILY_KEY, STITCH_KEY, `${FAMILY_KEY}-check`, `${FAMILY_KEY}-retry`, `${FAMILY_KEY}-creation-retry`, 'name-recording', 'learning-state'].includes(key) || trialKey.test(key);
 
 function profileId() {
   if (crypto.randomUUID) return crypto.randomUUID();

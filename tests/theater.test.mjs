@@ -173,9 +173,9 @@ test('parent milestones require independent sequencing across distinct scenes on
   assert.equal(theaterRecall(applyObservations({}, [evidence('room', start), evidence('garden', start + 16 * 3600000)])), false);
 });
 
-test('the theater backdrop is available on demand instead of during offline shell installation', async () => {
+test('the trial menu and puppet shows have their backdrop on the first offline visit', async () => {
   const read = path => readFile(new URL(`../dist/${path}`, import.meta.url), 'utf8').then(JSON.parse);
   const [core, all] = await Promise.all([read('offline-core.json'), read('offline.json')]);
-  assert.ok(!core.includes('./assets/theater-stage.webp'));
+  assert.ok(core.includes('./assets/theater-stage.webp'));
   assert.ok(all.includes('./assets/theater-stage.webp'));
 });

@@ -20,6 +20,8 @@ Ariel’s learning game for phones, tablets and computers. Ava gives instruction
 | **מחפשות עם פיקאצ׳ו** | Match Hebrew words to pictures, make animals hop, and tap Pikachu for his greeting. |
 | **מחפשות עם סטיץ׳** | Match six Hebrew clues to pictures, from a familiar object to its color, quantity or position. Tap Stitch to see him dance and hear a ukulele. Reopen his game to continue on the same device. |
 
+**ניסיון** is a separate entrance below the album and park on the home screen. It contains five science experiments, three boat-building missions with Luli, two guided puppet shows and a make-your-own-show studio, and four number activities. Each guided activity has six steps narrated by Ava. Predictions are open, and experiments can be repeated. Trial rounds and puppet shows are saved on this browser. This path uses its own storage and awards no album stickers.
+
 New scored adventures have six steps. Existing ten-step drafts can be finished at their original length. Each scored completion unlocks one sticker until the 1,000-sticker album is full. Tap any earned sticker in the album or on a reward screen to play its reaction. Dogs bark, cats meow, birds chirp and suns shine. Sticker play works offline and follows the sound and motion settings. Stickers also unlock decorations for the puppy park. Open-ended activities such as tracing and playing with the two characters have their own practice feedback.
 
 Tap the Pikachu or Stitch sticker on any screen to hear “Pika pika” or Stitch’s ukulele. If Ava is speaking, the last sticker you tapped waits for her to finish. These taps work offline and leave the current question and album as they were.
@@ -51,7 +53,7 @@ npm run dev
 
 The development server uses `dist/` as source. Set `PORT` to override 4173. Regenerate the checked-in offline inventories after changing the assets. If testing offline from the development server, update the shell version in `dist/sw.js` when changing the startup assets.
 
-Theater, Luli’s Boatyard, Science Lab and clock activities are paused. Their lessons and saved state are retained. To restore a path, update its setting in `dist/availability.js` and regenerate the bilingual guide from `dist/guide-content.js`.
+The original Theater, Boatyard, Science Lab and clock activities are paused. Their lessons and saved state are retained. The redesigned activities are available only through ניסיון. The main game map, daily missions, home suggestions and bilingual guide still use the established paths.
 
 ```sh
 npm run prepare-offline

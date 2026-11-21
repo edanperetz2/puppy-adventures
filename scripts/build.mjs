@@ -3,7 +3,7 @@ import { cp, mkdir, readFile, readdir, unlink, writeFile } from 'node:fs/promise
 import { basename, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
-import { offlineFiles, onDemandPictures, styleLinks, scriptLinks } from './prepare-offline.mjs';
+import { offlineFiles, styleLinks, scriptLinks } from './prepare-offline.mjs';
 import '../dist/narration-mp3.js';
 import { CLIPS } from '../dist/content.js';
 
@@ -58,7 +58,7 @@ for (let i = 0; i < voiceKeys.length; i += 32) {
   }));
 }
 // Changes to an image, the page, or a recording must also update installed copies.
-const checksums = await Promise.all([...core, ...onDemandPictures, './offline-audio.json'].map(async path => {
+const checksums = await Promise.all([...core, './offline-audio.json'].map(async path => {
   const file = await readFile(new URL(path, site));
   return createHash('sha256').update(path).update(file).digest('hex');
 }));
