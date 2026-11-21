@@ -52,12 +52,16 @@ export function picnicComplete(round, sticker, finished, nikud) {
   </main>`;
 }
 
-export function picnicPrompt(round) {
+export function picnicPrompt(round, readAloud = false) {
   const q = round.questions[round.index];
-  if (round.path === 'reading') return round.index === 0 && round.resolved ? ['picnic-read-model'] : ['act-out'];
+  if (round.path === 'reading') {
+    if (readAloud || round.resolved) return [`he-${q.word}`];
+    if (round.index === 0) return ['act-out', `he-${q.word}`];
+    return ['act-out'];
+  }
   if (round.path === 'addition') {
     if (round.index === 0 && round.resolved) return ['picnic-add-model'];
-    if (q.move && round.state.groups.length < 2) return ['picnic-add-move'];
+    if (q.move && round.state.groups.length < 2) return [round.state.groups.length ? 'picnic-tap-next' : 'picnic-tap-apples'];
     return ['picnic-add-choose', 'number-workshop-choose'];
   }
   if (round.index === 0) return ['picnic-clock-model'];
@@ -97,7 +101,7 @@ export function mountPicnicRound(root, {
     find('[data-picnic-action="hint"]').hidden = true;
     const modelButton = find('[data-picnic-action="model"]');
     if (modelButton) modelButton.hidden = true;
-    note(model() ? 'עַכְשָׁו תּוֹרֵךְ!' : 'כָּל הַכָּבוֹד, הִצְלַחְתְּ!', true);
+    note(model() ? 'הִצְלַחְנוּ!' : 'כָּל הַכָּבוֹד, הִצְלַחְתְּ!', true);
     if (audio) {
       speak(model() ? (isReading || isAddition ? picnicPrompt(round) : 'school-one-minute') : 'correct-1');
       next.focus({ preventScroll: true });
@@ -155,8 +159,8 @@ export function mountPicnicRound(root, {
     const task = q(), { a, b, choices, move, item } = task;
     const joined = move && state().groups.length === 2;
     const total = round.resolved ? a + b : '?';
-    const cue = move && !joined ? clipText('picnic-add-move') : `${clipText('picnic-add-choose')} ${clipText('number-workshop-choose')}`;
-    find('.picnic-cue').textContent = label(model() && round.resolved ? clipText('picnic-add-model') : cue);
+    const cue = picnicPrompt(round).map(clipText).join(' ');
+    find('.picnic-cue').textContent = label(cue);
     const groups = [a, b].map((amount, group) => additionGroups(task, amount, group)).join('<span class="picnic-plus" aria-hidden="true">+</span>');
     const landed = [a, b].map((amount, group) => state().groups.includes(group)
       ? `<span class="picnic-food" data-picnic-landed="${group}" role="img" aria-label="${amount} ${label(foodNames[item][amount === 1 ? 0 : 1])}">${art(item).repeat(amount)}</span>` : '').join('');
@@ -170,7 +174,7 @@ export function mountPicnicRound(root, {
     </div>` : ''}`;
   }
 
-  function moveGroup(group) {
+  function moveGroup(group, explainNext = true) {
     if (round.resolved || state().groups.includes(group) || ![0, 1].includes(group)) return;
     const origin = find(`[data-picnic-group="${group}"]`)?.getBoundingClientRect();
     state().groups.push(group);
@@ -185,7 +189,11 @@ export function mountPicnicRound(root, {
       const y = origin.top + origin.height / 2 - to.top - to.height / 2;
       placed.animate([{ transform: `translate(${x}px, ${y}px) scale(.94)` }, { transform: 'none' }], { duration: 280, easing: 'cubic-bezier(.23,.82,.35,1)' });
     }
-    if (!joined) { find('[data-picnic-group]')?.focus({ preventScroll: true }); return; }
+    if (!joined) {
+      find('[data-picnic-group]')?.focus({ preventScroll: true });
+      if (explainNext) speak(picnicPrompt(round));
+      return;
+    }
     if (model()) showSuccess();
     else { find('[data-picnic-answer]')?.focus({ preventScroll: true }); speak(picnicPrompt(round)); }
   }
@@ -281,7 +289,7 @@ export function mountPicnicRound(root, {
       find(`[data-act-place="${target}"]`).click();
     } else if (isAddition) {
       const remaining = [0, 1].filter(group => !state().groups.includes(group));
-      moveGroup(remaining[0]);
+      moveGroup(remaining[0], false);
       if (remaining.length === 2 && motion()) modelTimer = setTimeout(() => moveGroup(1), 285);
       else if (remaining.length === 2) moveGroup(1);
     } else {
@@ -292,7 +300,7 @@ export function mountPicnicRound(root, {
   }
 
   function hintText() {
-    if (isAddition) return q().move && state().groups.length < 2 ? clipText('picnic-add-move') : 'סִפְרִי אֶת כָּל מָה שֶׁיֵּשׁ בִּשְׁתֵּי הַקְּבוּצוֹת.';
+    if (isAddition) return q().move && state().groups.length < 2 ? clipText(picnicPrompt(round)[0]) : 'סִפְרִי אֶת כָּל מָה שֶׁיֵּשׁ בִּשְׁתֵּי הַקְּבוּצוֹת.';
     return q().duration ? 'מִקַּו לְקַו עוֹבֶרֶת דַּקָּה אַחַת. אֶפְשָׁר לְהַתְחִיל שׁוּב.' : 'הַמָּחוֹג הַקָּצָר מַרְאֶה שָׁעוֹת. הַמָּחוֹג הָאָרֹךְ מַרְאֶה דַּקּוֹת.';
   }
 
@@ -315,6 +323,11 @@ export function mountPicnicRound(root, {
     onSave(round);
   }
 
+  function repeatInstruction() {
+    if (isReading && !round.resolved && !model()) { markHelped(); onSave(round); }
+    return replay(picnicPrompt(round, true));
+  }
+
   root.addEventListener('click', event => {
     const button = event.target.closest('button');
     if (!button || !root.contains(button) || button.disabled) return;
@@ -325,7 +338,7 @@ export function mountPicnicRound(root, {
     }
     if (picnicGroup !== undefined && tapAllowed(event, button)) moveGroup(Number(picnicGroup));
     if (picnicAnswer !== undefined) answer(Number(picnicAnswer));
-    if (picnicAction === 'replay') replay(picnicPrompt(round));
+    if (picnicAction === 'replay') repeatInstruction();
     if (picnicAction === 'model') { button.hidden = true; playModel(); }
     if (picnicAction === 'hint' && !round.resolved) hint();
     if (picnicAction === 'restart-clock' && !round.resolved) {
@@ -348,7 +361,7 @@ export function mountPicnicRound(root, {
 
   paint();
   return {
-    replay: () => replay(picnicPrompt(round)),
+    replay: repeatInstruction,
     flush,
     destroy({ discard = false } = {}) {
       if (discard) clearTimeout(timer);

@@ -69,7 +69,7 @@ test('Little Stories shares its start path, copy, narration and six-step expecta
   assert.ok(actOutSteps(questions).length > 0);
 });
 
-test('The home resume selects played work across existing saves and skips completed science', () => {
+test('Home resume skips paused science even when it was the most recently played adventure', () => {
   const classic = { mission: 'hebrew', at: 1, index: 3, questions: Array(10).fill({}), helped: [], counted: [], attempted: [] };
   const onlyOpened = { mission: 'letters', at: 7, index: 0, questions: [{ showModel: true }], helped: [0], counted: [], attempted: [] };
   const journey = { mode: 'english', at: 4, index: 0, state: {} };
@@ -86,5 +86,7 @@ test('The home resume selects played work across existing saves and skips comple
   numbers.hint = true;
   assert.equal(latestPlayedDraft(saves).kind, 'numbers');
   science.complete = false;
-  assert.equal(latestPlayedDraft(saves).path, 'pepper');
+  assert.equal(latestPlayedDraft(saves).kind, 'numbers');
+  assert.equal(latestPlayedDraft({ drafts: {}, journeyDrafts: {}, numberDrafts: {}, scienceDrafts: saves.scienceDrafts }), undefined);
+  assert.deepEqual(saves.scienceDrafts.pepper, { at: 6, actions: ['water'], complete: false });
 });

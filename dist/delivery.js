@@ -14,7 +14,8 @@ const key = id => `english:single:${id}`;
 const wordClip = id => id === 'boat' ? 'delivery-en-boat' : `en-${id}`;
 
 export const DELIVERY_AUDIO = [...animals.map(wordClip), ...colors.map(wordClip), wordClip('boat'),
-  'delivery-welcome', 'delivery-aboard', 'delivery-pack', 'delivery-route', 'delivery-finish', 'delivery-pair', 'delivery-en-blue-boat'];
+  'delivery-welcome', ...new Set(Object.values(DELIVERY_MISSIONS).map(mission => mission.prompt)),
+  'delivery-finish', 'delivery-pair', 'delivery-en-blue-boat'];
 
 export function deliveryPairReady(items = {}) {
   return ['blue', 'boat'].every(word => items[key(word)]?.independent >= 2 && learningStage(items[key(word)]) === 'remembered');

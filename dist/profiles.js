@@ -3,11 +3,12 @@ import { findVoiceName, VOICE_NAMES } from './profile-content.js?v=2.2.0-voices'
 export const PROFILE_KEY = 'puppy-adventures-children-v1';
 export const GAME_KEY = 'puppy-adventures-v1';
 export const FAMILY_KEY = 'puppy-adventures-family-v1';
+export const STITCH_KEY = 'puppy-adventures-stitch-v1';
 export const LEGACY_PROFILE_ID = 'ariel-legacy';
 export const ARIEL = Object.freeze({ name: 'אריאל', address: 'female', voice: 'ariel' });
 const ARIEL_STORAGE_KEY = 'puppy-adventures-ariel-storage-v1';
 const allowedId = id => id === LEGACY_PROFILE_ID || /^[0-9a-f]{8}-[0-9a-f-]{27}$/u.test(id || '');
-const allowedKey = key => [GAME_KEY, FAMILY_KEY, `${FAMILY_KEY}-check`, `${FAMILY_KEY}-retry`, `${FAMILY_KEY}-creation-retry`, 'name-recording', 'learning-state'].includes(key);
+const allowedKey = key => [GAME_KEY, FAMILY_KEY, STITCH_KEY, `${FAMILY_KEY}-check`, `${FAMILY_KEY}-retry`, `${FAMILY_KEY}-creation-retry`, 'name-recording', 'learning-state'].includes(key);
 
 function profileId() {
   if (crypto.randomUUID) return crypto.randomUUID();

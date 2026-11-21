@@ -19,7 +19,7 @@ export async function offlineFiles(root, bundle = []) {
   const explicitlyLoaded = ['./index.html', './manifest.webmanifest', ...entryUrls];
   const sourceModules = bundle.length ? bundle : await findModules(root, entryUrls.filter(url => url.endsWith('.js') || url.includes('.js?')));
   const pictures = (await readdir(new URL('assets/', root)))
-    .filter(file => /\.(?:svg|png|jpe?g|webp|woff2|txt)$/.test(file) && !archivedAssets.test(file))
+    .filter(file => /\.(?:svg|png|jpe?g|webp|woff2|txt|wav)$/.test(file) && !archivedAssets.test(file))
     .map(file => `./assets/${file}`).filter(url => !onDemandPictures.includes(url));
   const audio = JSON.parse(await readFile(new URL('assets/audio/manifest.json', root), 'utf8')).clips;
   const keys = [...Object.keys(CLIPS), 'pikachu-greeting'];

@@ -9,21 +9,18 @@ Ariel’s learning game for phones, tablets and computers. Ava gives instruction
 | Activity | Practice |
 | --- | --- |
 | **משימה קטנה להיום** | Listen to English animal names and move the right animals to the pond in six steps. A worked example leads to a fresh try at the same step. |
-| **המסע שלי** | Four chapters with six-step missions. Read and add at the picnic. Listen to English on Bobi’s delivery route. Shape, load, test, and sail boats with Luli. Visit the theater to direct a scene, serve party guests, and play with shadows. Bobi offers an optional two-word prompt after independent practice with both words on different days. |
-| **תיאטרון החברים** | Guided shows under **המסע שלי**. Put actions in order and watch them play out, prepare cups as friends arrive, and move a puppet between a fixed lamp and screen. **ההצגות שלי** saves the shows you make on the current device. |
+| **המסע שלי** | Read and add at the friends’ picnic. Listen for an English word and choose a picture on Bobi’s delivery route. Both chapters have six-step missions. Bobi offers an optional two-word prompt after independent practice with both words on different days. |
 | **גינת המילים** | Ten Hebrew stages, from short words to little stories. Choose a matching picture or act out the sentence. A mixed adventure draws from the stages across replays. |
 | **סדנת המילים** | Build words from parts and letters, fill gaps and finish short sentences across four stages. |
 | **סיפור שמשחקים** | Eight playable Hebrew stories with illustrated choices and actions such as moving objects into place. |
 | **מפרץ האנגלית** | Start by listening to one word at a time. Optional routes introduce two-word phrases, first sounds and short written words. |
 | **סטודיו האותיות** | Recognize Hebrew handwriting and English lowercase in their own games. Trace and write Hebrew print, Hebrew handwriting, English capitals and English lowercase. |
 | **סדנת המספרים** | Count, add, find how many remain, and work with tens and ones. Trace numbers from 0 to 100, write them from Hebrew dictation, or cut fruits into halves. |
-| **מעבדת המדע** | Four simulations, each with six steps. Compare oil and water with and without soap, see what floats, melt ice, and watch how soap moves pepper across water. |
 | **חברים מהמסך** | Read the Hebrew names of Rubble & Crew and PAW Patrol characters. Play picture-to-name, name-to-picture or a mixture, with three levels per collection. |
 | **מחפשות עם פיקאצ׳ו** | Match Hebrew words to pictures, make animals hop, and tap Pikachu for his greeting. |
+| **מחפשות עם סטיץ׳** | Match six Hebrew clues to pictures, from a familiar object to its color, quantity or position. Tap Stitch to see him dance and hear a ukulele. Reopen his game to continue on the same device. |
 
-New scored adventures have six steps. Existing ten-step drafts can be finished at their original length. Each scored completion unlocks one sticker until the 1,000-sticker album is full. Stickers unlock decorations for the puppy park. Open-ended activities such as science, tracing and free clock play have their own practice feedback.
-
-In **בונות סירה עם לולי**, every prediction leads to a water test. The simulation holds the clay mass constant and uses the weight of the water displaced to set the boat’s depth until water reaches the rim. Completed missions share the album’s existing number-adventure totals. [Clay-shape experiment](https://www.acs.org/education/resources/k-8/inquiryinaction/fifth-grade/substances-have-characteristic-properties/lesson-2-4--density-and-sinking-and-floating.html) · [Physics of buoyancy](https://openstax.org/books/university-physics-volume-1/pages/14-4-archimedes-principle-and-buoyancy)
+New scored adventures have six steps. Existing ten-step drafts can be finished at their original length. Each scored completion unlocks one sticker until the 1,000-sticker album is full. Stickers unlock decorations for the puppy park. Open-ended activities such as tracing and playing with the two characters have their own practice feedback.
 
 The home screen offers **ממשיכות** when there’s a round in progress. Otherwise **יוצאות להרפתקה** opens the specific game on the card. The suggestions use recent practice in Hebrew reading, single-word English, and basic numbers. The game map is always available.
 
@@ -46,7 +43,7 @@ npm run dev
 
 The development server uses `dist/` as source. Set `PORT` to override 4173. Regenerate the checked-in offline inventories after changing the assets. If testing offline from the development server, update the shell version in `dist/sw.js` when changing the startup assets.
 
-Clock lessons, clock missions, and their saved progress can be restored by setting `CLOCK_ACTIVITIES_ENABLED` in `dist/availability.js` and regenerating the bilingual guide from `dist/guide-content.js`.
+Theater, Luli’s Boatyard, Science Lab and clock activities are paused. Their lessons and saved state are retained. To restore a path, update its setting in `dist/availability.js` and regenerate the bilingual guide from `dist/guide-content.js`.
 
 ```sh
 npm run prepare-offline

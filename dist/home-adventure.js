@@ -1,6 +1,6 @@
 import { MAX_ASSISTED_TO_ADVANCE, SESSION_LENGTH } from './adventure.js?v=2.2.2-six';
 import { ENGLISH_LISTENING, LITTLE_STORIES } from './activities.js';
-import { isPracticeAvailable } from './availability.js';
+import { isChapterAvailable, isPracticeAvailable } from './availability.js';
 import { DAY } from './learning.js';
 import { NUMBER_PATHS } from './number-workshop.js?v=2.3.0-numbers';
 import { nextReadingStage, READING_LEVELS, WORDS } from './reading.js?v=2.7.0-science';
@@ -94,11 +94,11 @@ export function latestPlayedDraft({ drafts, journeyDrafts, numberDrafts, science
     ...Object.values(drafts).filter(d => d.mission !== 'math' && isPracticeAvailable(d.mission) && activeClassic(d)).map(value => ({ kind: 'classic', value })),
     ...Object.values(journeyDrafts).filter(d => d.mode !== 'objects' && activeJourney(d)).map(value => ({ kind: 'journey', value })),
     ...Object.values(numberDrafts).filter(d => d.index || d.resolved || d.hint || d.attempted.length).map(value => ({ kind: 'numbers', value })),
-    ...Object.entries(scienceDrafts).filter(([, d]) => !d.complete && d.actions.length)
+    ...Object.entries(scienceDrafts).filter(([, d]) => isPracticeAvailable('science') && !d.complete && d.actions.length)
       .map(([path, value]) => ({ kind: 'science', path, value })),
     ...Object.entries(picnicDrafts).filter(([path, d]) => isPracticeAvailable(path) && d.at > 0).map(([path, value]) => ({ kind: 'picnic', path, value })),
     ...Object.entries(deliveryDrafts).filter(([, d]) => d.at > 0).map(([path, value]) => ({ kind: 'delivery', path, value })),
     ...Object.entries(boatyardDrafts).filter(([, d]) => d.at > 0).map(([path, value]) => ({ kind: 'boatyard', path, value })),
     ...Object.entries(theaterDrafts).filter(([, d]) => d.at > 0).map(([path, value]) => ({ kind: 'theater', path, value })),
-  ].sort((a, b) => b.value.at - a.value.at)[0];
+  ].filter(draft => isChapterAvailable(draft.kind)).sort((a, b) => b.value.at - a.value.at)[0];
 }

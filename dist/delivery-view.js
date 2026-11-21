@@ -116,9 +116,12 @@ export function mountDeliveryRound(root, { round, nikud, motion, play, onSave, o
     root.dataset.deliveryAudio = heard ? 'ready' : 'waiting';
     button.classList.remove('is-speaking');
     button.removeAttribute('aria-busy');
-    if (!heard && manual) note(navigator.onLine
-      ? 'לִחְצִי שׁוּב עַל הָרַמְקוֹל.'
-      : 'הַהַקְלָטָה תִּטָּעֵן כְּשֶׁיִּהְיֶה אִינְטֶרְנֶט.');
+    for (const choice of root.querySelectorAll('[data-delivery-choice]')) {
+      choice.disabled = !heard || round.resolved || round.state.attempted.includes(choice.dataset.deliveryChoice);
+    }
+    if (!heard) note(navigator.onLine
+      ? 'כְּדֵי לִשְׁמֹעַ, לִחְצִי עַל הָרַמְקוֹל.'
+      : 'אֶפְשָׁר לְנַסּוֹת שׁוּב כְּשֶׁיִּהְיֶה אִינְטֶרְנֶט.');
     return heard;
   }
 
@@ -127,7 +130,7 @@ export function mountDeliveryRound(root, { round, nikud, motion, play, onSave, o
     const cards = q.choices.map(value => {
       const right = value === q.answer;
       const sent = right && done;
-      const disabled = done || round.state.attempted.includes(value);
+      const disabled = !heard || done || round.state.attempted.includes(value);
       return `<button class="delivery-piece${sent ? ' is-delivered' : ''}${round.state.hint && right && !done ? ' has-clue' : ''}"
         data-delivery-choice="${value}" ${route ? 'data-delivery-target' : 'data-delivery-source'}
         aria-label="${choiceLabel(q, value)}" ${disabled ? 'disabled' : ''}>
@@ -153,7 +156,7 @@ export function mountDeliveryRound(root, { round, nikud, motion, play, onSave, o
     find('[data-delivery-action="hint"]').hidden = true;
     const demonstration = find('[data-delivery-action="model"]');
     if (demonstration) demonstration.hidden = true;
-    note(model() ? 'עַכְשָׁו תּוֹרֵךְ!' : 'כָּל הַכָּבוֹד, הִצְלַחְתְּ!', true);
+    note(model() ? 'הִצְלַחְנוּ!' : 'כָּל הַכָּבוֹד, הִצְלַחְתְּ!', true);
     if (!cameBack) find('[data-delivery-action="next"]').focus({ preventScroll: true });
   }
 
@@ -167,8 +170,7 @@ export function mountDeliveryRound(root, { round, nikud, motion, play, onSave, o
     ${bonus ? '' : `<div class="picnic-track" aria-hidden="true">${round.questions.map((_, i) =>
       `<span class="${i < round.index ? 'passed' : i === round.index ? 'current' : ''}"></span>`).join('')}</div>`}
     <section class="picnic-step-card delivery-step">
-      <div class="picnic-task-title"><h1 tabindex="-1">${label(mission.title)}</h1>
-        <button class="circle-button" data-delivery-action="instructions" aria-label="השמעת ההוראה">${uiIcon('sound')}</button></div>
+      <div class="picnic-task-title"><h1 tabindex="-1">${label(mission.title)}</h1></div>
       <p class="delivery-cue">${label(clipLabel(mission.prompt))}</p>
       <button class="primary-button delivery-listen" data-delivery-action="listen">${uiIcon('sound')} ${label(bonus ? 'שִׁמְעִי אֶת הַצֵּרוּף' : 'שִׁמְעִי אֶת הַמִּלָּה')}</button>
       <div class="delivery-board-slot"></div>
@@ -250,9 +252,8 @@ export function mountDeliveryRound(root, { round, nikud, motion, play, onSave, o
     if (button.dataset.deliveryChoice && acceptsClick(event, button)) choose(button);
     if (button.classList.contains('delivery-parcel') && acceptsClick(event, button)) tapPiece(button);
     const action = button.dataset.deliveryAction;
-    if ((action === 'listen' || action === 'instructions') && !round.resolved) note('');
+    if (action === 'listen' && !round.resolved) note('');
     if (action === 'listen') void listen({ manual: true });
-    if (action === 'instructions') void listen({ manual: true, instructions: true });
     if (action === 'model') void demonstrate(button);
     if (action === 'hint' && !round.resolved) {
       recordHelp(); round.state.hint = true; onSave(round);
@@ -268,8 +269,8 @@ export function mountDeliveryRound(root, { round, nikud, motion, play, onSave, o
   }, { signal: controls.signal });
   showStep();
   return {
-    start: () => { if (!round.resolved) void listen({ instructions: round.index === 0 }); },
-    replay: () => listen({ manual: true }),
+    start: () => { if (!round.resolved) void listen({ instructions: true }); },
+    replay: () => listen({ manual: true, instructions: true }),
     destroy() { alive = false; controls.abort(); },
   };
 }

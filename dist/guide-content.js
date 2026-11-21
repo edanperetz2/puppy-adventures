@@ -1,11 +1,13 @@
 import { DAILY_ACTIVITY, LITTLE_STORIES, MY_JOURNEY, THEATER } from './activities.js';
-import { CLOCK_ACTIVITIES_ENABLED } from './availability.js';
+import { CLOCK_ACTIVITIES_ENABLED, isChapterAvailable, isPracticeAvailable } from './availability.js';
 
 export const GUIDE_ITEMS = [
   { icon: MY_JOURNEY.icon, he: MY_JOURNEY.he, en: MY_JOURNEY.en },
   DAILY_ACTIVITY,
-  { icon: THEATER.icon, he: [THEATER.chapter, 'מְסַדְּרוֹת פְּעֻלּוֹת, מְכִינוֹת כּוֹסוֹת, מְשַׂחֲקוֹת בְּצֵל וְשׁוֹמְרוֹת הַצָּגוֹת.'],
-    en: ['Friends’ Theater', 'Put actions in order, serve guests, change a shadow, and save a show of your own.'] },
+  ...(isChapterAvailable('theater') ? [{
+    icon: THEATER.icon, he: [THEATER.chapter, 'מְסַדְּרוֹת פְּעֻלּוֹת, מְכִינוֹת כּוֹסוֹת, מְשַׂחֲקוֹת בְּצֵל וְשׁוֹמְרוֹת הַצָּגוֹת.'],
+    en: ['Friends’ Theater', 'Put actions in order, serve guests, change a shadow, and save a show of your own.'],
+  }] : []),
   { icon: 'flower', he: ['גִּנַּת הַמִּלִּים', `עֲשָׂרָה שְׁלָבִים עַד ״${LITTLE_STORIES.he[0]}״. ${LITTLE_STORIES.he[1]}`],
     en: ['Word Garden', `Ten stages, from short words to ${LITTLE_STORIES.en[0]}. ${LITTLE_STORIES.en[1]}`] },
   { icon: 'pencil', he: ['סַדְנַת הַמִּלִּים', 'בּוֹנוֹת מִלִּים מֵחֲלָקִים וּמַשְׁלִימוֹת אוֹתִיּוֹת וּמִשְׁפָּטִים.'],
@@ -22,12 +24,16 @@ export const GUIDE_ITEMS = [
     { icon: 'clock', he: ['גַּן הַשְּׁעוֹנִים', 'עֲשָׂרָה שִׁעוּרִים. מְזִיזוֹת אֶת שְׁנֵי הַמְּחוֹגִים וּמְתַרְגְּלוֹת קְרִיאַת שָׁעוֹת וְדַקּוֹת.'],
       en: ['Clock Garden', 'Ten lessons from minutes and hours to exact times. Move both hands and practise reading the clock.'] },
   ] : []),
-  { icon: 'lab', he: ['מַעְבֶּדֶת הַמַּדָּע', 'מְנַסּוֹת עִם מַיִם, שֶׁמֶן, סַבּוֹן וּפִלְפֵּל. בּוֹדְקוֹת מָה צָף וְאֵיךְ קֶרַח נָמֵס.'],
-    en: ['Science Lab', 'Try oil and water with soap, float or sink, melting ice, and pepper with a drop of soap.'] },
+  ...(isPracticeAvailable('science') ? [{
+    icon: 'lab', he: ['מַעְבֶּדֶת הַמַּדָּע', 'מְנַסּוֹת עִם מַיִם, שֶׁמֶן, סַבּוֹן וּפִלְפֵּל. בּוֹדְקוֹת מָה צָף וְאֵיךְ קֶרַח נָמֵס.'],
+    en: ['Science Lab', 'Try oil and water with soap, float or sink, melting ice, and pepper with a drop of soap.'],
+  }] : []),
   { icon: 'dog', he: ['חֲבֵרִים מֵהַמָּסָךְ', 'מַתְאִימוֹת שֵׁמוֹת בְּעִבְרִית לְדַמּוּיוֹת שֶׁל רָאבֶּל וְהַבַּנָּאִים וּמִפְרַץ הַהַרְפַּתְקָאוֹת.'],
     en: ['Screen Friends', 'Match Hebrew names to characters from Rubble & Crew and PAW Patrol.'] },
   { icon: 'pikachu', he: ['מְחַפְּשׂוֹת עִם פִּיקָאצ׳וּ', 'מַתְאִימוֹת מִלִּים וּתְמוּנוֹת, מַקְפִּיצוֹת חַיּוֹת וְשׁוֹמְעוֹת אֶת פִּיקָאצ׳וּ.'],
     en: ['Searching with Pikachu', 'Match Hebrew words to pictures, make animals hop, and tap Pikachu to hear his greeting.'] },
+  { icon: 'stitch', he: ['מְחַפְּשׂוֹת עִם סְטִיץ׳', 'קוֹרְאוֹת רֶמֶז קָצָר וּבוֹחֲרוֹת אֶת הַתְּמוּנָה הַמַּתְאִימָה. נוֹגְעוֹת בִּסְטִיץ׳ וְהוּא רוֹקֵד.'],
+    en: ['Searching with Stitch', 'Read a short Hebrew clue and choose the matching picture. Tap Stitch to make him dance.'] },
 ];
 
 export const GUIDE_EXTRAS = [

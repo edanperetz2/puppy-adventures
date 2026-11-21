@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { BOATYARD, BOATYARD_MISSIONS } from '../dist/activities.js';
+import { isChapterAvailable } from '../dist/availability.js';
 import {
   boatyardMove, boatyardOutcome, boatyardRound, CLAY_MASS, cleanBoatyard, cleanBoatyardRound,
   comparisonAnswer, nextBoatyardStep, packBoatyardRound, waterTrial,
@@ -104,6 +105,6 @@ test('each mission has six playable steps and each crossing has a hull that can 
   assert.deepEqual(cleanBoatyard(undefined), { drafts: {}, finished: [] });
   const current = latestPlayedDraft({ drafts: {}, journeyDrafts: {}, numberDrafts: {}, scienceDrafts: {},
     boatyardDrafts: { cargo: { at: 30 } }, deliveryDrafts: { route: { at: 20 } }, picnicDrafts: { reading: { at: 10 } } });
-  assert.equal(current.kind, 'boatyard');
-  assert.equal(current.path, 'cargo');
+  assert.equal(current.kind, isChapterAvailable('boatyard') ? 'boatyard' : 'delivery');
+  assert.equal(current.path, isChapterAvailable('boatyard') ? 'cargo' : 'route');
 });

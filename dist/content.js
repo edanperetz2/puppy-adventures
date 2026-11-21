@@ -155,4 +155,8 @@ Object.assign(CLIPS, NUMBER_WORKSHOP_CLIPS);
 CLIPS[ACT_OUT_PROMPT] = { lang: 'he-IL', text: ACT_OUT_INSTRUCTION, speech: 'kiʁʔˈi ʔˈet hamiʃpˈat. hazˈizi ʔˈet mˈa ʃematʔˈim.' };
 for (const [key, clip] of Object.entries(ACTION_STORY_INSTRUCTIONS)) CLIPS[key] = { lang: 'he-IL', ...clip };
 Object.assign(CLIPS, SCIENCE_CLIPS);
+CLIPS['listen-pick-animal'] = {
+  lang: 'he-IL', text: 'הַקְשִׁיבִי לַמִּלָּה. בַּחֲרִי אֶת הַחַיָּה.',
+  speech: 'hakʃˈivi lamilˈa. baχaʁˈi ʔˈet haχajˈa.',
+};
 Object.assign(CLIPS, STORY_CLUE_CLIPS, PICNIC_CLIPS, DELIVERY_CLIPS, BOATYARD_CLIPS, DAILY_CLIPS, THEATER_CLIPS);

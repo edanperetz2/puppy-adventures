@@ -17405,6 +17405,27 @@
       "detected_ipa": "hakʃˈivi lamilˈa, baχaʁˈi ʔˈet haχajˈa.",
       "phoneme_edit_ratio": 0,
       "seconds": 5.77
+    },
+    "listen-pick-animal": {
+      "sha256": "4754673ac1cf41adbef2e44e01811191fa0a0331ee514deb99f98064524dfa75",
+      "expected_ipa": "hakʃˈivi lamilˈa. baχaʁˈi ʔˈet haχajˈa.",
+      "detected_ipa": "hakʃˈivi lamilˈa, baχaʁˈi ʔˈet haχajˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.09
+    },
+    "picnic-tap-apples": {
+      "sha256": "dd95ea4cc1380791c2d6c95d708488a8a7132bb7956721f8747926728687b42d",
+      "expected_ipa": "liχtsˈi ʔˈal ʃtˈej kvutsˈot hatapuχˈim.",
+      "detected_ipa": "liχtsˈi ʔˈal ʃtˈej kvutsˈot hatapuχˈim.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.12
+    },
+    "picnic-tap-next": {
+      "sha256": "ef63eab7b7ca2178cf3f54830476cee40e549fb950e2948e9901a453600458be",
+      "expected_ipa": "ʔaχʃˈav liχtsˈi ʔˈal hakvutsˈa haʃnijˈa.",
+      "detected_ipa": "ʔaχʃˈav, liχtsˈi ʔˈal hakvutsˈa haʃnijˈa.",
+      "phoneme_edit_ratio": 0,
+      "seconds": 2.12
     }
   }
 }

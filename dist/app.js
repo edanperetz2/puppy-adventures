@@ -27,7 +27,7 @@ import { suggestedLetters, practicedLetterCount, recordLetters, recognitionTarge
 import { CHARACTERS, CHARACTER_COLLECTIONS, CHARACTER_LEVELS, CHARACTER_MODES, characterCollection, selectCharacterLevel, sanitizeCharacterPractice, finishCharacterPractice, nextCharacterLevel } from './characters.js?v=2.2.2-six';
 import { characterMenu, characterQuestion, characterAnswer, characterAnswerLabel, characterMissionArt, characterName } from './characters-view.js?v=2.2.2-six';
 import { letterExampleCards } from './letter-examples.js';
-import { ARIEL, openAriel, readArielInvitation, GAME_KEY } from './profiles.js?v=2.2.3-ariel';
+import { ARIEL, openAriel, readArielInvitation, GAME_KEY, STITCH_KEY } from './profiles.js?v=2.2.3-ariel';
 import { profileSpeech } from './profile-speech.js?v=2.2.0-voices';
 import { openGameGuide, GUIDE_ICON } from './guide.js?v=2.2.3-ariel';
 import { NUMBER_PATHS, cleanNumberRound, newNumberRound, numberClip } from './number-workshop.js?v=2.3.0-numbers';
@@ -35,14 +35,14 @@ import { numberMenu, mountNumberRound, numberComplete } from './number-workshop-
 import { numberWritingKey, mountNumberWriting } from './number-writing.js?v=2.3.3-dictation';
 import { mountNumberDictation, numberDictationKey } from './number-dictation.js?v=2.3.3-dictation';
 import { mountFruitCutting } from './fruit-cutting.js?v=2.5.0-play';
-import { mountPikachu, pikachuImage, PIKACHU_TITLE } from './pikachu-game.js?v=2.5.1-pikachu-greeting';
+import { mountPictureMatch, pikachuImage, PIKACHU_TITLE, stitchImage, STITCH_TITLE } from './pikachu-game.js';
 import { actOutDetails, actOutPrompt, actOutSteps } from './act-out.js?v=2.7.0-science';
 import { mountActOut } from './act-out-view.js?v=2.7.1-pepper';
 import { SCIENCE_TITLE, SCIENCE_EXPERIMENTS, cleanScienceRound, scienceClip } from './science-content.js?v=2.7.1-pepper';
 import { mountScience, scienceArt, scienceMenu } from './science-view.js?v=2.7.1-pepper';
 import { mountOfflineAudio, registerOffline } from './offline-audio.js';
 import { AVAILABLE_PICNIC_MISSIONS, BOATYARD, BOATYARD_MISSIONS, DELIVERY, DELIVERY_MISSIONS, ENGLISH_LISTENING, LITTLE_STORIES, PICNIC, PICNIC_MISSIONS, THEATER, THEATER_SHOWS, isPicnicReady } from './activities.js';
-import { CLOCK_ACTIVITIES_ENABLED, isPracticeAvailable } from './availability.js';
+import { CLOCK_ACTIVITIES_ENABLED, isChapterAvailable, isPracticeAvailable } from './availability.js';
 import { latestPlayedDraft, readingActivity, recommendAdventure } from './home-adventure.js';
 import { firstStoryClue, pictureClue, storyClue, storyReviewQuestion } from './story-practice.js';
 import { awardLocalRound, checkpointScoredRound, finishScoredRound } from './round-lifecycle.js';
@@ -87,7 +87,7 @@ let characterPractice = sanitizeCharacterPractice(null);
 let drafts = {}, journeyDrafts = {}, awardedRounds = [], writingPractice = { mode:'trace', drafts:{} };
 let learner = null, journeyController = null, journeyPlan = null, parkController = null, freeWriting = null, hub = 'hebrew';
 let numberRound = null, numberDrafts = {}, numberController = null, numberSticker = null;
-let pikachuController = null;
+let companionController = null;
 let actOutController = null;
 let sciencePath = null, scienceDrafts = {}, scienceController = null;
 let picnic = cleanPicnic(null), picnicRound = null, picnicController = null, picnicSticker = null;
@@ -486,21 +486,23 @@ function renderHome() {
     <div class="mission-body"><span class="subject-tag" ${m.id === 'english' ? 'lang="en" dir="ltr"' : ''}>${m.subject}</span><h3>${m.name}</h3><p>${m.subtitle}</p><span class="mission-go" aria-hidden="true">${uiIcon('arrow')}</span></div>
     ${activityCount(m.id) ? `<span class="mission-done" aria-label="כבר סיימת ${activityCount(m.id)} הרפתקאות">${uiIcon('check')}</span>` : ''}
   </button>`);
-  const science = `<button class="mission-card science-card" data-action="science-menu">
+  const science = isPracticeAvailable('science') ? `<button class="mission-card science-card" data-action="science-menu">
     <div class="mission-art" aria-hidden="true"><span class="art-orbit"></span><span class="lab-picture mission-object">${scienceArt('pepper')}</span>${pup('tofi', 'mission-pup')}</div>
     <div class="mission-body"><span class="subject-tag">מדע</span><h3>${SCIENCE_TITLE}</h3><p>מְנַסּוֹת וּמְגַלּוֹת מָה קוֹרֶה</p><span class="mission-go" aria-hidden="true">${uiIcon('arrow')}</span></div>
-  </button>`;
+  </button>` : '';
   app.innerHTML = `${header()}<main id="main" class="home-page">
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
         <div class="hero-greeting">
-          <button type="button" class="home-pika-link" data-action="pikachu" aria-label="${PIKACHU_TITLE}">${pikachuImage('home-pikachu')}</button>
           <h1 id="hero-title" tabindex="-1">שלום <bdi>${ARIEL.name}</bdi>!</h1>
+        </div>
+        <div class="home-companions">
+          <button type="button" class="home-pika-link home-pika-start companion-entry" data-action="pikachu">${pikachuImage('home-pikachu')}<span>${settings.nikud ? PIKACHU_TITLE : 'מחפשות עם פיקאצ׳ו'}</span></button>
+          <button type="button" class="home-stitch-link companion-entry" data-action="stitch">${stitchImage('home-stitch')}<span>${settings.nikud ? STITCH_TITLE : 'מחפשות עם סטיץ׳'}</span></button>
         </div>
         <section class="home-adventure" id="home-adventure" aria-labelledby="home-adventure-title">${homeAdventureContent()}</section>
         <section class="daily-home" id="home-daily" aria-labelledby="daily-home-title">${homeDailyContent()}</section>
-        <div class="hero-actions"><button type="button" class="secondary-button home-pika-start" data-action="pikachu">${PIKACHU_TITLE}</button>
-        <button class="text-button welcome-listen" data-action="welcome">${uiIcon('sound')} לחצי ונכיר את החברים</button></div>
+        <div class="hero-actions"><button class="text-button welcome-listen" data-action="welcome">${uiIcon('sound')} לחצי ונכיר את החברים</button></div>
         <p id="audio-notice" class="audio-notice" role="status" hidden></p>
       </div><div class="hero-world">${scene()}</div>
     </section>
@@ -673,7 +675,7 @@ function render() {
   journeyController?.destroy(); journeyController=null;
   numberController?.destroy(); numberController=null;
   parkController?.destroy(); parkController=null;
-  pikachuController?.destroy(); pikachuController=null;
+  companionController?.destroy(); companionController=null;
   actOutController?.destroy(); actOutController=null;
   scienceController?.destroy(); scienceController=null;
   picnicController?.destroy(); picnicController=null;
@@ -693,7 +695,7 @@ function render() {
   else if (view === 'number-dictation') renderNumberDictation();
   else if (view === 'fruit-cutting') renderFruitCutting();
   else if (view === 'number-complete') app.innerHTML = header() + numberComplete(numberRound, numberSticker) + footer();
-  else if (view === 'pikachu') renderPikachu();
+  else if (view === 'pikachu' || view === 'stitch') renderCompanion();
   else if (view === 'science-menu') app.innerHTML = header() + scienceMenu(scienceDrafts, settings.nikud) + footer();
   else if (view === 'science-round') renderScience();
   else if (view === 'chapters') app.innerHTML = header() + chapterMap({ picnic, delivery, boatyard, theater }, settings.nikud) + footer();
@@ -1017,6 +1019,7 @@ function renderSettings() {
     <section class="offline-panel"><h3>משחק בלי אינטרנט</h3><p role="status">מכינות את המשחק לשימוש בלי אינטרנט…</p><button class="secondary-button" type="button" disabled>הורדת ההקלטות</button></section>
     <p class="parent-note character-art-credit">איורי הדמויות: PAW Patrol / Rubble &amp; Crew © Spin Master Ltd. · <a href="https://dev.pawpatrol.com/character-guide" target="_blank" rel="noopener noreferrer">מדריך הדמויות הרשמי של מפרץ ההרפתקאות</a> · <a href="https://images.squarespace-cdn.com/content/v1/5595e2eee4b0b03840079b28/1685761053151-FY46DCUKCA43ODFF4MKK/image-asset.jpeg" target="_blank" rel="noopener noreferrer">McCown Design Agency</a>. משחק השמות נכלל בתחום עברית.</p>
     <p class="privacy-note">האלבום המשפחתי משתף מדבקות, התקדמות, היסטוריית למידה ופארק עם המכשירים שחוברו אליו בקוד. הרפתקאות פתוחות נשמרות בדפדפן שבו התחילו, וציורי הכתיבה נשארים במכשיר.</p>
+    <p class="parent-note">הדמות סטיץ׳ שייכת לדיסני. האיור באדיבות <a href="https://www.disneyclips.com/images/lilostitch.html" target="_blank" rel="noopener noreferrer">Disneyclips.com</a>.</p>
     <p class="parent-note">איורים נוספים: <a href="assets/Twemoji-LICENSE.txt" target="_blank" rel="noopener">Twemoji · רישיון ושמות היוצרים</a>. כל התמונות שמורות בתוך המשחק.</p>
     <p class="save-notice" ${storageAvailable ? 'hidden' : ''}>הדפדפן לא מאפשר שמירה כרגע. אפשר לשחק, אבל ההתקדמות עלולה להיעלם בסגירה.</p>
     <button class="text-button reset-button" data-dialog="reset">${album.linked ? 'ניתוק מהאלבום ואיפוס המכשיר הזה' : 'איפוס ההתקדמות במכשיר הזה'}</button>`);
@@ -1035,12 +1038,14 @@ function renderSettings() {
     renderSoundButton();
     clockSchool?.updateProgress();
     numberController?.updateMotion?.();
-    if (view === 'pikachu') pikachuController?.update();
+    companionController?.update();
   };
   dialog.querySelector('[data-dialog="reset"]').onclick = () => {
     openDialog(`<h2 id="parent-title">לאפס את המכשיר הזה?</h2><p>המדבקות וההתקדמות בדפדפן הזה יימחקו. הגדרות המשחק יישמרו.${album.linked ? ' החיבור לאלבום המשפחתי יוסר. האלבום שכבר סונכרן יישמר עבור המכשירים האחרים.' : ''}</p><div class="dialog-actions"><button class="secondary-button" data-dialog="cancel-reset">ביטול</button><button class="primary-button" data-dialog="confirm-reset">איפוס ההתקדמות</button></div>`);
     dialog.querySelector('[data-dialog="cancel-reset"]').onclick = renderSettings;
-    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => { if (album.linked) album.disconnect(); learner.reset(); drafts={};journeyDrafts={};numberDrafts={};numberRound=null;scienceDrafts={};picnicController?.destroy({discard:true});picnicController=null;picnic=cleanPicnic(null);picnicRound=null;delivery=cleanDelivery(null);deliveryRound=null;boatyard=cleanBoatyard(null);boatRound=null;dailyController?.destroy({discard:true});dailyController=null;daily=cleanDaily(null);dailyRound=null;theater=cleanTheater(null);theaterRound=null;awardedRounds=[];writingPractice={mode:'trace',drafts:{}}; progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
+    dialog.querySelector('[data-dialog="confirm-reset"]').onclick = () => {
+      try { gameStorage.removeItem(STITCH_KEY); } catch { /* Storage may be unavailable. */ }
+      if (album.linked) album.disconnect(); learner.reset(); drafts={};journeyDrafts={};numberDrafts={};numberRound=null;scienceDrafts={};picnicController?.destroy({discard:true});picnicController=null;picnic=cleanPicnic(null);picnicRound=null;delivery=cleanDelivery(null);deliveryRound=null;boatyard=cleanBoatyard(null);boatRound=null;dailyController?.destroy({discard:true});dailyController=null;daily=cleanDaily(null);dailyRound=null;theater=cleanTheater(null);theaterRound=null;awardedRounds=[];writingPractice={mode:'trace',drafts:{}}; progress = freshProgress(); readingPractice = sanitizeReadingPractice(null); characterPractice = sanitizeCharacterPractice(null); save(); round = null; view = 'home'; render(); renderSettings(); };
   };
 }
 
@@ -1199,21 +1204,23 @@ function renderFruitCutting() {
   });
 }
 
-function openPikachu() {
+function openCompanion(id) {
   narrator.stop();
-  view = 'pikachu'; render(); focusTitle();
-  pikachuController.hop();
+  view = id; render(); focusTitle();
+  companionController.hop();
 }
 
-function renderPikachu() {
-  app.innerHTML = `${header()}<main id="main" class="pikachu-page"><div id="pikachu-root"></div></main>${footer()}`;
-  pikachuController = mountPikachu(document.querySelector('#pikachu-root'), {
+function renderCompanion() {
+  app.innerHTML = `${header()}<main id="main" class="pikachu-page ${view}-match"><div id="${view}-root"></div></main>${footer()}`;
+  companionController = mountPictureMatch(document.getElementById(`${view}-root`), {
+    companion: view, storage: gameStorage,
     nikud: () => settings.nikud, motion: () => settings.motion,
     sound: () => settings.sound,
   });
 }
 
 function openScienceMenu() {
+  if (!isPracticeAvailable('science')) return;
   narrator.stop();
   checkpoint();
   round = null;
@@ -1222,7 +1229,7 @@ function openScienceMenu() {
 }
 
 function startScience(path, restart = false) {
-  if (!Object.hasOwn(SCIENCE_EXPERIMENTS, path)) return;
+  if (!isPracticeAvailable('science') || !Object.hasOwn(SCIENCE_EXPERIMENTS, path)) return;
   narrator.stop();
   sciencePath = path;
   if (restart || !scienceDrafts[path]) scienceDrafts[path] = { index: 0, actions: [], complete: false, at: Date.now() };
@@ -1301,6 +1308,7 @@ function renderDeliveryRound() {
 }
 
 function openBoatyard() {
+  if (!isChapterAvailable('boatyard')) return;
   checkpoint(); narrator.stop(); round = null; journeyPlan = null; boatRound = null;
   view = 'boatyard-map'; render(); focusTitle();
   if (!boatyard.finished.length) announcements.say(BOATYARD.intro);
@@ -1308,7 +1316,7 @@ function openBoatyard() {
 }
 
 function startBoatyard(path) {
-  if (!Object.hasOwn(BOATYARD_MISSIONS, path)) return;
+  if (!isChapterAvailable('boatyard') || !Object.hasOwn(BOATYARD_MISSIONS, path)) return;
   checkpoint(); narrator.stop(); round = null; journeyPlan = null;
   boatRound = cleanBoatyardRound(path, boatyard.drafts[path]) || boatyardRound(path);
   view = 'boatyard-round'; render(); focusTitle();
@@ -1337,6 +1345,7 @@ function renderBoatyardRound() {
 }
 
 function openTheater() {
+  if (!isChapterAvailable('theater')) return;
   checkpoint(); narrator.stop(); round = null; journeyPlan = null; theaterRound = null;
   view = 'theater-map'; render(); focusTitle();
   prepareTheaterAudio('map');
@@ -1344,7 +1353,7 @@ function openTheater() {
 }
 
 function startTheater(path) {
-  if (!Object.hasOwn(THEATER_SHOWS, path)) return;
+  if (!isChapterAvailable('theater') || !Object.hasOwn(THEATER_SHOWS, path)) return;
   checkpoint(); narrator.stop(); round = null; journeyPlan = null;
   theaterRound = cleanTheaterRound(path, theater.drafts[path]);
   if (!theaterRound) {
@@ -1356,6 +1365,7 @@ function startTheater(path) {
 }
 
 function openTheaterStudio() {
+  if (!isChapterAvailable('theater')) return;
   checkpoint(); narrator.stop(); round = null; journeyPlan = null;
   view = 'theater-studio'; prepareTheaterAudio('studio'); render(); focusTitle();
 }
@@ -1562,7 +1572,8 @@ app.addEventListener('click', event => {
     case 'number-write': openNumberWriting(); break;
     case 'number-dictation': openNumberDictation(); break;
     case 'fruit-cutting': openFruitCutting(); break;
-    case 'pikachu': openPikachu(); break;
+    case 'pikachu':
+    case 'stitch': openCompanion(button.dataset.action); break;
     case 'science-menu': openScienceMenu(); break;
     case 'science-start': startScience(button.dataset.path, scienceDrafts[button.dataset.path]?.complete); break;
     case 'chapters': openChapters(); break;
@@ -1634,7 +1645,7 @@ app.addEventListener('click', event => {
     case 'parents': parentGate(); break;
     case 'sound':
       settings.sound = !settings.sound; narrator.stop(); narrator.enabled = settings.sound; save(); renderSoundButton();
-      if (view === 'pikachu') pikachuController?.updateSound();
+      if (companionController) companionController.updateSound();
       else if (settings.sound) replay();
       break;
     case 'break': checkpoint(); narrator.stop(); round = null; view = 'home'; render(); focusTitle(); announcements.say('break'); break;

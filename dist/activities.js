@@ -1,5 +1,5 @@
 import { SESSION_LENGTH } from './adventure.js?v=2.2.2-six';
-import { CLOCK_ACTIVITIES_ENABLED, isPracticeAvailable } from './availability.js';
+import { CLOCK_ACTIVITIES_ENABLED, isChapterAvailable, isPracticeAvailable } from './availability.js';
 
 export const LITTLE_STORIES = Object.freeze({
   id: 'little-stories',
@@ -18,6 +18,8 @@ export const ENGLISH_LISTENING = Object.freeze({
   icon: 'dog',
 });
 
+export const LISTEN_AND_CHOOSE_ANIMAL = 'listen-pick-animal';
+
 export const DAILY_ACTIVITY = Object.freeze({
   icon: CLOCK_ACTIVITIES_ENABLED ? 'train' : 'duck',
   he: Object.freeze(['מְשִׂימָה קְטַנָּה לְהַיּוֹם', CLOCK_ACTIVITIES_ENABLED
@@ -31,12 +33,18 @@ export const DAILY_ACTIVITY = Object.freeze({
 export const MY_JOURNEY = Object.freeze({
   id: 'my-journey',
   route: Object.freeze({ action: 'chapters' }),
-  he: Object.freeze(['הַמַּסָּע שֶׁלִּי', CLOCK_ACTIVITIES_ENABLED
-    ? 'פִּיקְנִיק שֶׁל קְרִיאָה, חִבּוּר וְשָׁעוֹן. אַנְגְּלִית עִם בּוֹבִּי, סִירוֹת עִם לוּלִי וְהַצָּגוֹת בַּתֵּאַטְרוֹן.'
-    : 'קְרִיאָה וְחִבּוּר בַּפִּיקְנִיק, אַנְגְּלִית עִם בּוֹבִּי, סִירוֹת עִם לוּלִי וְהַצָּגוֹת בַּתֵּאַטְרוֹן.']),
-  en: Object.freeze(['My Journey', CLOCK_ACTIVITIES_ENABLED
-    ? 'Read, add, and set the clock at the picnic. Listen with Bobi, build boats with Luli, and direct a show.'
-    : 'Read and add at the picnic. Listen with Bobi, build boats with Luli, and direct a show.']),
+  he: Object.freeze(['הַמַּסָּע שֶׁלִּי', [
+    CLOCK_ACTIVITIES_ENABLED ? 'קוֹרְאוֹת, מְחַבְּרוֹת וּמְכַוְּנוֹת שָׁעוֹן בַּפִּיקְנִיק.' : 'קוֹרְאוֹת וּמְחַבְּרוֹת בַּפִּיקְנִיק.',
+    'מַקְשִׁיבוֹת לְמִלִּים בְּאַנְגְּלִית עִם בּוֹבִּי.',
+    isChapterAvailable('boatyard') && 'בּוֹנוֹת סִירוֹת עִם לוּלִי.',
+    isChapterAvailable('theater') && 'מַעֲלוֹת הַצָּגָה בַּתֵּאַטְרוֹן.',
+  ].filter(Boolean).join(' ')]),
+  en: Object.freeze(['My Journey', [
+    CLOCK_ACTIVITIES_ENABLED ? 'Read, add, and set the clock at the picnic.' : 'Read and add at the picnic.',
+    'Listen for English words on Bobi’s delivery trip.',
+    isChapterAvailable('boatyard') && 'Build boats with Luli.',
+    isChapterAvailable('theater') && 'Direct a show.',
+  ].filter(Boolean).join(' ')]),
   icon: 'boat',
 });
 
@@ -71,9 +79,9 @@ export const DELIVERY = Object.freeze({
 });
 
 export const DELIVERY_MISSIONS = Object.freeze({
-  aboard: { title: 'מִי עוֹלֶה לַסִּירָה?', description: 'מַקְשִׁיבוֹת וּמַעֲלוֹת חַיּוֹת לַסִּירָה.', icon: 'duck', prompt: 'delivery-aboard' },
-  cargo: { title: 'אוֹסְפוֹת צִיּוּד', description: 'מַקְשִׁיבוֹת וְאוֹרְזוֹת אֶת הַצִּיּוּד בַּסַּל.', icon: 'basket', prompt: 'delivery-pack' },
-  route: { title: 'מַגִּיעוֹת לַחֲבֵרִים', description: 'מַקְשִׁיבוֹת וּמְבִיאוֹת חֲבִילָה לַחָבֵר הַנָּכוֹן.', icon: 'gift', prompt: 'delivery-route' },
+  aboard: { title: 'מִי עוֹלֶה לַסִּירָה?', description: 'בּוֹחֲרוֹת חַיָּה שֶׁתַּעֲלֶה לַסִּירָה.', icon: 'duck', prompt: LISTEN_AND_CHOOSE_ANIMAL },
+  cargo: { title: 'מָה נָשִׂים בַּסַּל?', description: 'מַקְשִׁיבוֹת וּבוֹחֲרוֹת מָה לֶאֱרֹז.', icon: 'basket', prompt: 'journey-english-one' },
+  route: { title: 'מִי יְקַבֵּל חֲבִילָה?', description: 'בּוֹחֲרוֹת חַיָּה שֶׁתְּקַבֵּל חֲבִילָה.', icon: 'gift', prompt: LISTEN_AND_CHOOSE_ANIMAL },
 });
 
 export const BOATYARD = Object.freeze({

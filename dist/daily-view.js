@@ -1,5 +1,5 @@
 import { art, uiIcon } from './art.js';
-import { DAILY_ACTIVITY } from './activities.js';
+import { DAILY_ACTIVITY, LISTEN_AND_CHOOSE_ANIMAL } from './activities.js';
 import { chapterText } from './chapter-ui.js';
 import { mountClockDial } from './clock-dial.js?v=2.2.4-practice';
 import { learningTime } from './clock-learning.js?v=2.2.4-practice';
@@ -24,7 +24,7 @@ export function prepareDailyAudio(round) {
     audioId = round.id;
     const clock = round.path === 'clock';
     const prompts = round.questions.flat().flatMap(q => clock ? trainCue(q) : [targetClip(q)]);
-    const cues = clock ? ['picnic-clock-model', 'daily-train-go'] : ['daily-pond'];
+    const cues = clock ? ['picnic-clock-model', 'daily-train-go'] : [LISTEN_AND_CHOOSE_ANIMAL];
     const keys = new Set(['daily-example', 'daily-fresh', ...cues, ...prompts]);
     prepareRoundAudio = recordingPreloader([...keys]);
   }
@@ -90,13 +90,18 @@ export function mountDaily(root, { round, nikud, motion, play, onSave, onSuccess
     const listen = find('[data-daily-action=listen]');
     speaking = true;
     listen?.setAttribute('aria-busy', 'true');
-    return Promise.resolve(play([...prefix, ...(first ? ['daily-pond'] : []), targetClip(q)], manual)).then(played => {
+    return Promise.resolve(play([...prefix, ...(first ? [LISTEN_AND_CHOOSE_ANIMAL] : []), targetClip(q)], manual)).then(played => {
       if (!alive || tag !== sequence) return false;
       speaking = false;
       heard ||= played === true;
       root.dataset.dailyAudio = heard ? 'ready' : 'waiting';
       listen?.removeAttribute('aria-busy');
-      if (manual && !heard && !round.resolved) note('לִחְצִי שׁוּב עַל הָרַמְקוֹל.');
+      for (const choice of root.querySelectorAll('[data-daily-piece]')) {
+        choice.disabled = !heard || round.resolved || round.state.attempted.includes(choice.dataset.dailyPiece);
+      }
+      if (!heard && !round.resolved) note(navigator.onLine
+        ? 'כְּדֵי לִשְׁמֹעַ, לִחְצִי עַל הָרַמְקוֹל.'
+        : 'אֶפְשָׁר לְנַסּוֹת שׁוּב כְּשֶׁיִּהְיֶה אִינְטֶרְנֶט.');
       return heard;
     });
   }
@@ -158,7 +163,7 @@ export function mountDaily(root, { round, nikud, motion, play, onSave, onSuccess
     find('.daily-stage').innerHTML = `<button class="primary-button daily-listen" data-daily-action="listen">${uiIcon('sound')} ${label('שִׁמְעִי אֶת הַמִּלָּה')}</button>
       <div class="daily-animal-board"><div class="daily-animal-choices" role="group" aria-label="בחירת חיה">
         ${q.choices.map(word => `<button class="delivery-piece${placed && word === q.word ? ' daily-placed-choice' : ''}"
-          data-daily-piece="${word}" aria-label="${animals[word]}" ${placed || round.state.attempted.includes(word) ? 'disabled' : ''}>
+          data-daily-piece="${word}" aria-label="${animals[word]}" ${!heard || placed || round.state.attempted.includes(word) ? 'disabled' : ''}>
           <span class="delivery-picture">${art(word)}</span></button>`).join('')}</div>${shore(q, placed)}</div>`;
   }
 
@@ -170,14 +175,14 @@ export function mountDaily(root, { round, nikud, motion, play, onSave, onSuccess
     root.dataset.dailyVariant = round.state.renewed ? 'fresh' : 'first';
     const q = task(), example = round.state.example;
     const cue = example ? CLIPS['daily-example'].text : clock
-      ? `${CLIPS['daily-train'].text} ${CLIPS[durationKey(q)].text}.` : CLIPS['daily-pond'].text;
+      ? `${CLIPS['daily-train'].text} ${CLIPS[durationKey(q)].text}.` : CLIPS[LISTEN_AND_CHOOSE_ANIMAL].text;
     root.innerHTML = `<div class="picnic-topline"><button class="text-button back-button" data-action="home">
       ${uiIcon('home')} ${label('לְבֵית הַחֲבֵרִים')}</button><span>${label(`צַעַד ${round.index + 1} מִתּוֹךְ ${round.questions.length}`)}</span></div>
     <div class="picnic-track" aria-hidden="true">${round.questions.map((_, i) =>
       `<span class="${i < round.index ? 'passed' : i === round.index ? 'current' : ''}"></span>`).join('')}</div>
     <section class="picnic-step-card daily-step">
       <div class="picnic-task-title"><h1 tabindex="-1">${label(path.title)}</h1>
-        <button class="circle-button" data-daily-action="replay" aria-label="השמעת ההוראה">${uiIcon('sound')}</button></div>
+        ${clock ? `<button class="circle-button" data-daily-action="replay" aria-label="השמעת ההוראה">${uiIcon('sound')}</button>` : ''}</div>
       <p class="daily-cue">${label(cue)}</p><div class="daily-stage"></div>
       <p class="picnic-feedback daily-feedback" role="status"></p>
       <div class="picnic-controls">

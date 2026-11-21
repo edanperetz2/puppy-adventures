@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { MY_JOURNEY, PICNIC, PICNIC_MISSIONS, isPicnicReady } from '../dist/activities.js';
-import { CLOCK_ACTIVITIES_ENABLED } from '../dist/availability.js';
+import { CLOCK_ACTIVITIES_ENABLED, isChapterAvailable } from '../dist/availability.js';
 import { chapterMap } from '../dist/chapter-map.js';
 import { actOutMatches, actOutPlan, canActOut } from '../dist/act-out.js?v=2.7.0-science';
 import { clockParts, clockTotal } from '../dist/clock-learning.js?v=2.2.4-practice';
@@ -34,10 +34,17 @@ test('the guide and chapter share a six-step curriculum with distinct, solvable 
             const [{ index: piece, target }] = picnicReadingModel(q, plan.id);
             assert.ok(actOutMatches(word, structure, piece, target));
             assert.ok(CLIPS[`he-${word.id}`]);
+            assert.deepEqual(picnicPrompt(step, true), [`he-${word.id}`]);
+            assert.equal(picnicPrompt(step).includes(`he-${word.id}`), index === 0);
             problem.add(word.he);
           } else if (path === 'addition') {
             assert.ok(q.a + q.b <= cap);
             assert.equal(q.move, index < 4);
+            if (q.move) {
+              assert.equal(q.item, 'apple');
+              assert.deepEqual(picnicPrompt(step), ['picnic-tap-apples']);
+              assert.deepEqual(picnicPrompt({ ...step, state: { groups: [1] } }), ['picnic-tap-next']);
+            }
             if (index) {
               assert.equal(q.choices.filter(number => number === q.a + q.b).length, 1);
               assert.equal(q.choices.length, new Set(q.choices).size);
@@ -58,6 +65,20 @@ test('the guide and chapter share a six-step curriculum with distinct, solvable 
         }
       }
     }
+  }
+});
+
+test('paused chapters stay out of the map and resume card, including saved rounds from an earlier release', () => {
+  const progress = { finished: [], drafts: {} };
+  const map = chapterMap({ picnic: progress, delivery: progress, boatyard: progress, theater: progress }, false);
+  const history = { drafts: {}, journeyDrafts: {}, numberDrafts: {}, scienceDrafts: {},
+    picnicDrafts: { reading: { at: 2 } }, deliveryDrafts: { cargo: { at: 4 } } };
+  for (const [chapter, path] of [['boatyard', 'shape'], ['theater', 'party']]) {
+    assert.equal(map.includes(`data-action="${chapter}"`), isChapterAvailable(chapter));
+    const saved = { [path]: { at: 6 } };
+    const latest = latestPlayedDraft({ ...history, [`${chapter}Drafts`]: saved });
+    assert.equal(latest.kind, isChapterAvailable(chapter) ? chapter : 'delivery');
+    assert.equal(saved[path].at, 6);
   }
 });
 

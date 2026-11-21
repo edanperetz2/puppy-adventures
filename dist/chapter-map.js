@@ -1,5 +1,6 @@
 import { AVAILABLE_PICNIC_MISSIONS, BOATYARD, BOATYARD_MISSIONS, DELIVERY, DELIVERY_MISSIONS, MY_JOURNEY, PICNIC, THEATER, THEATER_SHOWS } from './activities.js';
 import { uiIcon } from './art.js';
+import { isChapterAvailable } from './availability.js';
 import { chapterText } from './chapter-ui.js';
 import { deliveryScene } from './delivery-view.js';
 import { picnicScene } from './picnic-view.js';
@@ -9,8 +10,8 @@ import { theaterPreview } from './theater-ui.js';
 export function chapterEntry(nikud) {
   const label = chapterText(nikud);
   return `<section class="picnic-entry chapter-entry" aria-labelledby="chapter-entry-title">
-    ${boatyardScene()}<div class="picnic-entry-copy"><h2 id="chapter-entry-title">${label(MY_JOURNEY.he[0])}</h2>
-    <p>${label('פִּיקְנִיק, מִשְׁלוֹחִים, סִירוֹת וְהַצָּגוֹת')}</p>
+    ${deliveryScene()}<div class="picnic-entry-copy"><h2 id="chapter-entry-title">${label(MY_JOURNEY.he[0])}</h2>
+    <p>${label(MY_JOURNEY.he[1])}</p>
     <button class="primary-button" data-action="${MY_JOURNEY.route.action}">${label('לַמַּסָּע שֶׁלִּי')} ${uiIcon('arrow')}</button></div>
   </section>`;
 }
@@ -18,6 +19,7 @@ export function chapterEntry(nikud) {
 export function chapterMap({ picnic, delivery, boatyard, theater }, nikud) {
   const label = chapterText(nikud);
   const choice = (chapter, renderScene, progress, missions) => {
+    if (!isChapterAvailable(chapter.id)) return '';
     const completed = progress.finished.filter(path => Object.hasOwn(missions, path)).length;
     return `<button class="chapter-choice chapter-${chapter.id}" data-action="${chapter.route.action}">
     ${renderScene(progress.finished)}

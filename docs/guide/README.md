@@ -2,7 +2,9 @@
 
 The in-game guide uses [game-guide-current.webp](../../dist/assets/game-guide-current.webp). The image shows the current activity map with English on pale blue at the left and Hebrew on cream at the right. [Guide text](../../dist/guide-content.js) records both editions of the copy. Little Stories and My Journey share their copy with the [game's activity definitions](../../dist/activities.js). The original posters and verification records below are release history.
 
-The Luli chapter’s [harbor illustration](../../dist/assets/boatyard-harbor.webp) was made with the built-in ImageGen tool.
+The Stitch portrait on the home screen and in the guide uses the smiling seated illustration from Disneyclips. The character belongs to Disney. The illustration is credited in the parent settings and bundled locally for offline play. [Stitch illustrations and non-commercial use terms](https://www.disneyclips.com/images/lilostitch.html)
+
+The paused Luli chapter’s [harbor illustration](../../dist/assets/boatyard-harbor.webp) was made with the built-in ImageGen tool.
 
 > Illustrate a peaceful lakeside boat workshop for a five-year-old’s learning game. Wide landscape storybook illustration. A honey-colored wooden jetty and a little workshop sit on the right among reeds and pine trees. Calm blue water fills the center and left, with soft late-afternoon light and a clear horizon. Use warm paper-grain gouache, rounded shapes, and a muted palette of teal, cream, coral, and amber. Leave open water in the middle for the game’s boat animation. Avoid characters, boats, words, logos, and interface elements.
 

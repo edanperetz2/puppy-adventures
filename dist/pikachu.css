@@ -1,21 +1,37 @@
-.home-pika-link {
-  display: block;
-  flex: 0 0 auto;
-  padding: 0;
-  border-radius: 50%;
-  background: transparent;
+.home-companions {
+  display: grid;
+  width: min(100%, 425px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(8px, 1.3vw, 15px);
+  margin-top: 13px;
 }
-.home-pika-start.secondary-button {
-  min-height: 44px;
-  margin-block-start: 8px;
-  padding: 8px 14px;
-  gap: 9px;
-  border-color: #d8b963;
-  background: #fff0bd;
+.companion-entry {
+  display: grid;
+  justify-items: center;
+  align-content: end;
+  min-width: 0;
+  padding: 5px 4px 8px;
+  border: 1px solid #e2cf99;
+  border-radius: 20px;
+  background: linear-gradient(to top, #fff1c3, #fffaf0);
   color: #573712;
-  font-size: clamp(14px, 2vw, 17px);
+  font-size: clamp(14px, 1.8vw, 18px);
+  font-weight: 600;
+  line-height: 1.5;
 }
-.home-pika-start > svg { width: 19px; }
+.home-stitch-link {
+  border-color: #add7df;
+  background: linear-gradient(to top, #d6eff1, #f4fbff);
+  color: #255568;
+}
+.home-companions img {
+  display: block;
+  width: min(100%, clamp(115px, 13vw, 168px));
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 2px #344a3829);
+}
 
 .pikachu-page {
   max-width: 800px;
@@ -243,6 +259,34 @@
 }
 .pika-actions button { min-height: 44px; }
 .pika-board .audio-notice { margin-block-start: 12px; }
+
+.stitch-match .pika-board {
+  border-color: #c5dedd;
+  background: #f7fcfb;
+}
+.stitch-match .pika-stage {
+  background:
+    radial-gradient(ellipse at 20% 10%, #fffbed 0 6%, transparent 6.5%),
+    linear-gradient(to bottom, #dbf0f6 0 48%, #97d8dd 48% 61%, #e5faf4 62% 65%, #f5e4bb 66%);
+}
+.stitch-match .pika-clue { border-color: #abd4d4; background: #e4f4f2; }
+.stitch-match .pika-choices button { border-color: #c3d9d5; }
+.stitch-match .pika-choices .pika-found { border-color: #418d63; }
+.stitch-match .pika-character > .ui-icon { color: #225d71; background: #ecfaff; box-shadow: 0 0 0 1px #9dcbd4; }
+.stitch-prompt { margin: 2px 0 6px; color: #315e68; font-size: clamp(15px, 3vw, 18px); }
+.stitch-hello:not(:empty) {
+  position: absolute;
+  z-index: 2;
+  top: 13%;
+  left: calc(50% + clamp(47px, 9vw, 85px));
+  padding: 3px 10px;
+  border-radius: 16px 16px 16px 3px;
+  background: #fff;
+  color: #235566;
+  box-shadow: 0 1px 5px #153e502b;
+  font-weight: 600;
+  pointer-events: none;
+}
 
 @media (max-width: 570px) {
   .pikachu-page { margin-inline: 12px; padding-block-start: 4px; }
