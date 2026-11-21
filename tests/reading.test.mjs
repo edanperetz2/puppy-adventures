@@ -6,6 +6,22 @@ import { art, hasArt } from '../dist/art.js';
 import { hebrewSpeech } from '../dist/hebrew-pronunciation.js';
 import { createSession, DEFAULT_SETTINGS, sanitizeSettings, SESSION_LENGTH } from '../dist/engine.js';
 import { VOCABULARY, distinctWordPictures } from '../dist/vocabulary.js';
+import { classicReadingHeading } from '../dist/classic-reading-heading.js';
+
+test('the word garden titles a forward word question with exactly the printed word and keeps reverse and listening headings neutral', () => {
+  for (const word of WORDS.filter(entry => !entry.scene && !entry.he.includes(' '))) {
+    const q = { type: 'read', word };
+    for (const nikud of [true, false]) {
+      const prompt = classicReadingHeading(q, nikud);
+      assert.ok(prompt.html.startsWith('<h1 id="question-title" tabindex="-1"'));
+      assert.ok(prompt.html.endsWith(`lang="he" dir="rtl">${nikud ? word.pointed : word.he}</h1>`), word.id);
+      assert.equal(prompt.clip, `he-${word.id}`);
+      assert.equal(prompt.speakerLabel, 'השמעת המילה');
+    }
+  }
+  assert.equal(classicReadingHeading({ type: 'read', direction: 'picture-sentence' }, true), null);
+  assert.equal(classicReadingHeading({ type: 'listen' }, true), null);
+});
 
 function seeded(seed) { seed = Math.imul(seed + 1, 0x9e3779b1) >>> 0; return () => { seed = (1664525 * seed + 1013904223) >>> 0; return seed / 4294967296; }; }
 const lettersIn = text => [...text.matchAll(/[א-ת]/gu)].length;

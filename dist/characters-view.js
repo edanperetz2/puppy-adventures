@@ -32,9 +32,8 @@ export function characterMenu(settings, practice) {
     <details class="character-roster"><summary>נכיר את החברים ואת השמות שלהם ${uiIcon('sound')}</summary><div class="character-roster-grid">${cast.map(c => `<button data-action="character-sound" data-character="${c.id}" aria-label="שמיעת השם ${c.he}">${characterPortrait(c, descriptions[c.id], '', collection)}<b lang="he" dir="rtl">${characterName(c, settings.nikud)}</b>${uiIcon('sound')}</button>`).join('')}</div></details><p id="audio-notice" class="audio-notice" role="status" hidden></p></main>`;
 }
 
-export function characterQuestion(q, nikud) {
-  if (q.direction === 'picture-name') return `<div class="character-target"><span class="character-picture-halo" aria-hidden="true"></span>${characterPortrait(q.character, descriptions[q.character.id], '', q.collection)}<p>נמצא את השם שמתאים לתמונה</p></div>`;
-  return `<div class="word-card character-word-card"><span class="card-label">מה כתוב כאן?</span><div class="target-word" lang="he" dir="rtl">${characterName(q.character, nikud)}</div><span class="word-underline"></span></div>`;
+export function characterPictureQuestion(q) {
+  return `<div class="character-target"><span class="character-picture-halo" aria-hidden="true"></span>${characterPortrait(q.character, descriptions[q.character.id], '', q.collection)}<p>נמצא את השם שמתאים לתמונה</p></div>`;
 }
 
 export function characterAnswer(q, option, nikud) {

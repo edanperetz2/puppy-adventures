@@ -34,12 +34,6 @@ function handwrittenWord(word) {
   </svg>`;
 }
 
-export function wordFormPrompt(word, language, nikud) {
-  const hebrew = language === 'hebrew';
-  const text = hebrew && nikud ? word.pointed : word.plain;
-  return `<div class="word-form-prompt"><bdi lang="${hebrew ? 'he' : 'en'}" dir="${hebrew ? 'rtl' : 'ltr'}">${escapeHtml(text)}</bdi></div>`;
-}
-
 export function wordFormOption(word, language) {
   return language === 'hebrew' ? handwrittenWord(word.plain)
     : `<bdi class="word-form-lowercase" lang="en" dir="ltr">${escapeHtml(word.plain.toLowerCase())}</bdi>`;

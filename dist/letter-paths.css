@@ -73,7 +73,7 @@
 .letter-word-choices .art{width:38px;height:38px}
 .word-trace-card{display:grid;justify-items:center;gap:10px;max-width:620px;margin:auto;text-align:center}
 .word-trace-title{display:flex;align-items:center;justify-content:center;gap:12px}.word-trace-title .art{width:64px;height:64px}
-.word-trace-title h1{font-size:20px;margin:0}.word-trace-title bdi{font-size:28px;font-weight:650}.word-trace-card .word-letter-count{margin:0}
+.word-trace-title h1{font-size:clamp(28px,5vw,38px);line-height:1.5;margin:0}.word-trace-card .word-letter-count{margin:0}
 .written-word{display:flex;max-width:100%;gap:4px}.word-glyph{width:clamp(32px,8vw,66px);aspect-ratio:1;border-radius:10px;background:#f4eff5}
 .word-glyph .letter-shape{color:#867b88}.word-glyph[aria-current]{outline:2px solid #80569c;background:#efdff8}.word-glyph.written{background:#e6f3e9}.word-glyph.written .letter-shape{color:#33775b}
 .word-trace-card .letter-pad-card{width:min(100%,330px)}
@@ -129,20 +129,6 @@
   .word-form-menu-art .word-form-slip { border-radius: 10px; font-size: 23px; }
 }
 
-.word-form-game .question-visual { min-height: 0; padding-block: 18px 24px; }
-.word-form-prompt {
-  display: grid;
-  place-items: center;
-  width: min(100%, 410px);
-  padding: 10px 16px 12px;
-  min-height: 120px;
-  color: #513d30;
-  background: #fbf0d9;
-  border: 1px solid #e4cfaa;
-  border-bottom: 4px solid #e5cdaa;
-  border-radius: 22px;
-}
-.word-form-prompt bdi { font-size: clamp(38px, 7vw, 64px); font-weight: 600; line-height: 1.45; }
 .word-form-game .answer-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
@@ -160,8 +146,6 @@
 .word-handwriting { display: block; width: auto; }
 .word-form-game .answer-button .word-handwriting { height: 79px; max-width: 100%; }
 @media (max-width: 650px) {
-  .word-form-game .question-visual { padding-block: 8px 16px; }
-  .word-form-prompt { min-height: 83px; padding: 5px 10px 8px; border-radius: 17px; }
   .word-form-game .answer-grid,
   .word-form-game .answer-grid.two-options {
     grid-template-columns: minmax(0, 1fr);

@@ -4,12 +4,27 @@ import { LETTERS, letterGroup, letterShape, advanceTrace } from '../dist/letters
 import { HEBREW_HANDWRITING } from '../dist/hebrew-handwriting.js';
 import { writingDuration, PEN_LIFT_MS } from '../dist/letter-pad.js';
 import { CLIPS } from '../dist/content.js';
-import { WRITING_WORDS, savedWritingWord, wordLabel, writingWordChoices } from '../dist/letter-words.js';
+import { WRITING_WORDS, mountWritingWord, savedWritingWord, wordLabel, writingWordChoices } from '../dist/letter-words.js';
 import { hasArt } from '../dist/art.js';
 import { unpackRound, packRound } from '../dist/session-state.js';
 import { createSession, DEFAULT_SETTINGS, sanitizeSettings, sanitizeProgress, finishSession } from '../dist/engine.js';
 
 function seeded(seed) { return () => { seed = (1664525 * seed + 1013904223) >>> 0; return seed / 4294967296; }; }
+
+test('the tracing heading keeps the word Ariel wrote in its chosen form through completion', () => {
+  for (const [language, id, form, nikud, text] of [
+    ['hebrew', 'sea', 'main', true, 'יָם'], ['hebrew', 'sea', 'alternate', false, 'ים'],
+    ['english', 'sun', 'main', false, 'SUN'], ['english', 'sun', 'alternate', false, 'sun'],
+  ]) {
+    const host = { addEventListener() {} };
+    const word = WRITING_WORDS[language].find(w => w.id === id);
+    const view = mountWritingWord(host, { language, word, index: word.indices.length, form, nikud });
+    const [, attrs, heading] = host.innerHTML.match(/<h1\b([^>]*)>([^<]*)<\/h1>/u);
+    assert.equal(heading, text);
+    assert.ok(attrs.includes(language === 'hebrew' ? 'lang="he" dir="rtl"' : 'lang="en" dir="ltr"'));
+    view.destroy();
+  }
+});
 
 test('Short writing words have pictures, recorded names, and the exact strokes for the printed clue', () => {
   for (const [language, alphabet] of Object.entries(LETTERS)) {

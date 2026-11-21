@@ -79,7 +79,8 @@ export function mountWritingWord(root, { language, form, word, index, nikud, mot
     const forms = models.map((letter, i) => `<span class="word-glyph ${i < index ? 'written' : ''}" ${i === index ? 'aria-current="step"' : ''}>${letterShape(letter)}</span>`).join('');
     root.innerHTML = `<button type="button" class="text-button" data-word-button="back">${uiIcon('arrow')} בחזרה לאותיות</button>
       <section class="letter-lesson-card word-trace-card"><div class="word-trace-title">${art(word.id)}
-        <div><h1 tabindex="-1">${finished ? 'כָּתַבְתְּ אֶת הַמִּלָּה!' : 'כּוֹתְבוֹת מִלָּה'}</h1><bdi dir="${dir}" lang="${he ? 'he' : 'en'}">${text}</bdi></div>
+        <div><h1 tabindex="-1" lang="${he ? 'he' : 'en'}" dir="${dir}">${text}</h1>
+          ${finished ? `<small>${nikud ? 'כָּתַבְתְּ אֶת הַמִּלָּה!' : 'כתבת את המילה!'}</small>` : ''}</div>
         <button class="circle-button" type="button" data-word-button="sound" aria-label="שמיעת המילה">${uiIcon('sound')}</button></div>
         <div class="written-word" dir="${dir}" aria-label="${text}">${forms}</div>
         ${finished ? `<button type="button" class="primary-button" data-word-button="back">נבחר מילה נוספת ${uiIcon('arrow')}</button>` :

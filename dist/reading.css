@@ -8,6 +8,9 @@
 .reading-stage-count{font-size:11px;color:#8f7b96;line-height:1.6;margin-top:3px}.scene-feeding{transform-origin:center}@media(prefers-reduced-motion:no-preference){.scene-feeding{animation:feed-nod 2s ease-in-out infinite}@keyframes feed-nod{0%,100%{transform:rotate(0deg)}50%{transform:rotate(3deg)}}}
 .reading-caption-entry { margin-block: 14px 0; }
 .reading-game .reading-prompt .question-heading { margin-block-end: clamp(12px, 2vw, 22px); }
+.reading-prompt .question-heading > div { min-width: 0; }
+.game-page .reading-prompt h1.reading-word { max-width: none; font-size: clamp(32px, 5.5vw, 54px); line-height: 1.55; }
+.game-board.reading-prompt > .answer-grid { grid-column: 1 / -1; }
 .reading-game .question-heading h1.reading-sentence { max-width: none; font-size: clamp(24px, 4.2vw, 36px); line-height: 1.65; }
 .reading-game .reading-prompt .answer-grid { grid-column: 1 / -1; width: min(100%, 660px); }
 .reading-game .caption-picture { display: grid; place-items: center; width: min(100%, 274px); border-radius: 22px; margin: auto; background: #f4f5e8; }

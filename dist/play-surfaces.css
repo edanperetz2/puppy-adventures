@@ -115,7 +115,7 @@
 
 /* Flashcards are unruled inside the reading area. The punched edge and
    offset sheet are outside the letters, so even low vowel marks stay clear. */
-.game-board :is(.word-card, .word-form-prompt, .letter-question-card) {
+.game-board :is(.word-card, .letter-question-card) {
   color: var(--page-ink);
   border: 1px solid #ddcba4;
   border-radius: 16px 20px 20px 16px;

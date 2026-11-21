@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { CHARACTERS, CHARACTER_COLLECTIONS, CHARACTER_LEVELS, CHARACTER_MODES, characterPool, characterArtwork, characterTier, characterPortrait, characterCollection, selectCharacterLevel, createCharacterSession, sanitizeCharacterPractice, finishCharacterPractice, nextCharacterLevel } from '../dist/characters.js';
-import { CHARACTER_DESCRIPTIONS, characterMenu, characterQuestion, characterAnswer, characterName } from '../dist/characters-view.js';
+import { CHARACTER_DESCRIPTIONS, characterMenu, characterPictureQuestion, characterAnswer, characterName } from '../dist/characters-view.js';
+import { classicReadingHeading } from '../dist/classic-reading-heading.js';
 import { CLIPS, MISSION_IDS, MISSIONS } from '../dist/content.js';
 import { createSession, DEFAULT_SETTINGS, freshProgress, finishSession, sanitizeProgress, sanitizeSettings } from '../dist/engine.js';
 import { compactContribution, withPending } from '../dist/sync.js';
@@ -93,13 +94,20 @@ test('Every character level has six unambiguous steps and covers the full cast a
 
 test('Reading targets and choices do not reveal the other half of the matching task', () => {
   for (const level of ['family', 'paw-all']) for (const q of createCharacterSession({ characterLevel: level }, seeded(35))) {
-    const question = characterQuestion(q, true);
     if (q.direction === 'picture-name') {
+      assert.equal(classicReadingHeading(q, true), null);
+      const question = characterPictureQuestion(q);
       assert.ok(!question.includes(q.character.he) && !question.includes(q.character.pointed));
       assert.match(question, /<svg/u);
       for (const option of q.options) { const html = characterAnswer(q, option, true); assert.ok(html.includes(option.pointed)); assert.doesNotMatch(html, /<svg|<img|href=/u); }
     } else {
-      assert.ok(question.includes(q.character.pointed)); assert.doesNotMatch(question, /<svg|<img/u);
+      for (const nikud of [true, false]) {
+        const heading = classicReadingHeading(q, nikud);
+        assert.match(heading.html, /^<h1\b/u);
+        assert.ok(heading.html.endsWith(`lang="he" dir="rtl">${characterName(q.character, nikud)}</h1>`));
+        assert.equal(heading.clip, q.character.clip);
+        assert.equal(heading.speakerLabel, 'השמעת השם');
+      }
       for (const option of q.options) { const html = characterAnswer(q, option, true); assert.match(html, /<svg/u); assert.ok(!html.includes(option.he) && !html.includes(option.pointed)); }
     }
   }

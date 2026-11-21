@@ -120,11 +120,14 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
     message='כָּל הַכָּבוֹד! הִצְלַחְנוּ בְּיַחַד!';persist();celebrating=true;render();say(['journey-success',...(q().kind==='context'?[`journey-context-${q().word.id}`]:q().word?.id?[`he-${q().word.id}`]:q().clip?[q().clip]:[])]);root.querySelector('[data-j="next"]')?.focus({preventScroll:false});
   }
   function retry(){help();message='נַנְסֶה שׁוּב. אֶפְשָׁר לְקַבֵּל רֶמֶז ♡';persist();render();say('try-again');}
+  function workshopShowsWord(task) {
+    return plan.mode === 'workshop' && task.kind !== 'context' && (task.model || s().showModel || s().resolved);
+  }
   function wordView(task){
     if(task.kind==='context')return `<div class="workshop-model">${art(task.word.id)}</div><p class="journey-instruction">${hebrew('אֵיזוֹ מִלָּה מַשְׁלִימָה אֶת הַמִּשְׁפָּט?')}</p><div class="context-choices">${task.choices.map(w=>`<button data-j="answer" data-answer="${w.id}" ${s().resolved?'disabled':''}>${nikud?w.pointed:w.he}</button>`).join('')}</div>`;
     const pieces=task.pieces,selected=s().chosen||[],missing=task.kind==='missing';
-    const text=nikud?task.word.pointed:task.word.he;
-    return `<div class="workshop-model">${art(task.word.id)}<button class="circle-button" data-j="word" aria-label="שמיעת המילה">${uiIcon('sound')}</button>${(task.model||s().showModel)?`<strong lang="he" dir="rtl">${text}</strong>`:''}</div>
+    const wordAudio = workshopShowsWord(task) ? '' : `<button class="circle-button" data-j="word" aria-label="שמיעת המילה">${uiIcon('sound')}</button>`;
+    return `<div class="workshop-model">${art(task.word.id)}${wordAudio}</div>
       <p class="journey-instruction">${missing?'אֵיזוֹ אוֹת חֲסֵרָה?':'נִגַּע בַּחֲלָקִים לְפִי הַסֵּדֶר. אֶפְשָׁר גַּם לִגְרֹר.'}</p>
       <div class="word-slots" dir="rtl" data-word-drop>${pieces.map((p,i)=>`<span class="word-slot ${missing&&i===task.missing?'missing-slot':''}">${missing?i===task.missing?(selected.length?task.tiles.find(t=>t.id===selected[0]).text:'?'):p:selected[i]!==undefined?task.tiles.find(t=>t.id===selected[i]).text:''}</span>`).join('')}</div>
       <div class="word-tiles" dir="rtl" role="group" aria-label="חלקי המילה">${task.tiles.map(t=>`<button data-j="tile" data-tile="${t.id}" ${selected.includes(t.id)||s().resolved?'disabled':''}>${t.text}${task.kind==='chunks'?'<span aria-hidden="true">♪</span>':''}</button>`).join('')}</div>
@@ -150,9 +153,7 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
   function englishView(task){
     if (task.kind === 'english-picture') return englishPictureView(task, s());
     if (task.readPicture) {
-      return `<p class="journey-instruction">קִרְאִי אֶת הַמִּלָּה וּבַחֲרִי תְּמוּנָה.</p>
-        <div class="blend-reading-word" lang="en" dir="ltr"><strong>${task.word.toUpperCase()}</strong> <span>${task.word}</span></div>
-        <button class="listen-orb" data-j="listen" aria-label="שמיעת המילה באנגלית">${uiIcon('sound')}</button>
+      return `<p class="journey-instruction">${hebrew('קִרְאִי אֶת הַמִּלָּה וּבַחֲרִי תְּמוּנָה.')}</p>
         <div class="journey-choices">${task.choices.map(id => `<button data-j="answer" data-answer="${id}" aria-label="${WORDS.find(w => w.id === id).he}" ${s().resolved ? 'disabled' : ''}>${learningPicture(id)}</button>`).join('')}</div>`;
     }
     if(task.kind==='sound'||task.kind==='blend') {
@@ -199,9 +200,10 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
   }
   function questionHeading(task) {
     const phaseTitle = phase() === 'warmup' ? 'מַתְחִילִים יַחַד' : phase() === 'practice' ? 'מְתַרְגְּלִים בְּנַחַת' : 'עוֹד צַעַד קָטָן';
-    const heading = (title, { kicker = phaseTitle, lang = 'he', action = 'replay', voice = 'שמיעת ההוראות' } = {}) =>
+    const heading = (title, { kicker = phaseTitle, lang = 'he', action = 'replay', voice = 'שמיעת ההוראות', lowercase = '' } = {}) =>
       `<div class="question-heading${task.kind === 'story' ? ' story-reading' : ''}"><div><span class="section-kicker">${hebrew(kicker)}</span>
-        <h1 tabindex="-1" lang="${lang}" dir="${lang === 'en' ? 'ltr' : 'rtl'}">${title}</h1></div>
+        <h1 tabindex="-1" lang="${lang}" dir="${lang === 'en' ? 'ltr' : 'rtl'}">${title}</h1>
+        ${lowercase ? `<span class="blend-lowercase" lang="en" dir="ltr">${esc(lowercase)}</span>` : ''}</div>
         <button data-j="${action}" class="circle-button" aria-label="${voice}">${uiIcon('sound')}</button></div>`;
     if (task.kind === 'story') return heading(hebrew(task.page.text), {
       kicker: `${task.story.title} · עַמּוּד ${plan.index + 1}`, action: 'read-story', voice: 'השמעת המשפט',
@@ -217,6 +219,12 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
       if (task.level === 'picture-words') return heading(hebrew('מָה רוֹאִים בַּתְּמוּנָה?'));
       return heading(esc(task.target.text.toUpperCase()), { lang: 'en', action: 'listen', voice: 'שמיעה באנגלית' });
     }
+    if (task.readPicture) return heading(esc(task.word.toUpperCase()), {
+      lang: 'en', action: 'listen', voice: 'שמיעת המילה באנגלית', lowercase: task.word,
+    });
+    if (workshopShowsWord(task)) return heading(esc(nikud ? task.word.pointed : task.word.he), {
+      action: 'word', voice: 'שמיעת המילה',
+    });
     return heading(hebrew(JOURNEYS[plan.mode].title));
   }
   function render(){

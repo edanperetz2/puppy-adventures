@@ -25,8 +25,7 @@
 
 .home-feature-card.album-feature{background:#f0e9f6;border-color:#dfd3e8}.home-feature-card>div>svg{display:block;width:100%;height:auto}
 .story-counted{left:50%;right:auto;top:18%;width:max-content;transform:translateX(-50%);display:grid;grid-template-columns:repeat(var(--count-columns,4),48px);gap:6px;justify-content:center}.story-counted button{flex:none;width:48px;max-width:48px;min-width:48px;height:48px;min-height:48px;padding:3px}.story-counted button svg{width:42px;height:42px}.story-counted b{top:-5px;left:-4px;width:22px;height:22px;font-size:14px;line-height:22px}
-.blend-reading-word { display: flex; justify-content: center; align-items: baseline; gap: .4em; font-size: clamp(34px, 8vw, 50px); }
-.blend-reading-word span { font-size: .78em; }
+.blend-lowercase { display: block; text-align: start; font-size: clamp(20px, 3vw, 28px); line-height: 1.25; }
 
 .match-model, .match-hint { display: grid; justify-items: center; align-items: center; margin: 12px auto 20px; }
 .match-model > svg, .match-model > .match-count { width: clamp(100px, 20vw, 160px); height: auto; }
