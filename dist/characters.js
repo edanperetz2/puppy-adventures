@@ -1,5 +1,5 @@
 import { SESSION_LENGTH, isSessionLength, MAX_ASSISTED_TO_ADVANCE, adventurePhase, choiceCount } from './adventure.js?v=2.2.2-six';
-import { shuffle } from './answer-order.js';
+import { answerShuffler, shuffle } from './answer-order.js';
 
 // Portrait windows into the unmodified, credited character artwork. These are
 // display crops, not newly drawn versions of the familiar characters.
@@ -80,8 +80,18 @@ export function characterPortrait(character, label = character.he, className = '
 
 const safeCount = n => Number.isSafeInteger(n) && n >= 0 && n <= 1000000 ? n : 0;
 export function sanitizeCharacterPractice(input) {
+  const lastRounds = {};
+  for (const level of Object.keys(CHARACTER_LEVELS)) {
+    const saved = input?.lastRounds?.[level];
+    if (!Array.isArray(saved) || saved.length !== SESSION_LENGTH) continue;
+    const cast = characterPool(level);
+    if (saved.every(step => cast.some(c => c.id === step?.id) && Number.isInteger(step.slot) && step.slot >= 0 && step.slot < 3)) {
+      lastRounds[level] = saved.map(({ id, slot }) => ({ id, slot }));
+    }
+  }
   return {
     lastTarget: CHARACTERS.some(character => character.id === input?.lastTarget) ? input.lastTarget : null,
+    lastRounds,
     completed: Object.fromEntries(Object.keys(CHARACTER_LEVELS).map(key => [key, safeCount(input?.completed?.[key])])),
     seen: Object.fromEntries(CHARACTER_DIRECTIONS.map(direction => [direction, Object.fromEntries(CHARACTERS.map(c => [c.id, safeCount(input?.seen?.[direction]?.[c.id])]))])),
   };
@@ -93,6 +103,11 @@ export function finishCharacterPractice(input, level, questions) {
   if (!questions.every(q => q.type === 'character' && CHARACTER_DIRECTIONS.includes(q.direction) && characterPool(level).some(c => c.id === q.character?.id))) return result;
   result.completed[level] = Math.min(1000000, result.completed[level] + 1);
   result.lastTarget = questions.at(-1).character.id;
+  const lastRound = questions.slice(-SESSION_LENGTH).map(q => ({
+    id: q.character.id, slot: Array.isArray(q.options) ? q.options.findIndex(option => option?.id === q.character.id) : -1,
+  }));
+  if (lastRound.every(({ slot }) => slot >= 0 && slot < 3)) result.lastRounds[level] = lastRound;
+  else delete result.lastRounds[level];
   for (const q of questions) result.seen[q.direction][q.character.id] = Math.min(1000000, result.seen[q.direction][q.character.id] + 1);
   return result;
 }
@@ -102,40 +117,44 @@ export function nextCharacterLevel(key, assisted) {
   return Object.keys(CHARACTER_LEVELS).find(next => characterCollection(next) === characterCollection(key) && CHARACTER_LEVELS[next].number === CHARACTER_LEVELS[key].number + 1) || null;
 }
 
-function similarity(a, b) {
-  const left = [...a.he].filter(c => /[א-ת]/u.test(c)), right = [...b.he].filter(c => /[א-ת]/u.test(c));
-  return (left[0] === right[0] ? 5 : 0) + left.filter(c => right.includes(c)).length - Math.abs(left.length - right.length) / 10;
-}
-
 export function createCharacterSession(settings = {}, rng = Math.random) {
   const level = Object.hasOwn(CHARACTER_LEVELS, settings.characterLevel) ? settings.characterLevel : 'friends';
   const mode = Object.hasOwn(CHARACTER_MODES, settings.characterMode) ? settings.characterMode : 'mixed';
   const practice = sanitizeCharacterPractice(settings.characterPractice), pool = characterPool(level);
-  const recent = Object.fromEntries(CHARACTER_DIRECTIONS.map(direction => [direction, { ...practice.seen[direction] }]));
-  const total = Object.fromEntries(CHARACTERS.map(c => [c.id, 0]));
-  const levelTier = CHARACTER_LEVELS[level].tier;
-  const collection = characterCollection(level), tierOf = character => characterTier(character, collection);
+  const { tier, collection } = CHARACTER_LEVELS[level];
+  const previous = practice.lastRounds[level] || [];
+  const lastCast = new Set(previous.map(step => step.id));
+  const visits = Object.fromEntries(pool.map(c => [c.id, 0]));
+  const totalSeen = Object.fromEntries(pool.map(c => [c.id, CHARACTER_DIRECTIONS.reduce((n, dir) => n + practice.seen[dir][c.id], 0)]));
+  const directions = mode === 'mixed'
+    ? shuffle(Array.from({ length: SESSION_LENGTH }, (_, i) => CHARACTER_DIRECTIONS[i % 2]), rng)
+    : Array(SESSION_LENGTH).fill(mode);
+  const orderAnswers = answerShuffler(rng);
   let last = practice.lastTarget;
-  return Array.from({ length: SESSION_LENGTH }, (_, index) => {
+  const questions = directions.map((direction, index) => {
     const phase = adventurePhase(index);
-    const tier = Math.min(levelTier, phase === 'warmup' ? 1 : phase === 'practice' ? 2 : 3);
-    const direction = mode === 'mixed' ? CHARACTER_DIRECTIONS[(practice.completed[level] + index) % 2] : mode;
-    const candidates = pool.filter(c => tierOf(c) === tier && c.id !== last);
-    const available = candidates.length ? candidates : pool.filter(c => tierOf(c) === tier);
-    const ordered = shuffle(available, rng).sort((a, b) => total[a.id] - total[b.id] || recent[direction][a.id] - recent[direction][b.id]);
-    const character = ordered[0];
-    total[character.id]++; recent[direction][character.id]++; last = character.id;
-    const alternatives = shuffle(pool.filter(c => c.id !== character.id && tierOf(c) <= tier), rng);
-    if (phase === 'challenge') {
-      alternatives.sort((a, b) => similarity(character, b) - similarity(character, a));
-      // Cycle the full set of distractor pairs. A hard round used to always
-      // pick the same two similar names, even after many completed visits.
-      const pairs=alternatives.flatMap((a,i)=>alternatives.slice(i+1).map(b=>[a,b]));
-      const offset=(practice.completed[level]+recent[direction][character.id]+Math.floor(rng()*pairs.length))%pairs.length;
-      alternatives.splice(0,alternatives.length,...pairs[offset]);
-    }
-    const options = shuffle([character, ...alternatives.slice(0, choiceCount(index) - 1)], rng);
+    const candidates = shuffle(pool.filter(c => c.id !== last), rng);
+    const [character] = candidates.sort((a, b) =>
+      visits[a.id] - visits[b.id] ||
+      Number(lastCast.has(a.id)) - Number(lastCast.has(b.id)) ||
+      Number(a.id === previous[index]?.id) - Number(b.id === previous[index]?.id) ||
+      totalSeen[a.id] - totalSeen[b.id] ||
+      practice.seen[direction][a.id] - practice.seen[direction][b.id]);
+    visits[character.id]++;
+    practice.seen[direction][character.id]++;
+    last = character.id;
+    const alternatives = shuffle(pool.filter(c => c !== character), rng).slice(0, choiceCount(index) - 1);
+    const options = orderAnswers([character, ...alternatives], character.id);
     return { id: `characters-${index}`, type: 'character', collection, direction, character, answer: character.id, options, phase, tier,
       prompt: `characters-${direction}`, hint: 'characters-hint' };
   });
+  // Even a small cast can draw the exact same six answer positions by chance.
+  // Break only a whole repeated layout, so individual slots can still repeat.
+  if (previous.length && questions.every((q, i) => q.options[previous[i].slot]?.id === q.answer)) {
+    const i = Math.floor(rng() * questions.length);
+    const { options } = questions[i], slot = previous[i].slot;
+    const other = (slot + 1 + Math.floor(rng() * (options.length - 1))) % options.length;
+    [options[slot], options[other]] = [options[other], options[slot]];
+  }
+  return questions;
 }

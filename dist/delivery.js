@@ -32,13 +32,16 @@ function deliveryTargets(path, items, rng, now) {
   // recognized in a fresh illustration, using the existing review priorities.
   const [review] = choosePractice(rest.filter(word => items[key(word)]?.independent), items, key, 1, now, rng);
   const later = shuffle(rest.filter(word => word !== review), rng);
-  if (cargo && rest.includes('blue')) {
-    const secondColor = review === 'blue' ? later[0] : review || later.find(word => word !== 'blue');
-    return [...starters, ...shuffle(['blue', secondColor], rng), 'boat'];
-  }
   const count = cargo ? 2 : 3;
-  const practice = review ? [...later.slice(0, count - 1), review] : later.slice(0, count);
-  return [...starters, ...practice, ...(cargo ? ['boat'] : [])];
+  const practice = review ? [review, ...later.slice(0, count - 1)] : later.slice(0, count);
+  if (cargo) {
+    if (rest.includes('blue') && !practice.includes('blue')) practice[practice.length - 1] = 'blue';
+    // Introduce “boat” at the end once. After Ariel recognizes it independently,
+    // it can appear alongside the other words in any of the three review slots.
+    if (!items[key('boat')]?.independent) return [...starters, ...shuffle(practice, rng), 'boat'];
+    practice.push('boat');
+  }
+  return [...starters, ...shuffle(practice, rng)];
 }
 
 function questionsFor({ id, path, targets, settings }) {
@@ -103,8 +106,8 @@ export function cleanDeliveryRound(path, saved) {
   const cargo = path === 'cargo';
   if (!Array.isArray(targets) || targets.length !== DELIVERY.steps || new Set(targets).size !== targets.length
     || !Array.isArray(settings) || settings.length !== DELIVERY.steps || settings.some(scene => !scenes.includes(scene))) return null;
-  const words = cargo ? targets.slice(0, -1) : targets;
-  if (words.some(word => !(cargo ? colors : animals).includes(word)) || (cargo && targets.at(-1) !== 'boat')) return null;
+  if (cargo && targets.indexOf('boat') < 3) return null;
+  if (!targets.every(word => cargo ? word === 'boat' || colors.includes(word) : animals.includes(word))) return null;
   const questions = questionsFor({ id, path, targets, settings });
   const question = questions[index];
   const attempts = Array.isArray(saved.state?.attempted) ? saved.state.attempted : [];

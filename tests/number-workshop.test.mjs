@@ -220,6 +220,19 @@ test('Focused dictation exhausts the selected band; on return, it starts with le
   }
 });
 
+test('a fully practised dictation range does not reproduce its earlier timestamp order', () => {
+  const digits = WRITING_NUMBERS.filter(n => n < 10);
+  const items = Object.fromEntries(digits.map(n => [numberDictationKey(n), { practice: 2, last: 1000 + n }]));
+  const orders = new Set();
+  for (let seed = 1; seed <= 16; seed++) {
+    const draw = numberDictationDraw(seeded(seed * 7919), 'digits', () => items);
+    const numbers = Array.from({ length: 10 }, draw);
+    assert.deepEqual(new Set(numbers), new Set(digits));
+    orders.add(numbers.join(','));
+  }
+  assert.ok(orders.size > 8);
+});
+
 test('Unfinished Number Workshop rounds retain their current pictures, options and help on reload', () => {
   const round = newNumberRound('left', 10, {}, seeded(8));
   round.index = 3;

@@ -55,6 +55,8 @@
 }
 .pika-heading { display: grid; place-items: center; min-height: 44px; }
 .pika-board h1 {
+  margin: 0;
+  line-height: 1.5;
   font-size: clamp(24px, 5vw, 40px);
   color: #473a29;
 }
@@ -149,20 +151,6 @@
   border-radius: 50%;
   background: #fff7d8;
   box-shadow: 0 2px 9px #7e572d49;
-}
-.pika-clue {
-  display: flex;
-  width: fit-content;
-  max-width: 100%;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 12px;
-  padding: 5px 13px;
-  border: 1px solid #e9d99e;
-  border-radius: 16px;
-  background: #fff5d0;
-  font-size: clamp(20px, 4.6vw, 29px);
-  font-weight: 600;
 }
 .pika-progress.step-track { margin: 4px auto 12px; }
 .pika-choices {
@@ -269,7 +257,6 @@
     radial-gradient(ellipse at 20% 10%, #fffbed 0 6%, transparent 6.5%),
     linear-gradient(to bottom, #dbf0f6 0 48%, #97d8dd 48% 61%, #e5faf4 62% 65%, #f5e4bb 66%);
 }
-.stitch-match .pika-clue { border-color: #abd4d4; background: #e4f4f2; }
 .stitch-match .pika-choices button { border-color: #c3d9d5; }
 .stitch-match .pika-choices .pika-found { border-color: #418d63; }
 .stitch-match .pika-character > .ui-icon { color: #225d71; background: #ecfaff; box-shadow: 0 0 0 1px #9dcbd4; }

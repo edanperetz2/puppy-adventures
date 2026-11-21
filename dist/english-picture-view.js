@@ -17,7 +17,7 @@ export function englishPictureView(task, state) {
   const audioButton = (action, entry, description) => `<button class="match-sound" data-j="${action}" data-voice="${entry.id}" aria-label="${description}">${uiIcon('sound')}</button>`;
   const prompt = reverse
     ? `<div class="match-model" role="img" aria-label="${task.target.he}">${englishMatchPicture(task.target)}</div>`
-    : `<div class="match-word">${label(task.target)}${audioButton('listen', task.target, 'שמיעה באנגלית')}</div>`;
+    : '<p class="journey-instruction">אֵיזוֹ תְּמוּנָה מַתְאִימָה?</p>';
   const hint = state.showModel && !state.resolved
     ? `<div class="match-hint">${reverse ? label(task.target) : englishMatchPicture(task.target)}</div>` : '';
   const choices = task.choices.map((entry, index) => {
@@ -25,6 +25,5 @@ export function englishPictureView(task, state) {
     return `<div class="match-option"><button data-j="answer" data-answer="${entry.id}" ${disabled}>${label(entry)}</button>
       ${audioButton('match-option-voice', entry, `שמיעת אפשרות ${index + 1} באנגלית`)}</div>`;
   }).join('');
-  return `<p class="journey-instruction">${reverse ? 'מָה רוֹאִים בַּתְּמוּנָה?' : 'אֵיזוֹ תְּמוּנָה מַתְאִימָה?'}</p>
-    ${prompt}${hint}<div class="${reverse ? 'match-labels' : 'journey-choices match-pictures'}" role="group" aria-label="בחירת תשובה">${choices}</div>`;
+  return `${prompt}${hint}<div class="${reverse ? 'match-labels' : 'journey-choices match-pictures'}" role="group" aria-label="בחירת תשובה">${choices}</div>`;
 }

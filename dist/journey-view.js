@@ -4,9 +4,8 @@ import { JOURNEYS, PHONICS, STORY_RELATIONS, journeyQuestions, soundExample } fr
 import { adventurePhase } from './adventure.js?v=2.2.2-six';
 import { escapeHtml as esc } from './profiles.js?v=2.2.0-voices';
 import { chunkClip, GIVING_CLIPS } from './journey-audio.js?v=2.2.0-voices';
-import { STORIES } from './journey-content.js';
+import { journeyReadingText } from './journey-content.js';
 import { englishPictureView } from './english-picture-view.js';
-import { MATCH_LEVELS } from './english-picture-match.js';
 import { dropTargetAt } from './drag.js';
 
 const color = id => COLORS.find(c=>c.id===id)?.hex || '#7baebc';
@@ -68,6 +67,7 @@ function storyProps(memory,page){
 export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,onComplete,onHome}) {
   const events=new AbortController(), questions=journeyQuestions(plan);let message='',celebrating=false;
   const q=()=>questions[plan.index],s=()=>plan.state;
+  const hebrew = text => journeyReadingText(text, nikud);
   const phase = () => adventurePhase(plan.index, questions.length);
   const atEnd = () => plan.index === questions.length - 1;
   const say=(keys,explicit=false)=>speak(keys,explicit);
@@ -103,6 +103,8 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
       help();
       clips.push(task.prompt.replace(/-prompt$/, ''), task.prompt);
       if (task.page.english) clips.push(`en-${task.page.english}`);
+    } else if (task.kind === 'context' && (s().showModel || s().resolved)) {
+      clips.push(`journey-context-${task.word.id}`);
     } else {
       clips.push(task.kind === 'blend' ? 'listen' : task.prompt, ...(task.extraClips || []));
       if (task.kind !== 'context') {
@@ -119,7 +121,7 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
   }
   function retry(){help();message='נַנְסֶה שׁוּב. אֶפְשָׁר לְקַבֵּל רֶמֶז ♡';persist();render();say('try-again');}
   function wordView(task){
-    if(task.kind==='context')return `<div class="workshop-model">${art(task.word.id)}</div><p class="journey-instruction">מַשְׁלִימִים מִשְׁפָּט קָטָן. אֵיזוֹ מִלָּה מַתְאִימָה לַתְּמוּנָה?</p><div class="context-sentence" dir="rtl">${task.context.before} <b>${s().resolved||s().showModel?task.word.pointed:'____'}</b> ${task.context.after}</div><div class="context-choices">${task.choices.map(w=>`<button data-j="answer" data-answer="${w.id}" ${s().resolved?'disabled':''}>${nikud?w.pointed:w.he}</button>`).join('')}</div>`;
+    if(task.kind==='context')return `<div class="workshop-model">${art(task.word.id)}</div><p class="journey-instruction">${hebrew('אֵיזוֹ מִלָּה מַשְׁלִימָה אֶת הַמִּשְׁפָּט?')}</p><div class="context-choices">${task.choices.map(w=>`<button data-j="answer" data-answer="${w.id}" ${s().resolved?'disabled':''}>${nikud?w.pointed:w.he}</button>`).join('')}</div>`;
     const pieces=task.pieces,selected=s().chosen||[],missing=task.kind==='missing';
     const text=nikud?task.word.pointed:task.word.he;
     return `<div class="workshop-model">${art(task.word.id)}<button class="circle-button" data-j="word" aria-label="שמיעת המילה">${uiIcon('sound')}</button>${(task.model||s().showModel)?`<strong lang="he" dir="rtl">${text}</strong>`:''}</div>
@@ -143,7 +145,7 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
       ? `<div class="story-source"><button data-j="source" aria-label="גרירת ${WORDS.find(word=>word.id===p.target)?.he||p.target} למקום המתאים" ${done?'disabled':''}>${art(p.target)}</button><span>גוֹרְרִים לַמָּקוֹם. אֶפְשָׁר גַּם לִבְחֹר לְמַטָּה.</span></div>
         <div class="quantity-tools" role="group" aria-label="בחירת מקום">${places.map(relation => `<button data-j="place" data-place="${relation}" ${done?'disabled':''}>${labels[relation]}</button>`).join('')}</div>`
       : `<div class="journey-choices">${task.choices.map(id=>`<button data-j="answer" data-answer="${id}" aria-label="${p.task==='count'?id:WORDS.find(w=>w.id===id)?.he||ANIMALS.find(w=>w.id===id)?.he||COLORS.find(w=>w.id===id)?.he||id}" ${done?'disabled':''}>${p.task==='count'?`<b class="quantity-number">${id}</b>`:learningPicture(id)}</button>`).join('')}</div>`;
-    return `<div class="story-reading"><span>סִפּוּר ${STORIES.findIndex(story=>story.id===plan.level)+1} · עַמּוּד ${plan.index+1}</span><p dir="rtl" lang="he">${nikud?p.text:p.text.replace(/[\u0591-\u05c7]/gu,'')}</p><button data-j="read-story" class="text-button">${uiIcon('sound')} קוֹרְאִים יַחַד</button></div>${scene}<p class="journey-instruction">${p.prompt}</p>${answers}`;
+    return `${scene}<p class="journey-instruction">${hebrew(p.prompt)}</p>${answers}`;
   }
   function englishView(task){
     if (task.kind === 'english-picture') return englishPictureView(task, s());
@@ -195,10 +197,32 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
       }).join('')}</div>`}
     <div class="quantity-tools"><button class="object-source" data-j="add" data-amount="${tens?10:1}" ${s().resolved?'disabled':''}>${tens?'<b>10</b>':art('apple')} ${uiIcon('plus')} ${tens?'מוֹט שֶׁל עֶשֶׂר':'מוֹסִיפִים אֶחָד'}</button>${tens?`<button data-j="add" data-amount="1" ${s().resolved?'disabled':''}>+1 יְחִידָה</button>`:''}<button data-j="less" data-amount="${tens?10:1}" ${!quantity||s().resolved?'disabled':''}>−${tens?'10':'1'}</button>${tens?`<button data-j="less" data-amount="1" ${!quantity||s().resolved?'disabled':''}>−1</button>`:''}</div><p class="quantity-readout">${bond?'הוֹסַפְנוּ':'בָּנִינוּ'} <b>${quantity}</b></p><button class="primary-button" data-j="check" ${s().resolved?'disabled':''}>בּוֹדְקִים ${uiIcon('check')}</button>`;
   }
+  function questionHeading(task) {
+    const phaseTitle = phase() === 'warmup' ? 'מַתְחִילִים יַחַד' : phase() === 'practice' ? 'מְתַרְגְּלִים בְּנַחַת' : 'עוֹד צַעַד קָטָן';
+    const heading = (title, { kicker = phaseTitle, lang = 'he', action = 'replay', voice = 'שמיעת ההוראות' } = {}) =>
+      `<div class="question-heading${task.kind === 'story' ? ' story-reading' : ''}"><div><span class="section-kicker">${hebrew(kicker)}</span>
+        <h1 tabindex="-1" lang="${lang}" dir="${lang === 'en' ? 'ltr' : 'rtl'}">${title}</h1></div>
+        <button data-j="${action}" class="circle-button" aria-label="${voice}">${uiIcon('sound')}</button></div>`;
+    if (task.kind === 'story') return heading(hebrew(task.page.text), {
+      kicker: `${task.story.title} · עַמּוּד ${plan.index + 1}`, action: 'read-story', voice: 'השמעת המשפט',
+    });
+    if (task.kind === 'context') {
+      const { before, after } = task.context;
+      const filled = s().resolved || s().showModel;
+      const word = filled ? (nikud ? task.word.pointed : task.word.he) : '____';
+      const sentence = (before ? hebrew(before) + ' ' : '') + `<b>${word}</b>` + (/^\p{P}/u.test(after) ? '' : ' ') + hebrew(after);
+      return heading(sentence, { voice: filled ? 'השמעת המשפט' : 'שמיעת ההוראות' });
+    }
+    if (task.kind === 'english-picture') {
+      if (task.level === 'picture-words') return heading(hebrew('מָה רוֹאִים בַּתְּמוּנָה?'));
+      return heading(esc(task.target.text.toUpperCase()), { lang: 'en', action: 'listen', voice: 'שמיעה באנגלית' });
+    }
+    return heading(hebrew(JOURNEYS[plan.mode].title));
+  }
   function render(){
     const task=q(),done=s().resolved;
     root.innerHTML=`<div class="journey-top"><button class="text-button" data-j="home">${uiIcon('home')} הַהַרְפַּתְקָה נִשְׁמֶרֶת</button><span>צַעַד ${plan.index+1} מִתּוֹךְ ${questions.length}</span></div><div class="step-track">${questions.map((_,i)=>`<span class="step-dot ${i<plan.index?'done':i===plan.index?'current':''}">${i<plan.index?'✓':i+1}</span>`).join('')}</div>
-      <section class="journey-board ${done?'journey-done':''} ${celebrating?'journey-celebrate':''}"><div class="question-heading"><div><span class="section-kicker">${phase()==='warmup'?'מַתְחִילִים יַחַד':phase()==='practice'?'מְתַרְגְּלִים בְּנַחַת':'עוֹד צַעַד קָטָן'}</span><h1 tabindex="-1">${plan.mode==='stories'?task.story.title:task.kind==='english-picture'?MATCH_LEVELS[task.level].title:JOURNEYS[plan.mode].title}</h1></div><button data-j="replay" class="circle-button" aria-label="שמיעת ההוראות">${uiIcon('sound')}</button></div>
+      <section class="journey-board ${done?'journey-done':''} ${celebrating?'journey-celebrate':''}">${questionHeading(task)}
       ${plan.mode==='workshop'?wordView(task):plan.mode==='stories'?storyView(task):plan.mode==='objects'?objectsView(task):englishView(task)}
       <div class="journey-feedback" role="status" aria-live="polite">${message|| (done?'כָּל הַכָּבוֹד! אֶפְשָׁר לְהַמְשִׁיךְ.':'אֶפְשָׁר לְנַסּוֹת וּלְבַקֵּשׁ עֶזְרָה. אֲנַחְנוּ כָּאן בְּיַחַד ♡')}</div><div class="journey-controls">${done?`<button class="primary-button" data-j="next">${atEnd()?'לַמַּדְבֵּקָה שֶׁלִּי':'מַמְשִׁיכִים'} ${uiIcon('arrow')}</button>`:`<button class="hint-button" data-j="hint">${uiIcon('hint')} רֶמֶז קָטָן</button>`}</div></section>`;
   }
@@ -216,7 +240,7 @@ export function mountJourney(root,{plan,nikud=true,speak,onSave,onObservation,on
       return;
     }
     if(action==='word'){say(`he-${task.word.id}`,true);return;}
-    if(action==='read-story'){help();replay(true);return;}
+    if(action==='read-story'){if(!s().resolved)help();say(task.prompt.replace(/-prompt$/, ''),true);return;}
     if(action==='pair-color'){say(`en-${task.target.color}`,true);return;}
     if(action==='pair-object'){say(`journey-en-${task.target.object}`,true);return;}
     if(action==='phoneme'){say(soundExample(b.dataset.phoneme),true);return;}

@@ -31,8 +31,9 @@
 .match-model, .match-hint { display: grid; justify-items: center; align-items: center; margin: 12px auto 20px; }
 .match-model > svg, .match-model > .match-count { width: clamp(100px, 20vw, 160px); height: auto; }
 .match-hint > svg, .match-hint > .match-count { width: 85px; height: auto; }
-.match-word { display: flex; justify-content: center; align-items: center; gap: 12px; margin: 16px auto 24px; }
-.match-word b { font-size: clamp(23px, 5vw, 40px); line-height: 1.2; }
+.journey-board .question-heading > div { min-width: 0; }
+.journey-board .question-heading h1 { max-width: none; }
+.journey-board .question-heading h1[lang="en"] { text-align: start; }
 .match-sound { flex: none; display: grid; place-items: center; min-width: 46px; min-height: 46px; border: 1px solid #a2c8be; border-radius: 50%; background: #edf7f3; color: #296354; }
 .match-sound svg { width: 23px; height: 23px; }
 .match-pictures > button { display: grid; place-items: center; }

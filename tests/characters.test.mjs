@@ -60,11 +60,14 @@ test('Every character level has six unambiguous steps and covers the full cast a
   for (const characterLevel of Object.keys(CHARACTER_LEVELS)) for (const characterMode of Object.keys(CHARACTER_MODES)) {
     const cast = characterPool(characterLevel);
     const castIds = new Set(cast.map(c => c.id));
-    const seen = new Set();
-    for (let seed = 0; seed < 100; seed++) {
-      const questions = createSession('characters', { characterLevel, characterMode }, seeded(seed));
+    const seen = new Set(), openers = new Set(), directionOrders = new Set();
+    for (let seed = 0; seed < 320; seed++) {
+      const questions = createSession('characters', { characterLevel, characterMode }, seeded(seed * 15485863));
       assert.equal(questions.length, 6);
-      let previousTier = 0;
+      openers.add(questions[0].answer);
+      directionOrders.add(questions.map(q => q.direction).join(','));
+      assert.equal(new Set(questions.map(q => q.answer)).size, Math.min(6, cast.length));
+      if (characterMode === 'mixed') assert.equal(questions.filter(q => q.direction === 'name-picture').length, 3);
       for (const [index, q] of questions.entries()) {
         assert.equal(q.type, 'character');
         seen.add(q.character.id);
@@ -72,17 +75,19 @@ test('Every character level has six unambiguous steps and covers the full cast a
         assert.equal(new Set(q.options.map(c => c.id)).size, q.options.length);
         assert.equal(q.options.filter(c => c.id === q.answer).length, 1);
         assert.equal(q.answer, q.character.id);
-        assert.ok(q.tier >= previousTier); previousTier = q.tier;
+        assert.equal(q.tier, CHARACTER_LEVELS[characterLevel].tier);
         assert.equal(q.collection, characterCollection(characterLevel));
         assert.ok(q.options.every(c => castIds.has(c.id) && characterTier(c, q.collection) <= q.tier));
         assert.equal(q.phase, index < 2 ? 'warmup' : index < 4 ? 'practice' : 'challenge');
         if (index) assert.notEqual(q.character.id, questions[index - 1].character.id);
         assert.ok(CLIPS[q.prompt]); assert.ok(CLIPS[q.hint]);
         assert.equal(q.targetClip, undefined, 'The answer name must not be automatically read before a hint or success');
-        assert.equal(q.direction, characterMode === 'mixed' ? index % 2 ? 'name-picture' : 'picture-name' : characterMode);
+        if (characterMode !== 'mixed') assert.equal(q.direction, characterMode);
       }
     }
     assert.deepEqual(seen, castIds);
+    assert.deepEqual(openers, castIds, 'Any character in the chosen cast can open a round');
+    if (characterMode === 'mixed') assert.ok(directionOrders.size > 10);
   }
 });
 
@@ -171,7 +176,7 @@ test('Less-practiced names are offered first and advancement allows two assisted
   assert.equal(nextCharacterLevel('paw-all', 0), null); assert.equal(nextCharacterLevel('paw-friends', 3), null);
 });
 
-test('The shared cast introduces both home companions and resumes each direction across rounds', () => {
+test('The shared cast introduces both home companions and rotates the opening target', () => {
   const level = 'together-friends';
   assert.deepEqual(characterPool(level).map(c => c.id), ['rubble', 'pikachu', 'stitch']);
   assert.equal(characterArtwork(characterPool(level)[1], 'together').src, './assets/home-pikachu.png');
@@ -181,6 +186,45 @@ test('The shared cast introduces both home companions and resumes each direction
   const practice = finishCharacterPractice(null, level, first);
   const next = createCharacterSession({ ...settings, characterPractice: practice }, seeded(1));
   assert.notEqual(next[0].answer, first.at(-1).answer);
-  assert.notEqual(next[0].direction, first[0].direction);
+  assert.notEqual(next[0].answer, first[0].answer);
   assert.ok(next.every(q => q.collection === 'together' && q.options.some(c => c.id === q.answer)));
+});
+
+test('Finishing and replaying every cast varies targets and answer positions, even with the same random draws', () => {
+  const slots = questions => questions.map(q => q.options.findIndex(option => option.id === q.answer));
+  for (const level of Object.keys(CHARACTER_LEVELS)) {
+    const cast = characterPool(level);
+    for (const characterMode of Object.keys(CHARACTER_MODES)) {
+      const practiced = new Set();
+      let history = {}, previous = [];
+      for (let visit = 0; visit < 12; visit++) {
+        const questions = createSession('characters', { characterLevel: level, characterMode, characterPractice: history }, seeded(2147483648));
+        const current = questions.map(q => q.answer), prior = new Set(previous.map(q => q.answer));
+        if (previous.length) {
+          assert.notEqual(current[0], previous[0].answer);
+          assert.notEqual(current[0], previous.at(-1).answer);
+          assert.notDeepEqual(slots(questions), slots(previous));
+          assert.equal(new Set(current.filter(id => !prior.has(id))).size, Math.min(6, cast.length - prior.size));
+        }
+        current.forEach(id => practiced.add(id));
+        if (visit === Math.ceil(cast.length / 6) - 1) assert.equal(practiced.size, cast.length);
+        history = JSON.parse(JSON.stringify(finishCharacterPractice(history, level, questions)));
+        previous = questions;
+      }
+    }
+  }
+});
+
+test('Recording a different cast preserves older counts and the earlier cast’s replay history', () => {
+  const old = { completed: { family: 4 }, seen: { 'name-picture': { wheeler: 7 } } };
+  const first = createSession('characters', { characterLevel: 'family', characterPractice: old }, seeded(25));
+  const family = finishCharacterPractice(old, 'family', first);
+  const second = createSession('characters', { characterLevel: 'paw-all', characterPractice: family }, seeded(85));
+  const both = sanitizeCharacterPractice(JSON.parse(JSON.stringify(finishCharacterPractice(family, 'paw-all', second))));
+  assert.equal(both.completed.family, 5);
+  assert.equal(both.completed['paw-all'], 1);
+  assert.deepEqual(both.lastRounds.family, family.lastRounds.family);
+  assert.ok(both.seen['name-picture'].wheeler >= 7);
+  const next = createSession('characters', { characterLevel: 'family', characterPractice: both }, seeded(25));
+  assert.notEqual(next[0].answer, first[0].answer);
 });

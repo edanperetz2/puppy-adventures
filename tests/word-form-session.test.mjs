@@ -60,17 +60,25 @@ test('real learning observations rotate whole words within their own language an
     assert.deepEqual(play(language, 'words', learn(letters)), first);
 
     // A merged learning ledger can have a different insertion order on each device.
-    // Once every word has been seen, the oldest eligible words should still come first.
+    // With identical history and randomness, both devices should draw the same
+    // review. Changing the random seed should vary even a fully practised deck.
     const oldest = first.slice(0, 2).map(q => q.answer);
     const events = WORD_FORM_WORDS[language].map((word, i) => {
       const order = oldest.indexOf(word.id);
       return { item: `word-form:${language}:${word.id}`, domain: 'letters', kind: 'independent',
         at: start + (order < 0 ? i + 2 : order) };
     });
-    for (const ordering of [events, [...events].reverse()]) {
-      const review = play(language, 'words', applyObservations({}, ordering));
-      assert.deepEqual(review.slice(0, 2).map(q => q.answer), oldest);
+    const items = applyObservations({}, events);
+    assert.deepEqual(play(language, 'words', items), play(language, 'words', applyObservations({}, [...events].reverse())));
+    const recent = events.toSorted((a, b) => a.at - b.at).slice(-6).map(e => e.item.split(':').at(-1));
+    const starts = new Set(), sets = new Set();
+    for (let seed = 1; seed <= 32; seed++) {
+      const ids = createSession('letters', settings(language, 'words', items), seeded(seed)).map(q => q.answer);
+      assert.ok(ids.every(id => !recent.includes(id)));
+      starts.add(ids[0]);
+      sets.add([...ids].sort().join(','));
     }
+    assert.ok(starts.size > 1 && sets.size > 1);
   }
 });
 

@@ -68,16 +68,26 @@ function trainQuestions(recent, rng) {
 
 function pondQuestions(items, rng, now) {
   const history = animalHistory(items);
-  const known = choosePractice(Object.keys(history), history, word => word, SESSION_LENGTH, now, rng);
-  const starters = DAILY_ANIMALS.slice(0, 6).filter(word => !known.includes(word));
-  const words = [...known, ...shuffle(starters, rng)].slice(0, SESSION_LENGTH);
+  const familiar = DAILY_ANIMALS.slice(0, 6);
+  const early = choosePractice(Object.keys(history), history, word => word, 2, now, rng);
+  for (const word of shuffle(familiar, rng)) {
+    if (early.length === 2) break;
+    if (!early.includes(word)) early.push(word);
+  }
+  // Keep the opening easy, then mix in one unfamiliar animal alongside review.
+  const remaining = DAILY_ANIMALS.filter(word => !early.includes(word));
+  const fresh = shuffle(remaining.filter(word => !history[word] && !familiar.includes(word)), rng).slice(0, 1);
+  const review = remaining.filter(word => history[word] || familiar.includes(word));
+  const later = choosePractice(review, history, word => word, SESSION_LENGTH - early.length - fresh.length, now, rng);
+  const words = [...early, ...shuffle([...later, ...fresh], rng)];
   const order = answerShuffler(rng);
   return words.map((word, index) => {
     const wrong = shuffle(DAILY_ANIMALS.filter(animal => animal !== word), rng);
     const count = index < 3 ? 1 : 2;
     const first = order([word, ...wrong.slice(0, count)], word);
     const second = shuffle(wrong.slice(count, count * 2), rng);
-    second.splice((first.indexOf(word) + 1) % first.length, 0, word);
+    const otherSlots = first.map((_, slot) => slot).filter(slot => slot !== first.indexOf(word));
+    second.splice(otherSlots[Math.floor(rng() * otherSlots.length)], 0, word);
     return [{ word, choices: first, scene: index % 3 },
       { word, choices: second, scene: (index + 1) % 3 }];
   });

@@ -153,10 +153,6 @@
   background-image: linear-gradient(to top, #e9f7fa45, transparent 65%), url("./assets/discovery-worlds.webp");
   background-position: center, right calc(50% + 33.333cqi);
 }
-.pikachu-page .pika-clue {
-  border-color: var(--page-edge); color: var(--page-ink); background: var(--page-wash);
-  box-shadow: 0 2px 0 var(--page-edge);
-}
 .pikachu-page .pika-shadow { background: #263c342e; }
 
 .journey-board .story-reading {

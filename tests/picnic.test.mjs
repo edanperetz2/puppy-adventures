@@ -13,6 +13,29 @@ import {
 } from '../dist/picnic.js';
 import { picnicMap, picnicPrompt } from '../dist/picnic-view.js';
 
+test('fresh picnic readings vary the object and destination, while old bookmarks keep their exact sentences', () => {
+  const bookmark = { id: '12345678-1111-4111-b111-000000000000', path: 'reading', revision: 1, cap: 5, index: 1 };
+  const old = cleanPicnicRound('reading', bookmark);
+  assert.deepEqual(old.questions.map(q => q.word), [
+    'picture-place-star-table-on-red', 'picture-place-ball-box-in-blue', 'picture-place-heart-table-under-pink',
+    'picture-place-flower-box-near-yellow', 'picture-place-balloon-table-near-yellow', 'picture-place-butterfly-tree-near-yellow',
+  ]);
+  assert.deepEqual(cleanPicnicRound('reading', packPicnicRound(old)), old);
+  const objects = Array.from({ length: 6 }, () => new Set()), places = objects.map(() => new Set());
+  const start = packPicnicRound(createPicnicRound('reading'));
+  for (let n = 1; n <= 40; n++) {
+    const prefix = (Math.imul(n, 2654435761) >>> 0).toString(16).padStart(8, '0');
+    const round = cleanPicnicRound('reading', { ...start, id: prefix + bookmark.id.slice(8) });
+    const scenes = round.questions.map(q => picnicWord(q).scene);
+    assert.equal(new Set(scenes.map(s => s.object)).size, 6);
+    assert.ok(['in', 'on'].includes(scenes[0].position));
+    scenes.forEach((scene, i) => { objects[i].add(scene.object); places[i].add(scene.position); });
+    assert.deepEqual(cleanPicnicRound('reading', packPicnicRound(round)), round);
+  }
+  assert.ok(objects.every(atStep => atStep.size > 1));
+  assert.ok(places.every(atStep => atStep.size > 1));
+});
+
 test('the guide and chapter share a six-step curriculum with distinct, solvable challenges and recorded prompts', () => {
   assert.ok(GUIDE_ITEMS.some(item => item.he === MY_JOURNEY.he && item.en === MY_JOURNEY.en));
   assert.equal(PICNIC.steps, 6);

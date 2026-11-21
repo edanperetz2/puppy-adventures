@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { applyObservation,applyObservations,learningStage,choosePractice,mergePark,englishPairsReady,MAX_LEARNING_ITEMS } from '../dist/learning.js';
 import { LearningStore } from '../dist/learning-sync.js';
-import { newJourney,journeyQuestions,cleanJourney } from '../dist/journey.js';
+import { newJourney,journeyQuestions,cleanJourney,seeded } from '../dist/journey.js';
 import { WORKSHOP_WORDS,STORIES } from '../dist/journey-content.js';
 import { CLIPS,WORDS } from '../dist/content.js';
 import { packRound,unpackRound,cleanDrafts,roundKey } from '../dist/session-state.js';
@@ -28,6 +28,19 @@ test('An encounter, supported answer, independent answer and later memory stay d
 test('Review favours an overdue supported item and never infers knowledge from an old album',()=>{
  const items=applyObservation({}, {item:'read:dog',domain:'hebrew',kind:'helped',at:time-7*86400000});
  assert.deepEqual(choosePractice([{id:'cat'},{id:'dog'}],items,w=>`read:${w.id}`,1,time,()=>.5).map(x=>x.id),['dog']);assert.equal(englishPairsReady({}),false);
+});
+test('equally due questions can return in different sets and orders while a much older review keeps priority', () => {
+ const pool = ['dog', 'cat', 'duck', 'rabbit', 'frog', 'fish'];
+ const items = applyObservations({}, pool.map((item, index) => ({
+   item, domain: 'english', kind: 'independent', at: time - (index ? 3600000 + index * 1000 : 7 * 86400000),
+ })));
+ const seconds = new Set();
+ for (let seed = 1; seed <= 32; seed++) {
+   const result = choosePractice(pool, items, id => id, 2, time, seeded(seed * 7919));
+   assert.equal(result[0], 'dog');
+   seconds.add(result[1]);
+ }
+ assert.equal(seconds.size, pool.length - 1);
 });
 test('Replaying a practice backlog agrees with individual observations, including at capacity', () => {
   const old = { item: 'read:dog', domain: 'hebrew', kind: 'helped', at: time };

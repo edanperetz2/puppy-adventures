@@ -5,7 +5,7 @@ import { clockParts, clockTotal } from './clock-learning.js?v=2.2.4-practice';
 import { numberOptions } from './engine.js?v=2.7.1-pepper';
 import { PICTURE_PLACE_PASSAGES } from './reading-picture-places.js';
 
-const revision = 1;
+const revision = 2;
 const paths = Object.keys(PICNIC_MISSIONS);
 const capValues = [5, 10, 20];
 const colors = ['red', 'blue', 'green', 'pink', 'purple', 'yellow'];
@@ -15,7 +15,7 @@ const wordById = new Map(PICTURE_PLACE_PASSAGES.map(word => [word.id, word]));
 export const picnicWord = ({ word }) => wordById.get(word);
 const choose = (values, rng) => values[Math.floor(rng() * values.length)];
 
-function readingQuestions(rng) {
+function originalReadingQuestions(rng) {
   const families = [
     'star-table-on',
     'ball-box-in',
@@ -25,6 +25,24 @@ function readingQuestions(rng) {
     choose(['butterfly-tree-above', 'butterfly-tree-on', 'butterfly-tree-near'], rng),
   ];
   return families.map(family => ({ word: `picture-place-${family}-${choose(colors, rng)}` }));
+}
+
+function readingQuestions(rng) {
+  const objects = new Set(), positions = new Set();
+  return Array.from({ length: PICNIC.steps }, (_, index) => {
+    const pool = PICTURE_PLACE_PASSAGES.filter(({ scene }) => {
+      if (objects.has(scene.object)) return false;
+      const flying = scene.object === 'bird' || scene.object === 'butterfly';
+      if (index === 0) return !flying && ['in', 'on'].includes(scene.position);
+      return index < 4 ? !flying : flying;
+    });
+    // Either flying animal can introduce "above"; it mustn't always be step five.
+    const newPositions = pool.filter(({ scene }) => !positions.has(scene.position));
+    const picked = choose(index !== 4 && newPositions.length ? newPositions : pool, rng);
+    objects.add(picked.scene.object);
+    positions.add(picked.scene.position);
+    return { word: picked.id };
+  });
 }
 
 function additionQuestions(cap, rng) {
@@ -56,11 +74,10 @@ function clockQuestions(rng) {
   ];
 }
 
-function questionsFor({ id, path, cap }) {
-  // Frozen for this draft revision. A resumed mission keeps its problems and answer order.
+function questionsFor({ id, path, cap, revision }) {
   let seed = parseInt(id.slice(0, 8), 16);
   const rng = () => ((seed = (Math.imul(1664525, seed) + 1013904223) >>> 0) / 2 ** 32);
-  if (path === 'reading') return readingQuestions(rng);
+  if (path === 'reading') return revision === 1 ? originalReadingQuestions(rng) : readingQuestions(rng);
   if (path === 'addition') return additionQuestions(cap, rng);
   return clockQuestions(rng);
 }
@@ -106,10 +123,10 @@ export function picnicItem(round) {
 export function packPicnicRound({ questions, ...saved }) { return saved; }
 
 export function cleanPicnicRound(path, saved) {
-  if (!saved || saved.revision !== revision || saved.path !== path || !paths.includes(path) || typeof saved.id !== 'string' || !uuid.test(saved.id)
+  if (!saved || ![1, revision].includes(saved.revision) || saved.path !== path || !paths.includes(path) || typeof saved.id !== 'string' || !uuid.test(saved.id)
     || !capValues.includes(saved.cap) || !Number.isInteger(saved.index) || saved.index < 0 || saved.index >= PICNIC.steps) return null;
-  const { id, cap, index } = saved;
-  const questions = questionsFor({ id, path, cap });
+  const { id, cap, index, revision: savedRevision } = saved;
+  const questions = questionsFor(saved);
   const q = questions[index], state = startState(q);
   const raw = saved.state;
   let resolved = saved.resolved === true;
@@ -129,7 +146,7 @@ export function cleanPicnicRound(path, saved) {
   const helped = numbers(saved.helped).filter(n => n > 0 && n <= index);
   if (state.clue || state.attempted.length) helped.push(index);
   const at = Number.isSafeInteger(saved.at) && saved.at > 0 ? saved.at : 0;
-  return { revision, id, path, cap, questions, index, state, resolved, helped: [...new Set([0, ...helped])], at };
+  return { revision: savedRevision, id, path, cap, questions, index, state, resolved, helped: [...new Set([0, ...helped])], at };
 }
 
 export function cleanPicnic(input) {

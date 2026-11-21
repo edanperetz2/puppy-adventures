@@ -76,12 +76,12 @@ test('Completed rounds rotate through the stage before reviewing its oldest item
     for (let round = 0; round < rounds + 3; round++) {
       const targets = readingTargets(pool, practice.recent[key], SESSION_LENGTH, seeded(round));
       assert.equal(new Set(targets.map(word => word.id)).size, SESSION_LENGTH);
-      assert.ok(targets.every(word => !previous.has(word.id)), 'A new round should not repeat the previous ten');
+      assert.ok(targets.every(word => !previous.has(word.id)), 'A new round should not repeat the previous six');
       const unseen = pool.filter(word => !seen.has(word.id));
       assert.equal(targets.filter(word => !seen.has(word.id)).length, Math.min(SESSION_LENGTH, unseen.length), 'Every remaining unseen target comes before review');
       const repeated = targets.filter(word => seen.has(word.id));
-      const oldest = practice.recent[key].slice(0, repeated.length);
-      assert.deepEqual(new Set(repeated.map(word => word.id)), new Set(oldest), 'Review fills a partial round from the oldest practiced targets');
+      const older = practice.recent[key].slice(0, Math.max(SESSION_LENGTH, repeated.length * 2));
+      assert.ok(repeated.every(word => older.includes(word.id)), 'Review draws from older practiced targets');
       for (const word of targets) seen.add(word.id);
       const before = structuredClone(practice);
       const updated = finishReadingPractice(practice, key, targets);
@@ -96,6 +96,17 @@ test('Completed rounds rotate through the stage before reviewing its oldest item
   assert.deepEqual(readingTargets([], [], 6), []);
   assert.deepEqual(sanitizeReadingPractice({ recent: { long: ['missing', 'rabbit', 'rabbit', null] } }).recent.long, ['rabbit']);
   assert.equal(sanitizeReadingPractice({}).recent.sentences.length, 0);
+});
+
+test('a fully read Hebrew level draws a different set of older words across fresh replays', () => {
+  const pool = readingWords('short'), history = pool.map(word => word.id);
+  const sets = new Set();
+  for (let i = 1; i <= 24; i++) {
+    const ids = readingTargets(pool, history, SESSION_LENGTH, seeded(i * 15485863)).map(word => word.id);
+    assert.ok(ids.every(id => !history.slice(-SESSION_LENGTH).includes(id)));
+    sets.add(ids.sort().join(','));
+  }
+  assert.ok(sets.size > 10);
 });
 
 test('Advancement offers only the immediately following stage after eight independent answers', () => {

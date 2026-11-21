@@ -277,13 +277,13 @@ test('New short-story rounds introduce new actions and rotate through all playab
   const seen = new Set();
   let practice = sanitizeReadingPractice({ recent: { sentences: prior.map(word => word.id) } });
   const learning = {};
-  const introductions = ['story-action-luli-waters-flower', 'story-action-dog-comes-in', 'story-animal-duck-swim', 'story-animal-cat-sleep'];
+  const introductions = new Set(['water', 'enter', 'swim', 'sleep']);
   for (let i = 0; i < PLAYABLE_STORIES.length; i++) {
     const questions = createSession('hebrew', { reading: 'sentences', readingRecent: practice.recent.sentences, learning }, rng(i + 22));
     assert.equal(questions.length, 6);
     const story = questions.find(q => actionIds.has(q.answer));
     assert.ok(story && !seen.has(story.answer));
-    if (i < introductions.length) assert.equal(story.answer, introductions[i]);
+    if (introductions.size) assert.ok(introductions.delete(story.word.scene.action));
     seen.add(story.answer);
     learning[`read:${story.answer}`] = { seen: 1, last: Date.now(), independent: 1, days: [] };
     practice = finishReadingPractice(practice, 'sentences', questions.map(q => q.word));

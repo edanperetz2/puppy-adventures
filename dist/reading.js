@@ -1,6 +1,7 @@
 import { ADVANCED_WORDS } from './reading-advanced.js?v=2.7.0-science';
 import { VOCABULARY_WORDS } from './vocabulary.js';
-import { MAX_ASSISTED_TO_ADVANCE } from './adventure.js?v=2.2.2-six';
+import { MAX_ASSISTED_TO_ADVANCE, SESSION_LENGTH } from './adventure.js?v=2.2.2-six';
+import { shuffle } from './answer-order.js';
 import { EXPANDED_READING_WORDS } from './reading-expansion.js';
 import { SUPPLEMENTAL_LETTER_WORDS } from './word-practice-expansion.js';
 import { PICTURE_PLACE_PASSAGES } from './reading-picture-places.js';
@@ -85,15 +86,18 @@ export function readingTargets(pool, recent, count, rng = Math.random) {
   if (!pool.length || count <= 0) return [];
   const byId = new Map(pool.map(word => [word.id, word]));
   const seen = new Set((Array.isArray(recent) ? recent : []).filter(id => byId.has(id)));
-  const newWords = pool.filter(word => !seen.has(word.id));
-  for (let i = newWords.length - 1; i > 0; i--) { const n = Math.floor(rng() * (i + 1)); [newWords[i], newWords[n]] = [newWords[n], newWords[i]]; }
-  const queue = newWords.slice(0, count);
-  for (const id of seen) {
-    if (queue.length >= count) break;
-    queue.push(byId.get(id));
+  const queue = shuffle(pool.filter(word => !seen.has(word.id)), rng).slice(0, count);
+  if (queue.length < count) {
+    const needed = count - queue.length;
+    const history = [...seen];
+    // Sample older words so mastering a level doesn't start a fixed rotation.
+    // Keep the latest round out whenever there are enough other words.
+    const rested = Math.max(needed, history.length - SESSION_LENGTH);
+    const window = history.slice(0, Math.min(rested, Math.max(SESSION_LENGTH, 2 * needed)));
+    queue.push(...shuffle(window, rng).slice(0, needed).map(id => byId.get(id)));
   }
-  for (let i = queue.length - 1; i > 0; i--) { const n = Math.floor(rng() * (i + 1)); [queue[i], queue[n]] = [queue[n], queue[i]]; }
-  return Array.from({ length: count }, (_, i) => queue[i % queue.length]);
+  const ordered = shuffle(queue, rng);
+  return Array.from({ length: count }, (_, i) => ordered[i % ordered.length]);
 }
 
 export function mixedReadingTargets(pool, recent = [], rng = Math.random) {

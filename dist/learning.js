@@ -60,8 +60,12 @@ export function reviewPriority(item, now=Date.now()) {
   return (now-item.last)/interval + (item.helped >= item.independent ? 2 : 0);
 }
 export function choosePractice(pool, items, key, count=10, now=Date.now(), rng=Math.random) {
-  const ranked=pool.map(value=>({value,priority:reviewPriority(items[key(value)],now),tie:rng()})).sort((a,b)=>b.priority-a.priority || a.tie-b.tie);
-  return ranked.slice(0,count).map(x=>x.value);
+  // Responses from the same practice session are comparably due. Keep review
+  // priorities, but don't let seconds between answers reconstruct that lesson.
+  const ranked = pool.map(value => ({
+    value, priority: Math.floor(reviewPriority(items[key(value)], now) * 2), tie: rng(),
+  })).sort((a, b) => b.priority - a.priority || a.tie - b.tie);
+  return ranked.slice(0, count).map(entry => entry.value);
 }
 export function learningSummary(items, domain=null, now=Date.now()) {
   const entries=Object.entries(items).filter(([,v])=>!domain || v.domain===domain);

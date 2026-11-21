@@ -84,6 +84,7 @@ let clockSchoolPosition = sanitizeClockPosition(null);
 let clockReturn = false;
 let letterDemo = { language: 'hebrew', form: 'alternate', index: 0, recorded: false };
 let recognitionChoice = null;
+let recognitionPreview = null;
 let letterPad = null;
 let writingWord = null, wordPad = null;
 let lastTraceHint = 0;
@@ -270,9 +271,12 @@ function letterFormTabs() {
   return `<div class="letter-language-tabs letter-form-tabs" role="group" aria-label="צורת האותיות לכתיבה">${WRITING_FORMS.map(form => `<button data-action="letter-form" data-form="${form}" aria-pressed="${letterDemo.form === form}">${letterFormName(letterDemo.language, form)}${letterDemo.language === 'english' ? ` · <bdi dir="ltr">${form === 'main' ? 'ABC' : 'abc'}</bdi>` : ''}</button>`).join('')}</div>`;
 }
 
-function recognitionGroup() {
-  const language = settings.letterLanguage;
-  return recognitionChoice ? recognitionChoice.map(id => LETTERS[language].find(letter => letter.id === id)) : recognitionTargets(progress.letterPractice, language, learner.items);
+function recognitionGroup(language = settings.letterLanguage) {
+  if (recognitionChoice) return recognitionChoice.map(id => LETTERS[language].find(letter => letter.id === id));
+  if (recognitionPreview?.[0].language !== language) {
+    recognitionPreview = recognitionTargets(progress.letterPractice, language, learner.items);
+  }
+  return recognitionPreview;
 }
 
 function letterGroupPreview(group, language) {
@@ -297,6 +301,7 @@ function openLetterMenu() {
 
 function openLetterMode(mode) {
   narrator.stop(); round = null; recognitionChoice = null;
+  recognitionPreview = null;
   if (mode === 'writing') { view = 'letters-writing'; render(); focusTitle(); announcements.say(`letters-writing-forms-${settings.letterLanguage}`); return; }
   view = 'letters-recognition'; render(); focusTitle(); announcements.say('letters-recognition');
 }
@@ -602,7 +607,7 @@ function questionVisual(q) {
   }
   if (q.type === 'clock') return `<div class="clock-question-clock">${analogClock(q.time.hour, q.time.minute)}</div><button class="text-button clock-learn-link" data-action="clock-learn">${uiIcon('hint')} נזכרות איך קוראים שעון</button>`;
   if (q.direction === 'picture-sentence') return `<div class="caption-picture" role="img" aria-label="${q.word.he}">${art(q.word.id)}</div>`;
-  if (q.type === 'read') return `<div class="word-card ${q.word.scene ? 'phrase-word' : q.word.he.length >= 6 ? 'long-word' : ''}">${q.actOut ? '' : '<span class="card-label">מה כתוב כאן?</span>'}<div class="target-word" lang="he" dir="rtl">${q.word.scene ? wordText(q.word).split(' ').map(word => `<span class="reading-token">${word}</span>`).join(' ') : wordText(q.word)}</div>${q.actOut ? '' : '<span class="word-underline"></span>'}</div>`;
+  if (q.type === 'read') return `<div class="word-card ${q.word.he.length >= 6 ? 'long-word' : ''}"><span class="card-label">מה כתוב כאן?</span><div class="target-word" lang="he" dir="rtl">${wordText(q.word)}</div><span class="word-underline"></span></div>`;
   if (q.type === 'listen') return `<button class="listen-orb" data-action="listen-word" aria-label="שמיעת המילה באנגלית">${uiIcon('sound')}<span class="sound-waves"><i></i><i></i><i></i><i></i><i></i></span><span>לחצי ושמעי את המילה</span></button>`;
   if (q.type === 'count') return `<div class="counting-stage">${tallyGroup(q.a, 0, q.item)}<p class="tally-instruction">אפשר לגעת בכל פריט ולספור ביחד</p></div>`;
   return `<div class="addition-stage ${Math.max(q.a, q.b) > 10 ? 'large-add' : ''}" dir="ltr"><div class="add-group">${tallyGroup(q.a, 0, q.item)}<span class="group-number">${q.a}</span></div><span class="plus-sign" aria-label="ועוד">+</span><div class="add-group">${tallyGroup(q.b, q.a, q.item)}<span class="group-number">${q.b}</span></div></div><div class="equation" dir="ltr" aria-label="${q.a} ועוד ${q.b}">${q.a} <span>+</span> ${q.b} <span>=</span> <b>?</b></div>`;
@@ -639,18 +644,19 @@ function renderGame() {
   const q = current();
   const length = round.questions.length;
   learner.record({...questionLearning(q),eventId:`${round.id}:seen:${round.index}`},'seen');
-  const actingTitle = settings.nikud ? 'מְשַׂחֲקוֹת אֶת הַסִּפּוּר' : 'משחקות את הסיפור';
+  const readingPhrase = q.type === 'read' && q.direction !== 'picture-sentence' && (q.word.scene || q.word.he.includes(' '));
   const wordMatch = q.type === 'word-form';
   const wordQuestion = q.word?.language === 'english'
     ? (settings.nikud ? 'אֵיפֹה אוֹתָהּ מִלָּה בְּאוֹתִיּוֹת קְטַנּוֹת?' : 'איפה אותה מילה באותיות קטנות?')
     : (settings.nikud ? 'אֵיפֹה אוֹתָהּ מִלָּה בִּכְתַב יָד?' : 'איפה אותה מילה בכתב יד?');
-  const title = wordMatch ? wordQuestion : q.direction === 'picture-sentence' ? (settings.nikud ? CLIPS[q.prompt].text : 'איזה משפט מתאים לתמונה?') : q.actOut ? actingTitle : q.type === 'character' ? q.direction === 'picture-name' ? 'מה השם של הדמות?' : 'איזו דמות מתאימה לשם?' : q.type === 'letter' ? 'איזו אות מתאימה?' : q.type === 'clock' ? 'מה השעה בשעון?' : q.type === 'read' ? q.word.scene ? 'איזו תמונה מתאימה למה שכתוב?' : 'איזו תמונה מתאימה למילה?' : q.type === 'listen' ? 'מה שמעת באנגלית?' : q.type === 'add' ? 'כמה יש ביחד?' : 'כמה יש בסל?';
+  const title = readingPhrase ? wordText(q.word).split(' ').map(token => `<span class="reading-token">${token}</span>`).join(' ')
+    : wordMatch ? wordQuestion : q.direction === 'picture-sentence' ? (settings.nikud ? CLIPS[q.prompt].text : 'איזה משפט מתאים לתמונה?') : q.type === 'character' ? q.direction === 'picture-name' ? 'מה השם של הדמות?' : 'איזו דמות מתאימה לשם?' : q.type === 'letter' ? 'איזו אות מתאימה?' : q.type === 'clock' ? 'מה השעה בשעון?' : q.type === 'read' ? 'איזו תמונה מתאימה למילה?' : q.type === 'listen' ? 'מה שמעת באנגלית?' : q.type === 'add' ? 'כמה יש ביחד?' : 'כמה יש בסל?';
   const stage = q.type === 'read' ? round.reading === 'all' ? Object.values(READING_LEVELS).find(level => level.level === q.word.level) : READING_LEVELS[round.reading] : null;
   app.innerHTML = `${header()}<main id="main" class="game-page ${mission.color} ${wordMatch ? 'word-form-game' : q.type === 'character' ? 'character-game' : q.type === 'clock' ? 'clock-game' : q.type === 'letter' ? 'letter-game' : q.type === 'read' ? 'reading-game' : ''}${q.actOut ? ' act-out-game' : ''}">
     <div class="game-topline"><button class="text-button back-button" data-action="${q.type === 'character' ? 'characters-menu' : q.type === 'read' ? 'reading-levels' : (q.type === 'letter' || wordMatch) ? 'letters-menu' : 'home'}">${uiIcon('home')} ${q.type === 'character' ? 'לבחירת חברים' : q.type === 'read' ? 'לבחירת שלב' : (q.type === 'letter' || wordMatch) ? 'למסלולי האותיות' : 'למפת ההרפתקאות'}</button><span class="mission-label">${mission.name}${q.type === 'character' ? ` · שלב ${CHARACTER_LEVELS[round.characterLevel].number}` : ''}${wordMatch ? ' · מתאימות מילים' : q.type === 'letter' ? ' · משחק זיהוי' : ''}${stage ? ` · ${stage.number ? `שלב ${stage.number}` : stage.name}` : ''}</span><span class="step-label">צעד ${round.index + 1} מתוך ${length}</span></div>
     <div class="step-track" aria-label="התקדמות: ${round.index} מתוך ${length}">${round.questions.map((_, i) => `<span class="step-dot ${i < round.index ? 'done' : i === round.index ? 'current' : ''}">${i < round.index ? uiIcon('check') : i + 1}</span>`).join('')}</div>
-    <section class="game-board"><div class="question-heading"><div><span class="section-kicker">${ADVENTURE_PHASES[q.phase]}</span><h1 id="question-title" tabindex="-1">${title}</h1></div><button class="circle-button replay-button" data-action="replay" aria-label="שמיעת ההוראות שוב">${uiIcon('sound')}</button></div>
-      <div class="question-visual">${questionVisual(q)}</div>
+    <section class="game-board${readingPhrase ? ' reading-prompt' : ''}"><div class="question-heading"><div><span class="section-kicker">${ADVENTURE_PHASES[q.phase]}</span><h1 id="question-title" tabindex="-1"${readingPhrase ? ' class="reading-sentence" lang="he" dir="rtl"' : ''}>${title}</h1></div><button class="circle-button replay-button" data-action="${readingPhrase ? 'read-sentence' : 'replay'}" aria-label="${readingPhrase ? 'השמעת המשפט' : 'שמיעת ההוראות שוב'}">${uiIcon('sound')}</button></div>
+      ${readingPhrase ? '' : `<div class="question-visual">${questionVisual(q)}</div>`}
       ${q.actOut ? '<div id="act-out-root"></div>' : `<div class="answer-grid ${q.options.length === 2 ? 'two-options' : ''} ${q.type === 'character' ? q.direction === 'picture-name' ? 'character-names' : 'character-pictures' : ''} ${q.direction === 'picture-sentence' ? 'caption-options' : q.type === 'read' && q.word.scene ? 'scene-options' : ''} ${q.type === 'count' || q.type === 'add' || q.kind === 'number' ? 'numeric-options' : ''}" ${wordMatch ? `dir="${q.word.language === 'hebrew' ? 'rtl' : 'ltr'}"` : q.type === 'letter' ? `dir="${q.letter.language === 'hebrew' ? 'rtl' : 'ltr'}"` : ''} role="group" aria-label="בחירת תשובה">${q.options.map(option => `${q.type === 'clock' ? '<div class="clock-choice">' : ''}<button class="answer-button ${round.attempted.has(option.id) ? 'try-again' : ''}" data-action="answer" data-answer="${option.id}" ${wordMatch ? `lang="${q.word.language === 'english' ? 'en' : 'he'}"` : ''} aria-label="${answerLabel(q, option)}" ${round.attempted.has(option.id) ? 'disabled' : ''}>${answerVisual(q, option)}<span class="answer-check">${uiIcon('check')}</span></button>${q.type === 'clock' ? `<button class="clock-option-sound" data-action="clock-option-audio" data-clips="${option.clips.join(' ')}" aria-label="שמיעת האפשרות ${option.he}">${uiIcon('sound')}</button></div>` : ''}`).join('')}</div>`}
       <div class="feedback-row"><div class="feedback" id="feedback" role="status" aria-live="polite">קחי את הזמן. החברים כאן איתך ♡</div><button class="hint-button" data-action="hint">${uiIcon('hint')} רמז קטן</button><button class="primary-button next-button" data-action="next" hidden>ממשיכות ${uiIcon('arrow')}</button></div>
       <div id="letter-success-examples">${round.resolved && q.type==='letter' ? letterExampleCards(q.letter,settings.nikud) : ''}</div><p id="audio-notice" class="audio-notice" role="status" hidden></p>
@@ -690,7 +696,7 @@ function renderComplete() {
   const letters = round.mission === 'letters' && !wordMatch;
   const characters = round.mission === 'characters';
   const nextCharacters = characters ? nextCharacterLevel(round.characterLevel, round.helped.size) : null;
-  const nextLetters = letters ? suggestedLetters(progress.letterPractice, round.letterLanguage) : [];
+  const nextLetters = letters ? recognitionGroup(round.letterLanguage) : [];
   const nextKey = reading ? nextReadingStage(round.reading, round.helped.size) : null;
   const nextStage = nextKey ? READING_LEVELS[nextKey] : null;
   app.innerHTML = `${header()}<main id="main" class="completion-page">
@@ -841,6 +847,7 @@ function startMission(mission, skipLesson = false, letterMode = 'recognition') {
     return;
   }
   const letterIds = mission === 'letters' && letterMode !== 'words' ? recognitionGroup().map(letter => letter.id) : null;
+  if (letterIds) recognitionPreview = null;
   const questions = createSession(mission, { ...settings, letterMode, learning:learner.items, readingRecent: readingPractice.recent[settings.reading], letterPractice: progress.letterPractice, letterIds, characterPractice });
   if (mission === 'hebrew' && settings.reading === LITTLE_STORIES.route.level) {
     for (const index of actOutSteps(questions)) {
@@ -914,7 +921,7 @@ function inLittleStories() {
 function paintStoryClue() {
   const clue = storyClue(current().word, round.storyClue);
   if (!clue) return;
-  document.querySelectorAll('.target-word .reading-token').forEach((token, index) => {
+  document.querySelectorAll('#question-title .reading-token').forEach((token, index) => {
     token.classList.toggle('story-clue-token', index >= clue.start && index < clue.end);
   });
   const { text, plain } = CLIPS[clue.clip];
@@ -1065,7 +1072,7 @@ function finishClassicRound() {
   round.sticker = reward.sticker;
   if (mission === 'hebrew') readingPractice = finishReadingPractice(readingPractice, round.reading, round.questions.map(q => q.word));
   if (mission === 'characters') characterPractice = finishCharacterPractice(characterPractice, round.characterLevel, round.questions);
-  if (letters) recognitionChoice = null;
+  if (letters) { recognitionChoice = null; recognitionPreview = null; }
   view = 'complete'; save(); render(); focusTitle(); revealWin('.reward-art');
   const nextReading = mission === 'hebrew' && nextReadingStage(round.reading, round.helped.size);
   const nextCharacter = mission === 'characters' && nextCharacterLevel(round.characterLevel, round.helped.size);
@@ -1735,6 +1742,10 @@ app.addEventListener('click', event => {
     case 'character-repeat': Object.assign(settings, selectCharacterLevel(settings, round.characterLevel)); settings.characterMode = round.characterMode; save(); startMission('characters', true); break;
     case 'welcome': welcome(); break;
     case 'replay': replay(); break;
+    case 'read-sentence':
+      if (!round.resolved) { round.helped.add(round.index); checkpoint(); }
+      clockSpeak(`he-${current().word.id}`);
+      break;
     case 'listen-word': if (!settings.sound) { settings.sound = true; narrator.enabled = true; save(); renderSoundButton(); } announcements.say(current().targetClip); break;
     case 'clock-practice':
       if (CLOCK_ACTIVITIES_ENABLED) {

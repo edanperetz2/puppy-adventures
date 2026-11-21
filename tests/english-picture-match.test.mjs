@@ -90,19 +90,30 @@ test('both directions progress in six distinct steps, save the target and choice
 
 test('the reverse path lets a child listen to every written choice separately, and the forward path shows pictures', () => {
   for (const level of Object.keys(MATCH_LEVELS)) {
-    for (const task of journeyQuestions(newJourney('english', level))) {
-      const html = englishPictureView(task, {});
+    const plan = newJourney('english', level);
+    for (const [index, task] of journeyQuestions(plan).entries()) {
+      const host = { addEventListener() {} };
+      const controller = mountJourney(host, {
+        plan: { ...plan, index, state: {} }, speak() {}, onSave() {}, onObservation() {},
+      });
+      const html = host.innerHTML;
+      const heading = html.match(/<h1\b([^>]*)>(.*?)<\/h1>/u);
       if (level === 'picture-words') {
+        assert.equal(heading[2], 'מָה רוֹאִים בַּתְּמוּנָה?');
         assert.equal(html.match(/data-j="match-option-voice"/gu).length, task.choices.length);
         assert.ok(!html.includes('data-j="listen"'));
         for (const entry of task.choices) {
           assert.ok(html.includes(`lang="en" dir="ltr">${entry.text.toUpperCase()}</b>`));
         }
       } else {
+        assert.equal(heading[2], task.target.text.toUpperCase());
+        assert.match(heading[1], /lang="en" dir="ltr"/u);
+        assert.ok(!englishPictureView(task, {}).includes(`>${heading[2]}<`));
         assert.ok(html.includes('data-j="listen"'));
         assert.ok(!html.includes('match-option-voice'));
         for (const entry of task.choices) assert.ok(html.includes(englishMatchPicture(entry)));
       }
+      controller.destroy();
     }
   }
 });
@@ -119,6 +130,10 @@ test('Ava reads the forward prompt, and plays each requested reverse option with
     });
     controller.replay();
     assert.deepEqual(heard.pop(), level === 'word-pictures' ? [task.prompt, task.clip] : [task.prompt]);
+    if (level === 'word-pictures') {
+      click({ target: { closest: () => ({ dataset: { j: 'listen' } }) } });
+      assert.equal(heard.pop(), task.clip);
+    }
     if (level === 'picture-words') {
       for (const choice of task.choices) {
         const button = { dataset: { j: 'match-option-voice', voice: choice.id } };

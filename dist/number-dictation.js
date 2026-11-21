@@ -24,9 +24,7 @@ export function numberDictationDraw(rng = Math.random, range = 'all', getItems =
     if (!queue.length) {
       const items = getItems();
       const practice = n => items[numberDictationKey(n)]?.practice || 0;
-      const last = n => items[numberDictationKey(n)]?.last || 0;
-      queue = shuffle(dictationRanges[range].numbers, rng)
-        .sort((a, b) => practice(a) - practice(b) || last(a) - last(b));
+      queue = shuffle(dictationRanges[range].numbers, rng).sort((a, b) => practice(a) - practice(b));
       if (queue[0] === previous) [queue[0], queue[1]] = [queue[1], queue[0]];
     }
     previous = queue.shift();

@@ -100,11 +100,12 @@ function chooseActionStory(settings, rng) {
   const recent = new Set(settings.readingRecent || []);
   const seenActions = new Set(PLAYABLE_STORIES.filter(word => recent.has(word.id) || settings.learning?.[`read:${word.id}`]?.seen)
     .map(word => word.scene.action));
-  const nextAction = firstActions.find(action => !seenActions.has(action));
-  return PLAYABLE_STORIES.find(word => word.scene.action === nextAction) || chooseReadingWords(PLAYABLE_STORIES, settings, 1, rng)[0];
+  const introductions = PLAYABLE_STORIES.filter(word => firstActions.includes(word.scene.action) && !seenActions.has(word.scene.action));
+  return chooseReadingWords(introductions.length ? introductions : PLAYABLE_STORIES, settings, 1, rng)[0];
 }
 
 export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Math.random) {
+  if (mission === 'characters') return createCharacterSession(rawSettings || {}, rng);
   if (mission === 'letters' && rawSettings?.letterMode === 'words') {
     const language = rawSettings.letterLanguage === 'english' ? 'english' : 'hebrew';
     const prefix = `word-form:${language}:`;
@@ -123,11 +124,10 @@ export function createSession(mission, rawSettings = DEFAULT_SETTINGS, rng = Mat
 
 function buildSession(mission, rawSettings, rng) {
   const settings = { ...DEFAULT_SETTINGS, ...rawSettings };
-  if (mission === 'characters') return createCharacterSession(settings, rng);
   if (mission === 'letters') {
     const language = Object.hasOwn(LETTERS, settings.letterLanguage) ? settings.letterLanguage : 'hebrew';
     const selected = Array.isArray(settings.letterIds) ? [...new Set(settings.letterIds)].map(id => LETTERS[language].find(letter => letter.id === id)).filter(Boolean) : [];
-    const group = selected.length === 3 ? selected : Number.isInteger(settings.letterStart) ? letterGroup(language, settings.letterStart) : recognitionTargets(settings.letterPractice, language, settings.learning);
+    const group = selected.length === 3 ? selected : Number.isInteger(settings.letterStart) ? letterGroup(language, settings.letterStart) : recognitionTargets(settings.letterPractice, language, settings.learning, Date.now(), rng);
     const guided = shuffle(group, rng);
     const recall = shuffle(group, rng);
     if (recall[0] === guided.at(-1)) {
@@ -184,7 +184,13 @@ function buildSession(mission, rawSettings, rng) {
     const colors = [select(COLORS, ['red', 'blue', 'yellow'])[0], ...choosePractice(reviewColors.filter(c=>!['red','blue','yellow'].includes(c.id)),settings.learning||{},c=>`english:single:${c.id}`,1,Date.now(),rng)];
     const numbers = [1 + Math.floor(rng() * 3), 4 + Math.floor(rng() * (max - 3))];
     let animal = 0, color = 0, number = 0;
-    return ['animal', 'color', 'number', 'animal', 'color', 'number'].map((kind, i) => {
+    const kinds = ['animal', 'color', 'number'];
+    const starters = shuffle(kinds, rng), followups = shuffle(kinds, rng);
+    if (followups[0] === starters.at(-1)) {
+      const other = 1 + Math.floor(rng() * (followups.length - 1));
+      [followups[0], followups[other]] = [followups[other], followups[0]];
+    }
+    return [...starters, ...followups].map((kind, i) => {
       const n = kind === 'number' ? numbers[number++] : null;
       const target = kind === 'animal' ? animals[animal++] : kind === 'color' ? colors[color++] : { id: String(n), number: n, en: NUMBERS[n] };
       const options = kind === 'number' ? numberOptions(n, max, rng, choiceCount(i)) : optionsFrom((kind === 'animal' ? ANIMALS : COLORS).filter(other=>other.id===target.id||distinctWordPictures(target,other)), target, rng, choiceCount(i));
@@ -221,7 +227,7 @@ function buildSession(mission, rawSettings, rng) {
   }
   if (mission === 'clock') {
     const level = CLOCK_LEVELS[settings.clockLevel] || CLOCK_LEVELS.hours;
-    const hours = shuffle(Array.from({ length: 12 }, (_, i) => i + 1), rng).slice(0, SESSION_LENGTH).sort((a, b) => a - b);
+    const hours = shuffle(Array.from({ length: 12 }, (_, i) => i + 1), rng).slice(0, SESSION_LENGTH);
     const sample = pool => pool[Math.floor(rng() * pool.length)];
     const minutes = settings.clockLevel === 'minutes'
       ? [0, 30, 15, 45, sample([5, 10, 20, 25, 35, 40, 50, 55]), sample(level.minutes.filter(n => n % 5))]

@@ -10,6 +10,7 @@ import {
   nextDailyStep, renewDailyStep, showDailyExample,
 } from '../dist/daily.js';
 import { applyObservations, DAY } from '../dist/learning.js';
+import { seeded } from '../dist/journey.js';
 import { parentLearning } from '../dist/learning-parent.js';
 
 const now = Date.UTC(2026, 10, 1, 12);
@@ -132,6 +133,31 @@ test('the pond revisits familiar single words with distinct animals and a change
     assert.equal(nextDailyStep(round), i !== 5);
   }
   assert.deepEqual(round.helped, [3]);
+});
+
+test('the pond varies the selection and presentation of equal-level animals across fresh visits', () => {
+  const familiar = DAILY_ANIMALS.slice(0, 6);
+  const learned = applyObservations({}, DAILY_ANIMALS.map((word, i) => fixture('daily:english:' + word, 'english', now - 3600000 + i * 1000)));
+  for (const items of [{}, learned]) {
+    const sets = new Set(), secondSlots = new Set(), reached = new Set();
+    for (let seed = 1; seed <= 50; seed++) {
+      const round = createDailyRound('english', items, [], { now, rng: seeded(seed * 7919) });
+      const words = round.questions.map(([q]) => q.word);
+      if (items !== learned) {
+        assert.ok(words.slice(0, 2).every(word => familiar.includes(word)));
+        assert.equal(words.filter(word => !familiar.includes(word)).length, 1);
+      }
+      words.forEach(word => reached.add(word));
+      sets.add([...words].sort().join(','));
+      for (const [first, second] of round.questions.slice(3)) {
+        secondSlots.add((second.choices.indexOf(first.word) - first.choices.indexOf(first.word) + 3) % 3);
+      }
+      assert.deepEqual(restored(round), round);
+    }
+    assert.equal(reached.size, DAILY_ANIMALS.length);
+    assert.ok(sets.size > 2);
+    assert.deepEqual(secondSlots, new Set([1, 2]));
+  }
 });
 
 test('the parent view describes independent recall only after success on another day', () => {

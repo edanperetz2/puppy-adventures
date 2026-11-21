@@ -86,6 +86,7 @@ export function makeWordFormQuestions(language, recentIds = [], rng = Math.rando
   if (!Object.hasOwn(catalogs, language)) throw new RangeError('Unknown word-matching language');
   const catalog = catalogs[language];
   const recency = new Map(recentIds.map((id, index) => [id, index]));
+  const lastRound = new Set(recentIds.slice(-SESSION_LENGTH));
   const available = shuffle(catalog.words, rng).sort((a, b) =>
     (recency.get(a.id) ?? -1) - (recency.get(b.id) ?? -1));
   const order = answerShuffler(rng);
@@ -98,7 +99,14 @@ export function makeWordFormQuestions(language, recentIds = [], rng = Math.rando
     else if (i === 3 && language === 'hebrew' && !questions.some(q => endsInFinal(q.word))) {
       eligible = available.filter(endsInFinal);
     }
-    const word = eligible[0];
+    let word = eligible[0];
+    if (recency.has(word.id)) {
+      // Once every eligible word is familiar, sample the older half rather than
+      // reconstructing exactly the order in which those words were last read.
+      const rested = eligible.filter(entry => !lastRound.has(entry.id));
+      const review = rested.length ? rested : eligible;
+      word = review[Math.floor(rng() * Math.ceil(review.length / 2))];
+    }
     available.splice(available.indexOf(word), 1);
     const options = order([word, ...distractors(catalog, word, i, rng)], word.id);
     questions.push(question(language, i, word, options));

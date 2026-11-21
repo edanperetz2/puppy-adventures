@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { LETTERS } from '../dist/letters.js';
-import { sanitizeLetterPractice, recordLetters, suggestedLetters, practicedLetterCount, pendingLetterPractice } from '../dist/letter-progress.js';
+import { sanitizeLetterPractice, recordLetters, suggestedLetters, practicedLetterCount, pendingLetterPractice, recognitionTargets } from '../dist/letter-progress.js';
+import { seeded } from '../dist/journey.js';
 import { freshProgress, finishSession, sanitizeProgress, sanitizeSettings, createSession } from '../dist/engine.js';
 
 test('Recognition introduces every Hebrew and English letter before reviewing previously practiced letters', () => {
@@ -41,6 +42,22 @@ test('Old repeated rounds move beyond aleph without inventing historical letter 
   assert.deepEqual(suggestedLetters(loaded.letterPractice, 'hebrew').map(letter => letter.familiar), ['ז', 'ח', 'ט']);
   assert.equal(restored.sessions, 7);
   assert.equal(completed.sessions, 8);
+});
+
+test('once every letter has been introduced, its review partners vary in both languages', () => {
+  const now = Date.UTC(2026, 10, 1);
+  for (const [language, letters] of Object.entries(LETTERS)) {
+    const progress = recordLetters(null, language, 'recognition', letters.map(letter => letter.id));
+    const items = Object.fromEntries(letters.map((letter, i) => [`letter:${language}:${letter.id}:recognition`,
+      { seen: 1, last: now - 3600000 + i * 1000, independent: 1, days: [] }]));
+    const groups = new Set();
+    for (let seed = 1; seed <= 24; seed++) {
+      const ids = recognitionTargets(progress, language, items, now, seeded(seed * 7919)).map(letter => letter.id);
+      assert.equal(new Set(ids).size, 3);
+      groups.add(ids.sort().join(','));
+    }
+    assert.ok(groups.size > 12);
+  }
 });
 
 test('Writing progress, recognition progress and the two languages stay independent', () => {

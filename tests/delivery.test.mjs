@@ -73,6 +73,21 @@ test('Bobi reviews a remembered word in a different scene and restores choices, 
   assert.equal(deliveryEvidence(restored).mode, `bobi-${q.scene}`);
 });
 
+test('a familiar boat or animal moves between review slots on fresh trips and stays put on resume', () => {
+  for (const [path, word] of [['cargo', 'boat'], ['aboard', 'frog']]) {
+    const items = applyObservations({}, [event(word, now)]);
+    const slots = new Set();
+    for (let i = 1; i <= 30; i++) {
+      let seed = i * 104729;
+      const rng = () => ((seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 2 ** 32);
+      const round = createDeliveryRound(path, items, { rng, now });
+      slots.add(round.targets.indexOf(word));
+      assert.deepEqual(cleanDeliveryRound(path, packDeliveryRound(round)).questions, round.questions);
+    }
+    assert.deepEqual([...slots].sort(), [3, 4, 5]);
+  }
+});
+
 test('the optional blue boat prompt requires separate-day independent results for both words', () => {
   const items = applyObservations({}, [
     event('blue', now - DAY), event('blue', now), event('boat', now - DAY),

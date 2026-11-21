@@ -82,7 +82,6 @@ export function openStitchRound(storage) {
 
 export function mountPictureMatch(root, { nikud, motion, sound, companion, storage, greet }) {
   const stitch = companion === 'stitch';
-  const gameTitle = stitch ? STITCH_TITLE : PIKACHU_TITLE;
   const characterName = stitch ? 'סטיץ׳' : 'פיקאצ׳ו';
   const bookmark = stitch ? openStitchRound(storage) : null;
   const events = new AbortController();
@@ -103,7 +102,7 @@ export function mountPictureMatch(root, { nikud, motion, sound, companion, stora
   </div>
   <section class="pika-board" aria-labelledby="pika-title">
     <div class="pika-heading">
-      <h1 id="pika-title" tabindex="-1">${gameTitle}</h1>
+      <h1 id="pika-title" class="pika-word pika-clue" lang="he" dir="rtl" tabindex="-1"></h1>
     </div>
     <div class="pika-stage">
       <span class="pika-shadow" aria-hidden="true"></span>
@@ -114,9 +113,8 @@ export function mountPictureMatch(root, { nikud, motion, sound, companion, stora
       <div class="pika-flying" aria-hidden="true"></div>
     </div>
     ${stitch ? '<p class="stitch-prompt"></p>' : ''}
-    <p class="pika-word pika-clue" id="pika-word" tabindex="-1"></p>
     <div class="step-track pika-progress" aria-hidden="true"></div>
-    <div class="pika-choices" role="group" aria-labelledby="pika-word"></div>
+    <div class="pika-choices" role="group" aria-labelledby="pika-title"></div>
     <div class="pika-animal-play" hidden>
       <p class="pika-animal-prompt" id="pika-animal-prompt"></p>
       <div class="pika-animal-trail" role="group" aria-labelledby="pika-animal-prompt">
@@ -137,7 +135,6 @@ export function mountPictureMatch(root, { nikud, motion, sound, companion, stora
   const title = root.querySelector('#pika-title');
   const character = root.querySelector('.pika-character');
   const face = character.querySelector('img');
-  const word = root.querySelector('.pika-word');
   const track = root.querySelector('.pika-progress');
   const choices = root.querySelector('.pika-choices');
   const animalPlay = root.querySelector('.pika-animal-play');
@@ -250,15 +247,14 @@ export function mountPictureMatch(root, { nikud, motion, sound, companion, stora
   function render() {
     const q = question();
     root.classList.toggle('pika-motion', allowMotion());
-    title.textContent = label(finished ? FINISH : gameTitle);
+    const clue = words.get(q.target);
+    title.textContent = finished ? label(FINISH) : nikud() ? clue.pointed : clue.he;
     step.textContent = finished ? '' : label(`צַעַד ${index + 1} מִתּוֹךְ ${SESSION_LENGTH}`);
     if (stitch) {
       const prompt = root.querySelector('.stitch-prompt');
       prompt.hidden = finished || solved;
       prompt.textContent = label('אֵיזוֹ תְּמוּנָה מַתְאִימָה?');
     }
-    word.hidden = finished;
-    word.textContent = nikud() ? words.get(q.target).pointed : words.get(q.target).he;
     const stepDone = solved && !canHop();
     track.innerHTML = questions.map((_, i) => `<span class="step-dot ${finished || i < index || i === index && stepDone ? 'done' : i === index ? 'current' : ''}">${i + 1}</span>`).join('');
     for (const cheer of cheers) cheer.hidden = !solved && !finished;
@@ -311,7 +307,7 @@ export function mountPictureMatch(root, { nikud, motion, sound, companion, stora
         index++; solved = false; feedback = ''; hops = 0; tried.clear();
         bookmark?.save(index, false);
         render();
-        word.focus({ preventScroll: true });
+        title.focus({ preventScroll: true });
       }
     } else if (button.dataset.pika === 'again' && finished) {
       clearMotion();

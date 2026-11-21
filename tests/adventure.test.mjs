@@ -45,9 +45,12 @@ test('Selected reading stages order smaller quantities and shorter text before h
 });
 
 test('English progresses from familiar animals, basic colors and small numbers within the selected cap', () => {
-  const nextAnimals = new Set();
+  const nextAnimals = new Set(), openers = new Set(), categoryOrders = new Set();
   for (const max of [10, 20]) for (let seed = 0; seed < 80; seed++) {
     const questions = createSession('english', { englishMax: max }, seeded(seed));
+    openers.add(questions[0].kind);
+    categoryOrders.add(questions.map(q => q.kind).join(','));
+    assert.notEqual(questions[2].kind, questions[3].kind);
     const animals = questions.filter(q => q.kind === 'animal').map(q => q.answer);
     assert.ok(['dog', 'cat', 'fish'].includes(animals[0]));
     assert.ok(['bird', 'duck', 'bear', 'horse', 'rabbit', 'lion'].includes(animals[1]));
@@ -62,6 +65,8 @@ test('English progresses from familiar animals, basic colors and small numbers w
     assert.ok(numbers[1] >= 4 && numbers[1] <= max);
   }
   assert.equal(nextAnimals.size, 6, 'Both familiar animals and the next new animal appear across replays');
+  assert.equal(openers.size, 3);
+  assert.ok(categoryOrders.size > 12);
 });
 
 test('Arithmetic never drops back to easier sums, reaches the chosen cap and avoids duplicate additions', () => {

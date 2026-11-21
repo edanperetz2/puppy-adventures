@@ -37,15 +37,17 @@ export function practicedLetterCount(input, language, mode) {
   return sanitizeLetterPractice(input)[language][mode].filter(n => n > 0).length;
 }
 
-export function recognitionTargets(input,language,items={},now=Date.now()) {
-  if(!Object.hasOwn(LETTERS,language))language='hebrew';
-  const practice=sanitizeLetterPractice(input)[language];
-  const ordered=suggestedLetters(input,language,'recognition',LETTERS[language].length);
-  return ordered.map((letter,order)=>{
-    const observed=items?.[`letter:${language}:${letter.id}:recognition`];
-    const legacy=practice.recognition[LETTERS[language].indexOf(letter)];
-    return {letter,order,priority:observed?reviewPriority(observed,now):legacy?1:3};
-  }).sort((a,b)=>b.priority-a.priority||a.order-b.order).slice(0,3).map(x=>x.letter);
+export function recognitionTargets(input, language, items = {}, now = Date.now(), rng = Math.random) {
+  if (!Object.hasOwn(LETTERS, language)) language = 'hebrew';
+  const visits = sanitizeLetterPractice(input)[language].recognition;
+  const review = visits.every(count => count > 0);
+  const ordered = suggestedLetters(input, language, 'recognition', LETTERS[language].length);
+  return ordered.map((letter, order) => {
+    const observed = items?.[`letter:${language}:${letter.id}:recognition`];
+    const count = visits[LETTERS[language].indexOf(letter)];
+    const priority = observed ? reviewPriority(observed, now) : count ? 1 : 3;
+    return { letter, count, priority: Math.floor(priority * 2), order: review ? rng() : order };
+  }).sort((a, b) => b.priority - a.priority || a.count - b.count || a.order - b.order).slice(0, 3).map(item => item.letter);
 }
 
 export function pendingLetterPractice(remote, own, confirmed) {
