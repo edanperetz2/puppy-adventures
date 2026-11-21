@@ -36,7 +36,8 @@ import { numberMenu, mountNumberRound, numberComplete } from './number-workshop-
 import { numberWritingKey, mountNumberWriting } from './number-writing.js?v=2.3.3-dictation';
 import { mountNumberDictation, numberDictationKey } from './number-dictation.js?v=2.3.3-dictation';
 import { mountFruitCutting } from './fruit-cutting.js?v=2.5.0-play';
-import { mountPictureMatch, pikachuImage, PIKACHU_TITLE, stitchImage, STITCH_TITLE } from './pikachu-game.js';
+import { mountPictureMatch, PIKACHU_TITLE, STITCH_TITLE } from './pikachu-game.js';
+import { companionStickers, createCompanionGreetings, pikachuImage, stitchImage } from './companion-stickers.js';
 import { actOutDetails, actOutPrompt, actOutSteps } from './act-out.js?v=2.7.0-science';
 import { mountActOut } from './act-out-view.js?v=2.7.1-pepper';
 import { SCIENCE_TITLE, SCIENCE_EXPERIMENTS, cleanScienceRound, scienceClip } from './science-content.js?v=2.7.1-pepper';
@@ -171,10 +172,12 @@ learner = new LearningStore({ storage:gameStorage, config:SYNC_CONFIG, getCode:(
 
 const narrator = new Narrator(status => {
   audioStatus = status;
+  companions.narrationStatus(status);
   for (const replay of document.querySelectorAll('[data-action="replay"], [data-action="welcome"]')) replay.classList.toggle('is-speaking', status === 'speaking');
   const notice = document.querySelector('#audio-notice');
   if (notice) { notice.hidden = status !== 'unavailable'; notice.textContent = 'הקול לא נשמע? לחצי שוב על הרמקול. אפשר גם להיעזר בהורה.'; }
 });
+const companions = createCompanionGreetings(narrator.audio, () => settings.sound);
 narrator.enabled = settings.sound;
 narrator.resolveKey = profileSpeech(ARIEL);
 const announcements = new GameAnnouncements(narrator);
@@ -220,6 +223,7 @@ function openAlbumInvite() {
 function applyPreferences() {
   document.documentElement.classList.toggle('still', !settings.motion);
   narrator.enabled = settings.sound;
+  if (!settings.sound) companions.stop();
 }
 
 function motionEnabled() {
@@ -235,7 +239,7 @@ function header() {
       <button class="circle-button sound-toggle" data-action="sound" aria-label="${settings.sound ? 'כיבוי הקול' : 'הפעלת הקול'}" aria-pressed="${settings.sound}">${uiIcon(settings.sound ? 'sound' : 'muted')}</button>
       <button class="parent-button" data-action="parents" aria-label="להורים">${uiIcon('settings')}<span>להורים</span></button>
     </nav>
-  </header>`;
+  </header>${companionStickers()}`;
 }
 
 function footer() {
@@ -728,6 +732,7 @@ function turnAlbumPage(index) {
 }
 
 function render() {
+  companions.stop();
   freeWriting?.destroy(); freeWriting=null;
   journeyController?.destroy(); journeyController=null;
   numberController?.destroy(); numberController=null;
@@ -1040,13 +1045,15 @@ function revealWin(selector) {
 }
 
 function openDialog(content) {
+  companions.stop();
   if (!dialog.open) dialogOpener = document.activeElement;
-  dialog.innerHTML = `<button class="dialog-close circle-button" aria-label="סגירה" data-dialog="close">${uiIcon('close')}</button>${content}`;
+  dialog.innerHTML = `<button class="dialog-close circle-button" aria-label="סגירה" data-dialog="close">${uiIcon('close')}</button>${companionStickers()}${content}`;
   dialog.querySelector('[data-dialog="close"]').onclick = closeDialog;
   if (!dialog.open) dialog.showModal();
 }
 
 function closeDialog(updatePreferences = false) {
+  companions.stop();
   const action = dialogOpener?.dataset.action;
   dialog.close();
   const refresh = refreshAfterDialog && progressScreens.includes(view) || updatePreferences === true && preferenceScreens.includes(view);
@@ -1279,6 +1286,7 @@ function renderCompanion() {
   app.innerHTML = `${header()}<main id="main" class="pikachu-page ${view}-match"><div id="${view}-root"></div></main>${footer()}`;
   companionController = mountPictureMatch(document.getElementById(`${view}-root`), {
     companion: view, storage: gameStorage,
+    greet: companions.greet,
     nikud: () => settings.nikud, motion: () => settings.motion,
     sound: () => settings.sound,
   });
@@ -1632,7 +1640,7 @@ app.addEventListener('click', event => {
   if (button.disabled) return;
   switch (button.dataset.action) {
     case 'home': leaveTo('home'); break;
-    case 'guide': narrator.stop(); openGameGuide(button); break;
+    case 'guide': companions.stop(); narrator.stop(); openGameGuide(button, companions.stop); break;
     case 'learning-hub': openLearningHub(button.dataset.hub); break;
     case 'number-menu': openNumberMenu(); break;
     case 'number-start': startNumberRound(button.dataset.path); break;
@@ -1712,6 +1720,7 @@ app.addEventListener('click', event => {
     case 'next': nextQuestion(); break;
     case 'parents': parentGate(); break;
     case 'sound':
+      companions.stop();
       settings.sound = !settings.sound; narrator.stop(); narrator.enabled = settings.sound; save(); renderSoundButton();
       if (companionController) companionController.updateSound();
       else if (settings.sound) replay();
@@ -1720,13 +1729,18 @@ app.addEventListener('click', event => {
   }
 });
 
+document.addEventListener('click', event => {
+  const sticker = event.target.closest('button[data-companion]');
+  if (sticker) companions.greet(sticker.dataset.companion, sticker);
+});
+
 app.addEventListener('change', event => {
   if (event.target.matches('select[data-album-page]')) turnAlbumPage(Number(event.target.value));
 });
 
 dialog.addEventListener('click', event => { if (event.target === dialog && event.offsetX >= 0 && event.offsetX <= dialog.clientWidth && event.offsetY >= 0 && event.offsetY <= dialog.clientHeight) return; if (event.target === dialog) closeDialog(); });
 dialog.addEventListener('cancel', event => { event.preventDefault(); closeDialog(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden) { picnicController?.flush(); dailyController?.flush(); narrator.stop(); } else { void album.flush();void learner.flush(); startOpeningWelcome(); } });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { companions.stop(); picnicController?.flush(); dailyController?.flush(); narrator.stop(); } else { void album.flush();void learner.flush(); startOpeningWelcome(); } });
 window.addEventListener('online', () => {
   void album.flush(); void learner.flush();
   if (view === 'delivery-map' || view === 'delivery-round') prepareDeliveryAudio();
@@ -1739,7 +1753,7 @@ window.addEventListener('online', () => {
 window.addEventListener('hashchange', openAlbumInvite);
 window.addEventListener('focus', () => { void album.flush();void learner.flush(); });
 setInterval(() => { if (!document.hidden && album.linked) {void album.flush();void learner.flush();} }, 15000);
-window.addEventListener('pagehide', () => { checkpoint(); narrator.stop(); });
+window.addEventListener('pagehide', () => { companions.stop(); checkpoint(); narrator.stop(); });
 render();
 openAlbumInvite();
 startOpeningWelcome();

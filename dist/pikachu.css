@@ -293,3 +293,106 @@
   .pika-board { padding: 12px 9px; }
   .pika-board h1 { font-size: clamp(21px, 5.6vw, 28px); }
 }
+
+/* Keep the artwork in the page margins. Only the two stickers accept taps. */
+.companion-stickers {
+  --sticker-size: clamp(48px, 7vw, 64px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(calc(100% - 32px), 1160px);
+  margin: 0 auto 4px;
+  pointer-events: none;
+}
+.companion-sticker {
+  --tilt: -7deg;
+  --wash: #f4cf67;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  flex: 0 0 var(--sticker-size);
+  place-items: center;
+  width: var(--sticker-size);
+  height: var(--sticker-size);
+  padding: 5px;
+  border: 0;
+  border-radius: 42%;
+  background: transparent;
+  pointer-events: auto;
+}
+.companion-sticker[data-companion="stitch"] {
+  --tilt: 6deg;
+  --wash: #80cbd4;
+}
+.companion-sticker::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 25% 2% 5%;
+  border-radius: 55% 45% 32% 42%;
+  background: var(--wash);
+  opacity: .19;
+  transform: rotate(var(--tilt));
+  pointer-events: none;
+}
+.companion-sticker img {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  object-fit: contain;
+  transform-origin: 50% 85%;
+  transform: rotate(var(--tilt));
+  filter: drop-shadow(1px 0 0 white) drop-shadow(-1px 0 0 white) drop-shadow(0 -1px 0 white) drop-shadow(0 2px 0 white) drop-shadow(0 2px 1px #4e493327);
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+/* The Pikachu source already contains its own transparent padding. */
+.companion-sticker[data-companion="pikachu"] { padding: 0; }
+.companion-sticker.is-greeting::before,
+.companion-sticker:focus-visible::before { opacity: .68; }
+@media (hover: hover) {
+  .companion-sticker:hover:not(.is-greeting, :focus-visible)::before { opacity: .42; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root:not(.still) .companion-sticker[data-companion="pikachu"].is-greeting img {
+    animation: sticker-pikachu-hop .48s ease-out;
+  }
+  :root:not(.still) .companion-sticker[data-companion="stitch"].is-greeting img {
+    animation: sticker-stitch-sway .55s ease-in-out;
+  }
+}
+@keyframes sticker-pikachu-hop {
+  0%, 100% { transform: rotate(var(--tilt)); }
+  22% { transform: rotate(-4deg) scale(1.05, .94); }
+  52% { transform: translateY(-12%) rotate(3deg); }
+}
+@keyframes sticker-stitch-sway {
+  0%, 100% { transform: rotate(var(--tilt)); }
+  30% { transform: rotate(-8deg); }
+  68% { transform: translateY(-5%) rotate(10deg); }
+}
+/* Above this width there is room beside even the widest game board. */
+@media (min-width: 1360px) {
+  #app > .companion-stickers {
+    --sticker-size: clamp(64px, calc(50vw - 614px), 90px);
+    position: fixed;
+    z-index: 2;
+    inset-block-start: clamp(136px, 28vh, 272px);
+    inset-inline: 0;
+    width: min(calc(100% - 32px), 1400px);
+  }
+  #app > .companion-stickers [data-companion="stitch"] { top: clamp(50px, 14vh, 150px); }
+}
+dialog .companion-stickers {
+  --sticker-size: 44px;
+  flex: none;
+  justify-content: start;
+  gap: 5px;
+  width: fit-content;
+  margin: 0;
+  margin-block-end: 4px;
+  margin-inline-end: auto;
+}
+.game-guide .companion-stickers { margin-inline-start: 14px; }

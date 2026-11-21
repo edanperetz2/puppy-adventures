@@ -22,6 +22,8 @@ Ariel’s learning game for phones, tablets and computers. Ava gives instruction
 
 New scored adventures have six steps. Existing ten-step drafts can be finished at their original length. Each scored completion unlocks one sticker until the 1,000-sticker album is full. Stickers unlock decorations for the puppy park. Open-ended activities such as tracing and playing with the two characters have their own practice feedback.
 
+Tap the Pikachu or Stitch sticker on any screen to hear “Pika pika” or Stitch’s ukulele. If Ava is speaking, the last sticker you tapped waits for her to finish. These taps work offline and leave the current question and album as they were.
+
 The home screen offers **ממשיכות** when there’s a round in progress. Otherwise **יוצאות להרפתקה** opens the specific game on the card. The suggestions use recent practice in Hebrew reading, single-word English, and basic numbers. The game map is always available.
 
 In **סיפורים קטנים**, the first clue highlights a detail in the sentence and Ava asks a short question about it. A later step can practice that detail with a different sentence. The clue and picture choices stay with the saved round. Number Workshop remembers which choices were tried and lets Ariel replay a used hint after reopening.

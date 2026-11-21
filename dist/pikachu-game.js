@@ -4,12 +4,11 @@ import { art, uiIcon } from './art.js';
 import { WORDS } from './reading.js';
 import { seeded } from './journey.js';
 import { STITCH_KEY } from './profiles.js';
-
-export const PIKACHU_CALL_URL = new URL('./assets/audio/pikachu-greeting.mp3', import.meta.url);
+import { pikachuImage, stitchImage } from './companion-stickers.js';
+export { PIKACHU_CALL_URL } from './companion-stickers.js';
 
 export const PIKACHU_TITLE = 'מְחַפְּשׂוֹת עִם פִּיקָאצ׳וּ';
 export const STITCH_TITLE = 'מְחַפְּשׂוֹת עִם סְטִיץ׳';
-const stitchCall = new URL('./assets/stitch-ukulele.wav', import.meta.url);
 const FINISH = 'כָּל הַכָּבוֹד! מָצָאתְ אֶת כָּל הַתְּמוּנוֹת';
 const words = new Map(WORDS.map(word => [word.id, word]));
 const objects = ['ball', 'tree', 'fish', 'flower', 'apple', 'dog', 'sun', 'duck', 'rabbit', 'butterfly', 'cat', 'grapes'];
@@ -81,23 +80,13 @@ export function openStitchRound(storage) {
   return { questions, index: state.index, solved: state.solved, save, restart };
 }
 
-export function pikachuImage(className) {
-  return `<img class="${className}" src="./assets/home-pikachu.png" alt="" width="215" height="215" draggable="false">`;
-}
-
-export function stitchImage(className) {
-  return `<img class="${className}" src="./assets/home-stitch.webp" alt="" width="215" height="215" draggable="false">`;
-}
-
-export function mountPictureMatch(root, { nikud, motion, sound, companion, storage }) {
+export function mountPictureMatch(root, { nikud, motion, sound, companion, storage, greet }) {
   const stitch = companion === 'stitch';
   const gameTitle = stitch ? STITCH_TITLE : PIKACHU_TITLE;
   const characterName = stitch ? 'סטיץ׳' : 'פיקאצ׳ו';
   const bookmark = stitch ? openStitchRound(storage) : null;
   const events = new AbortController();
   const animations = new Set();
-  const call = new Audio();
-  call.preload = 'none';
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const allowMotion = () => motion() && !reducedMotion.matches && typeof Element.prototype.animate === 'function';
   let questions = bookmark?.questions ?? pikachuQuestions(), index = bookmark?.index ?? 0;
@@ -246,24 +235,16 @@ export function mountPictureMatch(root, { nikud, motion, sound, companion, stora
     }
   }
 
-  function greet() {
+  function greetCharacter() {
     hop();
     if (hello) hello.textContent = label('שָׁלוֹם!');
-    if (!sound()) return;
-    if (!call.src) call.src = (stitch ? stitchCall : PIKACHU_CALL_URL).href;
-    else call.currentTime = 0;
-    void call.play().catch(() => {});
+    greet(companion, character);
   }
-  const stopped = () => character.classList.remove('pika-talking');
-  call.addEventListener('playing', () => character.classList.add('pika-talking'), { signal: events.signal });
-  for (const event of ['ended', 'pause', 'error']) call.addEventListener(event, stopped, { signal: events.signal });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) call.pause(); }, { signal: events.signal });
 
   function updateSound() {
     const enabled = sound();
     soundIcon.toggleAttribute('hidden', !enabled);
     character.setAttribute('aria-label', enabled ? (stitch ? 'לנגן עם סטיץ׳' : 'לשמוע את פיקאצ׳ו') : stitch ? 'לומר שלום לסטיץ׳' : characterName);
-    if (!enabled) call.pause();
   }
 
   function render() {
@@ -316,7 +297,7 @@ export function mountPictureMatch(root, { nikud, motion, sound, companion, stora
     }
 
     if (button.dataset.pika === 'greet') {
-      greet();
+      greetCharacter();
     } else if (button === animalButton && canHop()) {
       jumpAnimal();
     } else if (button.dataset.pika === 'next' && solved && !canHop() && !finished) {
@@ -348,8 +329,7 @@ export function mountPictureMatch(root, { nikud, motion, sound, companion, stora
     hop, updateSound,
     update() { if (!allowMotion()) clearMotion(); updateSound(); render(); },
     destroy() {
-      events.abort(); clearMotion(); call.pause();
-      if (call.src) { call.removeAttribute('src'); call.load(); }
+      events.abort(); clearMotion();
     },
   };
 }
